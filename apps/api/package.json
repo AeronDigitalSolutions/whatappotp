@@ -1,0 +1,21 @@
+{
+  "name": "@whatsapp-otp/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "fastify": "^4.26.1",
+    "@whatsapp-otp/database": "workspace:*",
+    "@whatsapp-otp/shared": "workspace:*",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "tsx": "^4.7.1",
+    "@types/node": "^20.0.0"
+  }
+}

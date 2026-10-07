@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String       @id @default(uuid())
+  email         String       @unique
+  passwordHash  String?
+  name          String?
+  emailVerified Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  memberships   Membership[]
+}
+
+model Organization {
+  id        String       @id @default(uuid())
+  name      String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  memberships Membership[]
+  projects    Project[]
+  wallet      Wallet?
+}
+
+model Membership {
+  id             String       @id @default(uuid())
+  userId         String
+  organizationId String
+  role           String       @default("viewer") // owner, admin, developer, viewer
+  createdAt      DateTime     @default(now())
+
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+}
+
+model Project {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  apiKeys        ApiKey[]
+  otpRequests    OtpRequest[]
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  projectId String
+  name      String
+  keyHash   String   @unique // Hashed version of the key
+  prefix    String   // e.g., "live_xxxx"
+  createdAt DateTime @default(now())
+  lastUsed  DateTime?
+  revokedAt DateTime?
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+
+model OtpRequest {
+  id            String       @id @default(uuid())
+  projectId     String
+  phone         String
+  channel       String       @default("whatsapp")
+  otpHash       String
+  expiresAt     DateTime
+  status        String       @default("queued") // queued, sent, delivered, failed, verified, expired
+  purpose       String?
+  reference     String?
+  locale        String       @default("en")
+  metadata      Json?
+  attempts      Int          @default(0)
+  maxAttempts   Int          @default(5)
+  resendAt      DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  project       Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  otpAttempts   OtpAttempt[]
+
+  @@index([projectId, createdAt])
+  @@index([phone, status])
+}
+
+model OtpAttempt {
+  id            String       @id @default(uuid())
+  otpRequestId  String
+  codeProvided  String?
+  successful    Boolean      @default(false)
+  ipAddress     String?
+  createdAt     DateTime     @default(now())
+
+  otpRequest    OtpRequest   @relation(fields: [otpRequestId], references: [id], onDelete: Cascade)
+}
+
+// =======================
+// PHASE 5: BILLING
+// =======================
+
+model Wallet {
+  id             String       @id @default(uuid())
+  organizationId String       @unique
+  balance        Decimal      @default(0.00) @db.Decimal(10, 2)
+  currency       String       @default("INR")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  transactions   WalletTransaction[]
+}
+
+model WalletTransaction {
+  id             String       @id @default(uuid())
+  walletId       String
+  amount         Decimal      @db.Decimal(10, 2) // positive for credit, negative for debit
+  type           String       // credit, charge, refund
+  referenceId    String?      // e.g. otpRequest id or stripe payment id
+  description    String?
+  createdAt      DateTime     @default(now())
+
+  wallet         Wallet       @relation(fields: [walletId], references: [id], onDelete: Cascade)
+}
+
+model PricingRule {
+  id             String       @id @default(uuid())
+  countryCode    String       @unique // e.g., "91" for India
+  costPerMessage Decimal      @db.Decimal(10, 4)
+  currency       String       @default("INR")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
