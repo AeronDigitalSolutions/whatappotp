@@ -130,10 +130,8 @@ export default function SocialAuthButtons({ onError, onLoading, loading }: Socia
 
   return (
     <>
-      <Script src="https://connect.facebook.net/en_US/sdk.js" strategy="lazyOnload" onLoad={initFb} />
-      {googleClientId && (
-        <Script src="https://accounts.google.com/gsi/client" strategy="lazyOnload" />
-      )}
+      <Script src="https://connect.facebook.net/en_US/sdk.js" strategy="afterInteractive" onLoad={initFb} />
+      <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
 
       <div className="space-y-3">
         {/* Google Sign In Button */}
