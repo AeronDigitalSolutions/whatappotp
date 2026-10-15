@@ -5,6 +5,7 @@ import Script from "next/script";
 import Link from "next/link";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
+import TokenUpdateModal from "@/components/TokenUpdateModal";
 
 export default function SetupPage() {
   const { showSuccess, showError, showWarning } = useModal();
@@ -24,6 +25,7 @@ export default function SetupPage() {
   
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showTokenModal, setShowTokenModal] = useState(false);
 
   useEffect(() => {
     const pid = localStorage.getItem("projectId");
@@ -322,6 +324,21 @@ export default function SetupPage() {
               </div>
               <h2 className="text-2xl font-bold text-slate-900">Meta Link Complete!</h2>
               <p className="text-slate-500">Your number is successfully registered with our system.</p>
+
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5 justify-center">
+                <button
+                  onClick={() => setShowTokenModal(true)}
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
+                >
+                  <span>🔑</span> Update Access Token
+                </button>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
+                >
+                  <span>⚙️</span> Re-select Phone / Profile
+                </button>
+              </div>
               
               <div className="bg-slate-50 border border-slate-200 rounded-xl mt-8 overflow-hidden text-left shadow-sm">
                 <div className="p-4 bg-slate-100 border-b border-slate-200">
@@ -341,6 +358,15 @@ export default function SetupPage() {
 
         </div>
       </div>
+
+      <TokenUpdateModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        onSuccess={() => {
+          if (projectId) fetchProjectData(projectId);
+        }}
+        projectId={projectId || ""}
+      />
     </>
   );
 }

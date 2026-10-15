@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
 import Loader from "@/components/Loader";
+import TokenUpdateModal from "@/components/TokenUpdateModal";
 
 interface TemplateComponent {
   type: "HEADER" | "BODY" | "FOOTER" | "BUTTONS";
@@ -36,6 +37,8 @@ export default function TemplatesPage() {
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const [wabaId, setWabaId] = useState<string>("");
+  // Token Modal State
+  const [showTokenModal, setShowTokenModal] = useState(false);
 
   // Create Modal State
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -296,6 +299,12 @@ export default function TemplatesPage() {
         </div>
         <div className="flex gap-2">
           <button
+            onClick={() => setShowTokenModal(true)}
+            className="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 shadow-sm flex items-center gap-1.5"
+          >
+            <span>🔑</span> Meta Token
+          </button>
+          <button
             onClick={loadTemplates}
             className="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 shadow-sm"
           >
@@ -311,8 +320,20 @@ export default function TemplatesPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-          {error}
+        <div className="p-5 bg-red-50 border border-red-200 rounded-2xl text-red-800 text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl shrink-0 mt-0.5">⚠️</span>
+            <div>
+              <p className="font-extrabold text-red-900 text-sm">Meta WhatsApp API Error</p>
+              <p className="text-red-700 text-xs mt-0.5 leading-relaxed">{error}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowTokenModal(true)}
+            className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-xs transition shrink-0 flex items-center gap-1.5 self-stretch sm:self-auto justify-center"
+          >
+            <span>🔑</span> Update Access Token
+          </button>
         </div>
       )}
 
@@ -666,6 +687,14 @@ export default function TemplatesPage() {
           </div>
         </div>
       )}
+
+      {/* Token Update Modal */}
+      <TokenUpdateModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        onSuccess={() => loadTemplates()}
+        projectId={projectId || ""}
+      />
     </div>
   );
 }

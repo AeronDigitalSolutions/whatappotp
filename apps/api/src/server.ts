@@ -219,6 +219,39 @@ fastify.post("/v1/auth/meta/callback", async (request: any, reply) => {
   }
 });
 
+fastify.post("/v1/meta/token/update", async (request: any, reply) => {
+  const { accessToken, projectId, wabaId, phoneId } = request.body;
+  if (!accessToken || !projectId) {
+    return reply.status(400).send({ error: "Missing accessToken or projectId" });
+  }
+
+  const trimmedToken = String(accessToken).trim();
+
+  try {
+    // 1. Verify token with Meta Graph API
+    const metaRes = await fetch(`https://graph.facebook.com/v19.0/me?access_token=${encodeURIComponent(trimmedToken)}`);
+    const metaData = await metaRes.json();
+    if (metaData.error) {
+      return reply.status(400).send({ error: `Meta Validation Failed: ${metaData.error.message}` });
+    }
+
+    // 2. Update Project in DB
+    const updateData: any = { metaAccessToken: trimmedToken };
+    if (wabaId) updateData.metaWabaId = wabaId;
+    if (phoneId) updateData.metaPhoneId = phoneId;
+
+    const project = await prisma.project.update({
+      where: { id: projectId },
+      data: updateData
+    });
+
+    return reply.send({ success: true, user: metaData, project });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: error.message || "Failed to update Meta token" });
+  }
+});
+
 fastify.get("/v1/meta/accounts/:projectId", async (request: any, reply) => {
   try {
     const project = await prisma.project.findUnique({ where: { id: request.params.projectId } });
