@@ -27,7 +27,7 @@ interface TemplateItem {
 }
 
 export default function TemplatesPage() {
-  const { showModal, showSuccess, showError, showConfirm } = useModal();
+  const { showModal, showSuccess, showError, showConfirm, showLoading } = useModal();
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -94,6 +94,8 @@ export default function TemplatesPage() {
       note: "Once deleted from Meta, any active marketing campaigns or OTP dispatch using this template name will immediately fail.",
       confirmText: "Yes, Delete Template",
       cancelText: "Cancel",
+      loadingTitle: `Deleting Template "${name}"...`,
+      loadingMessage: `Communicating with Meta WhatsApp Cloud API to permanently delete "${name}". Please wait...`,
       onConfirm: async () => {
         try {
           const res = await fetch(`${getApiUrl()}/v1/meta/templates/${projectId}/${encodeURIComponent(name)}`, {
@@ -191,6 +193,12 @@ export default function TemplatesPage() {
     }
 
     try {
+      setShowCreateModal(false);
+      showLoading(
+        `Registering template "${formData.name}" with WhatsApp Cloud API. Meta AI is validating message structure...`,
+        "Submitting Template to Meta..."
+      );
+
       const res = await fetch(`${getApiUrl()}/v1/meta/templates/${projectId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -204,7 +212,6 @@ export default function TemplatesPage() {
 
       const data = await res.json();
       if (data.success) {
-        setShowCreateModal(false);
         showModal({
           title: "Template Submitted to Meta",
           type: "success",

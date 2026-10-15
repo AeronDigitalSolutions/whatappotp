@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import Loader from "../components/Loader";
 
 export type ModalType = "success" | "error" | "warning" | "info";
 
@@ -19,7 +20,9 @@ export interface ModalOptions {
   confirmText?: string;
   cancelText?: string;
   confirmVariant?: "primary" | "danger" | "warning" | "default";
-  onConfirm?: () => void;
+  loadingTitle?: string;
+  loadingMessage?: string;
+  onConfirm?: () => Promise<void> | void;
   onCancel?: () => void;
 }
 
@@ -29,7 +32,8 @@ interface ModalContextType {
   showError: (message: string, title?: string, options?: Partial<ModalOptions>) => void;
   showWarning: (message: string, title?: string, options?: Partial<ModalOptions>) => void;
   showInfo: (message: string, title?: string, options?: Partial<ModalOptions>) => void;
-  showConfirm: (message: string, onConfirm: () => void, title?: string, options?: Partial<ModalOptions>) => void;
+  showConfirm: (message: string, onConfirm: () => Promise<void> | void, title?: string, options?: Partial<ModalOptions>) => void;
+  showLoading: (message?: string, title?: string) => void;
   closeModal: () => void;
 }
 
@@ -44,7 +48,19 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
     options: { message: "" }
   });
 
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingState, setProcessingState] = useState<{
+    title: string;
+    message: string;
+    badge?: string;
+  }>({
+    title: "Processing Request...",
+    message: "Please wait while we communicate with Meta."
+  });
+
   const showModal = (options: ModalOptions) => {
+    setIsProcessing(false);
+
     // Smart parsing if plain text message has status or paragraphs
     let parsedBadge = options.badge;
     let parsedNote = options.note;
@@ -79,7 +95,24 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
   };
 
   const closeModal = () => {
+    setIsProcessing(false);
     setModalState((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const showLoading = (message?: string, title?: string) => {
+    setIsProcessing(true);
+    setProcessingState({
+      title: title || "Processing Request...",
+      message: message || "Please wait while we communicate with Meta servers...",
+      badge: "In Progress • Meta Cloud API"
+    });
+    setModalState({
+      isOpen: true,
+      options: {
+        title: title || "Processing...",
+        message: message || "Please wait..."
+      }
+    });
   };
 
   const showSuccess = (message: string, title?: string, extra?: Partial<ModalOptions>) => {
@@ -98,7 +131,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
     showModal({ title: title || "Information", message, type: "info", confirmVariant: "default", ...extra });
   };
 
-  const showConfirm = (message: string, onConfirm: () => void, title?: string, extra?: Partial<ModalOptions>) => {
+  const showConfirm = (message: string, onConfirm: () => Promise<void> | void, title?: string, extra?: Partial<ModalOptions>) => {
     showModal({
       title: title || "Please Confirm",
       message,
@@ -140,6 +173,41 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
   const { isOpen, options } = modalState;
   const buttonVariant = getButtonVariant(options);
 
+  const handleConfirm = async () => {
+    if (!options.onConfirm) {
+      closeModal();
+      return;
+    }
+
+    const hasLoading = Boolean(
+      options.loadingTitle ||
+      options.loadingMessage ||
+      options.confirmVariant === "danger" ||
+      options.confirmText?.toLowerCase().includes("delete")
+    );
+
+    if (hasLoading) {
+      setIsProcessing(true);
+      setProcessingState({
+        title: options.loadingTitle || "Deleting WhatsApp Template...",
+        message: options.loadingMessage || "Communicating with Meta WhatsApp Cloud API. Please wait...",
+        badge: "Processing • Meta Cloud API"
+      });
+    }
+
+    try {
+      const result = options.onConfirm();
+      if (result && typeof (result as any).then === "function") {
+        await result;
+      } else if (!hasLoading) {
+        closeModal();
+      }
+    } catch (err: any) {
+      setIsProcessing(false);
+      showError(err.message || "An unexpected error occurred during execution.", "Action Failed");
+    }
+  };
+
   return (
     <ModalContext.Provider
       value={{
@@ -149,6 +217,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
         showWarning,
         showInfo,
         showConfirm,
+        showLoading,
         closeModal
       }}
     >
@@ -158,98 +227,134 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div
-            className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform scale-100 animate-in zoom-in-95 duration-200 relative"
+            className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform scale-100 animate-in zoom-in-95 duration-200 relative overflow-hidden"
             role="dialog"
             aria-modal="true"
           >
-            {/* Top Close Button */}
-            <button
-              onClick={closeModal}
-              className="absolute top-5 right-5 w-8 h-8 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-colors text-base font-bold"
-              aria-label="Close"
-            >
-              ✕
-            </button>
+            {/* Top Close Button (hidden during processing) */}
+            {!isProcessing && (
+              <button
+                onClick={closeModal}
+                className="absolute top-5 right-5 w-8 h-8 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-colors text-base font-bold"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            )}
 
-            {/* Header Icon & Title */}
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center mb-3">
-                {getIcon(options.type || "info", buttonVariant)}
-              </div>
+            {isProcessing ? (
+              /* Custom In-Process Loader View */
+              <div className="text-center py-4 animate-in fade-in zoom-in-95 duration-200">
+                {/* Custom Animated Bubble Pill Loader */}
+                <div className="py-2 flex items-center justify-center">
+                  <Loader scale={0.9} />
+                </div>
 
-              {options.badge && (
-                <div className="mb-2">
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold tracking-wider uppercase border shadow-xs ${getBadgeStyle(options.type || "info")}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
-                    {options.badge}
+                {/* Animated Badge */}
+                <div className="mt-3 mb-2">
+                  <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-extrabold tracking-wider uppercase bg-amber-50 text-amber-900 border border-amber-200 shadow-xs">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                    {processingState.badge || "Processing • Meta Cloud API"}
                   </span>
                 </div>
-              )}
 
-              <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-snug">
-                {options.title}
-              </h3>
+                {/* Title */}
+                <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-snug">
+                  {processingState.title}
+                </h3>
 
-              {options.message && (
-                <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto leading-relaxed">
-                  {options.message}
+                {/* Message */}
+                <p className="text-sm text-slate-600 mt-2 max-w-sm mx-auto leading-relaxed">
+                  {processingState.message}
                 </p>
-              )}
-            </div>
 
-            {/* Structured Details Card (if provided) */}
-            {options.details && options.details.length > 0 && (
-              <div className="mt-5 bg-slate-50 border border-slate-200/80 rounded-2xl p-4 divide-y divide-slate-100 text-xs">
-                {options.details.map((item, idx) => (
-                  <div key={idx} className={`flex items-center justify-between ${idx > 0 ? "pt-2.5" : ""} ${idx < options.details!.length - 1 ? "pb-2.5" : ""}`}>
-                    <span className="text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
-                      {item.label}
-                    </span>
-                    <span className="font-bold text-slate-900 font-mono bg-white border border-slate-200 px-2 py-0.5 rounded text-xs">
-                      {item.value}
-                    </span>
+                {/* Progress bar / status hint */}
+                <div className="mt-6 p-3 bg-slate-50 border border-slate-200/80 rounded-2xl flex items-center justify-center gap-2 text-xs font-semibold text-slate-500">
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Communicating with Meta Cloud API • Please do not refresh
+                </div>
+              </div>
+            ) : (
+              /* Standard Modal Content */
+              <>
+                {/* Header Icon & Title */}
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center mb-3">
+                    {getIcon(options.type || "info", buttonVariant)}
                   </div>
-                ))}
-              </div>
-            )}
 
-            {/* Helpful Note / Next Steps Banner */}
-            {options.note && (
-              <div className="mt-4 p-3.5 bg-emerald-50/70 border border-emerald-200/70 rounded-2xl text-xs text-emerald-900 flex items-start gap-3 leading-relaxed">
-                <span className="text-emerald-600 text-base shrink-0 mt-0.5">💡</span>
-                <span className="font-medium">{options.note}</span>
-              </div>
-            )}
+                  {options.badge && (
+                    <div className="mb-2">
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold tracking-wider uppercase border shadow-xs ${getBadgeStyle(options.type || "info")}`}>
+                        <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
+                        {options.badge}
+                      </span>
+                    </div>
+                  )}
 
-            {/* Action Buttons */}
-            <div className={`mt-6 ${options.cancelText ? "grid grid-cols-2 gap-3" : "flex"}`}>
-              {options.cancelText && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    closeModal();
-                    if (options.onCancel) options.onCancel();
-                  }}
-                  className="w-full py-3 px-4 rounded-xl text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer text-center"
-                >
-                  {options.cancelText}
-                </button>
-              )}
-              <button
-                type="button"
-                autoFocus
-                onClick={() => {
-                  closeModal();
-                  if (options.onConfirm) options.onConfirm();
-                }}
-                style={getButtonInlineStyle(buttonVariant)}
-                className={`w-full py-3 px-5 rounded-xl text-sm font-bold text-white shadow-md transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer text-center ${getButtonClass(
-                  buttonVariant
-                )}`}
-              >
-                {options.confirmText || "Got it"}
-              </button>
-            </div>
+                  <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-snug">
+                    {options.title}
+                  </h3>
+
+                  {options.message && (
+                    <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto leading-relaxed">
+                      {options.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Structured Details Card (if provided) */}
+                {options.details && options.details.length > 0 && (
+                  <div className="mt-5 bg-slate-50 border border-slate-200/80 rounded-2xl p-4 divide-y divide-slate-100 text-xs">
+                    {options.details.map((item, idx) => (
+                      <div key={idx} className={`flex items-center justify-between ${idx > 0 ? "pt-2.5" : ""} ${idx < options.details!.length - 1 ? "pb-2.5" : ""}`}>
+                        <span className="text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
+                          {item.label}
+                        </span>
+                        <span className="font-bold text-slate-900 font-mono bg-white border border-slate-200 px-2 py-0.5 rounded text-xs">
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Helpful Note / Next Steps Banner */}
+                {options.note && (
+                  <div className="mt-4 p-3.5 bg-emerald-50/70 border border-emerald-200/70 rounded-2xl text-xs text-emerald-900 flex items-start gap-3 leading-relaxed">
+                    <span className="text-emerald-600 text-base shrink-0 mt-0.5">💡</span>
+                    <span className="font-medium">{options.note}</span>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className={`mt-6 ${options.cancelText ? "grid grid-cols-2 gap-3" : "flex"}`}>
+                  {options.cancelText && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        closeModal();
+                        if (options.onCancel) options.onCancel();
+                      }}
+                      className="w-full py-3 px-4 rounded-xl text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer text-center"
+                    >
+                      {options.cancelText}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    autoFocus
+                    onClick={handleConfirm}
+                    style={getButtonInlineStyle(buttonVariant)}
+                    className={`w-full py-3 px-5 rounded-xl text-sm font-bold text-white shadow-md transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer text-center ${getButtonClass(
+                      buttonVariant
+                    )}`}
+                  >
+                    {options.confirmText || "Got it"}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
