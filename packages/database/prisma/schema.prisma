@@ -1,9 +1,10 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -47,12 +48,20 @@ model Project {
   id             String       @id @default(uuid())
   organizationId String
   name           String
+  
+  // Meta / WhatsApp Integration
+  metaProjectId   String?
+  metaAccessToken String?      @db.Text
+  metaWabaId      String?
+  metaPhoneId     String?
+
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   apiKeys        ApiKey[]
   otpRequests    OtpRequest[]
+  phoneNumbers   PhoneNumber[]
 }
 
 model ApiKey {
@@ -140,4 +149,25 @@ model PricingRule {
   currency       String       @default("INR")
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+}
+
+
+model PhoneNumber {
+  id           String   @id @default(uuid())
+  projectId    String
+  phoneId      String
+  displayPhone String
+  verifiedName String?
+  wabaId       String
+  wabaName     String?
+  service      String   @default("AUTHENTICATION") // AUTHENTICATION, MARKETING, UTILITY
+  isDefault    Boolean  @default(false)
+  quality      String?
+  status       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, phoneId])
 }
