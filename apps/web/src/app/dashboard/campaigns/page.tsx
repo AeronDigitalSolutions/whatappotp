@@ -120,18 +120,29 @@ export default function CampaignsPage() {
 
   // Initialize Project ID
   useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      try {
-        const u = JSON.parse(userStr);
-        if (u.projectId) setProjectId(u.projectId);
-      } catch (e) {}
+    let pid = typeof window !== "undefined" ? localStorage.getItem("projectId") : null;
+    if (!pid && typeof window !== "undefined") {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u.projectId) pid = u.projectId;
+        } catch (e) {}
+      }
+    }
+    if (pid) {
+      setProjectId(pid);
+    } else {
+      setLoading(false);
     }
   }, []);
 
   // Fetch Campaigns, Phone Numbers, and Templates
   const loadCampaigns = async () => {
-    if (!projectId) return;
+    if (!projectId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch(`${getApiUrl()}/v1/campaigns/${projectId}`);
@@ -150,7 +161,7 @@ export default function CampaignsPage() {
     if (!projectId) return;
     try {
       // 1. Load Phone Numbers
-      const pRes = await fetch(`${getApiUrl()}/v1/phone-numbers/${projectId}`);
+      const pRes = await fetch(`${getApiUrl()}/v1/meta/numbers/${projectId}`);
       const pData = await pRes.json();
       if (pData.success && pData.numbers) {
         setPhoneNumbers(pData.numbers);

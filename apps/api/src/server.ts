@@ -397,6 +397,20 @@ fastify.get("/v1/meta/numbers/:projectId", async (request: any, reply) => {
   }
 });
 
+fastify.get("/v1/phone-numbers/:projectId", async (request: any, reply) => {
+  const { projectId } = request.params;
+  try {
+    const numbers = await prisma.phoneNumber.findMany({
+      where: { projectId },
+      orderBy: [{ service: "asc" }, { createdAt: "desc" }]
+    });
+    return reply.send({ success: true, numbers });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to fetch phone numbers" });
+  }
+});
+
 fastify.post("/v1/meta/numbers/assign", async (request: any, reply) => {
   const { projectId, phoneId, service, services, isDefault } = request.body;
   if (!projectId || !phoneId) {
