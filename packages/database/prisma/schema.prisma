@@ -62,6 +62,7 @@ model Project {
   apiKeys        ApiKey[]
   otpRequests    OtpRequest[]
   phoneNumbers   PhoneNumber[]
+  campaigns      Campaign[]
 }
 
 model ApiKey {
@@ -171,3 +172,56 @@ model PhoneNumber {
 
   @@unique([projectId, phoneId])
 }
+
+model Campaign {
+  id               String       @id @default(uuid())
+  projectId        String
+  name             String
+  service          String       @default("MARKETING") // MARKETING, UTILITY, AUTHENTICATION
+  phoneId          String       // Sender Phone ID
+  senderPhone      String?      // Display phone number
+  templateName     String
+  templateLanguage String       @default("en_US")
+  status           String       @default("DRAFT") // DRAFT, SCHEDULED, RUNNING, PAUSED, COMPLETED, FAILED
+  totalRecipients  Int          @default(0)
+  sentCount        Int          @default(0)
+  deliveredCount   Int          @default(0)
+  readCount        Int          @default(0)
+  failedCount      Int          @default(0)
+  variablesMapping Json?        // e.g. { "1": "Name", "2": "Order_ID" }
+  scheduledAt      DateTime?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  sendRate         Int          @default(10) // msgs per second
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  project          Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  recipients       CampaignRecipient[]
+
+  @@index([projectId, createdAt])
+  @@index([projectId, status])
+}
+
+model CampaignRecipient {
+  id            String    @id @default(uuid())
+  campaignId    String
+  phone         String
+  name          String?
+  variables     Json?     // Mapped variables values e.g. { "1": "John", "2": "123" }
+  rawData       Json?     // Original row data from Excel
+  status        String    @default("queued") // queued, sent, delivered, read, failed
+  metaMessageId String?
+  errorMessage  String?   @db.Text
+  sentAt        DateTime?
+  deliveredAt   DateTime?
+  readAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  campaign      Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, status])
+  @@index([campaignId, phone])
+}
+

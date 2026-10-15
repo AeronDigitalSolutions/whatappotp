@@ -1417,8 +1417,564 @@ fastify.post("/v1/otp/resend", async (request: any, reply) => {
   }
 });
 
+// --- MODULE 6: BROADCAST & PROMOTIONAL CAMPAIGNS ---
+
+async function initCampaignTables() {
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS Campaign (
+        id VARCHAR(191) NOT NULL PRIMARY KEY,
+        projectId VARCHAR(191) NOT NULL,
+        name VARCHAR(191) NOT NULL,
+        service VARCHAR(50) NOT NULL DEFAULT 'MARKETING',
+        phoneId VARCHAR(191) NOT NULL,
+        senderPhone VARCHAR(191),
+        templateName VARCHAR(191) NOT NULL,
+        templateLanguage VARCHAR(20) NOT NULL DEFAULT 'en_US',
+        status VARCHAR(50) NOT NULL DEFAULT 'DRAFT',
+        totalRecipients INT NOT NULL DEFAULT 0,
+        sentCount INT NOT NULL DEFAULT 0,
+        deliveredCount INT NOT NULL DEFAULT 0,
+        readCount INT NOT NULL DEFAULT 0,
+        failedCount INT NOT NULL DEFAULT 0,
+        variablesMapping JSON,
+        scheduledAt DATETIME(3),
+        startedAt DATETIME(3),
+        completedAt DATETIME(3),
+        sendRate INT NOT NULL DEFAULT 10,
+        createdAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        updatedAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+        INDEX idx_campaign_project_created (projectId, createdAt),
+        INDEX idx_campaign_project_status (projectId, status)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS CampaignRecipient (
+        id VARCHAR(191) NOT NULL PRIMARY KEY,
+        campaignId VARCHAR(191) NOT NULL,
+        phone VARCHAR(50) NOT NULL,
+        name VARCHAR(191),
+        variables JSON,
+        rawData JSON,
+        status VARCHAR(50) NOT NULL DEFAULT 'queued',
+        metaMessageId VARCHAR(191),
+        errorMessage TEXT,
+        sentAt DATETIME(3),
+        deliveredAt DATETIME(3),
+        readAt DATETIME(3),
+        createdAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        updatedAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+        INDEX idx_recipient_campaign_status (campaignId, status),
+        INDEX idx_recipient_campaign_phone (campaignId, phone)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("Campaign tables verified successfully.");
+  } catch (e: any) {
+    console.warn("Could not verify campaign tables via raw SQL:", e.message);
+  }
+}
+
+// 1. Get all campaigns for a project
+fastify.get("/v1/campaigns/:projectId", async (request: any, reply) => {
+  const { projectId } = request.params;
+  try {
+    const campaigns = await prisma.campaign.findMany({
+      where: { projectId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        _count: {
+          select: { recipients: true }
+        }
+      }
+    });
+
+    return reply.send({ success: true, campaigns });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to fetch campaigns: " + error.message });
+  }
+});
+
+// 2. Get single campaign with recent recipients
+fastify.get("/v1/campaigns/:projectId/:campaignId", async (request: any, reply) => {
+  const { projectId, campaignId } = request.params;
+  try {
+    const campaign = await prisma.campaign.findFirst({
+      where: { id: campaignId, projectId },
+      include: {
+        recipients: {
+          take: 100,
+          orderBy: { createdAt: "asc" }
+        }
+      }
+    });
+
+    if (!campaign) {
+      return reply.status(404).send({ error: "Campaign not found" });
+    }
+
+    return reply.send({ success: true, campaign });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to fetch campaign: " + error.message });
+  }
+});
+
+// 3. Create a new campaign
+fastify.post("/v1/campaigns/:projectId", async (request: any, reply) => {
+  const { projectId } = request.params;
+  const {
+    name,
+    service = "MARKETING",
+    phoneId,
+    senderPhone,
+    templateName,
+    templateLanguage = "en_US",
+    variablesMapping = {},
+    scheduledAt,
+    sendRate = 10,
+    recipients = []
+  } = request.body;
+
+  if (!name || !phoneId || !templateName) {
+    return reply.status(400).send({ error: "Missing required fields (name, phoneId, templateName)" });
+  }
+
+  if (!Array.isArray(recipients) || recipients.length === 0) {
+    return reply.status(400).send({ error: "Recipients list cannot be empty. Please upload an audience." });
+  }
+
+  try {
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) {
+      return reply.status(404).send({ error: "Project not found" });
+    }
+
+    const campaignId = crypto.randomUUID();
+    const scheduledDate = scheduledAt ? new Date(scheduledAt) : null;
+    const initialStatus = scheduledDate && scheduledDate > new Date() ? "SCHEDULED" : "DRAFT";
+
+    // Create Campaign
+    const campaign = await prisma.campaign.create({
+      data: {
+        id: campaignId,
+        projectId,
+        name,
+        service,
+        phoneId,
+        senderPhone: senderPhone || null,
+        templateName,
+        templateLanguage,
+        variablesMapping,
+        scheduledAt: scheduledDate,
+        sendRate: Number(sendRate) || 10,
+        status: initialStatus,
+        totalRecipients: recipients.length,
+        sentCount: 0,
+        deliveredCount: 0,
+        readCount: 0,
+        failedCount: 0
+      }
+    });
+
+    // Create Recipients in batches of 500
+    const recipientChunks: any[][] = [];
+    for (let i = 0; i < recipients.length; i += 500) {
+      recipientChunks.push(recipients.slice(i, i + 500));
+    }
+
+    for (const chunk of recipientChunks) {
+      const dataToInsert = chunk.map((r: any) => ({
+        id: crypto.randomUUID(),
+        campaignId,
+        phone: String(r.phone || "").replace(/[^0-9]/g, ""),
+        name: r.name || null,
+        variables: r.variables || {},
+        rawData: r.rawData || null,
+        status: "queued"
+      }));
+
+      await prisma.campaignRecipient.createMany({
+        data: dataToInsert
+      });
+    }
+
+    return reply.send({
+      success: true,
+      message: `Campaign "${name}" created with ${recipients.length} recipients.`,
+      campaign
+    });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to create campaign: " + error.message });
+  }
+});
+
+// 4. Send a single live test message
+fastify.post("/v1/campaigns/:projectId/:campaignId/send-test", async (request: any, reply) => {
+  const { projectId, campaignId } = request.params;
+  const { testPhone, variables = {} } = request.body;
+
+  if (!testPhone) {
+    return reply.status(400).send({ error: "Test phone number is required" });
+  }
+
+  try {
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project || !project.metaAccessToken) {
+      return reply.status(400).send({ error: "Meta WhatsApp credentials not connected" });
+    }
+
+    const campaign = await prisma.campaign.findFirst({
+      where: { id: campaignId, projectId }
+    });
+    if (!campaign) {
+      return reply.status(404).send({ error: "Campaign not found" });
+    }
+
+    const cleanPhone = testPhone.replace(/[^0-9]/g, "");
+    const waUrl = `https://graph.facebook.com/v19.0/${campaign.phoneId}/messages`;
+
+    // Construct parameters from variables
+    const varKeys = Object.keys(variables).sort((a, b) => Number(a) - Number(b));
+    const parameters = varKeys.map(k => ({
+      type: "text",
+      text: String(variables[k] || "")
+    }));
+
+    const payload: any = {
+      messaging_product: "whatsapp",
+      to: cleanPhone,
+      type: "template",
+      template: {
+        name: campaign.templateName,
+        language: { code: campaign.templateLanguage || "en_US" }
+      }
+    };
+
+    if (parameters.length > 0) {
+      payload.template.components = [
+        {
+          type: "body",
+          parameters
+        }
+      ];
+    }
+
+    const waRes = await fetch(waUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${project.metaAccessToken}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const waData = await waRes.json();
+    if (!waRes.ok) {
+      return reply.status(400).send({
+        error: "Meta API Error: " + (waData.error?.message || "Failed to send test message"),
+        details: waData.error
+      });
+    }
+
+    return reply.send({
+      success: true,
+      message: `Test message successfully dispatched to +${cleanPhone}!`,
+      metaMessageId: waData.messages?.[0]?.id
+    });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to dispatch test message: " + error.message });
+  }
+});
+
+// 4b. Send direct live test message without saving campaign first
+fastify.post("/v1/campaigns/:projectId/test-direct", async (request: any, reply) => {
+  const { projectId } = request.params;
+  const { phoneId, templateName, templateLanguage = "en_US", testPhone, variables = {} } = request.body;
+
+  if (!testPhone || !phoneId || !templateName) {
+    return reply.status(400).send({ error: "Missing required fields (testPhone, phoneId, templateName)" });
+  }
+
+  try {
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project || !project.metaAccessToken) {
+      return reply.status(400).send({ error: "Meta WhatsApp credentials not connected" });
+    }
+
+    const cleanPhone = testPhone.replace(/[^0-9]/g, "");
+    const waUrl = `https://graph.facebook.com/v19.0/${phoneId}/messages`;
+
+    // Construct parameters from variables
+    const varKeys = Object.keys(variables).sort((a, b) => Number(a) - Number(b));
+    const parameters = varKeys.map(k => ({
+      type: "text",
+      text: String(variables[k] || "")
+    }));
+
+    const payload: any = {
+      messaging_product: "whatsapp",
+      to: cleanPhone,
+      type: "template",
+      template: {
+        name: templateName,
+        language: { code: templateLanguage || "en_US" }
+      }
+    };
+
+    if (parameters.length > 0) {
+      payload.template.components = [
+        {
+          type: "body",
+          parameters
+        }
+      ];
+    }
+
+    const waRes = await fetch(waUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${project.metaAccessToken}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const waData = await waRes.json();
+    if (!waRes.ok) {
+      return reply.status(400).send({
+        error: "Meta API Error: " + (waData.error?.message || "Failed to send test message"),
+        details: waData.error
+      });
+    }
+
+    return reply.send({
+      success: true,
+      message: `Test message successfully dispatched to +${cleanPhone}!`,
+      metaMessageId: waData.messages?.[0]?.id
+    });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to dispatch test message: " + error.message });
+  }
+});
+
+// 5. Launch / Run Campaign
+fastify.post("/v1/campaigns/:projectId/:campaignId/launch", async (request: any, reply) => {
+  const { projectId, campaignId } = request.params;
+
+  try {
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project || !project.metaAccessToken) {
+      return reply.status(400).send({ error: "Meta WhatsApp credentials not connected" });
+    }
+
+    const campaign = await prisma.campaign.findFirst({
+      where: { id: campaignId, projectId }
+    });
+    if (!campaign) {
+      return reply.status(404).send({ error: "Campaign not found" });
+    }
+
+    // Set Campaign Status to RUNNING
+    await prisma.campaign.update({
+      where: { id: campaignId },
+      data: {
+        status: "RUNNING",
+        startedAt: campaign.startedAt || new Date()
+      }
+    });
+
+    // Start background processor
+    setImmediate(async () => {
+      try {
+        const queuedRecipients = await prisma.campaignRecipient.findMany({
+          where: { campaignId, status: "queued" }
+        });
+
+        const waUrl = `https://graph.facebook.com/v19.0/${campaign.phoneId}/messages`;
+        const token = project.metaAccessToken;
+
+        let sentSuccess = 0;
+        let sentFailed = 0;
+
+        for (const recipient of queuedRecipients) {
+          // Check if paused
+          const currentCampaign = await prisma.campaign.findUnique({
+            where: { id: campaignId },
+            select: { status: true }
+          });
+          if (currentCampaign?.status === "PAUSED") {
+            break;
+          }
+
+          const vars = (recipient.variables as any) || {};
+          const varKeys = Object.keys(vars).sort((a, b) => Number(a) - Number(b));
+          const parameters = varKeys.map(k => ({
+            type: "text",
+            text: String(vars[k] ?? "")
+          }));
+
+          const payload: any = {
+            messaging_product: "whatsapp",
+            to: recipient.phone,
+            type: "template",
+            template: {
+              name: campaign.templateName,
+              language: { code: campaign.templateLanguage || "en_US" }
+            }
+          };
+
+          if (parameters.length > 0) {
+            payload.template.components = [
+              {
+                type: "body",
+                parameters
+              }
+            ];
+          }
+
+          try {
+            const waRes = await fetch(waUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+              },
+              body: JSON.stringify(payload)
+            });
+
+            const waData = await waRes.json();
+
+            if (waRes.ok && waData.messages?.[0]?.id) {
+              sentSuccess++;
+              await prisma.campaignRecipient.update({
+                where: { id: recipient.id },
+                data: {
+                  status: "sent",
+                  metaMessageId: waData.messages[0].id,
+                  sentAt: new Date()
+                }
+              });
+            } else {
+              sentFailed++;
+              await prisma.campaignRecipient.update({
+                where: { id: recipient.id },
+                data: {
+                  status: "failed",
+                  errorMessage: waData.error?.message || "Meta API rejection"
+                }
+              });
+            }
+          } catch (sendErr: any) {
+            sentFailed++;
+            await prisma.campaignRecipient.update({
+              where: { id: recipient.id },
+              data: {
+                status: "failed",
+                errorMessage: sendErr.message || "Network exception during dispatch"
+              }
+            });
+          }
+
+          // Delay to respect rate limit (default 100ms for 10 msgs/sec)
+          const delayMs = Math.max(25, Math.floor(1000 / (campaign.sendRate || 10)));
+          await new Promise((res) => setTimeout(res, delayMs));
+        }
+
+        // Update campaign totals
+        const remainingQueued = await prisma.campaignRecipient.count({
+          where: { campaignId, status: "queued" }
+        });
+
+        const totalSent = await prisma.campaignRecipient.count({
+          where: { campaignId, status: "sent" }
+        });
+
+        const totalFailed = await prisma.campaignRecipient.count({
+          where: { campaignId, status: "failed" }
+        });
+
+        await prisma.campaign.update({
+          where: { id: campaignId },
+          data: {
+            sentCount: totalSent,
+            failedCount: totalFailed,
+            status: remainingQueued === 0 ? "COMPLETED" : "PAUSED",
+            completedAt: remainingQueued === 0 ? new Date() : undefined
+          }
+        });
+      } catch (err: any) {
+        console.error("Error in background campaign processor:", err);
+      }
+    });
+
+    return reply.send({
+      success: true,
+      message: `Campaign "${campaign.name}" launched! Messages are being dispatched.`
+    });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to launch campaign: " + error.message });
+  }
+});
+
+// 6. Pause Campaign
+fastify.post("/v1/campaigns/:projectId/:campaignId/pause", async (request: any, reply) => {
+  const { projectId, campaignId } = request.params;
+  try {
+    const updated = await prisma.campaign.update({
+      where: { id: campaignId },
+      data: { status: "PAUSED" }
+    });
+    return reply.send({ success: true, message: "Campaign paused", campaign: updated });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to pause campaign: " + error.message });
+  }
+});
+
+// 7. Delete Campaign
+fastify.delete("/v1/campaigns/:projectId/:campaignId", async (request: any, reply) => {
+  const { projectId, campaignId } = request.params;
+  try {
+    await prisma.campaignRecipient.deleteMany({ where: { campaignId } });
+    await prisma.campaign.delete({ where: { id: campaignId } });
+    return reply.send({ success: true, message: "Campaign deleted successfully" });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to delete campaign: " + error.message });
+  }
+});
+
+// 8. Get Campaign Recipients (for logs & export)
+fastify.get("/v1/campaigns/:projectId/:campaignId/recipients", async (request: any, reply) => {
+  const { projectId, campaignId } = request.params;
+  const { limit = 500, offset = 0 } = request.query as any;
+
+  try {
+    const recipients = await prisma.campaignRecipient.findMany({
+      where: { campaignId },
+      orderBy: { createdAt: "asc" },
+      take: Number(limit),
+      skip: Number(offset)
+    });
+
+    const total = await prisma.campaignRecipient.count({ where: { campaignId } });
+
+    return reply.send({ success: true, recipients, total });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to fetch recipients: " + error.message });
+  }
+});
+
 const start = async () => {
   try {
+    await initCampaignTables();
     const portEnv = process.env.PORT;
     if (portEnv && isNaN(Number(portEnv))) {
        await fastify.listen({ path: portEnv }); 

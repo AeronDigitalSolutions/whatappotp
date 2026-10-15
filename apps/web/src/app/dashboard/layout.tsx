@@ -58,6 +58,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Link href="/dashboard/templates" className={navLinkClass("/dashboard/templates")}>
             📄 Template Studio
           </Link>
+          <Link href="/dashboard/campaigns" className={navLinkClass("/dashboard/campaigns")}>
+            📣 Broadcast Campaigns
+          </Link>
           <Link href="/dashboard/wallet" className={navLinkClass("/dashboard/wallet")}>
             💳 Wallet & Billing
           </Link>
