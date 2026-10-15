@@ -1,5 +1,6 @@
 import "./globals.css";
 import React from "react";
+import { ModalProvider } from "@/context/ModalContext";
 
 export const metadata = {
   title: "WhatsApp OTP SaaS",
@@ -9,7 +10,11 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <ModalProvider>
+          {children}
+        </ModalProvider>
+      </body>
     </html>
   );
 }

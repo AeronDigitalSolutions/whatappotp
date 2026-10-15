@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import Script from "next/script";
 import { getApiUrl } from "@/lib/api";
+import { useModal } from "@/context/ModalContext";
 
 export default function WalletPage() {
+  const { showSuccess, showError, showWarning } = useModal();
   const [balance, setBalance] = useState<string>("0.00");
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -45,7 +47,7 @@ export default function WalletPage() {
   }, [orgId]);
 
   const handleTopUp = async () => {
-    if (amount < 100) return alert("Minimum top-up is ₹100");
+    if (amount < 100) return showWarning("Minimum wallet recharge amount is ₹100.", "Minimum Top-up");
     
     setLoading(true);
     try {
@@ -66,7 +68,7 @@ export default function WalletPage() {
         description: "Wallet Credit Recharge",
         order_id: data.orderId,
         handler: function (response: any) {
-          alert(`Payment Successful! Transaction ID: ${response.razorpay_payment_id}`);
+          showSuccess(`Your payment of ₹${amount} was successful!\n\nTransaction ID: ${response.razorpay_payment_id}\nYour wallet balance has been updated.`, "Payment Received");
           setBalance((prev) => (parseFloat(prev) + amount).toFixed(2));
           setTransactions(prev => [
             { id: response.razorpay_payment_id, type: "credit", amount: `+₹${amount}.00`, desc: "Razorpay Wallet Top-up", date: "Just now" },
@@ -85,12 +87,12 @@ export default function WalletPage() {
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on('payment.failed', function (response: any){
-        alert("Payment Failed: " + response.error.description);
+        showError("Payment Failed: " + response.error.description, "Payment Error");
       });
       rzp.open();
       
     } catch (err: any) {
-      alert("Failed to initiate payment: " + err.message);
+      showError("Failed to initiate payment: " + err.message, "Recharge Failed");
     } finally {
       setLoading(false);
     }

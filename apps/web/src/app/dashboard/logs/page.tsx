@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
+import { useModal } from "@/context/ModalContext";
 
 interface AttemptItem {
   id: string;
@@ -26,6 +27,7 @@ interface OtpLogItem {
 }
 
 export default function LogsPage() {
+  const { showError, showSuccess } = useModal();
   const [logs, setLogs] = useState<OtpLogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,10 +91,10 @@ export default function LogsPage() {
         setResendMessage("Fresh OTP code dispatched successfully!");
         loadLogs(true);
       } else {
-        alert(data.error || "Failed to resend OTP");
+        showError(data.error || "Failed to resend OTP", "Resend Failed");
       }
     } catch (e: any) {
-      alert(e.message || "Network error");
+      showError(e.message || "Network error", "Network Error");
     } finally {
       setResending(false);
     }

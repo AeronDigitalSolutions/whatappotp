@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
+import { useModal } from "@/context/ModalContext";
 
 interface ApiKeyItem {
   id: string;
@@ -13,6 +14,7 @@ interface ApiKeyItem {
 }
 
 export default function ApiKeysPage() {
+  const { showError, showSuccess } = useModal();
   const [keys, setKeys] = useState<ApiKeyItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,10 +84,10 @@ export default function ApiKeysPage() {
         setCreatedSecret(data.key.secretKey);
         loadKeys();
       } else {
-        alert(data.error || "Failed to create API key");
+        showError(data.error || "Failed to create API key", "Key Creation Failed");
       }
     } catch (e: any) {
-      alert(e.message || "Network error");
+      showError(e.message || "Network error", "Network Error");
     } finally {
       setCreating(false);
     }
@@ -101,12 +103,13 @@ export default function ApiKeysPage() {
       const data = await res.json();
       if (data.success) {
         setRevokeTarget(null);
+        showSuccess(`Key "${revokeTarget.name}" has been revoked successfully.`, "Key Revoked");
         loadKeys();
       } else {
-        alert(data.error || "Failed to revoke key");
+        showError(data.error || "Failed to revoke key", "Revocation Failed");
       }
     } catch (e: any) {
-      alert(e.message || "Network error");
+      showError(e.message || "Network error", "Network Error");
     } finally {
       setRevoking(false);
     }

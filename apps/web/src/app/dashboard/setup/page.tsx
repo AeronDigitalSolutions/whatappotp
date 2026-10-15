@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import Script from "next/script";
 import Link from "next/link";
 import { getApiUrl } from "@/lib/api";
+import { useModal } from "@/context/ModalContext";
 
 export default function SetupPage() {
+  const { showSuccess, showError, showWarning } = useModal();
   const [projectId, setProjectId] = useState<string | null>(null);
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -80,7 +82,7 @@ export default function SetupPage() {
   }, []);
 
   const handleFacebookLogin = () => {
-    if (!projectId) return alert("Please log in first.");
+    if (!projectId) return showWarning("Please log in to your account first.", "Login Required");
     
     (window as any).FB.login(function (response: any) {
       if (response.authResponse) {
@@ -97,10 +99,10 @@ export default function SetupPage() {
              setProject({ ...project, metaAccessToken: accessToken });
              fetchMetaAccounts(projectId);
           } else {
-             alert("Error saving token");
+             showError("Failed to save Meta token: " + data.error, "Token Error");
           }
         })
-        .catch(err => alert("Error communicating with server"));
+        .catch(err => showError("Error communicating with server", "Network Error"));
       } else {
         console.log('User cancelled login or did not fully authorize.');
       }
@@ -111,7 +113,7 @@ export default function SetupPage() {
   };
 
   const saveSelection = async () => {
-    if (!selectedWaba || !selectedPhone) return alert("Please select an account and phone number");
+    if (!selectedWaba || !selectedPhone) return showWarning("Please select a WhatsApp Business Account and a phone number.", "Selection Required");
     setSaving(true);
     try {
       const currentBiz = businesses.find(b => b.id === selectedBiz);

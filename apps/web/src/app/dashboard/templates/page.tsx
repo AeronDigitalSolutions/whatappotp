@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
+import { useModal } from "@/context/ModalContext";
 
 interface TemplateComponent {
   type: "HEADER" | "BODY" | "FOOTER" | "BUTTONS";
@@ -26,6 +27,7 @@ interface TemplateItem {
 }
 
 export default function TemplatesPage() {
+  const { showSuccess, showError, showConfirm } = useModal();
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,22 +80,27 @@ export default function TemplatesPage() {
     loadTemplates();
   }, [projectId]);
 
-  const handleDelete = async (name: string) => {
-    if (!confirm(`Are you sure you want to delete template "${name}" from Meta? This cannot be undone.`)) return;
-    try {
-      const res = await fetch(`${getApiUrl()}/v1/meta/templates/${projectId}/${encodeURIComponent(name)}`, {
-        method: "DELETE"
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert("Template deleted successfully");
-        loadTemplates();
-      } else {
-        alert("Error deleting template: " + data.error);
-      }
-    } catch (e: any) {
-      alert("Failed to delete: " + e.message);
-    }
+  const handleDelete = (name: string) => {
+    showConfirm(
+      `Are you sure you want to delete template "${name}" from Meta? This action is permanent and cannot be undone.`,
+      async () => {
+        try {
+          const res = await fetch(`${getApiUrl()}/v1/meta/templates/${projectId}/${encodeURIComponent(name)}`, {
+            method: "DELETE"
+          });
+          const data = await res.json();
+          if (data.success) {
+            showSuccess(`Template "${name}" has been deleted successfully from Meta.`, "Template Deleted");
+            loadTemplates();
+          } else {
+            showError(data.error || "Failed to delete template", "Deletion Error");
+          }
+        } catch (e: any) {
+          showError(e.message || "Network error deleting template", "Deletion Error");
+        }
+      },
+      "Delete Template"
+    );
   };
 
   const handleSubmitTemplate = async (e: React.FormEvent) => {
@@ -187,8 +194,11 @@ export default function TemplatesPage() {
 
       const data = await res.json();
       if (data.success) {
-        alert("Template submitted to Meta successfully! Status: PENDING / APPROVED");
         setShowCreateModal(false);
+        showSuccess(
+          `Template "${formData.name}" was submitted to Meta successfully! Status: PENDING / APPROVED.\n\nMeta AI is now reviewing your template. Once approved, it will be immediately available for broadcast.`,
+          "Template Submitted"
+        );
         setFormData({
           name: "",
           category: "MARKETING",

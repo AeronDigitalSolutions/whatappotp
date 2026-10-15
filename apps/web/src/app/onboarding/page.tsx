@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useModal } from "@/context/ModalContext";
 
 export default function OnboardingWizard() {
+  const { showSuccess } = useModal();
   const [step, setStep] = useState(1);
   const [orgName, setOrgName] = useState("");
   const [testPhone, setTestPhone] = useState("");
@@ -109,7 +111,7 @@ export default function OnboardingWizard() {
               </div>
 
               <button 
-                onClick={() => alert('OTP Sent! (Mock)')}
+                onClick={() => showSuccess("A test OTP verification message was dispatched to your WhatsApp number.", "Test OTP Sent")}
                 className="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-md shadow-sm text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 transition-colors"
               >
                 Send Test Message

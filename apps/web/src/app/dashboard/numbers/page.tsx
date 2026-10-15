@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
+import { useModal } from "@/context/ModalContext";
 
 interface PhoneNumberItem {
   id: string;
@@ -17,6 +18,7 @@ interface PhoneNumberItem {
 }
 
 export default function NumbersPage() {
+  const { showSuccess, showError, showWarning } = useModal();
   const [numbers, setNumbers] = useState<PhoneNumberItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,11 +118,11 @@ export default function NumbersPage() {
       });
       const data = await res.json();
       if (!data.success) {
-        alert("Error saving service: " + data.error);
+        showError("Error saving service: " + data.error, "Update Failed");
         loadNumbers();
       }
     } catch (e: any) {
-      alert("Failed to update: " + e.message);
+      showError("Failed to update: " + e.message, "Network Error");
       loadNumbers();
     } finally {
       setUpdatingPhoneId(null);
@@ -140,12 +142,13 @@ export default function NumbersPage() {
       });
       const data = await res.json();
       if (data.success) {
+        showSuccess("Primary routing number updated successfully.", "Primary Number Set");
         loadNumbers();
       } else {
-        alert("Failed to set primary: " + data.error);
+        showError(data.error || "Failed to set primary number", "Update Failed");
       }
     } catch (e: any) {
-      alert("Network error: " + e.message);
+      showError(e.message || "Network error", "Network Error");
     }
   };
 
@@ -168,6 +171,7 @@ export default function NumbersPage() {
       const data = await res.json();
       if (data.success) {
         setShowAddModal(false);
+        showSuccess(`Number ${newNumber.displayPhone} was linked successfully.`, "Number Linked");
         setNewNumber({
           phoneId: "",
           displayPhone: "",
@@ -178,15 +182,18 @@ export default function NumbersPage() {
         });
         loadNumbers();
       } else {
-        alert("Error: " + data.error);
+        showError(data.error || "Failed to link number", "Error Linking Number");
       }
     } catch (e: any) {
-      alert("Failed to add number: " + e.message);
+      showError(e.message || "Failed to add number", "Error");
     }
   };
 
   const handleSendTest = async () => {
-    if (!testModal.phone || !testModal.to) return alert("Please enter recipient phone number");
+    if (!testModal.phone || !testModal.to) {
+      showWarning("Please enter a valid recipient phone number with country code.", "Recipient Required");
+      return;
+    }
     setTestModal((prev) => ({ ...prev, sending: true, result: null }));
     try {
       const res = await fetch(`${getApiUrl()}/v1/messages/send-template`, {
