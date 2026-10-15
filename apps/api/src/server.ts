@@ -398,27 +398,30 @@ fastify.get("/v1/meta/numbers/:projectId", async (request: any, reply) => {
 });
 
 fastify.post("/v1/meta/numbers/assign", async (request: any, reply) => {
-  const { projectId, phoneId, service, isDefault } = request.body;
-  if (!projectId || !phoneId || !service) {
-    return reply.status(400).send({ error: "Missing required fields" });
+  const { projectId, phoneId, service, services, isDefault } = request.body;
+  if (!projectId || !phoneId) {
+    return reply.status(400).send({ error: "Missing required fields (projectId, phoneId)" });
   }
 
   try {
-    // If setting as default, clear other defaults for this service
-    if (isDefault) {
-      await prisma.phoneNumber.updateMany({
-        where: { projectId, service },
-        data: { isDefault: false }
-      });
+    // Format service as comma-separated string if passed as array
+    let serviceStr = "";
+    if (Array.isArray(services)) {
+      serviceStr = services.join(",");
+    } else if (typeof service === "string") {
+      serviceStr = service;
     }
 
     const updated = await prisma.phoneNumber.update({
       where: { projectId_phoneId: { projectId, phoneId } },
-      data: { service, isDefault: !!isDefault }
+      data: {
+        service: serviceStr,
+        ...(isDefault !== undefined ? { isDefault: !!isDefault } : {})
+      }
     });
 
-    // If OTP service is set, keep project.metaPhoneId synced
-    if (service === "AUTHENTICATION" && isDefault) {
+    // If OTP/Authentication service is included and this is primary or project metaPhoneId is not set
+    if (serviceStr.includes("AUTHENTICATION")) {
       await prisma.project.update({
         where: { id: projectId },
         data: { metaPhoneId: phoneId, metaWabaId: updated.wabaId }
@@ -431,6 +434,7 @@ fastify.post("/v1/meta/numbers/assign", async (request: any, reply) => {
     return reply.status(500).send({ error: "Failed to assign service" });
   }
 });
+
 
 fastify.post("/v1/meta/numbers/add-manual", async (request: any, reply) => {
   const { projectId, phoneId, displayPhone, verifiedName, wabaId, wabaName, service } = request.body;
