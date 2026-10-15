@@ -81,6 +81,120 @@ fastify.post("/v1/auth/login", async (request: any, reply) => {
   }
 });
 
+// --- SOCIAL AUTHENTICATION (Google & Meta) ---
+async function findOrCreateSocialUser({ email, name, emailVerified = true, metaAccessToken = null }: { email: string, name?: string, emailVerified?: boolean, metaAccessToken?: string | null }) {
+  let user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        id: crypto.randomUUID(),
+        email,
+        name: name || null,
+        emailVerified
+      }
+    });
+
+    const org = await prisma.organization.create({
+      data: { id: crypto.randomUUID(), name: `${name || 'My'} Organization` }
+    });
+
+    await prisma.membership.create({
+      data: { id: crypto.randomUUID(), userId: user.id, organizationId: org.id, role: "owner" }
+    });
+
+    const project = await prisma.project.create({
+      data: {
+        id: crypto.randomUUID(),
+        organizationId: org.id,
+        name: "Default Project",
+        metaAccessToken: metaAccessToken || null
+      }
+    });
+
+    await prisma.wallet.create({
+      data: { id: crypto.randomUUID(), organizationId: org.id, balance: 0.00 }
+    });
+  }
+
+  const membership = await prisma.membership.findFirst({
+    where: { userId: user.id },
+    include: { organization: { include: { projects: true } } }
+  });
+
+  const projectId = membership?.organization.projects[0]?.id;
+  const organizationId = membership?.organizationId;
+
+  if (metaAccessToken && projectId) {
+    await prisma.project.update({
+      where: { id: projectId },
+      data: { metaAccessToken }
+    }).catch(() => {});
+  }
+
+  return { user: { id: user.id, email: user.email, name: user.name }, projectId, organizationId };
+}
+
+fastify.post("/v1/auth/google", async (request: any, reply) => {
+  const { credential, accessToken } = request.body;
+  if (!credential && !accessToken) {
+    return reply.status(400).send({ error: "Missing Google token or credential" });
+  }
+
+  try {
+    let email: string | null = null;
+    let name: string | null = null;
+
+    if (credential) {
+      const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+      const data = await res.json();
+      if (!res.ok || !data.email) throw new Error(data.error_description || "Invalid Google token");
+      email = data.email;
+      name = data.name;
+    } else if (accessToken) {
+      const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.email) throw new Error(data.error_description || "Invalid Google access token");
+      email = data.email;
+      name = data.name;
+    }
+
+    if (!email) return reply.status(400).send({ error: "No email returned from Google account" });
+
+    const result = await findOrCreateSocialUser({ email, name: name || undefined, emailVerified: true });
+    return reply.send({ success: true, ...result });
+  } catch (err: any) {
+    fastify.log.error(err);
+    return reply.status(400).send({ error: err.message || "Google authentication failed" });
+  }
+});
+
+fastify.post("/v1/auth/meta", async (request: any, reply) => {
+  const { accessToken } = request.body;
+  if (!accessToken) {
+    return reply.status(400).send({ error: "Missing Meta access token" });
+  }
+
+  try {
+    const res = await fetch(`https://graph.facebook.com/v19.0/me?fields=id,name,email&access_token=${accessToken}`);
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      throw new Error(data.error?.message || "Invalid Meta access token");
+    }
+
+    const email = data.email || `${data.id}@facebook.com`;
+    const name = data.name || "Meta User";
+
+    const result = await findOrCreateSocialUser({ email, name, emailVerified: true, metaAccessToken: accessToken });
+    return reply.send({ success: true, ...result });
+  } catch (err: any) {
+    fastify.log.error(err);
+    return reply.status(400).send({ error: err.message || "Meta authentication failed" });
+  }
+});
+
 // --- PROJECT & SETUP ---
 fastify.get("/v1/project/:id", async (request: any, reply) => {
   try {

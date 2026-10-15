@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getApiUrl } from "@/lib/api";
+import SocialAuthButtons from "@/components/SocialAuthButtons";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -38,31 +39,53 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 text-center">Welcome back</h1>
-          <p className="text-slate-500 text-center mt-2">Sign in to your OTP SaaS account</p>
+          <p className="text-slate-500 text-center mt-2 text-sm">Sign in to your OTP SaaS account</p>
         </div>
 
-        {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{error}</div>}
+        {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm border border-red-100">{error}</div>}
 
+        {/* Social Logins (Google & Meta) */}
+        <SocialAuthButtons onError={setError} onLoading={setLoading} loading={loading} />
+
+        {/* Standard Email / Password Form */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-            <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full border border-slate-200 rounded-lg px-4 py-2" />
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+              placeholder="you@company.com"
+            />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-            <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="w-full border border-slate-200 rounded-lg px-4 py-2" />
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Password</label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+              placeholder="••••••••"
+            />
           </div>
-          <button type="submit" disabled={loading} className="w-full bg-slate-900 text-white font-bold py-2 rounded-lg hover:bg-slate-800 disabled:opacity-50">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl hover:bg-slate-800 transition disabled:opacity-50 text-sm shadow-sm"
+          >
             {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
         <p className="text-center text-sm text-slate-500">
-          Don't have an account? <Link href="/signup" className="text-blue-600 font-medium">Sign up</Link>
+          Don't have an account? <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-semibold">Sign up</Link>
         </p>
       </div>
     </div>
