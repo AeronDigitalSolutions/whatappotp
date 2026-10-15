@@ -13,12 +13,8 @@ interface SocialAuthButtonsProps {
 
 export default function SocialAuthButtons({ onError, onLoading, loading }: SocialAuthButtonsProps) {
   const router = useRouter();
-  const [googleClientReady, setGoogleClientReady] = useState(false);
-  const [showGoogleModal, setShowGoogleModal] = useState(false);
-  const [manualClientId, setManualClientId] = useState("");
-
   const fbAppId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || "1831033178050637";
-  const envGoogleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
   // Initialize Meta SDK
   const initFb = () => {
@@ -36,13 +32,6 @@ export default function SocialAuthButtons({ onError, onLoading, loading }: Socia
     initFb();
   }, []);
 
-  // Initialize Google SDK
-  const initGoogle = () => {
-    if (typeof window !== "undefined" && (window as any).google) {
-      setGoogleClientReady(true);
-    }
-  };
-
   const handleAuthSuccess = (data: any) => {
     localStorage.setItem("user", JSON.stringify(data.user));
     localStorage.setItem("projectId", data.projectId);
@@ -50,11 +39,11 @@ export default function SocialAuthButtons({ onError, onLoading, loading }: Socia
     router.push("/dashboard/setup");
   };
 
-  // 1. Meta / Facebook Login
+  // 1. Meta / Facebook Login (Using Business Login scopes compatible with this App)
   const handleMetaLogin = () => {
     onError("");
     if (typeof window === "undefined" || !(window as any).FB) {
-      return onError("Facebook SDK is still loading. Please wait 2 seconds and try again.");
+      return onError("Facebook SDK is still loading. Please wait a moment and try again.");
     }
 
     onLoading(true);
@@ -81,25 +70,29 @@ export default function SocialAuthButtons({ onError, onLoading, loading }: Socia
       } else {
         onLoading(false);
       }
-    }, { scope: "public_profile,email" });
+    }, {
+      scope: "business_management,whatsapp_business_management,whatsapp_business_messaging",
+      return_scopes: true
+    });
   };
 
   // 2. Google Login
-  const triggerGoogleOAuth = (clientId: string) => {
-    if (!clientId) {
-      setShowGoogleModal(true);
+  const handleGoogleLogin = () => {
+    onError("");
+    if (!googleClientId) {
+      onError("Google Sign-In is not configured yet. Please add GOOGLE_CLIENT_ID or use Email / Meta to sign in.");
       return;
     }
 
     try {
       if (!(window as any).google?.accounts?.oauth2) {
-        onError("Google Sign-In is still loading. Please try again in a moment.");
+        onError("Google Sign-In service is loading. Please try again in a moment.");
         return;
       }
 
       onLoading(true);
       const client = (window as any).google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
+        client_id: googleClientId,
         scope: "email profile openid",
         callback: async (tokenResponse: any) => {
           if (tokenResponse.error) {
@@ -135,28 +128,12 @@ export default function SocialAuthButtons({ onError, onLoading, loading }: Socia
     }
   };
 
-  const handleGoogleLogin = () => {
-    onError("");
-    const clientId = envGoogleClientId || (typeof window !== "undefined" ? localStorage.getItem("temp_google_client_id") || "" : "");
-    if (!clientId) {
-      setShowGoogleModal(true);
-    } else {
-      triggerGoogleOAuth(clientId);
-    }
-  };
-
-  const handleSaveGoogleClientId = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!manualClientId.trim()) return;
-    localStorage.setItem("temp_google_client_id", manualClientId.trim());
-    setShowGoogleModal(false);
-    triggerGoogleOAuth(manualClientId.trim());
-  };
-
   return (
     <>
       <Script src="https://connect.facebook.net/en_US/sdk.js" strategy="lazyOnload" onLoad={initFb} />
-      <Script src="https://accounts.google.com/gsi/client" strategy="lazyOnload" onLoad={initGoogle} />
+      {googleClientId && (
+        <Script src="https://accounts.google.com/gsi/client" strategy="lazyOnload" />
+      )}
 
       <div className="space-y-3">
         {/* Google Sign In Button */}
@@ -209,49 +186,6 @@ export default function SocialAuthButtons({ onError, onLoading, loading }: Socia
         </span>
         <div className="flex-grow border-t border-slate-200"></div>
       </div>
-
-      {/* Google Client ID Modal (If not set in env) */}
-      {showGoogleModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
-            <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="font-bold text-slate-900">Google OAuth Setup</h3>
-              <button onClick={() => setShowGoogleModal(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
-            </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              To enable 1-click Google Sign-In, please provide your <strong>Google OAuth Client ID</strong> from Google Cloud Console.
-            </p>
-            <form onSubmit={handleSaveGoogleClientId} className="space-y-3">
-              <div>
-                <label className="text-xs font-bold text-slate-700 uppercase">Google Client ID</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. 123456789-xxxx.apps.googleusercontent.com"
-                  value={manualClientId}
-                  onChange={(e) => setManualClientId(e.target.value)}
-                  className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono"
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowGoogleModal(false)}
-                  className="px-3.5 py-1.5 border rounded-lg text-slate-600 text-xs font-semibold hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800"
-                >
-                  Save & Sign In
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </>
   );
 }
