@@ -84,6 +84,7 @@ export default function TemplatesPage() {
     showModal({
       title: "Delete WhatsApp Template?",
       type: "warning",
+      confirmVariant: "danger",
       badge: "Permanent Action",
       message: `Are you sure you want to delete template "${name}" from your Meta WhatsApp account?`,
       details: [

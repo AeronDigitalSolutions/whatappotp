@@ -18,6 +18,7 @@ export interface ModalOptions {
   note?: string;
   confirmText?: string;
   cancelText?: string;
+  confirmVariant?: "primary" | "danger" | "warning" | "default";
   onConfirm?: () => void;
   onCancel?: () => void;
 }
@@ -82,19 +83,19 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
   };
 
   const showSuccess = (message: string, title?: string, extra?: Partial<ModalOptions>) => {
-    showModal({ title: title || "Success", message, type: "success", ...extra });
+    showModal({ title: title || "Success", message, type: "success", confirmVariant: "primary", ...extra });
   };
 
   const showError = (message: string, title?: string, extra?: Partial<ModalOptions>) => {
-    showModal({ title: title || "Error Encountered", message, type: "error", ...extra });
+    showModal({ title: title || "Error Encountered", message, type: "error", confirmVariant: "danger", ...extra });
   };
 
   const showWarning = (message: string, title?: string, extra?: Partial<ModalOptions>) => {
-    showModal({ title: title || "Attention", message, type: "warning", ...extra });
+    showModal({ title: title || "Attention", message, type: "warning", confirmVariant: "warning", ...extra });
   };
 
   const showInfo = (message: string, title?: string, extra?: Partial<ModalOptions>) => {
-    showModal({ title: title || "Information", message, type: "info", ...extra });
+    showModal({ title: title || "Information", message, type: "info", confirmVariant: "default", ...extra });
   };
 
   const showConfirm = (message: string, onConfirm: () => void, title?: string, extra?: Partial<ModalOptions>) => {
@@ -102,8 +103,9 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
       title: title || "Please Confirm",
       message,
       type: "warning",
-      confirmText: "Confirm",
+      confirmText: "Yes, Confirm",
       cancelText: "Cancel",
+      confirmVariant: "danger",
       onConfirm,
       ...extra
     });
@@ -136,6 +138,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const { isOpen, options } = modalState;
+  const buttonVariant = getButtonVariant(options);
 
   return (
     <ModalContext.Provider
@@ -171,7 +174,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
             {/* Header Icon & Title */}
             <div className="text-center">
               <div className="inline-flex items-center justify-center mb-3">
-                {getIcon(options.type || "info")}
+                {getIcon(options.type || "info", buttonVariant)}
               </div>
 
               {options.badge && (
@@ -227,7 +230,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
                     closeModal();
                     if (options.onCancel) options.onCancel();
                   }}
-                  className="w-full py-2.5 px-4 rounded-xl text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                  className="w-full py-3 px-4 rounded-xl text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer text-center"
                 >
                   {options.cancelText}
                 </button>
@@ -239,8 +242,9 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
                   closeModal();
                   if (options.onConfirm) options.onConfirm();
                 }}
-                className={`w-full py-2.5 px-5 rounded-xl text-sm font-bold text-white shadow-sm transition-all hover:shadow-md ${getButtonClass(
-                  options.type || "info"
+                style={getButtonInlineStyle(buttonVariant)}
+                className={`w-full py-3 px-5 rounded-xl text-sm font-bold text-white shadow-md transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer text-center ${getButtonClass(
+                  buttonVariant
                 )}`}
               >
                 {options.confirmText || "Got it"}
@@ -275,21 +279,44 @@ function getDefaultTitle(type: ModalType) {
   }
 }
 
-function getIcon(type: ModalType) {
+function getButtonVariant(options: ModalOptions): "danger" | "warning" | "primary" | "default" {
+  if (options.confirmVariant) return options.confirmVariant;
+  const text = (options.confirmText || "").toLowerCase();
+  const title = (options.title || "").toLowerCase();
+  if (
+    text.includes("delete") ||
+    text.includes("remove") ||
+    title.includes("delete") ||
+    title.includes("remove") ||
+    options.type === "error"
+  ) {
+    return "danger";
+  }
+  if (options.type === "warning") {
+    return "warning";
+  }
+  if (options.type === "success") {
+    return "primary";
+  }
+  return "default";
+}
+
+function getIcon(type: ModalType, variant?: "danger" | "warning" | "primary" | "default") {
+  if (variant === "danger" || type === "error") {
+    return (
+      <div className="w-14 h-14 rounded-full bg-red-100/90 text-red-600 ring-8 ring-red-50 flex items-center justify-center shadow-sm">
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      </div>
+    );
+  }
   switch (type) {
     case "success":
       return (
         <div className="w-14 h-14 rounded-full bg-emerald-100/90 text-emerald-600 ring-8 ring-emerald-50 flex items-center justify-center shadow-sm">
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-      );
-    case "error":
-      return (
-        <div className="w-14 h-14 rounded-full bg-red-100/90 text-red-600 ring-8 ring-red-50 flex items-center justify-center shadow-sm">
-          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </div>
       );
@@ -327,16 +354,30 @@ function getBadgeStyle(type: ModalType) {
   }
 }
 
-function getButtonClass(type: ModalType) {
-  switch (type) {
-    case "success":
-      return "bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-100";
-    case "error":
-      return "bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-100";
+function getButtonClass(variant: "danger" | "warning" | "primary" | "default") {
+  switch (variant) {
+    case "danger":
+      return "bg-red-600 hover:bg-red-700 text-white shadow-red-500/20";
     case "warning":
-      return "bg-amber-600 hover:bg-amber-700 focus:ring-4 focus:ring-amber-100";
-    case "info":
+      return "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-500/20";
+    case "primary":
+      return "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20";
+    case "default":
     default:
-      return "bg-slate-900 hover:bg-slate-800 focus:ring-4 focus:ring-slate-100";
+      return "bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/20";
+  }
+}
+
+function getButtonInlineStyle(variant: "danger" | "warning" | "primary" | "default"): React.CSSProperties {
+  switch (variant) {
+    case "danger":
+      return { backgroundColor: "#dc2626", color: "#ffffff" };
+    case "warning":
+      return { backgroundColor: "#d97706", color: "#ffffff" };
+    case "primary":
+      return { backgroundColor: "#059669", color: "#ffffff" };
+    case "default":
+    default:
+      return { backgroundColor: "#0f172a", color: "#ffffff" };
   }
 }
