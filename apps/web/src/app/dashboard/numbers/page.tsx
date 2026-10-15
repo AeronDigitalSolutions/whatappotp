@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
+import Loader from "@/components/Loader";
 
 interface PhoneNumberItem {
   id: string;
@@ -375,9 +376,9 @@ export default function NumbersPage() {
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-slate-500">
-            <div className="w-6 h-6 border-2 border-slate-300 border-t-emerald-600 rounded-full animate-spin mx-auto mb-2"></div>
-            Loading numbers from Meta...
+          <div className="p-16 text-center text-slate-500">
+            <Loader scale={0.95} color="#0f172a" />
+            <p className="mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Syncing registered numbers from Meta...</p>
           </div>
         ) : numbers.length === 0 ? (
           <div className="p-12 text-center space-y-3">

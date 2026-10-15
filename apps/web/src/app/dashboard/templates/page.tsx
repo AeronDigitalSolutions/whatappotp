@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
+import Loader from "@/components/Loader";
 
 interface TemplateComponent {
   type: "HEADER" | "BODY" | "FOOTER" | "BUTTONS";
@@ -85,6 +86,7 @@ export default function TemplatesPage() {
       title: "Delete WhatsApp Template?",
       type: "warning",
       confirmVariant: "danger",
+      loaderVariant: "bubble",
       badge: "Permanent Action",
       message: `Are you sure you want to delete template "${name}" from your Meta WhatsApp account?`,
       details: [
@@ -351,7 +353,10 @@ export default function TemplatesPage() {
 
       {/* Templates Grid */}
       {loading ? (
-        <div className="p-16 text-center text-slate-500">Loading templates from Meta Graph API...</div>
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-16 text-center shadow-xs">
+          <Loader scale={0.95} color="#0f172a" />
+          <p className="mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Syncing templates from Meta Graph API...</p>
+        </div>
       ) : filteredTemplates.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-xl p-12 text-center space-y-3">
           <p className="text-slate-600 font-medium">No templates found matching your criteria.</p>

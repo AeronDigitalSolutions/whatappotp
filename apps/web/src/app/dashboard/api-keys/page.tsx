@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
+import Loader from "@/components/Loader";
 
 interface ApiKeyItem {
   id: string;
@@ -284,9 +285,9 @@ print(response.json())`
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm">
-            <div className="inline-block animate-spin w-6 h-6 border-2 border-slate-300 border-t-emerald-600 rounded-full mb-2"></div>
-            <p>Loading API keys...</p>
+          <div className="p-16 text-center text-slate-500">
+            <Loader scale={0.95} color="#0f172a" />
+            <p className="mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Loading API keys & credentials...</p>
           </div>
         ) : keys.length === 0 ? (
           <div className="p-12 text-center space-y-3">

@@ -22,6 +22,7 @@ export interface ModalOptions {
   confirmVariant?: "primary" | "danger" | "warning" | "default";
   loadingTitle?: string;
   loadingMessage?: string;
+  loaderVariant?: "universal" | "bubble";
   onConfirm?: () => Promise<void> | void;
   onCancel?: () => void;
 }
@@ -33,7 +34,7 @@ interface ModalContextType {
   showWarning: (message: string, title?: string, options?: Partial<ModalOptions>) => void;
   showInfo: (message: string, title?: string, options?: Partial<ModalOptions>) => void;
   showConfirm: (message: string, onConfirm: () => Promise<void> | void, title?: string, options?: Partial<ModalOptions>) => void;
-  showLoading: (message?: string, title?: string) => void;
+  showLoading: (message?: string, title?: string, loaderVariant?: "universal" | "bubble") => void;
   closeModal: () => void;
 }
 
@@ -53,9 +54,11 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
     title: string;
     message: string;
     badge?: string;
+    loaderVariant?: "universal" | "bubble";
   }>({
     title: "Processing Request...",
-    message: "Please wait while we communicate with Meta."
+    message: "Please wait while we communicate with Meta.",
+    loaderVariant: "universal"
   });
 
   const showModal = (options: ModalOptions) => {
@@ -99,12 +102,13 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
     setModalState((prev) => ({ ...prev, isOpen: false }));
   };
 
-  const showLoading = (message?: string, title?: string) => {
+  const showLoading = (message?: string, title?: string, loaderVariant?: "universal" | "bubble") => {
     setIsProcessing(true);
     setProcessingState({
       title: title || "Processing Request...",
       message: message || "Please wait while we communicate with Meta servers...",
-      badge: "In Progress • Meta Cloud API"
+      badge: "In Progress • Meta Cloud API",
+      loaderVariant: loaderVariant || "universal"
     });
     setModalState({
       isOpen: true,
@@ -189,9 +193,10 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
     if (hasLoading) {
       setIsProcessing(true);
       setProcessingState({
-        title: options.loadingTitle || "Deleting WhatsApp Template...",
+        title: options.loadingTitle || "Processing Request...",
         message: options.loadingMessage || "Communicating with Meta WhatsApp Cloud API. Please wait...",
-        badge: "Processing • Meta Cloud API"
+        badge: "Processing • Meta Cloud API",
+        loaderVariant: options.loaderVariant || (options.confirmText?.toLowerCase().includes("delete") ? "bubble" : "universal")
       });
     }
 
@@ -243,11 +248,11 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
             )}
 
             {isProcessing ? (
-              /* Custom In-Process Loader View */
+              /* In-Process Loader View (Universal by default, or customized if specified) */
               <div className="text-center py-4 animate-in fade-in zoom-in-95 duration-200">
-                {/* Custom Animated Bubble Pill Loader */}
+                {/* Loader */}
                 <div className="py-2 flex items-center justify-center">
-                  <Loader scale={0.9} />
+                  <Loader variant={processingState.loaderVariant || "universal"} scale={0.9} />
                 </div>
 
                 {/* Animated Badge */}
