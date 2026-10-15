@@ -818,6 +818,601 @@ fastify.post("/v1/messages/send-template", async (request: any, reply) => {
   }
 });
 
+// ==========================================
+// --- MODULE 3: API KEYS MANAGEMENT ---
+// ==========================================
+
+fastify.get("/v1/api-keys/:projectId", async (request: any, reply) => {
+  const { projectId } = request.params;
+  try {
+    const keys = await prisma.apiKey.findMany({
+      where: { projectId },
+      select: {
+        id: true,
+        name: true,
+        prefix: true,
+        createdAt: true,
+        lastUsed: true,
+        revokedAt: true
+      },
+      orderBy: { createdAt: "desc" }
+    });
+    return reply.send({ success: true, keys });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to fetch API keys" });
+  }
+});
+
+fastify.post("/v1/api-keys/:projectId", async (request: any, reply) => {
+  const { projectId } = request.params;
+  const { name, environment } = request.body || {};
+  try {
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) return reply.status(404).send({ error: "Project not found" });
+
+    const envTag = environment === "test" ? "test" : "live";
+    const randomHex = crypto.randomBytes(24).toString("hex");
+    const rawSecret = `wotp_${envTag}_${randomHex}`;
+    const prefix = `${rawSecret.substring(0, 14)}...`;
+    const keyHash = crypto.createHash("sha256").update(rawSecret).digest("hex");
+
+    const newKey = await prisma.apiKey.create({
+      data: {
+        id: crypto.randomUUID(),
+        projectId,
+        name: name?.trim() || `${envTag === "test" ? "Development" : "Production"} API Key`,
+        prefix,
+        keyHash
+      }
+    });
+
+    return reply.send({
+      success: true,
+      key: {
+        id: newKey.id,
+        name: newKey.name,
+        prefix: newKey.prefix,
+        createdAt: newKey.createdAt,
+        secretKey: rawSecret
+      }
+    });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to create API key" });
+  }
+});
+
+fastify.delete("/v1/api-keys/:projectId/:keyId", async (request: any, reply) => {
+  const { projectId, keyId } = request.params;
+  try {
+    const key = await prisma.apiKey.findFirst({ where: { id: keyId, projectId } });
+    if (!key) return reply.status(404).send({ error: "API key not found" });
+
+    await prisma.apiKey.update({
+      where: { id: keyId },
+      data: { revokedAt: new Date() }
+    });
+
+    return reply.send({ success: true, message: "API key revoked successfully" });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to revoke API key" });
+  }
+});
+
+// ==========================================
+// --- MODULE 4: DEVELOPER OTP LIFECYCLE ---
+// ==========================================
+
+// Helper: Authenticate requests using API key or Dashboard Session
+async function resolveProjectContext(request: any) {
+  const authHeader = request.headers.authorization || request.headers["x-api-key"];
+  const bodyProjectId = request.body?.projectId || request.query?.projectId;
+
+  if (authHeader) {
+    const rawKey = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (rawKey.startsWith("wotp_")) {
+      const keyHash = crypto.createHash("sha256").update(rawKey).digest("hex");
+      const apiKeyRecord = await prisma.apiKey.findUnique({
+        where: { keyHash },
+        include: {
+          project: {
+            include: {
+              organization: { include: { wallet: true } },
+              phoneNumbers: true
+            }
+          }
+        }
+      });
+
+      if (!apiKeyRecord) {
+        throw new Error("Invalid API key provided");
+      }
+      if (apiKeyRecord.revokedAt) {
+        throw new Error("API key has been revoked");
+      }
+
+      // Update lastUsed asynchronously
+      prisma.apiKey.update({
+        where: { id: apiKeyRecord.id },
+        data: { lastUsed: new Date() }
+      }).catch(() => {});
+
+      return { project: apiKeyRecord.project, apiKey: apiKeyRecord };
+    }
+  }
+
+  // Fallback to body / query projectId for UI dashboard operations
+  if (bodyProjectId) {
+    const project = await prisma.project.findUnique({
+      where: { id: bodyProjectId },
+      include: {
+        organization: { include: { wallet: true } },
+        phoneNumbers: true
+      }
+    });
+    if (project) return { project, apiKey: null };
+  }
+
+  throw new Error("Authentication failed. Please provide a valid 'Authorization: Bearer wotp_...' header or a valid projectId.");
+}
+
+// POST /v1/otp/send - Generate and dispatch OTP
+fastify.post("/v1/otp/send", async (request: any, reply) => {
+  try {
+    const { project } = await resolveProjectContext(request);
+    const {
+      phone,
+      to,
+      length = 6,
+      expiryMinutes = 10,
+      purpose = "AUTHENTICATION",
+      reference,
+      templateName,
+      simulate = false
+    } = request.body || {};
+
+    const rawPhone = (phone || to || "").toString().trim();
+    if (!rawPhone) {
+      return reply.status(400).send({ error: "Missing required 'phone' parameter" });
+    }
+
+    // Clean phone number (strip whitespace, hyphens, parentheses)
+    let cleanPhone = rawPhone.replace(/[\s\-\(\)]/g, "");
+    if (!cleanPhone.startsWith("+")) {
+      // Default to India (+91) if 10 digits
+      if (cleanPhone.length === 10) cleanPhone = `+91${cleanPhone}`;
+      else cleanPhone = `+${cleanPhone}`;
+    }
+
+    // Check wallet balance (standard OTP rate is ₹0.50)
+    const wallet = project.organization?.wallet;
+    const otpCost = 0.50;
+    if (!wallet || Number(wallet.balance) < otpCost) {
+      return reply.status(402).send({
+        error: `Insufficient wallet balance (Current: ₹${Number(wallet?.balance || 0).toFixed(2)}). Required: ₹${otpCost.toFixed(2)}. Please recharge your wallet at /dashboard/wallet.`
+      });
+    }
+
+    // Generate secure numeric OTP
+    const numDigits = Math.max(4, Math.min(8, Number(length) || 6));
+    const minVal = Math.pow(10, numDigits - 1);
+    const maxVal = Math.pow(10, numDigits) - 1;
+    const otpCode = crypto.randomInt(minVal, maxVal + 1).toString();
+
+    // Securely hash OTP for storage
+    const otpHash = crypto.createHash("sha256").update(otpCode).digest("hex");
+    const expiresAt = new Date(Date.now() + Math.max(1, Number(expiryMinutes) || 10) * 60 * 1000);
+
+    // Resolve designated sender phone number
+    let targetPhoneId = project.metaPhoneId;
+    if (project.phoneNumbers && project.phoneNumbers.length > 0) {
+      const designated = project.phoneNumbers.find(p => p.service === "AUTHENTICATION" && p.isDefault) ||
+                         project.phoneNumbers.find(p => p.service === "AUTHENTICATION") ||
+                         project.phoneNumbers[0];
+      if (designated) targetPhoneId = designated.phoneId;
+    }
+
+    const tplName = templateName || "otp_verification";
+
+    // Create OTP request record in DB (status: queued)
+    const otpRequest = await prisma.otpRequest.create({
+      data: {
+        id: crypto.randomUUID(),
+        projectId: project.id,
+        phone: cleanPhone,
+        channel: "whatsapp",
+        otpHash,
+        expiresAt,
+        status: "queued",
+        purpose: purpose || "AUTHENTICATION",
+        reference: reference || null,
+        metadata: { length: numDigits, templateName: tplName }
+      }
+    });
+
+    // If simulate flag or development bypass is enabled
+    if (simulate || !project.metaAccessToken || !targetPhoneId) {
+      // Deduct wallet for simulated test
+      await prisma.wallet.update({
+        where: { id: wallet.id },
+        data: { balance: { decrement: otpCost } }
+      });
+
+      await prisma.walletTransaction.create({
+        data: {
+          walletId: wallet.id,
+          amount: -otpCost,
+          type: "charge",
+          description: `Simulated OTP sent to ${cleanPhone}`,
+          referenceId: otpRequest.id
+        }
+      });
+
+      await prisma.otpRequest.update({
+        where: { id: otpRequest.id },
+        data: { status: "sent" }
+      });
+
+      return reply.send({
+        success: true,
+        requestId: otpRequest.id,
+        phone: cleanPhone,
+        channel: "whatsapp",
+        status: "sent",
+        expiresAt,
+        cost: otpCost,
+        devCode: otpCode, // Provided in simulation for developer convenience
+        note: "Simulated delivery (dev mode)"
+      });
+    }
+
+    // Call Meta Cloud API for live delivery
+    const waUrl = `https://graph.facebook.com/v19.0/${targetPhoneId}/messages`;
+    const waPayload = {
+      messaging_product: "whatsapp",
+      to: cleanPhone.replace("+", ""),
+      type: "template",
+      template: {
+        name: tplName,
+        language: { code: "en_US" },
+        components: [
+          {
+            type: "body",
+            parameters: [{ type: "text", text: otpCode }]
+          },
+          {
+            type: "button",
+            sub_type: "url",
+            index: "0",
+            parameters: [{ type: "text", text: otpCode }]
+          }
+        ]
+      }
+    };
+
+    const waRes = await fetch(waUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${project.metaAccessToken}`
+      },
+      body: JSON.stringify(waPayload)
+    });
+
+    const waData = await waRes.json();
+
+    if (!waRes.ok || waData.error) {
+      const errMsg = waData.error?.message || "Failed to dispatch via Meta WhatsApp Cloud API";
+      fastify.log.warn(`Meta OTP send failed: ${errMsg}`);
+
+      await prisma.otpRequest.update({
+        where: { id: otpRequest.id },
+        data: { status: "failed", metadata: { error: errMsg, raw: waData } }
+      });
+
+      return reply.status(400).send({
+        success: false,
+        requestId: otpRequest.id,
+        status: "failed",
+        error: errMsg,
+        hint: "In Meta Development Mode, ensure the recipient phone number is added to WhatsApp Test Numbers in Meta Developer Portal (App Roles / WhatsApp > API Setup)."
+      });
+    }
+
+    // Meta Success: Deduct wallet & record transaction
+    await prisma.wallet.update({
+      where: { id: wallet.id },
+      data: { balance: { decrement: otpCost } }
+    });
+
+    await prisma.walletTransaction.create({
+      data: {
+        walletId: wallet.id,
+        amount: -otpCost,
+        type: "charge",
+        description: `OTP sent to ${cleanPhone}`,
+        referenceId: waData.messages?.[0]?.id || otpRequest.id
+      }
+    });
+
+    await prisma.otpRequest.update({
+      where: { id: otpRequest.id },
+      data: { status: "sent", reference: waData.messages?.[0]?.id || null }
+    });
+
+    return reply.send({
+      success: true,
+      requestId: otpRequest.id,
+      phone: cleanPhone,
+      channel: "whatsapp",
+      status: "sent",
+      expiresAt,
+      cost: otpCost,
+      messageId: waData.messages?.[0]?.id
+    });
+
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(error.message?.includes("Authentication") ? 401 : 500).send({
+      error: error.message || "Failed to send OTP"
+    });
+  }
+});
+
+// POST /v1/otp/verify - Verify user-submitted OTP code
+fastify.post("/v1/otp/verify", async (request: any, reply) => {
+  const { requestId, code, phone } = request.body || {};
+
+  if (!requestId || !code) {
+    return reply.status(400).send({ error: "Missing required fields: 'requestId' and 'code'" });
+  }
+
+  try {
+    const otpRequest = await prisma.otpRequest.findUnique({
+      where: { id: requestId },
+      include: { otpAttempts: true }
+    });
+
+    if (!otpRequest) {
+      return reply.status(404).send({ error: "OTP request not found or invalid requestId" });
+    }
+
+    if (phone) {
+      const cleanPhone = phone.toString().replace(/[\s\-\(\)]/g, "");
+      const reqPhone = otpRequest.phone.replace(/[\s\-\(\)]/g, "");
+      if (!reqPhone.endsWith(cleanPhone.replace("+", "")) && !cleanPhone.endsWith(reqPhone.replace("+", ""))) {
+        return reply.status(400).send({ error: "Phone number does not match OTP request" });
+      }
+    }
+
+    if (otpRequest.status === "verified") {
+      return reply.status(400).send({
+        error: "This OTP has already been verified",
+        verified: true,
+        status: "verified"
+      });
+    }
+
+    if (otpRequest.status === "expired" || new Date() > otpRequest.expiresAt) {
+      if (otpRequest.status !== "expired") {
+        await prisma.otpRequest.update({
+          where: { id: otpRequest.id },
+          data: { status: "expired" }
+        });
+      }
+      return reply.status(400).send({
+        error: "This OTP has expired. Please request a new one.",
+        verified: false,
+        status: "expired"
+      });
+    }
+
+    if (otpRequest.attempts >= otpRequest.maxAttempts) {
+      return reply.status(429).send({
+        error: "Maximum verification attempts exceeded. Please request a new OTP.",
+        verified: false,
+        status: "locked"
+      });
+    }
+
+    // Verify code hash
+    const inputHash = crypto.createHash("sha256").update(code.toString().trim()).digest("hex");
+    const isMatch = inputHash === otpRequest.otpHash;
+    const clientIp = request.ip || request.headers["x-forwarded-for"] || "127.0.0.1";
+
+    if (isMatch) {
+      // Mark as verified
+      await prisma.otpRequest.update({
+        where: { id: otpRequest.id },
+        data: {
+          status: "verified",
+          attempts: { increment: 1 }
+        }
+      });
+
+      await prisma.otpAttempt.create({
+        data: {
+          id: crypto.randomUUID(),
+          otpRequestId: otpRequest.id,
+          codeProvided: "******",
+          successful: true,
+          ipAddress: String(clientIp)
+        }
+      });
+
+      return reply.send({
+        success: true,
+        verified: true,
+        message: "OTP verified successfully",
+        requestId: otpRequest.id,
+        phone: otpRequest.phone
+      });
+    } else {
+      // Failed attempt
+      const newAttempts = otpRequest.attempts + 1;
+      await prisma.otpRequest.update({
+        where: { id: otpRequest.id },
+        data: { attempts: newAttempts }
+      });
+
+      await prisma.otpAttempt.create({
+        data: {
+          id: crypto.randomUUID(),
+          otpRequestId: otpRequest.id,
+          codeProvided: "******",
+          successful: false,
+          ipAddress: String(clientIp)
+        }
+      });
+
+      const remaining = Math.max(0, otpRequest.maxAttempts - newAttempts);
+      return reply.status(400).send({
+        success: false,
+        verified: false,
+        error: "Incorrect OTP code",
+        remainingAttempts: remaining
+      });
+    }
+
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to process verification" });
+  }
+});
+
+// GET /v1/otp/logs/:projectId - Real-time OTP delivery & verification logs
+fastify.get("/v1/otp/logs/:projectId", async (request: any, reply) => {
+  const { projectId } = request.params;
+  const { status, limit = 100 } = request.query || {};
+
+  try {
+    const whereClause: any = { projectId };
+    if (status && status !== "ALL") {
+      whereClause.status = status.toLowerCase();
+    }
+
+    const requests = await prisma.otpRequest.findMany({
+      where: whereClause,
+      include: {
+        otpAttempts: {
+          orderBy: { createdAt: "desc" }
+        }
+      },
+      orderBy: { createdAt: "desc" },
+      take: Math.min(200, Number(limit) || 100)
+    });
+
+    const logs = requests.map(r => ({
+      id: r.id,
+      phone: r.phone,
+      channel: r.channel || "whatsapp",
+      status: r.status,
+      purpose: r.purpose || "AUTHENTICATION",
+      reference: r.reference,
+      createdAt: r.createdAt,
+      expiresAt: r.expiresAt,
+      attempts: r.attempts,
+      maxAttempts: r.maxAttempts,
+      cost: r.status === "failed" ? 0.00 : 0.50,
+      attemptsHistory: r.otpAttempts.map(a => ({
+        id: a.id,
+        successful: a.successful,
+        createdAt: a.createdAt,
+        ipAddress: a.ipAddress
+      }))
+    }));
+
+    return reply.send({ success: true, logs });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to fetch OTP logs" });
+  }
+});
+
+// POST /v1/otp/resend - Resend an existing OTP
+fastify.post("/v1/otp/resend", async (request: any, reply) => {
+  const { requestId } = request.body || {};
+  if (!requestId) return reply.status(400).send({ error: "Missing 'requestId'" });
+
+  try {
+    const original = await prisma.otpRequest.findUnique({
+      where: { id: requestId },
+      include: {
+        project: {
+          include: {
+            organization: { include: { wallet: true } },
+            phoneNumbers: true
+          }
+        }
+      }
+    });
+
+    if (!original) return reply.status(404).send({ error: "Original OTP request not found" });
+    if (original.status === "verified") return reply.status(400).send({ error: "Cannot resend an already verified OTP" });
+
+    // Generate fresh code
+    const length = (original.metadata as any)?.length || 6;
+    const minVal = Math.pow(10, length - 1);
+    const maxVal = Math.pow(10, length) - 1;
+    const newCode = crypto.randomInt(minVal, maxVal + 1).toString();
+    const newHash = crypto.createHash("sha256").update(newCode).digest("hex");
+    const newExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+    const project = original.project;
+    let targetPhoneId = project.metaPhoneId;
+    if (project.phoneNumbers && project.phoneNumbers.length > 0) {
+      const designated = project.phoneNumbers.find(p => p.service === "AUTHENTICATION" && p.isDefault) ||
+                         project.phoneNumbers.find(p => p.service === "AUTHENTICATION") ||
+                         project.phoneNumbers[0];
+      if (designated) targetPhoneId = designated.phoneId;
+    }
+
+    const tplName = (original.metadata as any)?.templateName || "otp_verification";
+
+    // Call Meta
+    if (project.metaAccessToken && targetPhoneId) {
+      const waUrl = `https://graph.facebook.com/v19.0/${targetPhoneId}/messages`;
+      await fetch(waUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${project.metaAccessToken}`
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          to: original.phone.replace("+", ""),
+          type: "template",
+          template: {
+            name: tplName,
+            language: { code: "en_US" },
+            components: [
+              { type: "body", parameters: [{ type: "text", text: newCode }] },
+              { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: newCode }] }
+            ]
+          }
+        })
+      });
+    }
+
+    await prisma.otpRequest.update({
+      where: { id: original.id },
+      data: {
+        otpHash: newHash,
+        expiresAt: newExpires,
+        resendAt: new Date(),
+        status: "sent"
+      }
+    });
+
+    return reply.send({ success: true, message: "OTP resent successfully", expiresAt: newExpires });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to resend OTP" });
+  }
+});
+
 const start = async () => {
   try {
     const portEnv = process.env.PORT;
