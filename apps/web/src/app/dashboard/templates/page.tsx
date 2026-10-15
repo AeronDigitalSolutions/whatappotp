@@ -27,7 +27,7 @@ interface TemplateItem {
 }
 
 export default function TemplatesPage() {
-  const { showSuccess, showError, showConfirm } = useModal();
+  const { showModal, showSuccess, showError, showConfirm } = useModal();
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,9 +81,19 @@ export default function TemplatesPage() {
   }, [projectId]);
 
   const handleDelete = (name: string) => {
-    showConfirm(
-      `Are you sure you want to delete template "${name}" from Meta? This action is permanent and cannot be undone.`,
-      async () => {
+    showModal({
+      title: "Delete WhatsApp Template?",
+      type: "warning",
+      badge: "Permanent Action",
+      message: `Are you sure you want to delete template "${name}" from your Meta WhatsApp account?`,
+      details: [
+        { label: "Template Name", value: name },
+        { label: "WABA ID", value: wabaId || "2107898293422238" }
+      ],
+      note: "Once deleted from Meta, any active marketing campaigns or OTP dispatch using this template name will immediately fail.",
+      confirmText: "Yes, Delete Template",
+      cancelText: "Cancel",
+      onConfirm: async () => {
         try {
           const res = await fetch(`${getApiUrl()}/v1/meta/templates/${projectId}/${encodeURIComponent(name)}`, {
             method: "DELETE"
@@ -98,9 +108,8 @@ export default function TemplatesPage() {
         } catch (e: any) {
           showError(e.message || "Network error deleting template", "Deletion Error");
         }
-      },
-      "Delete Template"
-    );
+      }
+    });
   };
 
   const handleSubmitTemplate = async (e: React.FormEvent) => {
@@ -195,10 +204,19 @@ export default function TemplatesPage() {
       const data = await res.json();
       if (data.success) {
         setShowCreateModal(false);
-        showSuccess(
-          `Template "${formData.name}" was submitted to Meta successfully! Status: PENDING / APPROVED.\n\nMeta AI is now reviewing your template. Once approved, it will be immediately available for broadcast.`,
-          "Template Submitted"
-        );
+        showModal({
+          title: "Template Submitted to Meta",
+          type: "success",
+          badge: "Under Review • Meta AI",
+          message: `Template "${formData.name}" was successfully registered with WhatsApp Cloud API.`,
+          details: [
+            { label: "Template Name", value: formData.name },
+            { label: "Category", value: formData.category },
+            { label: "Language", value: formData.language }
+          ],
+          note: "Meta AI automatically reviews standard and authentication templates within minutes. You can click 'Refresh Status' anytime to check progress.",
+          confirmText: "Back to Templates"
+        });
         setFormData({
           name: "",
           category: "MARKETING",
