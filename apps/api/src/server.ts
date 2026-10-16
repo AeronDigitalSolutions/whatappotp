@@ -635,6 +635,59 @@ fastify.delete("/v1/meta/templates/:projectId/:templateName", async (request: an
   }
 });
 
+// --- MODULE 2b: TEMPLATE VARIABLES METADATA & EXCEL MAPPING DEFINITIONS ---
+fastify.get("/v1/meta/template-variables/:projectId", async (request: any, reply) => {
+  const { projectId } = request.params;
+  try {
+    const rows: any = await prisma.$queryRawUnsafe(`
+      SELECT templateName, variableIndex, variableName, label, sampleValue
+      FROM TemplateVariable
+      WHERE projectId = ?
+      ORDER BY templateName, variableIndex ASC
+    `, projectId);
+
+    const mapping: Record<string, any[]> = {};
+    for (const r of rows || []) {
+      if (!mapping[r.templateName]) mapping[r.templateName] = [];
+      mapping[r.templateName].push({
+        index: r.variableIndex,
+        name: r.variableName,
+        label: r.label,
+        sampleValue: r.sampleValue
+      });
+    }
+    return reply.send({ success: true, variables: mapping });
+  } catch (error: any) {
+    return reply.send({ success: true, variables: {} });
+  }
+});
+
+fastify.post("/v1/meta/template-variables/:projectId", async (request: any, reply) => {
+  const { projectId } = request.params;
+  const { templateName, variables } = request.body;
+  if (!templateName || !Array.isArray(variables)) {
+    return reply.status(400).send({ error: "Missing templateName or variables array" });
+  }
+
+  try {
+    await prisma.$executeRawUnsafe(`
+      DELETE FROM TemplateVariable WHERE projectId = ? AND templateName = ?
+    `, projectId, templateName);
+
+    for (const v of variables) {
+      const id = `${projectId}_${templateName}_${v.index || 1}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      await prisma.$executeRawUnsafe(`
+        INSERT INTO TemplateVariable (id, projectId, templateName, variableIndex, variableName, label, sampleValue)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `, id, projectId, templateName, v.index || 1, v.name || `var_${v.index}`, v.label || v.name, v.sampleValue || "");
+    }
+    return reply.send({ success: true });
+  } catch (error: any) {
+    fastify.log.warn("Could not save template variables to db: " + error.message);
+    return reply.send({ success: false, error: error.message });
+  }
+});
+
 // --- BILLING (Razorpay) & WALLET ---
 fastify.get("/v1/wallet/:organizationId", async (request: any, reply) => {
   const { organizationId } = request.params;
@@ -1534,7 +1587,22 @@ async function initCampaignTables() {
         INDEX idx_recipient_campaign_phone (campaignId, phone)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
-    console.log("Campaign tables verified successfully.");
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS TemplateVariable (
+        id VARCHAR(191) NOT NULL PRIMARY KEY,
+        projectId VARCHAR(191) NOT NULL,
+        templateName VARCHAR(191) NOT NULL,
+        variableIndex INT NOT NULL,
+        variableName VARCHAR(191) NOT NULL,
+        label VARCHAR(191) NOT NULL,
+        sampleValue VARCHAR(191) NOT NULL,
+        createdAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        updatedAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+        INDEX idx_tpl_var (projectId, templateName)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("Campaign and TemplateVariable tables verified successfully.");
   } catch (e: any) {
     console.warn("Could not verify campaign tables via raw SQL:", e.message);
   }

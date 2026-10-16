@@ -84,6 +84,7 @@ export default function CampaignsPage() {
   // Available Sender Numbers & Templates
   const [phoneNumbers, setPhoneNumbers] = useState<PhoneNumberItem[]>([]);
   const [templates, setTemplates] = useState<MetaTemplate[]>([]);
+  const [templateVariablesMap, setTemplateVariablesMap] = useState<Record<string, Array<{ index: number; name: string; label: string; sampleValue: string }>>>({});
 
   // Wizard state
   const [showWizard, setShowWizard] = useState<boolean>(false);
@@ -178,6 +179,15 @@ export default function CampaignsPage() {
         const approved = tData.templates.filter((t: MetaTemplate) => t.status === "APPROVED");
         setTemplates(approved);
       }
+
+      // 3. Load Template Variables metadata
+      try {
+        const vRes = await fetch(`${getApiUrl()}/v1/meta/template-variables/${projectId}`);
+        const vData = await vRes.json();
+        if (vData.success && vData.variables) {
+          setTemplateVariablesMap(vData.variables);
+        }
+      } catch (err) {}
     } catch (e) {
       console.error("Error loading dependencies:", e);
     }
@@ -218,22 +228,96 @@ export default function CampaignsPage() {
     }
   }, [filteredTemplatesForService]);
 
-  // Detect variables like {{1}}, {{2}} in template body
+  // Detect variables like {{1}}, {{2}} or {{Customer_Name}} in template body
   const detectedVariables = useMemo(() => {
     if (!currentTemplate) return [];
     const bodyComp = currentTemplate.components?.find((c) => c.type === "BODY");
     if (!bodyComp || !bodyComp.text) return [];
 
-    const matches = bodyComp.text.match(/\{\{(\d+)\}\}/g);
+    const matches = bodyComp.text.match(/\{\{([a-zA-Z0-9_\s]+)\}\}/g);
     if (!matches) return [];
 
-    const uniqueVars = Array.from(new Set(matches.map((m) => m.replace(/[\{\}]/g, "")))).sort(
-      (a, b) => Number(a) - Number(b)
-    );
-    return uniqueVars;
+    const uniqueVars = Array.from(new Set(matches.map((m) => m.replace(/[\{\}]/g, "").trim())));
+    return uniqueVars.sort((a, b) => {
+      const numA = Number(a);
+      const numB = Number(b);
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return 0;
+    });
   }, [currentTemplate]);
 
-  // Handle Excel / CSV File Upload
+  // Helper: Get label and sample preview for a given variable key in the current template
+  const getVariableInfo = (varKey: string) => {
+    // 1. Try templateVariablesMap for current template
+    const savedList = templateVariablesMap[selectedTemplateName];
+    if (savedList && Array.isArray(savedList)) {
+      const found = savedList.find(
+        (v) => String(v.index) === String(varKey) || v.name.toLowerCase() === varKey.toLowerCase()
+      );
+      if (found) {
+        return {
+          label: found.label || found.name,
+          sample: found.sampleValue || "Sample Value",
+          originalName: found.name
+        };
+      }
+    }
+
+    // 2. Try localStorage fallback
+    if (typeof window !== "undefined") {
+      try {
+        const localStr = localStorage.getItem(`tpl_vars_${selectedTemplateName}`);
+        if (localStr) {
+          const parsed: any[] = JSON.parse(localStr);
+          const found = parsed.find(
+            (v) => String(v.index) === String(varKey) || v.name.toLowerCase() === varKey.toLowerCase()
+          );
+          if (found) {
+            return {
+              label: found.label || found.name,
+              sample: found.sampleValue || "Sample Value",
+              originalName: found.name
+            };
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 3. Smart fallbacks
+    let label = varKey.replace(/_/g, " ");
+    let sample = "Sample Value";
+    if (/^\d+$/.test(varKey)) {
+      if (varKey === "1") {
+        label = "Customer Name";
+        sample = "Rahul Sharma";
+      } else if (varKey === "2") {
+        label = "Order ID";
+        sample = "ORD-9481";
+      } else if (varKey === "3") {
+        label = "Offer / Amount";
+        sample = "₹1,499";
+      } else {
+        label = `Variable ${varKey}`;
+        sample = `Value ${varKey}`;
+      }
+    } else {
+      const lower = varKey.toLowerCase();
+      if (/name|customer|user|client/i.test(lower)) sample = "Rahul Sharma";
+      else if (/order|invoice|bill/i.test(lower)) sample = "ORD-9481";
+      else if (/discount|offer|percent|coupon/i.test(lower)) sample = "25% OFF";
+      else if (/address|city|loc/i.test(lower)) sample = "Flat 402, Green Avenue, Mumbai";
+      else if (/amount|price|total|cost|fee/i.test(lower)) sample = "₹1,499";
+      else if (/date|time|day/i.test(lower)) sample = "24 Oct 2026";
+    }
+
+    return {
+      label,
+      sample,
+      originalName: varKey
+    };
+  };
+
+  // Handle Excel / CSV File Upload with Smart Auto-Mapping
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -259,28 +343,60 @@ export default function CampaignsPage() {
         setParsedRows(data);
         setPreviewRowIndex(0);
 
-        // Smart column detection
+        // Smart phone column detection
         const detectedPhone = cols.find((c) =>
           /phone|mobile|contact|whatsapp|number|cell/i.test(c.trim())
         );
         if (detectedPhone) setPhoneColumn(detectedPhone);
         else setPhoneColumn(cols[0]);
 
+        // Smart recipient name column detection
         const detectedName = cols.find((c) => /name|customer|client|recipient|user/i.test(c.trim()));
         if (detectedName) setNameColumn(detectedName);
 
-        // Auto-map variables
+        // Smart auto-mapping for template variables against Excel columns
         const initialMap: Record<string, string> = {};
+        const initialFallbacks: Record<string, string> = {};
+
         detectedVariables.forEach((v, idx) => {
-          if (idx === 0 && detectedName) {
+          const info = getVariableInfo(v);
+          initialFallbacks[v] = info.sample;
+
+          const lowerLabel = info.label.toLowerCase();
+          const lowerVar = v.toLowerCase();
+          const lowerOrig = (info.originalName || "").toLowerCase();
+
+          // Search for best matching Excel column
+          const matchedCol = cols.find((c) => {
+            const lc = c.trim().toLowerCase();
+            return (
+              lc === lowerLabel ||
+              lc === lowerVar ||
+              lc === lowerOrig ||
+              lc.replace(/[^a-z0-9]/g, "") === lowerLabel.replace(/[^a-z0-9]/g, "") ||
+              lc.replace(/[^a-z0-9]/g, "") === lowerVar.replace(/[^a-z0-9]/g, "") ||
+              (lowerLabel.includes("name") && lc.includes("name")) ||
+              (lowerLabel.includes("order") && lc.includes("order")) ||
+              (lowerLabel.includes("discount") && (lc.includes("discount") || lc.includes("offer") || lc.includes("promo"))) ||
+              (lowerLabel.includes("address") && (lc.includes("address") || lc.includes("city") || lc.includes("location"))) ||
+              (lowerLabel.includes("amount") && (lc.includes("amount") || lc.includes("price") || lc.includes("total") || lc.includes("cost"))) ||
+              (lowerLabel.includes("date") && (lc.includes("date") || lc.includes("day") || lc.includes("time")))
+            );
+          });
+
+          if (matchedCol) {
+            initialMap[v] = matchedCol;
+          } else if (idx === 0 && detectedName) {
             initialMap[v] = detectedName;
           } else if (cols[idx + 1]) {
             initialMap[v] = cols[idx + 1];
           }
         });
-        setVariableMappings(initialMap);
 
-        showSuccess(`Loaded ${data.length} records from "${file.name}" successfully!`, "Spreadsheet Imported");
+        setVariableMappings(initialMap);
+        setStaticFallbacks(initialFallbacks);
+
+        showSuccess(`Loaded ${data.length} records from "${file.name}" successfully! Mapped Excel columns automatically.`, "Spreadsheet Imported");
       } catch (err: any) {
         showError("Failed to parse file: " + err.message, "File Read Error");
       }
@@ -331,8 +447,11 @@ export default function CampaignsPage() {
     const currentRow = parsedRows[previewRowIndex] || {};
 
     detectedVariables.forEach((v) => {
+      const info = getVariableInfo(v);
       const mappedCol = variableMappings[v];
-      let val = mappedCol && currentRow[mappedCol] ? String(currentRow[mappedCol]) : staticFallbacks[v] || `{{${v}}}`;
+      let val = mappedCol && currentRow[mappedCol] !== undefined
+        ? String(currentRow[mappedCol])
+        : staticFallbacks[v] || info.sample || `{{${v}}}`;
       text = text.replace(new RegExp(`\\{\\{${v}\\}\\}`, "g"), val);
     });
 
@@ -356,8 +475,9 @@ export default function CampaignsPage() {
       const sampleVars: Record<string, string> = {};
       const currentRow = parsedRows[0] || {};
       detectedVariables.forEach((v) => {
+        const info = getVariableInfo(v);
         const mappedCol = variableMappings[v];
-        sampleVars[v] = mappedCol && currentRow[mappedCol] ? String(currentRow[mappedCol]) : staticFallbacks[v] || "Sample Value";
+        sampleVars[v] = mappedCol && currentRow[mappedCol] ? String(currentRow[mappedCol]) : staticFallbacks[v] || info.sample || "Sample Value";
       });
 
       const res = await fetch(`${getApiUrl()}/v1/campaigns/${projectId}/test-direct`, {
@@ -421,8 +541,9 @@ export default function CampaignsPage() {
 
       const vars: Record<string, string> = {};
       detectedVariables.forEach((v) => {
+        const info = getVariableInfo(v);
         const col = variableMappings[v];
-        vars[v] = col && row[col] ? String(row[col]) : staticFallbacks[v] || "";
+        vars[v] = col && row[col] ? String(row[col]) : staticFallbacks[v] || info.sample || "";
       });
 
       return {
@@ -1174,19 +1295,38 @@ export default function CampaignsPage() {
 
                   {/* Detected Variables notice */}
                   {detectedVariables.length > 0 ? (
-                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl text-xs text-blue-900">
-                      <div className="font-bold flex items-center gap-1.5 text-blue-800 mb-1">
-                        <span>💡</span> Detected {detectedVariables.length} Dynamic Variables in Template
+                    <div className="p-4 bg-purple-50/80 border border-purple-200 rounded-2xl text-xs text-purple-900 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="font-extrabold flex items-center gap-1.5 text-purple-900">
+                          <span>💡</span> Detected {detectedVariables.length} Dynamic Variables in Template
+                        </div>
+                        <span className="text-[10px] font-bold text-purple-700 bg-white px-2 py-0.5 rounded-full border border-purple-200">
+                          Auto-mapped to Excel
+                        </span>
                       </div>
-                      <p>
-                        This template uses{" "}
-                        {detectedVariables.map((v) => (
-                          <span key={v} className="font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-blue-200 mx-1">
-                            {"{{" + v + "}}"}
-                          </span>
-                        ))}
-                        . You will map these to your Excel columns in Step 3!
+                      <p className="text-slate-600">
+                        This template uses dynamic placeholders that will be extracted from your uploaded Excel sheet in the next step:
                       </p>
+                      <div className="space-y-1.5">
+                        {detectedVariables.map((v) => {
+                          const info = getVariableInfo(v);
+                          return (
+                            <div key={v} className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-purple-100 shadow-2xs">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono font-extrabold text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                                  {"{{" + v + "}}"}
+                                </span>
+                                <span className="font-bold text-slate-800 text-xs">
+                                  {info.label}
+                                </span>
+                              </div>
+                              <span className="text-[11px] text-slate-500 font-mono">
+                                Sample: <b className="text-slate-700">"{info.sample}"</b>
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   ) : (
                     <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-600">
@@ -1385,57 +1525,99 @@ export default function CampaignsPage() {
                     {/* Template Variable Mapping */}
                     {detectedVariables.length > 0 && (
                       <div className="pt-4 border-t border-slate-200 space-y-3">
-                        <div className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                          Map Dynamic Template Variables
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <span>✨</span> Map Template Variables to Excel Columns
+                          </div>
+                          <span className="text-[11px] text-slate-500 font-medium">
+                            {detectedVariables.length} custom Excel field{detectedVariables.length !== 1 ? "s" : ""}
+                          </span>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {detectedVariables.map((v) => (
-                            <div key={v} className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                              <div className="flex items-center justify-between">
-                                <span className="font-mono font-extrabold text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
-                                  Variable {"{{" + v + "}}"}
-                                </span>
-                              </div>
+                          {detectedVariables.map((v) => {
+                            const info = getVariableInfo(v);
+                            const isMapped = Boolean(variableMappings[v]);
+                            const sampleFromRow = isMapped && parsedRows[0] ? parsedRows[0][variableMappings[v]] : null;
 
-                              <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase">Map to Excel Column:</label>
-                                <select
-                                  value={variableMappings[v] || ""}
-                                  onChange={(e) =>
-                                    setVariableMappings((prev) => ({
-                                      ...prev,
-                                      [v]: e.target.value
-                                    }))
-                                  }
-                                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold"
-                                >
-                                  <option value="">-- Select Column --</option>
-                                  {excelColumns.map((c) => (
-                                    <option key={c} value={c}>
-                                      {c}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
+                            return (
+                              <div
+                                key={v}
+                                className={`bg-white p-4 rounded-2xl border transition shadow-xs space-y-3 ${
+                                  isMapped ? "border-emerald-300 ring-1 ring-emerald-100" : "border-slate-200"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-mono font-extrabold text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                                      {"{{" + v + "}}"}
+                                    </span>
+                                    <span className="font-extrabold text-slate-900 text-xs">
+                                      {info.label}
+                                    </span>
+                                  </div>
+                                  {isMapped ? (
+                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                                      <span>✓</span> Mapped
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 font-semibold">
+                                      Needs Mapping
+                                    </span>
+                                  )}
+                                </div>
 
-                              <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase">Or Static Fallback Value:</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g. Valued Customer"
-                                  value={staticFallbacks[v] || ""}
-                                  onChange={(e) =>
-                                    setStaticFallbacks((prev) => ({
-                                      ...prev,
-                                      [v]: e.target.value
-                                    }))
-                                  }
-                                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs"
-                                />
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
+                                    <span>Map to Excel Column:</span>
+                                    <span className="text-[9px] font-normal text-slate-400">Sample: "{info.sample}"</span>
+                                  </label>
+                                  <select
+                                    value={variableMappings[v] || ""}
+                                    onChange={(e) =>
+                                      setVariableMappings((prev) => ({
+                                        ...prev,
+                                        [v]: e.target.value
+                                      }))
+                                    }
+                                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                  >
+                                    <option value="">-- Choose Excel Column --</option>
+                                    {excelColumns.map((c) => (
+                                      <option key={c} value={c}>
+                                        Column: {c}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                {sampleFromRow !== null && sampleFromRow !== undefined && (
+                                  <div className="bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 text-[11px] text-slate-600 flex items-center justify-between">
+                                    <span className="text-slate-400 text-[10px]">Row 1 Value:</span>
+                                    <span className="font-bold text-slate-900 truncate max-w-[150px]">{String(sampleFromRow)}</span>
+                                  </div>
+                                )}
+
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-bold text-slate-400 uppercase">
+                                    Static Fallback (If cell is empty):
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder={`e.g. ${info.sample}`}
+                                    value={staticFallbacks[v] || ""}
+                                    onChange={(e) =>
+                                      setStaticFallbacks((prev) => ({
+                                        ...prev,
+                                        [v]: e.target.value
+                                      }))
+                                    }
+                                    className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs"
+                                  />
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
