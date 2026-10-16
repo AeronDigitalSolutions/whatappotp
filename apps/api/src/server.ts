@@ -610,6 +610,17 @@ fastify.post("/v1/meta/templates/:projectId", async (request: any, reply) => {
 
 fastify.delete("/v1/meta/templates/:projectId/:templateName", async (request: any, reply) => {
   const { projectId, templateName } = request.params;
+  const { hsm_id } = (request.query || {}) as any;
+
+  // Protect system/default templates from deletion attempts
+  const isProtected = templateName.toLowerCase() === "hello_world" || templateName.toLowerCase().startsWith("sample_");
+  if (isProtected) {
+    return reply.status(400).send({
+      success: false,
+      error: `"${templateName}" is a default template created by Meta WhatsApp. Meta locks default templates and does not permit them to be deleted.`
+    });
+  }
+
   try {
     const project = await prisma.project.findUnique({ where: { id: projectId } });
     if (!project || !project.metaAccessToken) {
@@ -619,19 +630,42 @@ fastify.delete("/v1/meta/templates/:projectId/:templateName", async (request: an
     const wabaId = project.metaWabaId || "2107898293422238";
     const token = project.metaAccessToken;
 
-    const res = await fetch(`https://graph.facebook.com/v19.0/${wabaId}/message_templates?name=${encodeURIComponent(templateName)}`, {
+    // Build URL with name and optional hsm_id
+    let url = `https://graph.facebook.com/v19.0/${wabaId}/message_templates?name=${encodeURIComponent(templateName)}`;
+    if (hsm_id) {
+      url += `&hsm_id=${encodeURIComponent(hsm_id)}`;
+    }
+
+    const res = await fetch(url, {
       method: "DELETE",
       headers: { "Authorization": `Bearer ${token}` }
     });
 
     const data = await res.json();
     if (!res.ok) {
-      return reply.status(400).send({ error: data.error?.message || "Failed to delete template" });
+      let friendlyError = data.error?.message || "Failed to delete template";
+      // Translate Meta error #100 permission error
+      if (data.error?.code === 100 && friendlyError.toLowerCase().includes("permission")) {
+        friendlyError = `Meta Permission Required: Your Meta System User or Token requires "Full Control (Manage WhatsApp Account)" asset access on WABA (${wabaId}) in Meta Business Settings > Accounts > WhatsApp Accounts to permanently delete templates.`;
+      }
+      return reply.status(400).send({ error: friendlyError, raw: data.error });
+    }
+
+    // Clean up local TemplateVariable metadata if present
+    try {
+      await prisma.$executeRawUnsafe(
+        `DELETE FROM TemplateVariable WHERE projectId = ? AND templateName = ?`,
+        projectId,
+        templateName
+      );
+    } catch (cleanErr) {
+      // Non-fatal if table or row does not exist
     }
 
     return reply.send({ success: true, data });
   } catch (error: any) {
-    return reply.status(500).send({ error: "Failed to delete template" });
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to delete template from Meta" });
   }
 });
 

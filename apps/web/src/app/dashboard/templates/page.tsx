@@ -254,7 +254,16 @@ export default function TemplatesPage() {
     loadTemplates();
   }, [projectId]);
 
-  const handleDelete = (name: string) => {
+  const handleDelete = (name: string, id?: string) => {
+    const isProtected = name.toLowerCase() === "hello_world" || name.toLowerCase().startsWith("sample_");
+    if (isProtected) {
+      showError(
+        `"${name}" is a default template created by Meta WhatsApp. Meta locks default templates and does not permit them to be deleted.`,
+        "Protected System Template"
+      );
+      return;
+    }
+
     showModal({
       title: "Delete WhatsApp Template?",
       type: "warning",
@@ -264,6 +273,7 @@ export default function TemplatesPage() {
       message: `Are you sure you want to delete template "${name}" from your Meta WhatsApp account?`,
       details: [
         { label: "Template Name", value: name },
+        { label: "Template ID", value: id || "N/A" },
         { label: "WABA ID", value: wabaId || "2107898293422238" }
       ],
       note: "Once deleted from Meta, any active marketing campaigns or OTP dispatch using this template name will immediately fail.",
@@ -273,11 +283,15 @@ export default function TemplatesPage() {
       loadingMessage: `Communicating with Meta WhatsApp Cloud API to permanently delete "${name}". Please wait...`,
       onConfirm: async () => {
         try {
-          const res = await fetch(`${getApiUrl()}/v1/meta/templates/${projectId}/${encodeURIComponent(name)}`, {
+          const query = id ? `?hsm_id=${encodeURIComponent(id)}` : "";
+          const res = await fetch(`${getApiUrl()}/v1/meta/templates/${projectId}/${encodeURIComponent(name)}${query}`, {
             method: "DELETE"
           });
           const data = await res.json();
           if (data.success) {
+            try {
+              localStorage.removeItem(`tpl_vars_${name}`);
+            } catch (e) {}
             showSuccess(`Template "${name}" has been deleted successfully from Meta.`, "Template Deleted");
             loadTemplates();
           } else {
@@ -708,12 +722,21 @@ export default function TemplatesPage() {
 
                 <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-xs">
                   <span className="font-mono text-slate-400 text-[10px]">ID: {template.id}</span>
-                  <button
-                    onClick={() => handleDelete(template.name)}
-                    className="text-red-600 hover:text-red-800 font-semibold hover:underline"
-                  >
-                    Delete
-                  </button>
+                  {template.name.toLowerCase() === "hello_world" || template.name.toLowerCase().startsWith("sample_") ? (
+                    <span
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded border border-slate-300/80 cursor-help"
+                      title="Default sample template provisioned by Meta. Meta locks this template and it cannot be deleted."
+                    >
+                      <span>🔒</span> Default Meta Template
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handleDelete(template.name, template.id)}
+                      className="text-red-600 hover:text-red-800 font-semibold hover:underline"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </div>
             );
