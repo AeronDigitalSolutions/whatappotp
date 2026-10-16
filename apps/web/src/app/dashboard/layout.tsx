@@ -55,6 +55,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Link href="/dashboard/numbers" className={navLinkClass("/dashboard/numbers")}>
             📱 Numbers & Routing
           </Link>
+          <Link href="/dashboard/green-tick" className={navLinkClass("/dashboard/green-tick")}>
+            ✅ Green Tick (OBA)
+          </Link>
           <Link href="/dashboard/templates" className={navLinkClass("/dashboard/templates")}>
             📄 Template Studio
           </Link>

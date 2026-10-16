@@ -1636,7 +1636,30 @@ async function initCampaignTables() {
         INDEX idx_tpl_var (projectId, templateName)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
-    console.log("Campaign and TemplateVariable tables verified successfully.");
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS GreenTickApplication (
+        id VARCHAR(191) NOT NULL PRIMARY KEY,
+        projectId VARCHAR(191) NOT NULL,
+        phoneId VARCHAR(191) NOT NULL,
+        displayPhone VARCHAR(191) NOT NULL,
+        brandName VARCHAR(191) NOT NULL,
+        websiteUrl VARCHAR(500) NOT NULL,
+        parentBrand VARCHAR(191),
+        mediaLinks JSON,
+        wikipediaUrl VARCHAR(500),
+        socialLinks JSON,
+        justification TEXT,
+        status VARCHAR(50) NOT NULL DEFAULT 'SUBMITTED',
+        metaObaStatus VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+        adminNotes TEXT,
+        createdAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        updatedAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+        INDEX idx_oba_project (projectId),
+        INDEX idx_oba_phone (phoneId)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("Campaign, TemplateVariable, and GreenTickApplication tables verified successfully.");
   } catch (e: any) {
     console.warn("Could not verify campaign tables via raw SQL:", e.message);
   }
@@ -2136,6 +2159,162 @@ fastify.get("/v1/campaigns/:projectId/:campaignId/recipients", async (request: a
   } catch (error: any) {
     fastify.log.error(error);
     return reply.status(500).send({ error: "Failed to fetch recipients: " + error.message });
+  }
+});
+
+// --- MODULE 7: GREEN TICK / OFFICIAL BUSINESS ACCOUNT (OBA) VERIFICATION ---
+
+fastify.get("/v1/meta/oba-status/:projectId/:phoneId", async (request: any, reply) => {
+  const { projectId, phoneId } = request.params;
+  try {
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project || !project.metaAccessToken) {
+      return reply.status(400).send({ error: "Meta WhatsApp not connected" });
+    }
+
+    const token = project.metaAccessToken;
+    const wabaId = project.metaWabaId || "2107898293422238";
+
+    // Query Meta Graph API for official business account status and phone metadata
+    const fields = "official_business_account,verified_name,display_phone_number,code_verification_status,quality_rating,name_status,is_official_business_account,account_mode";
+    const metaRes = await fetch(`https://graph.facebook.com/v19.0/${phoneId}?fields=${fields}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const metaData = await metaRes.json();
+
+    if (!metaRes.ok) {
+      return reply.status(400).send({ error: metaData.error?.message || "Failed to fetch phone status from Meta" });
+    }
+
+    // Determine OBA status
+    let obaStatus = metaData.official_business_account?.oba_status || (metaData.is_official_business_account ? "VERIFIED" : "NOT_STARTED");
+    const verifiedName = metaData.verified_name || "";
+    const qualityRating = metaData.quality_rating || "UNKNOWN";
+    const codeVerification = metaData.code_verification_status || "VERIFIED";
+
+    // Check if there is an in-app recorded application
+    const application: any = await prisma.$queryRawUnsafe(`
+      SELECT * FROM GreenTickApplication
+      WHERE projectId = ? AND phoneId = ?
+      ORDER BY createdAt DESC LIMIT 1
+    `, projectId, phoneId).catch(() => []);
+
+    const appRecord = Array.isArray(application) && application.length > 0 ? application[0] : null;
+
+    if (appRecord && obaStatus === "NOT_STARTED") {
+      obaStatus = appRecord.metaObaStatus || "PENDING";
+    }
+
+    // Compute readiness score
+    const readiness = {
+      displayNameApproved: Boolean(verifiedName && verifiedName.length > 1),
+      twoFactorEnabled: codeVerification === "VERIFIED",
+      qualityHealthy: qualityRating === "GREEN" || qualityRating === "UNKNOWN" || qualityRating === "HIGH",
+      tenureEligible: true,
+      score: 100
+    };
+
+    let score = 0;
+    if (readiness.displayNameApproved) score += 35;
+    if (readiness.twoFactorEnabled) score += 25;
+    if (readiness.qualityHealthy) score += 20;
+    if (readiness.tenureEligible) score += 20;
+    readiness.score = score;
+
+    return reply.send({
+      success: true,
+      phoneId,
+      displayPhone: metaData.display_phone_number,
+      verifiedName,
+      qualityRating,
+      obaStatus,
+      isOfficialBusinessAccount: obaStatus === "VERIFIED" || Boolean(metaData.is_official_business_account),
+      readiness,
+      wabaId,
+      metaManagerUrl: `https://business.facebook.com/wa/manage/phone-numbers/?waba_id=${wabaId}`,
+      lastApplication: appRecord
+    });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to inspect OBA status: " + error.message });
+  }
+});
+
+fastify.post("/v1/meta/oba-apply/:projectId", async (request: any, reply) => {
+  const { projectId } = request.params;
+  const {
+    phoneId,
+    displayPhone,
+    brandName,
+    websiteUrl,
+    parentBrand,
+    mediaLinks,
+    wikipediaUrl,
+    socialLinks,
+    justification
+  } = request.body || {};
+
+  if (!phoneId || !brandName || !websiteUrl) {
+    return reply.status(400).send({ error: "Phone number, brand name, and official website URL are required." });
+  }
+
+  try {
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) return reply.status(404).send({ error: "Project not found" });
+
+    const appId = crypto.randomUUID();
+    const mediaLinksJson = JSON.stringify(Array.isArray(mediaLinks) ? mediaLinks.filter(Boolean) : []);
+    const socialLinksJson = JSON.stringify(socialLinks || {});
+
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO GreenTickApplication (
+        id, projectId, phoneId, displayPhone, brandName, websiteUrl,
+        parentBrand, mediaLinks, wikipediaUrl, socialLinks, justification,
+        status, metaObaStatus
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'SUBMITTED', 'PENDING')
+      ON DUPLICATE KEY UPDATE
+        brandName = VALUES(brandName),
+        websiteUrl = VALUES(websiteUrl),
+        parentBrand = VALUES(parentBrand),
+        mediaLinks = VALUES(mediaLinks),
+        wikipediaUrl = VALUES(wikipediaUrl),
+        socialLinks = VALUES(socialLinks),
+        justification = VALUES(justification),
+        status = 'SUBMITTED',
+        metaObaStatus = 'PENDING',
+        updatedAt = NOW()
+    `,
+      appId, projectId, phoneId, displayPhone || phoneId, brandName, websiteUrl,
+      parentBrand || null, mediaLinksJson, wikipediaUrl || null, socialLinksJson, justification || null
+    );
+
+    const wabaId = project.metaWabaId || "2107898293422238";
+
+    return reply.send({
+      success: true,
+      message: "Green Tick application submitted successfully!",
+      applicationId: appId,
+      metaManagerUrl: `https://business.facebook.com/wa/manage/phone-numbers/?waba_id=${wabaId}`
+    });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to submit Green Tick application: " + error.message });
+  }
+});
+
+fastify.get("/v1/meta/oba-applications/:projectId", async (request: any, reply) => {
+  const { projectId } = request.params;
+  try {
+    const applications: any = await prisma.$queryRawUnsafe(`
+      SELECT * FROM GreenTickApplication
+      WHERE projectId = ?
+      ORDER BY createdAt DESC
+    `, projectId).catch(() => []);
+
+    return reply.send({ success: true, applications: Array.isArray(applications) ? applications : [] });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to list applications" });
   }
 });
 
