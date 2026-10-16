@@ -9,22 +9,17 @@ export default function HomePage() {
   const [activeCodeTab, setActiveCodeTab] = useState<"curl" | "node" | "python">("curl");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // Live sandbox state
-  const [sandboxService, setSandboxService] = useState<"marketing" | "utility" | "otp">("marketing");
-  const [sandboxName, setSandboxName] = useState("Alex");
-  const [sandboxOffer, setSandboxOffer] = useState("FLAT 30% OFF");
-
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased selection:bg-emerald-500 selection:text-white">
-      {/* 1. TOP ANNOUNCEMENT BANNER */}
+      {/* 1. TOP ANNOUNCEMENT BANNER (MATCHING ALL SCREENSHOTS) */}
       {showOfferBar && (
         <div className="bg-[#00c853] text-white text-xs sm:text-sm font-semibold py-2.5 px-4 sticky top-0 z-50 shadow-xs flex items-center justify-between transition-all">
           <div className="flex-1 flex items-center justify-center gap-2 sm:gap-3 flex-wrap text-center">
-            <span>Get ₹3050 worth of WhatsApp messaging credits for just ₹1425 with Exclusive Launch Offer 🎉</span>
+            <span>Get ₹3050 worth for just ₹1425 with Exclusive Launch Offer 🎉</span>
             <Link
               href="/signup"
               className="bg-white text-slate-900 hover:bg-slate-100 font-bold px-3 py-1 rounded-full text-xs shadow-xs transition"
@@ -42,8 +37,8 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 2. NAVIGATION BAR */}
-      <header className="sticky top-[39px] z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 transition-all">
+      {/* 2. NAVIGATION BAR (MATCHING AISENSY NAVBAR) */}
+      <header className="sticky top-[39px] z-40 bg-white/95 backdrop-blur-md border-b border-slate-150 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
@@ -64,20 +59,26 @@ export default function HomePage() {
 
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-600">
+            <Link href="#pricing" className="hover:text-emerald-600 transition">
+              Pricing
+            </Link>
             <Link href="#features" className="hover:text-emerald-600 transition flex items-center gap-1">
               Product <span className="text-xs text-slate-400">▾</span>
             </Link>
-            <Link href="#broadcast" className="hover:text-emerald-600 transition flex items-center gap-1">
+            <Link href="#advanced-features" className="hover:text-emerald-600 transition flex items-center gap-1">
               Features <span className="text-xs text-slate-400">▾</span>
             </Link>
             <Link href="#solutions" className="hover:text-emerald-600 transition flex items-center gap-1">
               Industries <span className="text-xs text-slate-400">▾</span>
             </Link>
-            <Link href="#pricing" className="hover:text-emerald-600 transition">
-              Pricing
+            <Link href="#testimonials" className="hover:text-emerald-600 transition flex items-center gap-1">
+              Resources <span className="text-xs text-slate-400">▾</span>
             </Link>
-            <Link href="#developer" className="hover:text-emerald-600 transition">
-              API & Docs
+            <Link href="#developer" className="hover:text-emerald-600 transition flex items-center gap-1">
+              Integrations <span className="text-xs text-slate-400">▾</span>
+            </Link>
+            <Link href="/dashboard" className="hover:text-emerald-600 transition">
+              Partner
             </Link>
             <span className="text-slate-300">|</span>
             <div className="flex items-center gap-1 text-slate-500 hover:text-slate-900 cursor-pointer text-xs font-bold uppercase">
@@ -88,16 +89,17 @@ export default function HomePage() {
           {/* Right Action CTAs */}
           <div className="hidden sm:flex items-center gap-3">
             <Link
-              href="/login"
-              className="px-5 py-2.5 text-sm font-bold text-slate-900 hover:text-emerald-600 border border-slate-200 hover:border-slate-300 rounded-xl transition shadow-2xs"
-            >
-              Login ➔
-            </Link>
-            <Link
               href="/signup"
-              className="px-6 py-2.5 text-sm font-bold text-white bg-[#00c853] hover:bg-[#00b248] rounded-xl shadow-md shadow-emerald-500/25 hover:shadow-lg hover:shadow-emerald-500/35 transition flex items-center gap-1.5"
+              className="px-6 py-2.5 text-sm font-extrabold text-white bg-[#00c853] hover:bg-[#00b248] rounded-xl shadow-md shadow-emerald-500/25 hover:shadow-lg hover:shadow-emerald-500/35 transition flex items-center gap-1.5"
             >
               <span>Start for FREE</span>
+              <span>➔</span>
+            </Link>
+            <Link
+              href="/login"
+              className="px-5 py-2.5 text-sm font-bold text-slate-900 hover:text-emerald-600 border border-slate-300 hover:border-slate-400 rounded-xl transition shadow-2xs flex items-center gap-1"
+            >
+              <span>Login</span>
               <span>➔</span>
             </Link>
           </div>
@@ -123,23 +125,26 @@ export default function HomePage() {
         {mobileMenuOpen && (
           <div className="lg:hidden border-b border-slate-200 bg-white px-6 py-4 space-y-3">
             <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700">
-              Product & Features
+              Product &amp; Features
             </Link>
             <Link href="#broadcast" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700">
               Broadcast Campaigns
             </Link>
+            <Link href="#advanced-features" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700">
+              Advanced Conversion Features
+            </Link>
+            <Link href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700">
+              Testimonials &amp; Reviews
+            </Link>
             <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700">
               Pricing Plans
             </Link>
-            <Link href="#developer" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700">
-              Developer API
-            </Link>
             <div className="pt-3 flex flex-col gap-2">
-              <Link href="/login" className="w-full text-center py-2.5 font-bold border border-slate-300 rounded-xl">
-                Login
-              </Link>
               <Link href="/signup" className="w-full text-center py-2.5 font-bold bg-[#00c853] text-white rounded-xl shadow-xs">
                 Start for FREE ➔
+              </Link>
+              <Link href="/login" className="w-full text-center py-2.5 font-bold border border-slate-300 rounded-xl">
+                Login
               </Link>
             </div>
           </div>
@@ -148,14 +153,13 @@ export default function HomePage() {
 
       {/* 3. HERO SECTION (IMAGE 1 & 2 STYLE) */}
       <section className="relative overflow-hidden pt-12 pb-24 md:pt-20 md:pb-32 bg-gradient-to-b from-emerald-50/40 via-white to-white">
-        {/* Background glow orbs */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-tr from-emerald-300/20 to-purple-300/15 rounded-full blur-3xl pointer-events-none -z-10" />
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Top Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 border border-purple-200/80 text-purple-700 text-xs sm:text-sm font-bold shadow-2xs mb-8 animate-in fade-in slide-in-from-bottom-2">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 border border-purple-200/80 text-purple-700 text-xs sm:text-sm font-bold shadow-2xs mb-8">
             <span>✨</span>
-            <span>AI-Powered WhatsApp Marketing & Authentication Platform</span>
+            <span>AI-Powered WhatsApp Marketing Platform</span>
           </div>
 
           {/* Hero Main Headline */}
@@ -166,7 +170,7 @@ export default function HomePage() {
 
           {/* Subtitle */}
           <p className="max-w-3xl mx-auto text-lg sm:text-xl text-slate-600 leading-relaxed font-normal mb-10">
-            Broadcast, Automate, Engage, Sell — do everything with the enterprise-grade WhatsApp Marketing &amp; OTP Platform. Powered by Official Meta WhatsApp APIs ⚡
+            Broadcast, Automate, Engage, Sell - do everything with the AI-powered WhatsApp Marketing &amp; Engagement Platform. Powered by Official WhatsApp APIs ⚡
           </p>
 
           {/* Hero CTAs */}
@@ -203,7 +207,7 @@ export default function HomePage() {
           {/* 4. HERO VISUAL SHOWCASE STAGE (IMAGE 1 & 2 MOCKUPS) */}
           <div className="relative max-w-5xl mx-auto pt-6">
             {/* Floating Metric Badges */}
-            <div className="absolute -top-4 left-4 sm:left-12 z-20 bg-white rounded-2xl p-3.5 shadow-xl border border-slate-100 flex items-center gap-3 animate-bounce duration-1000">
+            <div className="absolute -top-4 left-4 sm:left-12 z-20 bg-white rounded-2xl p-3.5 shadow-xl border border-slate-100 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-black">
                 $
               </div>
@@ -279,7 +283,6 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Incoming Ad trigger message */}
                   <div className="max-w-[85%] ml-auto bg-[#dcf8c6] rounded-xl rounded-tr-xs p-3 text-xs text-slate-800 shadow-2xs space-y-1">
                     <div className="text-[10px] text-slate-500 border-l-2 border-emerald-500 pl-2 mb-1 bg-white/40 p-1 rounded">
                       Ad · Enjoy 20% OFF. Use LUXE20
@@ -288,7 +291,6 @@ export default function HomePage() {
                     <span className="text-[9px] text-slate-400 block text-right">1:14 PM ✓✓</span>
                   </div>
 
-                  {/* Automated AI WhatsApp Reply */}
                   <div className="max-w-[88%] mr-auto bg-white rounded-xl rounded-tl-xs p-3 text-xs text-slate-800 shadow-2xs space-y-2">
                     <p>
                       Hey Nisha! 🌸 The summer drop is live till midnight. Here is your personalized promo link:
@@ -321,7 +323,7 @@ export default function HomePage() {
             Founders &amp; Marketers Love us
           </h3>
           <p className="text-slate-500 text-sm max-w-xl mx-auto">
-            Trusted by 210,000+ fast-growing brands &amp; enterprises across 68+ countries
+            Trusted by 210,000+ Businesses across 68+ Countries
           </p>
 
           {/* Client Logos Grid */}
@@ -345,26 +347,6 @@ export default function HomePage() {
               BRIGADE 🏢
             </div>
           </div>
-
-          {/* High-Impact Stat Grid */}
-          <div className="pt-10 grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
-              <span className="text-4xl font-black text-emerald-600 block mb-1">98%</span>
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Average Open Rate</span>
-            </div>
-            <div className="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
-              <span className="text-4xl font-black text-slate-900 block mb-1">45-60%</span>
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Click-Through Rate</span>
-            </div>
-            <div className="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
-              <span className="text-4xl font-black text-emerald-600 block mb-1">3-5X</span>
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Higher Conversions</span>
-            </div>
-            <div className="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
-              <span className="text-4xl font-black text-slate-900 block mb-1">&lt; 2.1s</span>
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">OTP Inbox Latency</span>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -373,14 +355,11 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Left Text */}
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wider">
-              📣 Official Broadcast Suite
-            </div>
             <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
               Broadcast Marketing Messages on WhatsApp (Officially)
             </h2>
             <p className="text-lg text-slate-600">
-              Enjoy a Limitless Broadcasting experience on WhatsApp. Send personalized campaigns to thousands of verified contacts with complete safety and zero ban risks.
+              Enjoy a Limitless Broadcasting experience on WhatsApp
             </p>
 
             <div className="space-y-5 pt-3">
@@ -391,7 +370,7 @@ export default function HomePage() {
                 <div>
                   <h4 className="font-extrabold text-base text-slate-900">8+ Powerful Messaging Categories</h4>
                   <p className="text-sm text-slate-500 mt-1">
-                    Send Promotions, Flash Sales, Offers, Coupon codes, Product Catalogs, and Media Carousels — Risk-Free!
+                    Send Promotions, Offers, Coupon codes, Carousels and More- Risk-Free!
                   </p>
                 </div>
               </div>
@@ -403,7 +382,7 @@ export default function HomePage() {
                 <div>
                   <h4 className="font-extrabold text-base text-slate-900">Add CTAs. Drive 3x Conversions</h4>
                   <p className="text-sm text-slate-500 mt-1">
-                    Turn ordinary conversations into instant conversions with eye-catching Click-to-Action URLs and Quick Reply buttons.
+                    Turn conversations into conversions with eye-catching CTA and Quick Reply buttons
                   </p>
                 </div>
               </div>
@@ -413,9 +392,9 @@ export default function HomePage() {
                   💬
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-base text-slate-900">Schedule &amp; Throttle Your WhatsApp Messages</h4>
+                  <h4 className="font-extrabold text-base text-slate-900">Schedule your WhatsApp messages</h4>
                   <p className="text-sm text-slate-500 mt-1">
-                    Streamline your campaigns. Upload Excel spreadsheets, auto-map columns, and schedule broadcasts months ahead with velocity throttlers.
+                    Streamline your work, Schedule Broadcasts 2 months ahead of time
                   </p>
                 </div>
               </div>
@@ -434,17 +413,12 @@ export default function HomePage() {
 
           {/* Right Phone Visual Mockup (Image 3 Style) */}
           <div className="relative flex justify-center">
-            {/* Background decorative blob */}
             <div className="absolute inset-0 bg-gradient-to-tr from-emerald-100 to-teal-50 rounded-3xl transform rotate-2 -z-10" />
 
-            {/* Smartphone Bezel */}
             <div className="w-full max-w-sm bg-slate-900 rounded-[45px] p-4 shadow-2xl border-4 border-slate-800">
-              {/* Dynamic Island / Notch */}
               <div className="w-28 h-5 bg-black rounded-full mx-auto mb-4" />
 
-              {/* Chat Viewport */}
               <div className="bg-[#efeae2] rounded-[32px] p-4 space-y-4 min-h-[460px] flex flex-col justify-between">
-                {/* Header */}
                 <div className="bg-[#075e54] text-white -m-4 p-4 rounded-t-[32px] flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold text-sm">
                     🎧
@@ -455,25 +429,17 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Message Body */}
                 <div className="space-y-3 pt-6">
-                  {/* Order broadcast message */}
                   <div className="bg-white rounded-2xl rounded-tl-xs p-4 shadow-2xs space-y-2.5">
                     <div className="rounded-xl bg-slate-100 h-28 flex items-center justify-center text-4xl">
                       🎧
                     </div>
                     <p className="text-xs text-slate-800 leading-relaxed">
-                      Your Order <strong className="text-slate-900">Rockway 450 Pro Headphones</strong> will be delivered by <strong>21st January, Tuesday</strong>.
+                      Your Order <strong className="text-slate-900">Rockway 450 Headphones</strong> will be delivered by <strong>21st January, Tuesday</strong>.
                     </p>
-                    <div className="pt-1">
-                      <button className="w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-blue-600 font-bold text-xs rounded-lg transition">
-                        📦 Track Live Package
-                      </button>
-                    </div>
                     <span className="text-[9px] text-slate-400 block text-right">3:35 PM</span>
                   </div>
 
-                  {/* Customer reaction */}
                   <div className="bg-[#dcf8c6] rounded-xl rounded-tr-xs p-2.5 max-w-[70%] ml-auto text-xs text-slate-900 shadow-2xs">
                     <p>Thank You! 🙏</p>
                     <span className="text-[9px] text-slate-400 block text-right">3:36 PM ✓✓</span>
@@ -481,7 +447,7 @@ export default function HomePage() {
                 </div>
 
                 <div className="bg-white/80 backdrop-blur-xs p-2.5 rounded-2xl border border-slate-200 text-center text-[11px] font-bold text-emerald-800">
-                  ⚡ 99.8% Inbox Delivery Guarantee
+                  ⚡ 99.8% Official Delivery
                 </div>
               </div>
             </div>
@@ -492,13 +458,12 @@ export default function HomePage() {
       {/* 7. FEATURES GRID (IMAGES 4 & 5 STYLE) */}
       <section id="features" className="py-24 bg-slate-50/60 border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
-          {/* Section Header */}
           <div className="text-center space-y-4 max-w-3xl mx-auto">
             <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
               Packed with Powerful WhatsApp Marketing Features
             </h2>
             <p className="text-slate-600 text-base sm:text-lg">
-              Launch latest WhatsApp Cloud APIs, AI features, and automated funnels at blazing fast speed ⚡
+              Launches latest WhatsApp API and AI Features at Blazing fast speed ⚡
             </p>
           </div>
 
@@ -512,20 +477,19 @@ export default function HomePage() {
                 Run Ads on Facebook &amp; Instagram that land on WhatsApp. 5X Your lead generations &amp; 2-3X Conversions Instantly!
               </p>
               <p className="text-slate-500 text-sm leading-relaxed">
-                Capture high-intent traffic with Meta Conversions API, smartly qualify leads with interactive chatbots, and assign conversations automatically to your sales team.
+                Run Ads from our platform, get quality leads with AI &amp; conversions API, smartly segregate your leads and build Chatbot Flows to automate everything!
               </p>
               <div className="pt-2">
                 <Link
                   href="/signup"
                   className="inline-flex items-center gap-1.5 px-6 py-3 bg-[#00c853] hover:bg-[#00b248] text-white font-bold text-sm rounded-xl shadow-xs transition"
                 >
-                  <span>Explore Click-to-WhatsApp</span>
+                  <span>Explore</span>
                   <span>➔</span>
                 </Link>
               </div>
             </div>
 
-            {/* Visual representation */}
             <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 flex flex-col gap-4">
               <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
@@ -533,18 +497,18 @@ export default function HomePage() {
                 </div>
                 <div className="flex-1">
                   <span className="font-bold text-slate-900 text-sm block">Hind University ✓</span>
-                  <span className="text-[11px] text-slate-400">Sponsored Ad · MBA &amp; MS Programs</span>
+                  <span className="text-[11px] text-slate-400">Sponsored Ad · MBA, MS, MTech Programs</span>
                 </div>
                 <span className="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full">
-                  Click to Chat
+                  Send Message
                 </span>
               </div>
 
               <div className="bg-[#efeae2] p-4 rounded-xl border border-slate-200 text-xs space-y-2">
                 <div className="bg-white p-3 rounded-lg shadow-2xs space-y-2">
-                  <p>Hi Diksha 👋 Thank you for your interest in our Executive MBA program!</p>
+                  <p>Hi Diksha 👋 Fill this form to proceed</p>
                   <button className="w-full py-2 bg-emerald-600 text-white font-bold rounded-lg text-xs">
-                    📝 Fill Details &amp; Download Brochure
+                    Fill Details
                   </button>
                 </div>
               </div>
@@ -553,51 +517,49 @@ export default function HomePage() {
 
           {/* FEATURE 2: BUILD WHATSAPP FORMS (IMAGE 5) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-white p-8 sm:p-12 rounded-3xl border border-slate-200/80 shadow-sm">
-            {/* Visual Phone Mockup */}
             <div className="order-2 lg:order-1 bg-slate-50 rounded-2xl p-6 border border-slate-200 flex justify-center">
               <div className="w-full max-w-xs bg-white rounded-2xl p-5 shadow-md border border-slate-200 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <span className="font-bold text-slate-900 text-xs">Black Friday Survey Form</span>
-                  <span className="text-[10px] text-emerald-600 bg-emerald-50 font-bold px-2 py-0.5 rounded">Native</span>
+                  <span className="font-bold text-slate-900 text-xs">Get early access to our Black Friday deals</span>
+                  <span className="text-[10px] text-emerald-600 bg-emerald-50 font-bold px-2 py-0.5 rounded">Form</span>
                 </div>
                 <div className="space-y-2 text-xs">
-                  <span className="font-bold text-slate-700 block">Which category interests you most?</span>
+                  <span className="font-bold text-slate-700 block">Let us know which category you're interested in?</span>
                   <label className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg text-slate-700">
                     <input type="checkbox" defaultChecked className="accent-emerald-600" />
-                    <span>Mobile Phones &amp; Accessories</span>
+                    <span>Mobile phones</span>
                   </label>
                   <label className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg text-slate-700">
                     <input type="checkbox" defaultChecked className="accent-emerald-600" />
-                    <span>Smart Televisions &amp; Audio</span>
+                    <span>Televisions</span>
                   </label>
                   <label className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg text-slate-700">
                     <input type="checkbox" className="accent-emerald-600" />
-                    <span>Home &amp; Kitchen Appliances</span>
+                    <span>Home audio</span>
                   </label>
                 </div>
                 <button className="w-full py-2.5 bg-[#00c853] text-white font-bold text-xs rounded-xl shadow-xs">
-                  Confirm Preferences ➔
+                  Continue ➔
                 </button>
               </div>
             </div>
 
-            {/* Text */}
             <div className="order-1 lg:order-2 space-y-5">
               <h3 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                Build Interactive WhatsApp Forms
+                Build WhatsApp Forms
               </h3>
               <p className="text-slate-600 text-base leading-relaxed">
-                Capture Leads &amp; collect useful information <strong>Directly in WhatsApp Chats</strong> with native WhatsApp Forms.
+                Capture Leads &amp; collect useful information <strong>Directly in WhatsApp Chats</strong> with WhatsApp Forms.
               </p>
               <p className="text-slate-500 text-sm leading-relaxed">
-                From feedback to gathering user insights, appointments, and quiz surveys — collect rich structured data without making your customers leave their chat.
+                From feedback to gathering user insights, collect it all on WhatsApp.
               </p>
               <div className="pt-2">
                 <Link
                   href="/signup"
                   className="inline-flex items-center gap-1.5 px-6 py-3 bg-[#00c853] hover:bg-[#00b248] text-white font-bold text-sm rounded-xl shadow-xs transition"
                 >
-                  <span>Explore WhatsApp Forms</span>
+                  <span>Explore</span>
                   <span>➔</span>
                 </Link>
               </div>
@@ -611,50 +573,46 @@ export default function HomePage() {
                 Collect Payments on WhatsApp
               </h3>
               <p className="text-slate-600 text-base leading-relaxed">
-                Collect Payments now on WhatsApp seamlessly with WhatsApp Pay and other payment modes (Razorpay, UPI, PayU, Stripe) and grow your revenue.
-              </p>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Reduce checkout drop-offs by up to 60%. Send interactive payment cards and let shoppers complete purchases in seconds without switching apps.
+                Collect Payments now on WhatsApp seamlessly with WhatsApp Pay and other modes of payment (Razorpay, Payu etc) and grow your revenue.
               </p>
               <div className="pt-2">
                 <Link
                   href="/signup"
                   className="inline-flex items-center gap-1.5 px-6 py-3 bg-[#00c853] hover:bg-[#00b248] text-white font-bold text-sm rounded-xl shadow-xs transition"
                 >
-                  <span>Explore WhatsApp Payments</span>
+                  <span>Explore</span>
                   <span>➔</span>
                 </Link>
               </div>
             </div>
 
-            {/* Visual Card */}
             <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 space-y-4">
               <div className="bg-[#efeae2] p-4 rounded-2xl border border-slate-200 space-y-3">
                 <div className="bg-white p-4 rounded-xl shadow-sm space-y-3">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <span className="font-bold text-xs text-slate-700">Payment Request · Headway Inc.</span>
-                    <span className="text-[10px] text-emerald-600 font-extrabold bg-emerald-50 px-2 py-0.5 rounded">Verified</span>
+                    <span className="font-bold text-xs text-slate-700">Sounds great! Let me create an order</span>
+                    <span className="text-[10px] text-emerald-600 font-extrabold bg-emerald-50 px-2 py-0.5 rounded">✓✓</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center text-2xl">
                       🎧
                     </div>
                     <div>
-                      <h6 className="font-bold text-slate-900 text-sm">Rockway 450 Studio Edition</h6>
-                      <span className="text-xs text-slate-500">Qty: 1</span>
+                      <h6 className="font-bold text-slate-900 text-sm">Rockway 450</h6>
+                      <span className="text-xs text-slate-500">Quantity 1</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                    <span className="text-xs font-bold text-slate-600">Total Amount</span>
+                    <span className="text-xs font-bold text-slate-600">Total</span>
                     <span className="text-lg font-black text-slate-900">₹890.00</span>
                   </div>
-                  <button className="w-full py-2.5 bg-[#00c853] hover:bg-[#00b248] text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-2">
-                    <span>Pay ₹890 with UPI / Cards</span>
-                    <span>🔒</span>
+                  <button className="w-full py-2 bg-blue-50 text-blue-600 font-bold text-xs rounded-lg">
+                    View Details
                   </button>
                 </div>
-                <div className="text-right text-[10px] text-slate-400">
-                  Sent to You ✓✓ Completed
+                <div className="bg-white p-3 rounded-xl shadow-2xs flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-900">₹890.00</span>
+                  <span className="text-emerald-600 font-semibold text-[10px]">Sent to You · Completed</span>
                 </div>
               </div>
             </div>
@@ -662,8 +620,435 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 8. DEVELOPER API SECTION */}
-      <section id="developer" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* 8. NEW: ADVANCED FEATURES THAT DRIVE CONVERSIONS (USER UPLOADED IMAGE 1 & 2) */}
+      <section id="advanced-features" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+        <div className="text-center space-y-4 max-w-3xl mx-auto">
+          <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+            Advanced Features that Drive Conversions
+          </h2>
+          <p className="text-slate-600 text-base sm:text-lg">
+            3X Your revenues using our WhatsApp Marketing &amp; Automation Platform
+          </p>
+        </div>
+
+        {/* 2x2 Grid of High-Performance Conversion Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* CARD 1: Multiple Human Live Chat (Image 1 Left) */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-sm space-y-6 flex flex-col justify-between hover:shadow-md transition">
+            <div className="space-y-3">
+              <h3 className="text-2xl font-black text-slate-900">
+                Multiple Human Live Chat
+              </h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Have multiple team members to drive Live Chat Support on the Same WhatsApp Business Number.
+              </p>
+              <p className="text-slate-500 text-xs leading-relaxed">
+                Filter Chats according to tags, campaigns and attributes for Smart Agent Chat Routing.
+              </p>
+            </div>
+
+            {/* Live Chat Mockup Frame */}
+            <div className="bg-indigo-50/60 rounded-2xl p-4 border border-indigo-100 overflow-hidden">
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="font-bold text-xs text-slate-900">Arvind Bajaj · Active</span>
+                  </div>
+                  <span className="text-[10px] bg-purple-50 text-purple-700 font-bold px-2 py-0.5 rounded">
+                    Republic_Day_Sale
+                  </span>
+                </div>
+                <div className="flex gap-3 text-[11px]">
+                  <div className="w-1/3 border-r border-slate-100 pr-2 space-y-1 text-slate-500">
+                    <div className="font-bold text-slate-800">Team Inbox</div>
+                    <div className="bg-emerald-50 text-emerald-800 p-1 rounded text-[10px] font-semibold">● Dr. Hussain</div>
+                    <div className="p-1 text-[10px]">● Manisha</div>
+                    <div className="p-1 text-[10px]">● Yash Batra</div>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <div className="bg-[#efeae2] p-2 rounded-lg text-[10px] text-slate-800">
+                      Hi, kindly complete payment to confirm your order.
+                    </div>
+                    <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between font-bold text-xs text-emerald-900">
+                      <span>Headway 225 Earphones</span>
+                      <span>₹1,500.00</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CARD 2: Real-Time Analytics (Image 1 Right) */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-sm space-y-6 flex flex-col justify-between hover:shadow-md transition">
+            <div className="space-y-3">
+              <h3 className="text-2xl font-black text-slate-900">
+                Real-Time Analytics
+              </h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Track your campaign results in real-time.
+              </p>
+              <p className="text-slate-500 text-xs leading-relaxed">
+                Monitor Read, Replied &amp; Clicked rates for each campaign and retarget smartly for higher conversions!
+              </p>
+            </div>
+
+            {/* Real-time Analytics Mockup Frame */}
+            <div className="bg-orange-50/60 rounded-2xl p-4 border border-orange-100 overflow-hidden space-y-3">
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-slate-900 text-xs">← REPUBLIC DAY SALE</span>
+                  <span className="text-[10px] text-slate-400">Sent on 23rd January</span>
+                </div>
+                {/* Funnel chips */}
+                <div className="grid grid-cols-4 gap-1 text-center text-[10px]">
+                  <div className="p-1.5 bg-slate-50 rounded border border-slate-100">
+                    <span className="font-black block text-slate-900">100%</span>
+                    <span className="text-[8px] text-slate-400">Overview</span>
+                  </div>
+                  <div className="p-1.5 bg-slate-50 rounded border border-slate-100">
+                    <span className="font-black block text-emerald-600">97%</span>
+                    <span className="text-[8px] text-slate-400">Delivered</span>
+                  </div>
+                  <div className="p-1.5 bg-slate-50 rounded border border-slate-100">
+                    <span className="font-black block text-blue-600">93%</span>
+                    <span className="text-[8px] text-slate-400">Read</span>
+                  </div>
+                  <div className="p-1.5 bg-purple-50 rounded border border-purple-200">
+                    <span className="font-black block text-purple-700">45%</span>
+                    <span className="text-[8px] text-purple-600">Clicked</span>
+                  </div>
+                </div>
+                {/* Wave Area Graph */}
+                <div className="pt-2 border-t border-slate-100">
+                  <div className="flex justify-between text-[10px] text-slate-500 font-bold mb-1">
+                    <span>Audience (per day)</span>
+                    <span className="text-purple-600 bg-purple-100 px-1.5 rounded">CLICKED PEAK</span>
+                  </div>
+                  <div className="h-16 w-full bg-gradient-to-t from-purple-100/60 via-purple-50/40 to-transparent rounded-lg flex items-end justify-between px-2 pb-1 border-b border-purple-200">
+                    <span className="text-[9px] text-slate-400">23 Jan</span>
+                    <div className="w-8 h-10 bg-purple-500/40 rounded-t" />
+                    <div className="w-8 h-14 bg-purple-600 rounded-t" />
+                    <div className="w-8 h-8 bg-purple-400/40 rounded-t" />
+                    <span className="text-[9px] text-slate-400">31 Jan</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CARD 3: Build no-code Chatbot in minutes (Image 2 Left) */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-sm space-y-6 flex flex-col justify-between hover:shadow-md transition">
+            <div className="space-y-3">
+              <h3 className="text-2xl font-black text-slate-900">
+                Build no-code Chatbot in minutes
+              </h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Build your Own Chatbot Flows your Way! Easy-to-use Chatbot &amp; Catalog Flow builder to build your conversational journeys
+              </p>
+            </div>
+
+            {/* Chatbot flow builder canvas mockup */}
+            <div className="bg-sky-50/60 rounded-2xl p-4 border border-sky-100 overflow-hidden">
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-3 text-xs">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <span className="font-bold text-xs text-slate-900">Visual Flow Studio ➔ Urban Studioz</span>
+                  <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded">Live</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-center space-y-1 w-24">
+                    <span className="text-[9px] font-bold text-emerald-600 block">Flow Start</span>
+                    <span className="text-[10px] text-slate-700">Keyword: "Help"</span>
+                  </div>
+                  <span className="text-slate-300">⇢</span>
+                  <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-center space-y-1 flex-1">
+                    <span className="text-[9px] font-bold text-emerald-800 block">Media + Buttons</span>
+                    <span className="text-[10px] text-emerald-900 font-semibold">[📦 Track Order] [💬 Agent]</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CARD 4: Import & Broadcast Instantly (Image 2 Right) */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-sm space-y-6 flex flex-col justify-between hover:shadow-md transition">
+            <div className="space-y-3">
+              <h3 className="text-2xl font-black text-slate-900">
+                Import &amp; Broadcast Instantly
+              </h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Simply Import all your Contacts and Broadcast approved messages Instantly.
+              </p>
+              <p className="text-slate-500 text-xs leading-relaxed">
+                See real-time analytics on the platform for delivered, read rates and more
+              </p>
+            </div>
+
+            {/* Contacts Table mockup */}
+            <div className="bg-teal-50/60 rounded-2xl p-4 border border-teal-100 overflow-hidden">
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900">Contacts Manager</span>
+                  <div className="flex gap-1.5">
+                    <span className="bg-slate-100 text-slate-700 text-[9px] font-bold px-2 py-1 rounded">Import Excel ▾</span>
+                    <span className="bg-[#00c853] text-white text-[9px] font-bold px-2.5 py-1 rounded">Broadcast ➔</span>
+                  </div>
+                </div>
+                <div className="border border-slate-100 rounded-lg overflow-hidden text-[10px]">
+                  <div className="bg-slate-50 p-1.5 font-bold text-slate-600 grid grid-cols-3">
+                    <span>Name</span>
+                    <span>Mobile</span>
+                    <span>Tag</span>
+                  </div>
+                  <div className="p-1.5 border-t border-slate-100 grid grid-cols-3 text-slate-700">
+                    <span>Aryan Gautam</span>
+                    <span>+91 98765...</span>
+                    <span className="text-emerald-600 font-bold">VVIP Lead</span>
+                  </div>
+                  <div className="p-1.5 border-t border-slate-100 grid grid-cols-3 text-slate-700">
+                    <span>Nisha Sharma</span>
+                    <span>+91 94120...</span>
+                    <span className="text-purple-600 font-bold">Cart Dropped</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* TRUST CHECKLIST STRIP (IMAGE 2 BOTTOM) */}
+        <div className="pt-6 pb-2 border-t border-slate-200 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs sm:text-sm font-extrabold text-slate-700">
+          <span className="flex items-center gap-1.5 text-emerald-800">
+            <span className="text-emerald-500">✓</span> Free Onboarding
+          </span>
+          <span className="flex items-center gap-1.5 text-emerald-800">
+            <span className="text-emerald-500">✓</span> Zero Setup fee
+          </span>
+          <span className="flex items-center gap-1.5 text-emerald-800">
+            <span className="text-emerald-500">✓</span> Free Website Widget
+          </span>
+          <span className="flex items-center gap-1.5 text-emerald-800">
+            <span className="text-emerald-500">✓</span> Free QR &amp; Link
+          </span>
+          <span className="flex items-center gap-1.5 text-emerald-800">
+            <span className="text-emerald-500">✓</span> Free Green Tick Verification
+          </span>
+        </div>
+      </section>
+
+      {/* 9. NEW: #1 WHATSAPP MARKETING PLATFORM (USER UPLOADED IMAGE 3) */}
+      <section id="testimonials" className="py-24 bg-gradient-to-b from-slate-50 to-white border-t border-slate-150">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+          <div className="text-center space-y-4 max-w-4xl mx-auto">
+            <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+              #1 WhatsApp Marketing &amp; Engagement Platform for startups &amp; growing businesses
+            </h2>
+            <p className="text-slate-500 text-sm sm:text-base">
+              Recognized and loved by over 210,000+ businesses worldwide
+            </p>
+          </div>
+
+          {/* G2 Badges Ribbon / Carousel Representation (Image 3) */}
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 opacity-90">
+            {[
+              "User Love Us",
+              "High Performer",
+              "High Performer Asia",
+              "High Performer India",
+              "High Performer Small Business",
+              "Momentum Leader",
+              "High Performer Asia Pacific"
+            ].map((badge, bIdx) => (
+              <div
+                key={bIdx}
+                className="bg-white border-2 border-red-500/20 rounded-xl px-3 py-2 text-center shadow-xs flex flex-col items-center justify-center min-w-[110px]"
+              >
+                <span className="text-[9px] font-black text-red-600 uppercase tracking-widest block">SPRING 2026</span>
+                <span className="text-xs font-black text-slate-900 block mt-0.5 leading-tight">{badge}</span>
+                <span className="text-[10px] text-amber-500 font-bold">★★★★★</span>
+              </div>
+            ))}
+          </div>
+
+          {/* 3 Real Testimonial Cards (Image 3) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
+            {/* Card 1: Priyal Ostwal */}
+            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6 flex flex-col justify-between hover:-translate-y-1 transition">
+              <div className="space-y-4 text-center">
+                <div className="w-24 h-24 rounded-full bg-emerald-100 border-4 border-emerald-300 mx-auto flex items-center justify-center text-3xl font-bold text-emerald-800 shadow-sm">
+                  👩‍💼
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-lg text-slate-900">Priyal Ostwal</h4>
+                  <p className="text-xs text-slate-500 font-semibold">Marketing Manager, PhysicsWallah</p>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed italic">
+                  "Our team has experienced exceptional professionalism, reliability and a true commitment to customer satisfaction. Delivery rates on campaigns have consistently exceeded 97%."
+                </p>
+              </div>
+              <div className="pt-3 border-t border-slate-100 text-center text-[11px] font-bold text-emerald-600">
+                ✓ Verified Customer Review
+              </div>
+            </div>
+
+            {/* Card 2: Akash Jain */}
+            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6 flex flex-col justify-between hover:-translate-y-1 transition">
+              <div className="space-y-4 text-center">
+                <div className="w-24 h-24 rounded-full bg-orange-100 border-4 border-orange-300 mx-auto flex items-center justify-center text-3xl font-bold text-orange-800 shadow-sm">
+                  👨‍💼
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-lg text-slate-900">Akash Jain</h4>
+                  <p className="text-xs text-slate-500 font-semibold">Business Executive, Cosco</p>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed italic">
+                  "Helped us increase our customer engagement significantly. Our customer engagement increased from <strong className="text-emerald-600">35% to 90%</strong> with the Smart Retargeting feature."
+                </p>
+              </div>
+              <div className="pt-3 border-t border-slate-100 text-center text-[11px] font-bold text-orange-600">
+                ✓ Verified Customer Review
+              </div>
+            </div>
+
+            {/* Card 3: Achina Mayya */}
+            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6 flex flex-col justify-between hover:-translate-y-1 transition">
+              <div className="space-y-4 text-center">
+                <div className="w-24 h-24 rounded-full bg-purple-100 border-4 border-purple-300 mx-auto flex items-center justify-center text-3xl font-bold text-purple-800 shadow-sm">
+                  👩‍💻
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-lg text-slate-900">Achina Mayya</h4>
+                  <p className="text-xs text-slate-500 font-semibold">Founder &amp; CEO, AevyTV</p>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed italic">
+                  "Has been pivotal for us. The personalised interactions and instant responses greatly improved our engagement rates, and more importantly our sales!"
+                </p>
+              </div>
+              <div className="pt-3 border-t border-slate-100 text-center text-[11px] font-bold text-purple-600">
+                ✓ Verified Customer Review
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 10. NEW: START WHATSAPP MARKETING IN 10 MINUTES (USER UPLOADED IMAGE 4) */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-br from-white via-emerald-50/20 to-teal-50/40 rounded-[36px] border border-slate-200/90 shadow-xl p-8 sm:p-14 overflow-hidden relative">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="space-y-6">
+              <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                Start WhatsApp Marketing in 10 Minutes
+              </h2>
+              <p className="text-slate-600 text-base leading-relaxed">
+                Our Platform is powered by Official Whatsapp Business APIs and is in alignment with all Whatsapp Rules.
+              </p>
+
+              <div className="space-y-5 pt-2">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg shrink-0">
+                    🛡️
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-base text-slate-900">Official Green Tick Verification</h4>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Get Verified Green Tick on your Whatsapp. Broadcast Unlimited Notifications everyday.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg shrink-0">
+                    💬
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-base text-slate-900">Dedicated Live Chat Support</h4>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Priority Chat Support by our team over WhatsApp, Phone, Live Chat &amp; Email.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg shrink-0">
+                    ⚡
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-base text-slate-900">Blazing Fast Feature launches</h4>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      We're constantly adding new WhatsApp features, so you can always offer the best experience to your customers.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4">
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-[#00c853] hover:bg-[#00b248] text-white font-extrabold text-sm rounded-xl shadow-lg shadow-emerald-500/25 transition"
+                >
+                  <span>Start Now for FREE</span>
+                  <span>➔</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Layered Isometric Dashboard Collage (Image 4) */}
+            <div className="relative flex justify-center">
+              <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <span className="font-extrabold text-xs text-slate-900">✨ AI Ads Manager Dashboard</span>
+                  <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded">
+                    Meta Verified
+                  </span>
+                </div>
+
+                {/* Metrics Bar */}
+                <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-[10px] text-slate-400 block font-semibold">ROAS</span>
+                    <span className="font-black text-slate-900 text-sm">7.5X</span>
+                  </div>
+                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-[10px] text-slate-400 block font-semibold">Leads</span>
+                    <span className="font-black text-slate-900 text-sm">3,900</span>
+                  </div>
+                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-[10px] text-slate-400 block font-semibold">Revenue</span>
+                    <span className="font-black text-emerald-600 text-sm">₹15.2L</span>
+                  </div>
+                </div>
+
+                {/* Floating chat snippet */}
+                <div className="bg-[#efeae2] p-3 rounded-2xl border border-slate-200 text-xs space-y-2">
+                  <div className="bg-white p-3 rounded-xl shadow-2xs space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-slate-900 text-[11px]">ZoomBus Assistant ✓</span>
+                      <span className="text-[9px] bg-blue-100 text-blue-700 font-bold px-1.5 rounded">Verified Blue Tick</span>
+                    </div>
+                    <p className="text-[11px] text-slate-700">
+                      Hello, I will be your travel assistant from ZoomBus. Please choose an option:
+                    </p>
+                    <div className="flex gap-2 pt-1">
+                      <button className="flex-1 py-1.5 bg-slate-100 text-slate-800 font-bold rounded text-[10px]">
+                        Book Bus Ticket
+                      </button>
+                      <button className="flex-1 py-1.5 bg-slate-100 text-slate-800 font-bold rounded text-[10px]">
+                        Cancel Ticket
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 11. DEVELOPER API SECTION */}
+      <section id="developer" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-100">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider">
@@ -782,7 +1167,7 @@ print(res.json())`}
         </div>
       </section>
 
-      {/* 9. PRICING SECTION */}
+      {/* 12. PRICING SECTION */}
       <section id="pricing" className="py-24 bg-slate-50 border-t border-slate-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12">
           <div className="space-y-4 max-w-2xl mx-auto">
@@ -879,7 +1264,7 @@ print(res.json())`}
         </div>
       </section>
 
-      {/* 10. FAQ SECTION */}
+      {/* 13. FAQ SECTION */}
       <section className="py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="text-center space-y-3">
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
@@ -929,7 +1314,7 @@ print(res.json())`}
         </div>
       </section>
 
-      {/* 11. PRE-FOOTER CTA BANNER */}
+      {/* 14. PRE-FOOTER CTA BANNER */}
       <section className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
         <div className="max-w-4xl mx-auto space-y-6 relative z-10">
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
@@ -956,7 +1341,7 @@ print(res.json())`}
         </div>
       </section>
 
-      {/* 12. GLOBAL FOOTER */}
+      {/* 15. GLOBAL FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-16 text-slate-500 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 space-y-4">
@@ -1020,7 +1405,7 @@ print(res.json())`}
         </div>
       </footer>
 
-      {/* 13. FLOATING WHATSAPP CHAT BUTTON (BOTTOM RIGHT AS IN ALL SCREENSHOTS) */}
+      {/* 16. FLOATING WHATSAPP CHAT BUTTON (BOTTOM RIGHT AS IN ALL SCREENSHOTS) */}
       <a
         href="https://wa.me/?text=Hello%20I%20want%20to%20learn%20more%20about%20WhatsApp%20Cloud%20SaaS"
         target="_blank"
