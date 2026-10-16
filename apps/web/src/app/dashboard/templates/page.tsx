@@ -256,16 +256,40 @@ export default function TemplatesPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "APPROVED":
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">✓ APPROVED</span>;
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 whitespace-nowrap shrink-0 leading-tight">
+            <span>✓</span>
+            <span>APPROVED</span>
+          </span>
+        );
       case "PENDING":
       case "IN_REVIEW":
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-300 animate-pulse">⏳ IN REVIEW</span>;
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-300 animate-pulse whitespace-nowrap shrink-0 leading-tight">
+            <span>⏳</span>
+            <span>IN REVIEW</span>
+          </span>
+        );
       case "REJECTED":
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800 border border-red-300">✕ REJECTED</span>;
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-full bg-red-100 text-red-800 border border-red-300 whitespace-nowrap shrink-0 leading-tight">
+            <span>✕</span>
+            <span>REJECTED</span>
+          </span>
+        );
       case "PAUSED":
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-slate-100 text-slate-700">⏸ PAUSED</span>;
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-full bg-slate-100 text-slate-700 whitespace-nowrap shrink-0 leading-tight">
+            <span>⏸</span>
+            <span>PAUSED</span>
+          </span>
+        );
       default:
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-slate-100 text-slate-800">{status}</span>;
+        return (
+          <span className="inline-flex items-center px-2.5 py-1 text-[11px] font-bold rounded-full bg-slate-100 text-slate-800 whitespace-nowrap shrink-0 leading-tight">
+            {status}
+          </span>
+        );
     }
   };
 
@@ -394,15 +418,23 @@ export default function TemplatesPage() {
             return (
               <div key={template.id} className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between hover:border-slate-300 transition">
                 <div className="p-5 space-y-3">
-                  <div className="flex justify-between items-start gap-2">
-                    <div>
-                      <h3 className="font-bold text-slate-900 text-sm break-all">{template.name}</h3>
-                      <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-start justify-between gap-3 min-w-0">
+                    <div className="flex-1 min-w-0 pr-1">
+                      <h3
+                        className="font-bold text-slate-900 text-sm leading-snug break-words"
+                        title={template.name}
+                        style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
+                      >
+                        {template.name}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                         {getCategoryBadge(template.category)}
                         <span className="text-[11px] font-mono text-slate-500 uppercase">{template.language}</span>
                       </div>
                     </div>
-                    <div>{getStatusBadge(template.status)}</div>
+                    <div className="shrink-0 flex items-center pt-0.5">
+                      {getStatusBadge(template.status)}
+                    </div>
                   </div>
 
                   {/* Message Bubble Preview */}
