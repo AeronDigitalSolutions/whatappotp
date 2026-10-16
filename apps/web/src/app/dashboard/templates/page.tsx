@@ -123,15 +123,34 @@ export default function TemplatesPage() {
     return { label, sampleValue };
   };
 
-  // Detect all unique {{...}} placeholders in bodyText
+  // Close modal on Escape key and prevent background scroll
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && showCreateModal) {
+        setShowCreateModal(false);
+      }
+    };
+    if (showCreateModal) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showCreateModal]);
+
+  // Detect all unique {{...}} placeholders in bodyText (strictly letters, numbers, underscores)
   const detectedVariables = useMemo(() => {
-    const matches = formData.bodyText.match(/\{\{([a-zA-Z0-9_\s]+)\}\}/g);
+    const matches = formData.bodyText.match(/\{\{([a-zA-Z0-9_]+)\}\}/g);
     if (!matches) return [];
     const unique = Array.from(new Set(matches.map(m => m.replace(/[\{\}]/g, "").trim())));
     return unique;
   }, [formData.bodyText]);
 
-  // Insert variable at cursor position in textarea
+  // Insert variable at cursor position in textarea without creating nested brackets
   const insertVariableAtCursor = (varName: string, isCustom = false) => {
     const textarea = bodyTextareaRef.current;
     const placeholder = isCustom ? "Custom_Field" : varName;
@@ -142,9 +161,21 @@ export default function TemplatesPage() {
       return;
     }
 
-    const start = textarea.selectionStart ?? textarea.value.length;
-    const end = textarea.selectionEnd ?? textarea.value.length;
+    let start = textarea.selectionStart ?? textarea.value.length;
+    let end = textarea.selectionEnd ?? textarea.value.length;
     const text = textarea.value;
+
+    // Check if cursor or selection is already touching or inside brackets like {{...}}
+    let before = text.substring(0, start);
+    let after = text.substring(end);
+
+    // If selection is already surrounded by braces, expand replace range to consume outer braces
+    while (before.endsWith("{") && after.startsWith("}")) {
+      before = before.slice(0, -1);
+      after = after.slice(1);
+      start -= 1;
+      end += 1;
+    }
 
     const newText = text.substring(0, start) + insertion + text.substring(end);
     setFormData(prev => ({ ...prev, bodyText: newText }));
@@ -182,8 +213,10 @@ export default function TemplatesPage() {
       detectedVariables.forEach(v => {
         const def = variableDefs[v];
         const val = def?.sampleValue || getSmartDefaults(v).sampleValue;
-        text = text.replace(new RegExp(`\\{\\{${v}\\}\\}`, "g"), val);
+        text = text.replaceAll(`{{${v}}}`, val);
       });
+      // Clean up any remaining malformed braces for preview
+      text = text.replace(/\{+/g, "").replace(/\}+/g, "");
     }
     return text;
   }, [formData.bodyText, detectedVariables, variableDefs, previewMode]);
@@ -690,27 +723,42 @@ export default function TemplatesPage() {
 
       {/* Create Template Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-5xl w-full p-6 sm:p-8 shadow-2xl space-y-6 my-8 border border-slate-100">
-            <div className="flex justify-between items-center border-b pb-4">
+        <div
+          className="fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 z-50 overflow-hidden"
+          onClick={() => setShowCreateModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-5xl w-full shadow-2xl flex flex-col max-h-[92vh] border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+          >
+            {/* 1. STICKY MODAL HEADER */}
+            <div className="shrink-0 flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-white z-10">
               <div>
-                <h3 className="font-extrabold text-xl text-slate-900 flex items-center gap-2">
+                <h3 className="font-extrabold text-lg sm:text-xl text-slate-900 flex items-center gap-2">
                   <span>✨</span> Create & Submit WhatsApp Template
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Design your message with custom brackets like <code className="font-mono text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded font-bold">&#123;&#123;Customer_Name&#125;&#125;</code>. Meta AI reviews within minutes.
                 </p>
               </div>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-lg transition"
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-block text-[11px] text-slate-400 font-medium bg-slate-100 px-2 py-1 rounded-md">
+                  ESC to close
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold text-xl transition cursor-pointer"
+                  title="Close Modal (or click outside / Esc)"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
+            {/* Error Banner */}
             {submitError && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-xs sm:text-sm font-semibold flex items-center gap-2">
+              <div className="shrink-0 mx-6 mt-4 p-3.5 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-xs sm:text-sm font-semibold flex items-center gap-2">
                 <span className="text-base">⚠️</span>
                 <div>
                   <strong>Meta Submission Error:</strong> {submitError}
@@ -718,459 +766,475 @@ export default function TemplatesPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* Form Side */}
-              <form onSubmit={handleSubmitTemplate} className="lg:col-span-7 space-y-4">
-                <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
-                    Template Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. order_alert_v1"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "_") })}
-                    className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  />
-                  <p className="text-[11px] text-slate-400 mt-1">Lowercase letters, numbers, and underscores only.</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Category</label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                      className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    >
-                      <option value="MARKETING">📢 Marketing / Promo</option>
-                      <option value="UTILITY">📦 Utility / Order Alert</option>
-                      <option value="AUTHENTICATION">🔑 Authentication (OTP)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Language</label>
-                    <select
-                      value={formData.language}
-                      onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                      className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    >
-                      <option value="en_US">English (en_US)</option>
-                      <option value="hi">Hindi (hi)</option>
-                    </select>
-                  </div>
-                </div>
-
-                {formData.category !== "AUTHENTICATION" && (
-                  <>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Header Type</label>
-                        <select
-                          value={formData.headerType}
-                          onChange={(e) => setFormData({ ...formData, headerType: e.target.value as any })}
-                          className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white"
-                        >
-                          <option value="NONE">None</option>
-                          <option value="TEXT">Text Header</option>
-                          <option value="IMAGE">Image Header</option>
-                        </select>
-                      </div>
-                      {formData.headerType === "TEXT" && (
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Header Text</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. Order Update"
-                            value={formData.headerText}
-                            onChange={(e) => setFormData({ ...formData, headerText: e.target.value })}
-                            className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm"
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* BODY TEXT SECTION WITH CURSOR VARIABLE INSERTERS */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                          Body Message <span className="text-red-500">*</span>
-                        </label>
-                        <span className="text-[11px] text-slate-400">
-                          {detectedVariables.length} variable{detectedVariables.length !== 1 ? "s" : ""} detected
-                        </span>
-                      </div>
-
-                      {/* Smart Quick Insert Variable Buttons */}
-                      <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                            <span>⚡</span> Click to Insert at Cursor:
-                          </span>
-                          <span className="text-[10px] text-slate-400">Clicking inserts placeholder at cursor</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => insertVariableAtCursor("Customer_Name")}
-                            className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 hover:border-purple-300 transition shadow-2xs flex items-center gap-1"
-                            title="Insert {{Customer_Name}} at cursor"
-                          >
-                            <span>👤</span> + &#123;&#123;Customer_Name&#125;&#125;
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => insertVariableAtCursor("Order_ID")}
-                            className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition shadow-2xs flex items-center gap-1"
-                            title="Insert {{Order_ID}} at cursor"
-                          >
-                            <span>📦</span> + &#123;&#123;Order_ID&#125;&#125;
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => insertVariableAtCursor("Offer_Discount")}
-                            className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-200 hover:border-emerald-300 transition shadow-2xs flex items-center gap-1"
-                            title="Insert {{Offer_Discount}} at cursor"
-                          >
-                            <span>🏷️</span> + &#123;&#123;Offer_Discount&#125;&#125;
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => insertVariableAtCursor("Address")}
-                            className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-amber-50 text-amber-700 border border-amber-200 hover:border-amber-300 transition shadow-2xs flex items-center gap-1"
-                            title="Insert {{Address}} at cursor"
-                          >
-                            <span>📍</span> + &#123;&#123;Address&#125;&#125;
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => insertVariableAtCursor("Amount")}
-                            className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 hover:border-rose-300 transition shadow-2xs flex items-center gap-1"
-                            title="Insert {{Amount}} at cursor"
-                          >
-                            <span>💰</span> + &#123;&#123;Amount&#125;&#125;
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => insertVariableAtCursor("Delivery_Date")}
-                            className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300 transition shadow-2xs flex items-center gap-1"
-                            title="Insert {{Delivery_Date}} at cursor"
-                          >
-                            <span>📅</span> + &#123;&#123;Delivery_Date&#125;&#125;
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => insertVariableAtCursor("Custom_Field", true)}
-                            className="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition shadow-2xs flex items-center gap-1"
-                            title="Insert custom brackets {{...}} with cursor inside"
-                          >
-                            <span>✨</span> + Custom Variable &#123;&#123;...&#125;&#125;
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Main Textarea */}
-                      <textarea
-                        ref={bodyTextareaRef}
-                        rows={4}
-                        required
-                        value={formData.bodyText}
-                        onChange={(e) => setFormData({ ...formData, bodyText: e.target.value })}
-                        className="w-full border border-slate-200 rounded-xl p-3.5 text-sm font-sans focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                        placeholder="Type message here... Click buttons above or write {{Field_Name}} for variables."
-                      />
-                    </div>
-
-                    {/* DYNAMIC VARIABLE DEFINITION & EXCEL MAPPING TABLE */}
-                    {detectedVariables.length > 0 && (
-                      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-sm">📊</span>
-                            <span className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
-                              Dynamic Variables & Excel Mapping ({detectedVariables.length})
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-200">
-                            Auto-translates to Meta &#123;&#123;1&#125;&#125;, &#123;&#123;2&#125;&#125;
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-500">
-                          Meta AI requires sample preview values to approve templates. These field labels will be used in your campaigns to automatically map uploaded Excel columns!
-                        </p>
-
-                        <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                          {detectedVariables.map((v, idx) => {
-                            const metaIdx = idx + 1;
-                            const currentDef = variableDefs[v] || getSmartDefaults(v);
-                            return (
-                              <div
-                                key={v}
-                                className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-2 text-xs"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-mono font-extrabold text-xs px-2 py-0.5 rounded bg-purple-100 text-purple-800 border border-purple-200">
-                                      &#123;&#123;{metaIdx}&#125;&#125;
-                                    </span>
-                                    <span className="font-mono text-[11px] text-slate-700 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                                      &#123;&#123;{v}&#125;&#125;
-                                    </span>
-                                  </div>
-                                  <span className="text-[10px] text-slate-400 font-mono">Meta Parameter #{metaIdx}</span>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-2.5">
-                                  <div>
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">
-                                      Excel Column Label:
-                                    </label>
-                                    <input
-                                      type="text"
-                                      value={currentDef.label}
-                                      onChange={(e) => {
-                                        const newLabel = e.target.value;
-                                        setVariableDefs(prev => ({
-                                          ...prev,
-                                          [v]: {
-                                            ...(prev[v] || getSmartDefaults(v)),
-                                            name: v,
-                                            label: newLabel
-                                          }
-                                        }));
-                                      }}
-                                      placeholder={`e.g. ${v}`}
-                                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">
-                                      Sample Preview Value:
-                                    </label>
-                                    <input
-                                      type="text"
-                                      value={currentDef.sampleValue}
-                                      onChange={(e) => {
-                                        const newSample = e.target.value;
-                                        setVariableDefs(prev => ({
-                                          ...prev,
-                                          [v]: {
-                                            ...(prev[v] || getSmartDefaults(v)),
-                                            name: v,
-                                            sampleValue: newSample
-                                          }
-                                        }));
-                                      }}
-                                      placeholder="e.g. Rahul Sharma"
-                                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
+            {/* 2. SCROLLABLE CONTENT BODY */}
+            <div className="flex-1 overflow-y-auto px-6 py-5">
+              <form id="createTemplateForm" onSubmit={handleSubmitTemplate}>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* Form Side */}
+                  <div className="lg:col-span-7 space-y-4">
                     <div>
                       <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
-                        Footer Text (Optional)
+                        Template Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. Reply STOP to unsubscribe"
-                        value={formData.footerText}
-                        onChange={(e) => setFormData({ ...formData, footerText: e.target.value })}
-                        className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm"
+                        required
+                        placeholder="e.g. order_alert_v1"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "_") })}
+                        className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       />
+                      <p className="text-[11px] text-slate-400 mt-1">Lowercase letters, numbers, and underscores only.</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
-                          Button Type
-                        </label>
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Category</label>
                         <select
-                          value={formData.buttonType}
-                          onChange={(e) => setFormData({ ...formData, buttonType: e.target.value as any })}
-                          className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold bg-white"
+                          value={formData.category}
+                          onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         >
-                          <option value="NONE">None</option>
-                          <option value="URL">Website URL</option>
-                          <option value="QUICK_REPLY">Quick Reply</option>
+                          <option value="MARKETING">📢 Marketing / Promo</option>
+                          <option value="UTILITY">📦 Utility / Order Alert</option>
+                          <option value="AUTHENTICATION">🔑 Authentication (OTP)</option>
                         </select>
                       </div>
-                      {formData.buttonType !== "NONE" && (
+                      <div>
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Language</label>
+                        <select
+                          value={formData.language}
+                          onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        >
+                          <option value="en_US">English (en_US)</option>
+                          <option value="hi">Hindi (hi)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {formData.category !== "AUTHENTICATION" && (
+                      <>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Header Type</label>
+                            <select
+                              value={formData.headerType}
+                              onChange={(e) => setFormData({ ...formData, headerType: e.target.value as any })}
+                              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white"
+                            >
+                              <option value="NONE">None</option>
+                              <option value="TEXT">Text Header</option>
+                              <option value="IMAGE">Image Header</option>
+                            </select>
+                          </div>
+                          {formData.headerType === "TEXT" && (
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Header Text</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. Order Update"
+                                value={formData.headerText}
+                                onChange={(e) => setFormData({ ...formData, headerText: e.target.value })}
+                                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* BODY TEXT SECTION WITH CURSOR VARIABLE INSERTERS */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                              Body Message <span className="text-red-500">*</span>
+                            </label>
+                            <span className="text-[11px] text-slate-400">
+                              {detectedVariables.length} variable{detectedVariables.length !== 1 ? "s" : ""} detected
+                            </span>
+                          </div>
+
+                          {/* Smart Quick Insert Variable Buttons */}
+                          <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                <span>⚡</span> Click to Insert at Cursor:
+                              </span>
+                              <span className="text-[10px] text-slate-400">Clicking inserts placeholder at cursor</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => insertVariableAtCursor("Customer_Name")}
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 hover:border-purple-300 transition shadow-2xs flex items-center gap-1 cursor-pointer"
+                                title="Insert {{Customer_Name}} at cursor"
+                              >
+                                <span>👤</span> + &#123;&#123;Customer_Name&#125;&#125;
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => insertVariableAtCursor("Order_ID")}
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition shadow-2xs flex items-center gap-1 cursor-pointer"
+                                title="Insert {{Order_ID}} at cursor"
+                              >
+                                <span>📦</span> + &#123;&#123;Order_ID&#125;&#125;
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => insertVariableAtCursor("Offer_Discount")}
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-200 hover:border-emerald-300 transition shadow-2xs flex items-center gap-1 cursor-pointer"
+                                title="Insert {{Offer_Discount}} at cursor"
+                              >
+                                <span>🏷️</span> + &#123;&#123;Offer_Discount&#125;&#125;
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => insertVariableAtCursor("Address")}
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-amber-50 text-amber-700 border border-amber-200 hover:border-amber-300 transition shadow-2xs flex items-center gap-1 cursor-pointer"
+                                title="Insert {{Address}} at cursor"
+                              >
+                                <span>📍</span> + &#123;&#123;Address&#125;&#125;
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => insertVariableAtCursor("Amount")}
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 hover:border-rose-300 transition shadow-2xs flex items-center gap-1 cursor-pointer"
+                                title="Insert {{Amount}} at cursor"
+                              >
+                                <span>💰</span> + &#123;&#123;Amount&#125;&#125;
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => insertVariableAtCursor("Delivery_Date")}
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300 transition shadow-2xs flex items-center gap-1 cursor-pointer"
+                                title="Insert {{Delivery_Date}} at cursor"
+                              >
+                                <span>📅</span> + &#123;&#123;Delivery_Date&#125;&#125;
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => insertVariableAtCursor("Custom_Field", true)}
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition shadow-2xs flex items-center gap-1 cursor-pointer"
+                                title="Insert custom brackets {{...}} with cursor inside"
+                              >
+                                <span>✨</span> + Custom Variable &#123;&#123;...&#125;&#125;
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Main Textarea */}
+                          <textarea
+                            ref={bodyTextareaRef}
+                            rows={4}
+                            required
+                            value={formData.bodyText}
+                            onChange={(e) => setFormData({ ...formData, bodyText: e.target.value })}
+                            className="w-full border border-slate-200 rounded-xl p-3.5 text-sm font-sans focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            placeholder="Type message here... Click buttons above or write {{Field_Name}} for variables."
+                          />
+                        </div>
+
+                        {/* DYNAMIC VARIABLE DEFINITION & EXCEL MAPPING TABLE */}
+                        {detectedVariables.length > 0 && (
+                          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-sm">📊</span>
+                                <span className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                                  Dynamic Variables & Excel Mapping ({detectedVariables.length})
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-200">
+                                Auto-translates to Meta &#123;&#123;1&#125;&#125;, &#123;&#123;2&#125;&#125;
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500">
+                              Meta AI requires sample preview values to approve templates. These field labels will be used in your campaigns to automatically map uploaded Excel columns!
+                            </p>
+
+                            <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                              {detectedVariables.map((v, idx) => {
+                                const metaIdx = idx + 1;
+                                const currentDef = variableDefs[v] || getSmartDefaults(v);
+                                return (
+                                  <div
+                                    key={v}
+                                    className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-2 text-xs"
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-mono font-extrabold text-xs px-2 py-0.5 rounded bg-purple-100 text-purple-800 border border-purple-200">
+                                          &#123;&#123;{metaIdx}&#125;&#125;
+                                        </span>
+                                        <span className="font-mono text-[11px] text-slate-700 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                          &#123;&#123;{v}&#125;&#125;
+                                        </span>
+                                      </div>
+                                      <span className="text-[10px] text-slate-400 font-mono">Meta Parameter #{metaIdx}</span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2.5">
+                                      <div>
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">
+                                          Excel Column Label:
+                                        </label>
+                                        <input
+                                          type="text"
+                                          value={currentDef.label}
+                                          onChange={(e) => {
+                                            const newLabel = e.target.value;
+                                            setVariableDefs(prev => ({
+                                              ...prev,
+                                              [v]: {
+                                                ...(prev[v] || getSmartDefaults(v)),
+                                                name: v,
+                                                label: newLabel
+                                              }
+                                            }));
+                                          }}
+                                          placeholder={`e.g. ${v}`}
+                                          className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">
+                                          Sample Preview Value:
+                                        </label>
+                                        <input
+                                          type="text"
+                                          value={currentDef.sampleValue}
+                                          onChange={(e) => {
+                                            const newSample = e.target.value;
+                                            setVariableDefs(prev => ({
+                                              ...prev,
+                                              [v]: {
+                                                ...(prev[v] || getSmartDefaults(v)),
+                                                name: v,
+                                                sampleValue: newSample
+                                              }
+                                            }));
+                                          }}
+                                          placeholder="e.g. Rahul Sharma"
+                                          className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
                         <div>
                           <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
-                            Button Label
+                            Footer Text (Optional)
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g. Visit Website"
-                            value={formData.buttonText}
-                            onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })}
+                            placeholder="e.g. Reply STOP to unsubscribe"
+                            value={formData.footerText}
+                            onChange={(e) => setFormData({ ...formData, footerText: e.target.value })}
                             className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm"
                           />
                         </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                              Button Type
+                            </label>
+                            <select
+                              value={formData.buttonType}
+                              onChange={(e) => setFormData({ ...formData, buttonType: e.target.value as any })}
+                              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold bg-white"
+                            >
+                              <option value="NONE">None</option>
+                              <option value="URL">Website URL</option>
+                              <option value="QUICK_REPLY">Quick Reply</option>
+                            </select>
+                          </div>
+                          {formData.buttonType !== "NONE" && (
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                                Button Label
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="e.g. Visit Website"
+                                value={formData.buttonText}
+                                onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })}
+                                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {formData.buttonType === "URL" && (
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                              Destination URL
+                            </label>
+                            <input
+                              type="url"
+                              placeholder="https://..."
+                              value={formData.buttonUrl}
+                              onChange={(e) => setFormData({ ...formData, buttonUrl: e.target.value })}
+                              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono"
+                            />
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {formData.category === "AUTHENTICATION" && (
+                      <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-900 space-y-2">
+                        <p className="font-bold flex items-center gap-1.5">
+                          <span>🔒</span> Meta Standard OTP Format
+                        </p>
+                        <p>
+                          Meta automatically generates standard, highly secure OTP templates with a 1-tap "Copy Code" button. Custom text is restricted by Meta policies to prevent phishing.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Live Preview Side */}
+                  <div className="lg:col-span-5 bg-slate-50 p-6 rounded-3xl border border-slate-200 flex flex-col items-center">
+                    <div className="w-full flex items-center justify-between mb-4">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                        Live WhatsApp Preview
+                      </span>
+                      {formData.category !== "AUTHENTICATION" && (
+                        <div className="flex bg-slate-200 p-0.5 rounded-lg text-[10px] font-bold">
+                          <button
+                            type="button"
+                            onClick={() => setPreviewMode("live")}
+                            className={`px-2 py-0.5 rounded-md transition ${previewMode === "live" ? "bg-white text-emerald-700 shadow-2xs" : "text-slate-600"}`}
+                          >
+                            👁️ Sample Data
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPreviewMode("raw")}
+                            className={`px-2 py-0.5 rounded-md transition ${previewMode === "raw" ? "bg-white text-emerald-700 shadow-2xs" : "text-slate-600"}`}
+                          >
+                            🔍 Raw Code
+                          </button>
+                        </div>
                       )}
                     </div>
 
-                    {formData.buttonType === "URL" && (
-                      <div>
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
-                          Destination URL
-                        </label>
-                        <input
-                          type="url"
-                          placeholder="https://..."
-                          value={formData.buttonUrl}
-                          onChange={(e) => setFormData({ ...formData, buttonUrl: e.target.value })}
-                          className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono"
-                        />
+                    <div className="w-full max-w-[290px] bg-slate-900 rounded-[36px] p-3 shadow-2xl border-4 border-slate-700 relative">
+                      {/* Phone Notch */}
+                      <div className="w-24 h-4 bg-slate-800 rounded-b-xl mx-auto mb-2"></div>
+
+                      {/* WhatsApp Chat Area */}
+                      <div className="bg-[#E5DDD5] rounded-[24px] overflow-hidden min-h-[380px] flex flex-col justify-between p-3 border border-slate-300 relative text-xs">
+                        {/* Chat Header */}
+                        <div className="bg-[#075E54] text-white p-2.5 -mx-3 -mt-3 flex items-center justify-between mb-3 shadow-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-emerald-400 flex items-center justify-center text-[10px] font-bold text-slate-900">
+                              WA
+                            </div>
+                            <div>
+                              <div className="font-bold leading-none flex items-center gap-1 text-[11px]">
+                                <span>Verified Business</span>
+                                <span className="text-[10px] text-emerald-300">✓</span>
+                              </div>
+                              <div className="text-[9px] text-emerald-100 opacity-80">Official WhatsApp Account</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Chat Message Bubble */}
+                        <div className="bg-white rounded-2xl rounded-tl-none p-3 shadow-sm border border-slate-100 space-y-2 max-w-[95%]">
+                          {formData.category === "AUTHENTICATION" ? (
+                            <>
+                              <div className="text-xs text-slate-800 leading-relaxed">
+                                <span className="font-mono bg-slate-100 px-2 py-0.5 rounded font-bold text-slate-900">123456</span> is your verification code. Valid for 10 minutes. For your security, do not share this code.
+                              </div>
+                              <div className="pt-2 border-t border-black/10">
+                                <div className="bg-white text-blue-600 font-bold text-center py-2 rounded-xl text-xs shadow-2xs border border-slate-200 flex items-center justify-center gap-1">
+                                  <span>📋</span> Copy Code
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              {formData.headerType === "TEXT" && formData.headerText && (
+                                <div className="font-bold text-slate-900 text-xs border-b border-black/5 pb-1">
+                                  {formData.headerText}
+                                </div>
+                              )}
+                              {formData.headerType === "IMAGE" && (
+                                <div className="h-28 bg-slate-200 rounded-lg flex items-center justify-center text-slate-500 text-[11px] font-semibold border border-slate-300">
+                                  🖼️ [Image Header Preview]
+                                </div>
+                              )}
+                              <div className="text-xs text-slate-800 whitespace-pre-line leading-relaxed">
+                                {livePreviewBodyText}
+                              </div>
+                              {formData.footerText && (
+                                <div className="text-[10px] text-slate-400 pt-0.5">
+                                  {formData.footerText}
+                                </div>
+                              )}
+                              <div className="text-[9px] text-slate-400 text-right flex items-center justify-end gap-1 pt-1">
+                                <span>12:00 PM</span>
+                                <span className="text-blue-500 font-bold">✓✓</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Buttons */}
+                        {formData.category !== "AUTHENTICATION" && formData.buttonType !== "NONE" && formData.buttonText && (
+                          <div className="pt-2 space-y-1.5">
+                            <div className="bg-white text-blue-600 font-bold text-center py-2 rounded-xl text-xs shadow-2xs border border-slate-200 flex items-center justify-center gap-1.5">
+                              {formData.buttonType === "URL" && <span>🔗</span>}
+                              {formData.buttonType === "QUICK_REPLY" && <span>💬</span>}
+                              <span>{formData.buttonText}</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </>
-                )}
+                    </div>
 
-                {formData.category === "AUTHENTICATION" && (
-                  <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-900 space-y-2">
-                    <p className="font-bold flex items-center gap-1.5">
-                      <span>🔒</span> Meta Standard OTP Format
-                    </p>
-                    <p>
-                      Meta automatically generates standard, highly secure OTP templates with a 1-tap "Copy Code" button. Custom text is restricted by Meta policies to prevent phishing.
-                    </p>
+                    <div className="mt-4 text-center">
+                      <span className="text-[11px] text-slate-500 font-medium">
+                        {previewMode === "live" ? "Showing realistic preview with sample data" : "Showing raw template placeholders"}
+                      </span>
+                    </div>
                   </div>
-                )}
-
-                <div className="flex justify-end gap-3 pt-4 border-t">
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateModal(false)}
-                    className="px-4 py-2 border rounded-xl text-slate-700 text-sm font-semibold hover:bg-slate-50 transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 disabled:opacity-50 shadow-sm transition flex items-center gap-1.5"
-                  >
-                    {submitting ? "Submitting to Meta..." : "🚀 Submit to Meta Review"}
-                  </button>
                 </div>
               </form>
+            </div>
 
-              {/* Live Preview Side */}
-              <div className="lg:col-span-5 bg-slate-50 p-6 rounded-3xl border border-slate-200 flex flex-col items-center">
-                <div className="w-full flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Live WhatsApp Preview
-                  </span>
-                  {formData.category !== "AUTHENTICATION" && (
-                    <div className="flex bg-slate-200 p-0.5 rounded-lg text-[10px] font-bold">
-                      <button
-                        type="button"
-                        onClick={() => setPreviewMode("live")}
-                        className={`px-2 py-0.5 rounded-md transition ${previewMode === "live" ? "bg-white text-emerald-700 shadow-2xs" : "text-slate-600"}`}
-                      >
-                        👁️ Sample Data
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPreviewMode("raw")}
-                        className={`px-2 py-0.5 rounded-md transition ${previewMode === "raw" ? "bg-white text-emerald-700 shadow-2xs" : "text-slate-600"}`}
-                      >
-                        🔍 Raw Code
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="w-full max-w-[290px] bg-slate-900 rounded-[36px] p-3 shadow-2xl border-4 border-slate-700 relative">
-                  {/* Phone Notch */}
-                  <div className="w-24 h-4 bg-slate-800 rounded-b-xl mx-auto mb-2"></div>
-
-                  {/* WhatsApp Chat Area */}
-                  <div className="bg-[#E5DDD5] rounded-[24px] overflow-hidden min-h-[380px] flex flex-col justify-between p-3 border border-slate-300 relative text-xs">
-                    {/* Chat Header */}
-                    <div className="bg-[#075E54] text-white p-2.5 -mx-3 -mt-3 flex items-center justify-between mb-3 shadow-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-emerald-400 flex items-center justify-center text-[10px] font-bold text-slate-900">
-                          WA
-                        </div>
-                        <div>
-                          <div className="font-bold leading-none flex items-center gap-1 text-[11px]">
-                            <span>Verified Business</span>
-                            <span className="text-[10px] text-emerald-300">✓</span>
-                          </div>
-                          <div className="text-[9px] text-emerald-100 opacity-80">Official WhatsApp Account</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Chat Message Bubble */}
-                    <div className="bg-white rounded-2xl rounded-tl-none p-3 shadow-sm border border-slate-100 space-y-2 max-w-[95%]">
-                      {formData.category === "AUTHENTICATION" ? (
-                        <>
-                          <div className="text-xs text-slate-800 leading-relaxed">
-                            <span className="font-mono bg-slate-100 px-2 py-0.5 rounded font-bold text-slate-900">123456</span> is your verification code. Valid for 10 minutes. For your security, do not share this code.
-                          </div>
-                          <div className="pt-2 border-t border-black/10">
-                            <div className="bg-white text-blue-600 font-bold text-center py-2 rounded-xl text-xs shadow-2xs border border-slate-200 flex items-center justify-center gap-1">
-                              <span>📋</span> Copy Code
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          {formData.headerType === "TEXT" && formData.headerText && (
-                            <div className="font-bold text-slate-900 text-xs border-b border-black/5 pb-1">
-                              {formData.headerText}
-                            </div>
-                          )}
-                          {formData.headerType === "IMAGE" && (
-                            <div className="h-28 bg-slate-200 rounded-lg flex items-center justify-center text-slate-500 text-[11px] font-semibold border border-slate-300">
-                              🖼️ [Image Header Preview]
-                            </div>
-                          )}
-                          <div className="text-xs text-slate-800 whitespace-pre-line leading-relaxed">
-                            {livePreviewBodyText}
-                          </div>
-                          {formData.footerText && (
-                            <div className="text-[10px] text-slate-400 pt-0.5">
-                              {formData.footerText}
-                            </div>
-                          )}
-                          <div className="text-[9px] text-slate-400 text-right flex items-center justify-end gap-1 pt-1">
-                            <span>12:00 PM</span>
-                            <span className="text-blue-500 font-bold">✓✓</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Buttons */}
-                    {formData.category !== "AUTHENTICATION" && formData.buttonType !== "NONE" && formData.buttonText && (
-                      <div className="pt-2 space-y-1.5">
-                        <div className="bg-white text-blue-600 font-bold text-center py-2 rounded-xl text-xs shadow-2xs border border-slate-200 flex items-center justify-center gap-1.5">
-                          {formData.buttonType === "URL" && <span>🔗</span>}
-                          {formData.buttonType === "QUICK_REPLY" && <span>💬</span>}
-                          <span>{formData.buttonText}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4 text-center">
-                  <span className="text-[11px] text-slate-500 font-medium">
-                    {previewMode === "live" ? "Showing realistic preview with sample data" : "Showing raw template placeholders"}
-                  </span>
-                </div>
+            {/* 3. STICKY MODAL FOOTER */}
+            <div className="shrink-0 flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-100 z-10">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="px-4 py-2 text-slate-600 hover:text-slate-900 text-sm font-semibold hover:bg-slate-200/60 rounded-xl transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="hidden sm:inline-block px-4 py-2 border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  form="createTemplateForm"
+                  disabled={submitting}
+                  className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold disabled:opacity-50 shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  {submitting ? "Submitting to Meta..." : "🚀 Submit to Meta Review"}
+                </button>
               </div>
             </div>
           </div>
