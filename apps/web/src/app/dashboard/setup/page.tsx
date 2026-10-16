@@ -371,8 +371,101 @@ export default function SetupPage() {
                       2. WhatsApp Business Account (WABA)
                     </label>
                     {currentWabas.length === 0 ? (
-                      <div className="text-xs text-red-600 p-3 bg-red-50 rounded-xl border border-red-200">
-                        No WhatsApp Accounts found inside this portfolio.
+                      <div className="p-4 bg-amber-50/90 border border-amber-200 rounded-2xl text-xs space-y-3">
+                        <div className="flex items-start gap-2.5">
+                          <span className="text-lg shrink-0">ℹ️</span>
+                          <div>
+                            <p className="font-extrabold text-amber-900 text-sm">
+                              Why is Ishinna Sadana not showing yet?
+                            </p>
+                            <p className="text-amber-800 text-xs mt-1 leading-relaxed">
+                              Your active Meta token was generated under <strong className="text-slate-900">Digital Being (ID: 205078357411585)</strong>. Meta isolates portfolios, so it blocks this token from reading assets inside <strong className="text-slate-900">{currentBiz?.name || "this portfolio"}</strong> until you grant partner permission or add a token for this portfolio.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="bg-white p-3.5 rounded-xl border border-amber-200 space-y-2.5">
+                          <p className="font-extrabold text-slate-800 text-xs">
+                            👉 Two Fast Ways to Connect {currentBiz?.name || "this portfolio"}:
+                          </p>
+
+                          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-slate-900 text-[11px]">
+                                Method 1: Assign Partner in Meta (Takes 15 Seconds)
+                              </span>
+                              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+                                Recommended
+                              </span>
+                            </div>
+                            <ol className="list-decimal pl-4 space-y-1.5 text-[11px] text-slate-600">
+                              <li>
+                                In your Meta Business Settings tab for <strong>{currentBiz?.name}</strong>, go to <strong>WhatsApp accounts</strong> ➔ <strong>Ishinna Sadana</strong>.
+                              </li>
+                              <li>
+                                Click the <strong className="text-blue-600">Assign partner</strong> button (right above the summary tabs).
+                              </li>
+                              <li>
+                                Enter Digital Being Partner Business ID:
+                                <div className="mt-1 flex items-center gap-2">
+                                  <code className="bg-slate-200 px-2 py-1 rounded text-slate-900 font-mono font-bold text-xs">
+                                    205078357411585
+                                  </code>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText("205078357411585");
+                                      showSuccess("Copied Digital Being ID (205078357411585) to clipboard!", "Copied");
+                                    }}
+                                    className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold rounded shadow-2xs"
+                                  >
+                                    📋 Copy ID
+                                  </button>
+                                </div>
+                              </li>
+                              <li>Toggle <strong>Full control</strong> / <strong>Manage WhatsApp account</strong> and click Save!</li>
+                            </ol>
+                          </div>
+
+                          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                            <span className="font-bold text-slate-900 text-[11px]">
+                              Method 2: Generate Token directly inside {currentBiz?.name}
+                            </span>
+                            <p className="text-[11px] text-slate-600 leading-relaxed">
+                              In <strong>{currentBiz?.name}</strong>, go to <strong>Users</strong> ➔ <strong>System users</strong>, create an Admin user, assign <strong>Ishinna Sadana</strong>, and generate a token.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setShowTokenModal(true)}
+                              className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg shadow-2xs transition inline-flex items-center gap-1.5"
+                            >
+                              <span>🔑</span> Paste Token for {currentBiz?.name}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (projectId) {
+                                fetchMetaAccounts(projectId);
+                                fetchConnectedNumbers(projectId);
+                              }
+                            }}
+                            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-2xs transition flex items-center gap-1"
+                          >
+                            <span>🔄</span> Refresh Accounts Once Permitted
+                          </button>
+                          <a
+                            href="https://business.facebook.com/settings/whatsapp-business-accounts"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-blue-600 hover:underline font-semibold"
+                          >
+                            Open Meta Business Settings ↗
+                          </a>
+                        </div>
                       </div>
                     ) : (
                       <select 
