@@ -64,8 +64,9 @@ export default function WalletPage() {
         key: data.keyId || "rzp_live_Tl4uH3gYo8IWeO",
         amount: data.amount,
         currency: "INR",
-        name: "OTP SaaS",
-        description: "Wallet Credit Recharge",
+        name: "Digital Beings",
+        description: "Wallet Credit Recharge (Digital Beings)",
+        image: "/icon.png",
         order_id: data.orderId,
         handler: function (response: any) {
           showSuccess(`Your payment of ₹${amount} was successful!\n\nTransaction ID: ${response.razorpay_payment_id}\nYour wallet balance has been updated.`, "Payment Received");

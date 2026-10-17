@@ -39,11 +39,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen bg-slate-100 flex">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-slate-200 hidden md:block shrink-0">
-        <div className="h-16 flex items-center px-6 border-b border-slate-200">
-          <span className="font-extrabold text-xl tracking-tight text-slate-900 flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-            OTP SaaS
-          </span>
+        <div className="h-16 flex items-center px-5 border-b border-slate-200">
+          <Link href="/dashboard" className="flex items-center gap-2.5 group">
+            <img
+              src="/icon.png"
+              alt="Digital Beings"
+              className="w-8 h-8 rounded-lg object-contain shadow-xs shrink-0 group-hover:scale-105 transition"
+            />
+            <div className="flex flex-col min-w-0">
+              <span className="font-extrabold text-base tracking-tight text-slate-900 leading-tight">
+                Digital<span className="text-emerald-600">Beings</span>
+              </span>
+              <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase">
+                Secure • Connect • Grow
+              </span>
+            </div>
+          </Link>
         </div>
         <nav className="p-4 space-y-1.5 text-sm">
           <Link href="/dashboard/setup" className="block px-4 py-2 text-emerald-800 font-bold bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-200 mb-3 transition">

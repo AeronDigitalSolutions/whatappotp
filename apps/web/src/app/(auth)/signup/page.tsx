@@ -42,9 +42,16 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 text-center">Create an account</h1>
-          <p className="text-slate-500 text-center mt-2 text-sm">Get started with OTP SaaS today</p>
+        <div className="flex flex-col items-center text-center">
+          <Link href="/" className="inline-block mb-3 group">
+            <img
+              src="/icon.png"
+              alt="Digital Beings"
+              className="w-12 h-12 rounded-2xl object-contain shadow-xs group-hover:scale-105 transition mx-auto"
+            />
+          </Link>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Create your account</h1>
+          <p className="text-slate-500 mt-1 text-xs">Get started with <b>Digital Beings</b> today</p>
         </div>
 
         {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm border border-red-100">{error}</div>}

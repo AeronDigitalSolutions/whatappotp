@@ -41,18 +41,18 @@ export default function HomePage() {
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-2xs transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3 xl:gap-6">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-[#25D366] flex items-center justify-center text-white font-black text-xl shadow-md shadow-emerald-500/20 group-hover:scale-105 transition shrink-0">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 fill-current" viewBox="0 0 24 24">
-                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z" />
-              </svg>
-            </div>
+          <Link href="/" className="flex items-center gap-3 group shrink-0">
+            <img
+              src="/icon.png"
+              alt="Digital Beings"
+              className="w-10 h-10 rounded-xl object-contain shadow-md group-hover:scale-105 transition shrink-0"
+            />
             <div className="flex flex-col">
               <span className="font-black text-xl sm:text-2xl tracking-tight text-slate-900 leading-none">
-                OTP<span className="text-emerald-500">SaaS</span>
+                Digital<span className="text-emerald-600">Beings</span>
               </span>
               <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 tracking-wider sm:tracking-widest uppercase">
-                WhatsApp Cloud Suite
+                Secure • Connect • Grow
               </span>
             </div>
           </Link>
@@ -1366,13 +1366,20 @@ print(res.json())`}
       <footer className="bg-white border-t border-slate-200 py-16 text-slate-500 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-[#25D366] flex items-center justify-center text-white font-black text-sm">
-                ⚡
+            <Link href="/" className="flex items-center gap-3">
+              <img
+                src="/icon.png"
+                alt="Digital Beings"
+                className="w-9 h-9 rounded-xl object-contain shadow-xs shrink-0"
+              />
+              <div className="flex flex-col">
+                <span className="font-black text-xl tracking-tight text-slate-900 leading-none">
+                  Digital<span className="text-emerald-600">Beings</span>
+                </span>
+                <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase">
+                  Secure • Connect • Grow
+                </span>
               </div>
-              <span className="font-black text-xl tracking-tight text-slate-900">
-                OTP<span className="text-emerald-500">SaaS</span>
-              </span>
             </Link>
             <p className="text-slate-500 max-w-sm leading-relaxed">
               Official Meta Tech Partner powering broadcast marketing, customer support, and instant OTP authentication over WhatsApp Cloud API.
@@ -1417,7 +1424,7 @@ print(res.json())`}
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 mt-12 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© 2026 OTP SaaS / Digital Beings. All rights reserved. Meta and WhatsApp are registered trademarks of Meta Platforms, Inc.</p>
+          <p>© 2026 Digital Beings (Aeron Digital Solutions). All rights reserved. Meta and WhatsApp are registered trademarks of Meta Platforms, Inc.</p>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:underline">Privacy</Link>
             <Link href="/terms" className="hover:underline">Terms</Link>
