@@ -39,7 +39,7 @@ interface MetaTemplate {
 interface CampaignItem {
   id: string;
   name: string;
-  service: "MARKETING" | "UTILITY" | "AUTHENTICATION";
+  service: "MARKETING" | "UTILITY";
   phoneId: string;
   senderPhone?: string;
   templateName: string;
@@ -172,11 +172,11 @@ export default function CampaignsPage() {
         }
       }
 
-      // 2. Load Approved Templates from Meta
+      // 2. Load Approved Templates from Meta (strictly exclude AUTHENTICATION / OTP templates)
       const tRes = await fetch(`${getApiUrl()}/v1/meta/templates/${projectId}`);
       const tData = await tRes.json();
       if (tData.success && tData.templates) {
-        const approved = tData.templates.filter((t: MetaTemplate) => t.status === "APPROVED");
+        const approved = tData.templates.filter((t: MetaTemplate) => t.status === "APPROVED" && t.category !== "AUTHENTICATION");
         setTemplates(approved);
       }
 
@@ -200,12 +200,12 @@ export default function CampaignsPage() {
     }
   }, [projectId]);
 
-  // Filter templates by category
+  // Filter templates by category (MARKETING or UTILITY)
   const filteredTemplatesForService = useMemo(() => {
     return templates.filter((t) => {
+      if (t.category === "AUTHENTICATION") return false;
       if (service === "MARKETING") return t.category === "MARKETING";
       if (service === "UTILITY") return t.category === "UTILITY";
-      if (service === "AUTHENTICATION") return t.category === "AUTHENTICATION";
       return true;
     });
   }, [templates, service]);
@@ -854,10 +854,9 @@ export default function CampaignsPage() {
             onChange={(e) => setFilterService(e.target.value)}
             className="px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 font-medium bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
-            <option value="ALL">All Services</option>
+            <option value="ALL">All Broadcast Types</option>
             <option value="MARKETING">📣 Marketing & Promo</option>
-            <option value="UTILITY">📦 Order Utility</option>
-            <option value="AUTHENTICATION">🔐 OTP & Authentication</option>
+            <option value="UTILITY">📋 Operational & Utility</option>
           </select>
 
           <select
@@ -1169,31 +1168,48 @@ export default function CampaignsPage() {
                       onClick={() => setService("MARKETING")}
                       className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
                         service === "MARKETING"
-                          ? "border-purple-600 bg-purple-50/50 shadow-sm"
-                          : "border-slate-200 hover:border-slate-300"
+                          ? "border-purple-600 bg-purple-50/70 shadow-sm ring-1 ring-purple-600/30"
+                          : "border-slate-200 hover:border-slate-300 bg-white"
                       }`}
                     >
-                      <div className="text-xl mb-1">📣</div>
-                      <div className="font-extrabold text-slate-900 text-sm">Marketing & Promo</div>
-                      <div className="text-xs text-slate-500 mt-1">Discounts, offers, and seasonal sales.</div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-2xl">📣</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
+                          ₹1.00 / msg
+                        </span>
+                      </div>
+                      <div className="font-extrabold text-slate-900 text-sm">Marketing & Promo Broadcast</div>
+                      <div className="text-xs text-slate-500 mt-1 leading-relaxed">
+                        Festive discounts, promotional offers, seasonal sales, and product launch announcements.
+                      </div>
                     </div>
 
                     <div
                       onClick={() => setService("UTILITY")}
                       className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
                         service === "UTILITY"
-                          ? "border-blue-600 bg-blue-50/50 shadow-sm"
-                          : "border-slate-200 hover:border-slate-300"
+                          ? "border-blue-600 bg-blue-50/70 shadow-sm ring-1 ring-blue-600/30"
+                          : "border-slate-200 hover:border-slate-300 bg-white"
                       }`}
                     >
-                      <div className="text-xl mb-1">📦</div>
-                      <div className="font-extrabold text-slate-900 text-sm">Order Update / Utility</div>
-                      <div className="text-xs text-slate-500 mt-1">Order confirmations, billing, shipping alerts & reminders.</div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-2xl">📋</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                          ₹0.50 / msg (50% Off)
+                        </span>
+                      </div>
+                      <div className="font-extrabold text-slate-900 text-sm">Operational & Utility Broadcast</div>
+                      <div className="text-xs text-slate-500 mt-1 leading-relaxed">
+                        Invoices, fee due reminders, school/society notices, and service maintenance alerts.
+                      </div>
                     </div>
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-2">
-                    💡 <b>Note:</b> OTP / Authentication templates are real-time security events triggered via API keys, and cannot be broadcast as campaigns.
-                  </p>
+                  <div className="bg-slate-100/80 border border-slate-200/80 rounded-xl p-3 mt-3 flex items-start gap-2.5 text-[11px] text-slate-600">
+                    <span className="text-base shrink-0 mt-0.5">💡</span>
+                    <span>
+                      <b>Looking for OTP / Authentication?</b> OTP is a real-time, 1-to-1 security trigger and cannot be sent via bulk Excel campaigns. Dispatch OTPs programmatically using your secret keys under <a href="/dashboard/api-keys" className="font-bold text-slate-900 underline hover:text-emerald-700">API Keys & Sandbox</a>.
+                    </span>
+                  </div>
                 </div>
 
                 <div>

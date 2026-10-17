@@ -1731,6 +1731,12 @@ fastify.post("/v1/campaigns/:projectId", async (request: any, reply) => {
     return reply.status(400).send({ error: "Missing required fields (name, phoneId, templateName)" });
   }
 
+  if (service === "AUTHENTICATION") {
+    return reply.status(400).send({
+      error: "OTP / Authentication templates cannot be broadcast as bulk campaigns. OTPs are real-time, 1-to-1 security events and must be triggered via POST /v1/otp/send API."
+    });
+  }
+
   if (!Array.isArray(recipients) || recipients.length === 0) {
     return reply.status(400).send({ error: "Recipients list cannot be empty. Please upload an audience." });
   }
