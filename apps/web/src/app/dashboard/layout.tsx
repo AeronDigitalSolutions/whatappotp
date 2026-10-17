@@ -10,6 +10,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [userName, setUserName] = useState("User");
 
   useEffect(() => {
+    const titles: Record<string, string> = {
+      "/dashboard": "Mission Control Overview | Digital Beings",
+      "/dashboard/setup": "Setup Guide | Digital Beings",
+      "/dashboard/numbers": "Numbers & Routing | Digital Beings",
+      "/dashboard/green-tick": "Green Tick Verification | Digital Beings",
+      "/dashboard/templates": "Template Studio | Digital Beings",
+      "/dashboard/campaigns": "Broadcast Campaigns | Digital Beings",
+      "/dashboard/wallet": "Wallet & Billing | Digital Beings",
+      "/dashboard/logs": "OTP Logs & Audits | Digital Beings",
+      "/dashboard/api-keys": "API Keys | Digital Beings",
+      "/dashboard/settings": "Settings | Digital Beings",
+    };
+    document.title = titles[pathname] || "Digital Beings - WhatsApp Cloud Platform";
+
     const userJson = localStorage.getItem("user");
     if (!userJson) {
       router.push("/login");
@@ -18,7 +32,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setUserName(user.name || "User");
       setAuthChecked(true);
     }
-  }, [pathname]);
+  }, [pathname, router]);
 
   if (!authChecked) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 

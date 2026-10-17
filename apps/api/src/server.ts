@@ -942,24 +942,110 @@ fastify.get("/v1/wallet/:organizationId", async (request: any, reply) => {
 });
 
 fastify.post("/v1/billing/order", async (request: any, reply) => {
-  const { amount, organizationId } = request.body;
-  const rzpKeyId = process.env.RAZORPAY_KEY_ID;
-  const rzpKeySecret = process.env.RAZORPAY_KEY_SECRET;
+  const { amount, organizationId } = request.body || {};
+  const rzpKeyId = process.env.RAZORPAY_KEY_ID || "rzp_live_Tl4uH3gYo8IWeO";
+  const rzpKeySecret = process.env.RAZORPAY_KEY_SECRET || "pD9rgL4P76hS9ECynnKSn75c";
 
-  if (!rzpKeyId || !rzpKeySecret) return reply.status(500).send({ error: "Razorpay keys missing" });
+  if (!rzpKeyId || !rzpKeySecret) {
+    return reply.status(500).send({ error: "Razorpay payment keys are not configured" });
+  }
 
   try {
-    const auth = Buffer.from(`${rzpKeyId}:${rzpKeySecret}`).toString('base64');
+    const parsedAmount = Math.max(100, Math.round(Number(amount) || 100));
+    // Razorpay receipt field strictly requires <= 40 characters
+    const shortReceipt = `rcpt_${Math.random().toString(36).substring(2, 8)}_${Date.now().toString().slice(-6)}`;
+
+    const auth = Buffer.from(`${rzpKeyId}:${rzpKeySecret}`).toString("base64");
     const orderRes = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Basic ${auth}` },
-      body: JSON.stringify({ amount: Math.round(amount * 100), currency: "INR", receipt: `receipt_${organizationId}_${Date.now()}` })
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Basic ${auth}` 
+      },
+      body: JSON.stringify({
+        amount: parsedAmount * 100, // Razorpay takes amount in paise
+        currency: "INR",
+        receipt: shortReceipt,
+        notes: {
+          organizationId: String(organizationId || "demo-org-id"),
+          platform: "Digital Beings"
+        }
+      })
     });
+
     const orderData = await orderRes.json();
-    if (!orderRes.ok) throw new Error(orderData.error?.description || "Razorpay API error");
-    return reply.send({ success: true, orderId: orderData.id, amount: orderData.amount, keyId: rzpKeyId });
+    if (!orderRes.ok) {
+      fastify.log.error({ msg: "Razorpay order error", orderData });
+      throw new Error(orderData.error?.description || "Razorpay API error creating order");
+    }
+
+    return reply.send({
+      success: true,
+      orderId: orderData.id,
+      amount: orderData.amount,
+      keyId: rzpKeyId
+    });
   } catch (error: any) {
-    return reply.status(500).send({ error: "Failed to create order" });
+    fastify.log.error(error);
+    return reply.status(500).send({ error: error.message || "Failed to create order" });
+  }
+});
+
+fastify.post("/v1/billing/verify", async (request: any, reply) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, amount, organizationId } = request.body || {};
+  const rzpKeySecret = process.env.RAZORPAY_KEY_SECRET || "pD9rgL4P76hS9ECynnKSn75c";
+
+  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    return reply.status(400).send({ error: "Missing required payment verification parameters" });
+  }
+
+  // Verify HMAC SHA256 signature
+  const body = `${razorpay_order_id}|${razorpay_payment_id}`;
+  const expectedSignature = crypto.createHmac("sha256", rzpKeySecret).update(body).digest("hex");
+
+  if (expectedSignature !== razorpay_signature) {
+    return reply.status(400).send({ error: "Invalid payment verification signature" });
+  }
+
+  const orgId = organizationId || "demo-org-id";
+  const amountInRs = Number(amount) || 0;
+
+  try {
+    // Check if this payment was already processed
+    const existingTx = await prisma.walletTransaction.findFirst({
+      where: { referenceId: razorpay_payment_id }
+    });
+
+    if (existingTx) {
+      const wallet = await prisma.wallet.findUnique({ where: { organizationId: orgId } });
+      return reply.send({ success: true, message: "Payment already verified", balance: wallet?.balance });
+    }
+
+    const wallet = await prisma.wallet.upsert({
+      where: { organizationId: orgId },
+      update: { balance: { increment: amountInRs } },
+      create: { id: crypto.randomUUID(), organizationId: orgId, balance: amountInRs }
+    });
+
+    const tx = await prisma.walletTransaction.create({
+      data: {
+        id: crypto.randomUUID(),
+        walletId: wallet.id,
+        amount: amountInRs,
+        type: "credit",
+        referenceId: razorpay_payment_id,
+        description: `Razorpay Online Recharge (${razorpay_order_id})`
+      }
+    });
+
+    return reply.send({
+      success: true,
+      balance: wallet.balance,
+      transaction: tx
+    });
+  } catch (err: any) {
+    fastify.log.error(err);
+    return reply.status(500).send({ error: "Failed to update wallet after verification: " + err.message });
   }
 });
 
@@ -975,13 +1061,20 @@ fastify.post("/v1/billing/webhook", async (request: any, reply) => {
     const amountInRs = payment.amount / 100;
     const orgId = payment.notes?.organizationId || "demo-org-id";
     try {
+      const existingTx = await prisma.walletTransaction.findFirst({
+        where: { referenceId: payment.id }
+      });
+      if (existingTx) {
+        return reply.send({ status: "ok", message: "Already credited" });
+      }
+
       const wallet = await prisma.wallet.upsert({
         where: { organizationId: orgId },
         update: { balance: { increment: amountInRs } },
-        create: { organizationId: orgId, balance: amountInRs }
+        create: { id: crypto.randomUUID(), organizationId: orgId, balance: amountInRs }
       });
       await prisma.walletTransaction.create({
-        data: { walletId: wallet.id, amount: amountInRs, type: "credit", referenceId: payment.id, description: "Razorpay Wallet Top-up" }
+        data: { id: crypto.randomUUID(), walletId: wallet.id, amount: amountInRs, type: "credit", referenceId: payment.id, description: "Razorpay Wallet Top-up" }
       });
     } catch (dbErr) { fastify.log.error(dbErr); }
   }

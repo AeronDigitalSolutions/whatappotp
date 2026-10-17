@@ -43,6 +43,7 @@ export default function WalletPage() {
   };
 
   useEffect(() => {
+    document.title = "Wallet & Billing | Digital Beings";
     loadWallet();
   }, [orgId]);
 
@@ -51,44 +52,88 @@ export default function WalletPage() {
     
     setLoading(true);
     try {
+      // Ensure Razorpay script is loaded dynamically if not yet ready
+      if (typeof (window as any).Razorpay === "undefined") {
+        await new Promise<void>((resolve, reject) => {
+          const existingScript = document.querySelector('script[src*="checkout.razorpay.com"]');
+          if (existingScript) {
+            existingScript.addEventListener("load", () => resolve());
+            existingScript.addEventListener("error", () => reject(new Error("Failed to load Razorpay checkout SDK")));
+            if ((window as any).Razorpay) return resolve();
+          } else {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.async = true;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error("Unable to connect to Razorpay payment gateway"));
+            document.body.appendChild(script);
+          }
+        });
+      }
+
       const res = await fetch(`${getApiUrl()}/v1/billing/order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount, organizationId: orgId })
+        body: JSON.stringify({ amount: Math.round(amount), organizationId: orgId })
       });
       const data = await res.json();
       
-      if (!data.success) throw new Error(data.error);
+      if (!data.success) throw new Error(data.error || "Failed to initiate payment order");
 
       const options = {
         key: data.keyId || "rzp_live_Tl4uH3gYo8IWeO",
         amount: data.amount,
         currency: "INR",
         name: "Digital Beings",
-        description: "Wallet Credit Recharge (Digital Beings)",
+        description: `Wallet Credit Top-up (₹${amount})`,
         image: "/icon.png",
         order_id: data.orderId,
-        handler: function (response: any) {
-          showSuccess(`Your payment of ₹${amount} was successful!\n\nTransaction ID: ${response.razorpay_payment_id}\nYour wallet balance has been updated.`, "Payment Received");
-          setBalance((prev) => (parseFloat(prev) + amount).toFixed(2));
-          setTransactions(prev => [
-            { id: response.razorpay_payment_id, type: "credit", amount: `+₹${amount}.00`, desc: "Razorpay Wallet Top-up", date: "Just now" },
-            ...prev
-          ]);
-          // Reload real wallet from server
-          setTimeout(loadWallet, 2000);
+        handler: async function (response: any) {
+          try {
+            // Verify payment instantly on backend
+            const verifyRes = await fetch(`${getApiUrl()}/v1/billing/verify`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                amount: amount,
+                organizationId: orgId
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              showSuccess(
+                `Payment of ₹${amount} received successfully!\n\nPayment ID: ${response.razorpay_payment_id}\nYour wallet balance has been updated.`,
+                "Recharge Successful"
+              );
+            } else {
+              showSuccess(
+                `Payment of ₹${amount} received!\nPayment ID: ${response.razorpay_payment_id}`,
+                "Payment Completed"
+              );
+            }
+          } catch (vErr) {
+            showSuccess(
+              `Payment received! Payment ID: ${response.razorpay_payment_id}`,
+              "Payment Received"
+            );
+          } finally {
+            loadWallet();
+          }
         },
         prefill: {
-          name: user?.name || "Customer",
-          email: user?.email || "customer@example.com",
-          contact: "9999999999"
+          name: user?.name || "Digital Beings Customer",
+          email: user?.email || "customer@digitalbeings.in",
+          contact: ""
         },
-        theme: { color: "#0f172a" }
+        theme: { color: "#059669" }
       };
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on('payment.failed', function (response: any){
-        showError("Payment Failed: " + response.error.description, "Payment Error");
+        showError(response.error?.description || "Payment was cancelled or declined.", "Payment Failed");
       });
       rzp.open();
       
