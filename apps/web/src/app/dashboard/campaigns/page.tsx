@@ -92,7 +92,7 @@ export default function CampaignsPage() {
 
   // Wizard Form Data
   const [campaignName, setCampaignName] = useState<string>("");
-  const [service, setService] = useState<"MARKETING" | "UTILITY" | "AUTHENTICATION">("MARKETING");
+  const [service, setService] = useState<"MARKETING" | "UTILITY">("MARKETING");
   const [selectedPhoneId, setSelectedPhoneId] = useState<string>("");
   const [selectedTemplateName, setSelectedTemplateName] = useState<string>("");
   const [templateLanguage, setTemplateLanguage] = useState<string>("en_US");
@@ -1164,7 +1164,7 @@ export default function CampaignsPage() {
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                     Service Category <span className="text-red-500">*</span>
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div
                       onClick={() => setService("MARKETING")}
                       className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
@@ -1188,22 +1188,12 @@ export default function CampaignsPage() {
                     >
                       <div className="text-xl mb-1">📦</div>
                       <div className="font-extrabold text-slate-900 text-sm">Order Update / Utility</div>
-                      <div className="text-xs text-slate-500 mt-1">Order confirmations, billing, shipping alerts.</div>
-                    </div>
-
-                    <div
-                      onClick={() => setService("AUTHENTICATION")}
-                      className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
-                        service === "AUTHENTICATION"
-                          ? "border-emerald-600 bg-emerald-50/50 shadow-sm"
-                          : "border-slate-200 hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="text-xl mb-1">🔐</div>
-                      <div className="font-extrabold text-slate-900 text-sm">OTP & Verification</div>
-                      <div className="text-xs text-slate-500 mt-1">Security codes, login links, verification alerts.</div>
+                      <div className="text-xs text-slate-500 mt-1">Order confirmations, billing, shipping alerts & reminders.</div>
                     </div>
                   </div>
+                  <p className="text-[11px] text-slate-400 mt-2">
+                    💡 <b>Note:</b> OTP / Authentication templates are real-time security events triggered via API keys, and cannot be broadcast as campaigns.
+                  </p>
                 </div>
 
                 <div>
