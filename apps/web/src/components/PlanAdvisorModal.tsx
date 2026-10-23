@@ -199,11 +199,17 @@ export default function PlanAdvisorModal({
                         <span className="text-xs text-slate-500 font-semibold">/ 30 days total</span>
                       </div>
                       <p className="text-xs text-slate-500 mt-1">One-time payment (+18% GST). Perfect for solo developers.</p>
+                      <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-[11px] font-black border border-emerald-200">
+                        <span>🎁 Includes ₹100 Free Starter OTP Fuel (~500 OTPs)</span>
+                      </div>
                     </div>
 
                     <div className="pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-600">
                       <div className="flex items-center gap-2 font-bold text-slate-900">
                         <span className="text-emerald-600 font-black">✓</span> 1 User Only (Owner Profile)
+                      </div>
+                      <div className="flex items-center gap-2 font-bold text-emerald-800">
+                        <span className="text-emerald-600 font-black">✓</span> ₹100 Pre-loaded Fuel (No 2nd payment to start!)
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-emerald-600 font-bold">✓</span> WhatsApp OTP API Integration &amp; REST Keys
@@ -254,12 +260,16 @@ export default function PlanAdvisorModal({
                       <p className="text-xs text-emerald-800 font-semibold mt-1">
                         Only ₹500 more gets you 3 extra team seats &amp; ongoing monthly stability!
                       </p>
+                      <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 text-[11px] font-black border border-emerald-300">
+                        <span>🎁 Includes ₹200 Free Starter Fuel (~1,000 OTPs)</span>
+                      </div>
                     </div>
 
                     <div className="p-3 bg-emerald-100/70 rounded-xl border border-emerald-200 text-xs text-emerald-950 space-y-1">
                       <span className="font-extrabold block">🎁 What You Gain Over the ₹500 Trial:</span>
                       <p className="text-[11px] leading-relaxed">
                         • <strong>3 Extra Support Profiles Included</strong> (1 Owner + 3 Support = 4 Total Seats, saving ₹1,500/mo).<br />
+                        • <strong>₹200 Pre-loaded Fuel Credit</strong> included directly in your wallet balance.<br />
                         • <strong>2-Way Live Team Inbox</strong>: Multiple staff reply from one official WhatsApp number.<br />
                         • <strong>Meta Template Approval Studio</strong> with real-time status sync.<br />
                         • <strong>Uninterrupted Month-to-Month Continuity</strong>: Never worry about a 30-day cutoff.
@@ -269,6 +279,9 @@ export default function PlanAdvisorModal({
                     <div className="space-y-2 text-xs text-slate-700">
                       <div className="flex items-center gap-2 font-bold text-slate-900">
                         <span className="text-emerald-600 font-black">✓</span> 1 Owner + 3 Support Seats (4 Seats Total)
+                      </div>
+                      <div className="flex items-center gap-2 font-bold text-emerald-800">
+                        <span className="text-emerald-600 font-black">✓</span> Pre-loaded ₹200 Starter Wallet Fuel
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-emerald-600 font-bold">✓</span> Extra seats available at ₹500/month each
@@ -393,12 +406,16 @@ export default function PlanAdvisorModal({
                       <p className="text-xs text-emerald-200 mt-1">
                         Turnkey automations for scaling brands &amp; e-commerce businesses.
                       </p>
+                      <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-400 text-slate-950 text-[11px] font-black shadow-xs">
+                        <span>🎁 Includes ₹500 Free Starter Fuel (~2,500 OTPs)</span>
+                      </div>
                     </div>
 
                     <div className="p-3 bg-emerald-900/60 rounded-xl border border-emerald-700/80 text-xs text-emerald-100 space-y-1">
                       <span className="font-extrabold text-white block">🚀 Everything in Basic, plus:</span>
                       <p className="text-[11px] leading-relaxed">
                         • <strong>6 Seats Included</strong> (1 Owner + 5 Support Profiles).<br />
+                        • <strong>₹500 Pre-loaded Fuel Credit</strong> for instant broadcasts and OTPs.<br />
                         • <strong>Shopify &amp; WooCommerce Recipes</strong> (Cart recovery &amp; COD confirmation).<br />
                         • <strong>24/7 AI Chatbot Assistant</strong> with interactive buttons.<br />
                         • <strong>Complex Logic Campaigns</strong> (Read-Not-Replied follow-ups).<br />
@@ -409,6 +426,9 @@ export default function PlanAdvisorModal({
                     <div className="space-y-2 text-xs text-emerald-50">
                       <div className="flex items-center gap-2 font-bold text-white">
                         <span className="text-emerald-400 font-black">✓</span> 1 Owner + 5 Support Seats (6 Total)
+                      </div>
+                      <div className="flex items-center gap-2 font-bold text-emerald-300">
+                        <span className="text-emerald-400 font-black">✓</span> Pre-loaded ₹500 Starter Wallet Fuel
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-emerald-400 font-bold">✓</span> E-Commerce API (Shopify, WooCommerce, Custom)

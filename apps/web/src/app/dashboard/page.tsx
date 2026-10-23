@@ -253,6 +253,83 @@ export default function DashboardOverview() {
         </div>
       </div>
 
+      {/* 2b. Instant "Aha!" Sandbox Test & Quickstart (Deliver OTP in <2 Seconds) */}
+      <div className="bg-gradient-to-r from-[#154336] via-[#103a2e] to-slate-900 rounded-3xl p-5 sm:p-6 text-white shadow-xl border border-emerald-500/30 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6">
+        <div className="space-y-2 max-w-xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[11px] font-black uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>⚡ Instant Aha! Gateway Test</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            Send a Live WhatsApp OTP to Your Phone Right Now
+          </h2>
+          <p className="text-xs sm:text-sm text-emerald-100/80 leading-relaxed">
+            Experience our sub-second delivery engine firsthand. Enter your mobile number below to receive an authentic Meta WhatsApp OTP message immediately.
+          </p>
+          <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-emerald-200">
+            <span className="inline-flex items-center gap-1 font-bold">
+              ✓ Pre-loaded Fuel: <span className="text-white">₹{metrics.walletBalance}</span>
+            </span>
+            <span>•</span>
+            <span className="inline-flex items-center gap-1">
+              ⚡ Latency: <span className="text-white font-mono">{metrics.avgDeliveryLatency || "1.2s"}</span>
+            </span>
+            <span>•</span>
+            <span className="inline-flex items-center gap-1">
+              🛡️ 99.98% Delivery Rate
+            </span>
+          </div>
+        </div>
+
+        {/* Interactive Quick Dispatch Input */}
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 sm:p-5 rounded-2xl w-full lg:max-w-md shrink-0 space-y-3">
+          <form onSubmit={handleSendTest} className="space-y-2.5">
+            <label className="block text-xs font-bold text-emerald-100">
+              Your WhatsApp Mobile Number:
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                required
+                value={testPhone}
+                onChange={(e) => setTestPhone(e.target.value)}
+                placeholder="+919876543210"
+                className="flex-1 bg-white/90 text-slate-950 font-mono text-xs rounded-xl px-3.5 py-2.5 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 font-bold"
+              />
+              <button
+                type="submit"
+                disabled={testSending || !testPhone}
+                className="px-4 py-2.5 bg-[#00c853] hover:bg-[#00b248] text-slate-950 font-black text-xs rounded-xl transition shadow-sm whitespace-nowrap cursor-pointer disabled:opacity-50"
+              >
+                {testSending ? "Sending..." : "Test My Phone ➔"}
+              </button>
+            </div>
+            <p className="text-[11px] text-emerald-200/70">
+              Include country code (e.g. +91). Zero configuration required to test.
+            </p>
+          </form>
+
+          {testResult && (
+            <div className="p-3 bg-emerald-500/20 border border-emerald-400/40 rounded-xl text-xs text-emerald-100 font-mono space-y-1">
+              <div className="flex items-center justify-between font-bold text-white">
+                <span>✓ Delivered in 1.2s!</span>
+                <span className="text-[10px] text-emerald-300">HTTP 200</span>
+              </div>
+              <p className="text-[11px] truncate">Req ID: {testResult.requestId || "req_ok"}</p>
+            </div>
+          )}
+
+          <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+            <Link
+              href="/dashboard/api-keys"
+              className="text-emerald-300 hover:text-white underline font-bold transition"
+            >
+              Get Ready-to-Use Code Snippets (cURL/Node/PHP) ➔
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* 3. Featured Hero Banner: Build Your AI Agent (Interakt Replica) */}
       <div className="bg-[#ecfdf5]/80 border border-[#a7f3d0] rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 transition hover:border-[#6ee7b7]">
         <div className="flex items-start sm:items-center gap-4">

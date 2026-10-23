@@ -108,10 +108,16 @@ export default function ActivationPaywallModal({
                   <span className="text-[10px] text-slate-500 font-semibold">+ 18% GST</span>
                 </div>
                 <span className="text-[11px] text-slate-500 block">30 Days Platform Access</span>
+                <span className="mt-1 text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block">
+                  🎁 Incl. ₹100 Free Fuel (~500 OTPs)
+                </span>
               </div>
               <ul className="text-xs text-slate-600 space-y-1.5 pt-2 border-t border-slate-200/80">
                 <li className="flex items-center gap-1.5 font-bold text-slate-800">
                   <span className="text-emerald-600">✓</span> 1 User (Owner profile)
+                </li>
+                <li className="flex items-center gap-1.5 font-bold text-emerald-800">
+                  <span className="text-emerald-600">✓</span> ₹100 Pre-loaded Fuel
                 </li>
                 <li className="flex items-center gap-1.5">
                   <span className="text-emerald-600">✓</span> WhatsApp OTP API Keys
@@ -147,10 +153,16 @@ export default function ActivationPaywallModal({
                   <span className="text-[10px] text-slate-500 font-semibold">/ month</span>
                 </div>
                 <span className="text-[11px] text-emerald-800 font-semibold block">4 Seats Included (1+3)</span>
+                <span className="mt-1 text-[10px] font-black text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 inline-block">
+                  🎁 Incl. ₹200 Free Fuel (~1,000 OTPs)
+                </span>
               </div>
               <ul className="text-xs text-slate-700 space-y-1.5 pt-2 border-t border-emerald-200">
                 <li className="flex items-center gap-1.5 font-bold text-slate-900">
                   <span className="text-emerald-600">✓</span> 1 Owner + 3 Support Seats
+                </li>
+                <li className="flex items-center gap-1.5 font-bold text-emerald-800">
+                  <span className="text-emerald-600">✓</span> ₹200 Pre-loaded Fuel
                 </li>
                 <li className="flex items-center gap-1.5">
                   <span className="text-emerald-600">✓</span> 2-Way Live Team Inbox
@@ -183,10 +195,16 @@ export default function ActivationPaywallModal({
                   <span className="text-[10px] text-slate-500 font-semibold">/ month</span>
                 </div>
                 <span className="text-[11px] text-slate-500 block">6 Seats + Shopify + AI</span>
+                <span className="mt-1 text-[10px] font-black text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 inline-block">
+                  🎁 Incl. ₹500 Free Fuel + Free OBA
+                </span>
               </div>
               <ul className="text-xs text-slate-600 space-y-1.5 pt-2 border-t border-slate-200/80">
                 <li className="flex items-center gap-1.5 font-bold text-slate-900">
                   <span className="text-emerald-600">✓</span> 1 Owner + 5 Support Seats
+                </li>
+                <li className="flex items-center gap-1.5 font-bold text-emerald-800">
+                  <span className="text-emerald-600">✓</span> ₹500 Pre-loaded Fuel
                 </li>
                 <li className="flex items-center gap-1.5">
                   <span className="text-emerald-600">✓</span> Shopify/Woo Webhooks

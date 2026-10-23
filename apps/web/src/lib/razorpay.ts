@@ -17,6 +17,8 @@ export interface PlanConfig {
   basePrice: number;
   description: string;
   seats: string;
+  bonusWalletCredit: number;
+  estimatedOtpsIncluded: number;
 }
 
 export const PLAN_CONFIGS: Record<string, PlanConfig> = {
@@ -25,21 +27,27 @@ export const PLAN_CONFIGS: Record<string, PlanConfig> = {
     name: "Starter Trial",
     basePrice: 500,
     description: "30-Day Platform Trial for 1 User (Owner Account)",
-    seats: "1 User"
+    seats: "1 User",
+    bonusWalletCredit: 100,
+    estimatedOtpsIncluded: 500
   },
   BASIC: {
     planId: "BASIC",
     name: "Basic Business Plan",
     basePrice: 1000,
     description: "1 Owner + 3 Support Seats (4 Total Seats)",
-    seats: "4 Seats (1 Owner + 3 Support)"
+    seats: "4 Seats (1 Owner + 3 Support)",
+    bonusWalletCredit: 200,
+    estimatedOtpsIncluded: 1000
   },
   PROFESSIONAL: {
     planId: "PROFESSIONAL",
     name: "Professional Plan",
     basePrice: 2500,
     description: "1 Owner + 5 Support Seats + Shopify + AI Bots + Free OBA",
-    seats: "6 Seats (1 Owner + 5 Support)"
+    seats: "6 Seats (1 Owner + 5 Support)",
+    bonusWalletCredit: 500,
+    estimatedOtpsIncluded: 2500
   }
 };
 

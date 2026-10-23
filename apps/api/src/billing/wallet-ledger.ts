@@ -579,6 +579,57 @@ export async function processSubscriptionPayment(params: SubscriptionPaymentPara
           obaIncluded: planId === "PROFESSIONAL" ? true : org.obaIncluded
         }
       });
+
+      // Bundled Starter Fuel Credits (No double payment needed to start sending OTPs)
+      const bonusFuel = planId === "TRIAL" ? 100.0 : planId === "BASIC" ? 200.0 : 500.0;
+      const wallet = await tx.wallet.upsert({
+        where: { organizationId },
+        update: { balance: { increment: bonusFuel } },
+        create: {
+          id: crypto.randomUUID(),
+          organizationId,
+          balance: bonusFuel,
+          reservedBalance: 0.0,
+          currency: "INR"
+        }
+      });
+
+      const balanceBefore = Number(wallet.balance) - bonusFuel;
+      const balanceAfter = Number(wallet.balance);
+
+      await tx.walletLedgerEntry.create({
+        data: {
+          id: crypto.randomUUID(),
+          walletId: wallet.id,
+          entryType: "CREDIT_RECHARGE",
+          amount: bonusFuel,
+          balanceBefore,
+          balanceAfter,
+          reservedBefore: Number(wallet.reservedBalance),
+          reservedAfter: Number(wallet.reservedBalance),
+          currency: "INR",
+          referenceType: "SUBSCRIPTION_BONUS",
+          referenceId: paymentId,
+          description: `Bundled Starter OTP Credit: ₹${bonusFuel.toFixed(2)} included with ${planId} Plan activation`,
+          metadata: {
+            planId,
+            orderId,
+            invoiceId: invoice.id
+          },
+          idempotencyKey: `sub_bonus_${paymentId}`
+        }
+      });
+
+      await tx.walletTransaction.create({
+        data: {
+          id: crypto.randomUUID(),
+          walletId: wallet.id,
+          amount: bonusFuel,
+          type: "credit",
+          referenceId: paymentId,
+          description: `Starter OTP Fuel Credit (${planId} Plan Bonus)`
+        }
+      });
     } else if (type === "ADDON_SEAT") {
       await tx.organization.update({
         where: { id: organizationId },
