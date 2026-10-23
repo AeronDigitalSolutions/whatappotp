@@ -27,12 +27,12 @@ export default function HomePage() {
       {showOfferBar && (
         <div className="bg-[#00c853] text-white text-xs sm:text-sm font-semibold py-2 px-4 shadow-xs flex items-center justify-between relative z-50">
           <div className="flex-1 flex items-center justify-center gap-2 sm:gap-3 flex-wrap text-center">
-            <span>Start your 30-Day WhatsApp Platform Trial for just ₹500 🎉</span>
+            <span>Start your 30-Day WhatsApp Platform Trial for just ₹500 + GST 🎉</span>
             <button
               onClick={() => openPlanModal("TRIAL_VS_BASIC")}
               className="bg-white text-slate-900 hover:bg-slate-100 font-bold px-3 py-1 rounded-full text-xs shadow-xs transition whitespace-nowrap cursor-pointer"
             >
-              Start 30-Day Trial (₹500) ➔
+              Start 30-Day Trial (₹500 + GST) ➔
             </button>
           </div>
           <button
@@ -102,7 +102,7 @@ export default function HomePage() {
               onClick={() => openPlanModal("TRIAL_VS_BASIC")}
               className="px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-bold text-white bg-[#00c853] hover:bg-[#00b248] rounded-[10px] shadow-sm hover:shadow transition flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
-              <span>Start 30-Day Trial (₹500)</span>
+              <span>Start 30-Day Trial (₹500 + GST)</span>
               <span>➔</span>
             </button>
             <Link
@@ -163,7 +163,7 @@ export default function HomePage() {
                 }}
                 className="w-full text-center py-2.5 font-bold bg-[#00c853] text-white rounded-xl shadow-xs cursor-pointer"
               >
-                Start 30-Day Trial (₹500) ➔
+                Start 30-Day Trial (₹500 + GST) ➔
               </button>
               <Link href="/login" className="w-full text-center py-2.5 font-bold border border-slate-300 rounded-xl">
                 Login
@@ -192,7 +192,7 @@ export default function HomePage() {
 
           {/* Subtitle */}
           <p className="max-w-3xl mx-auto text-lg sm:text-xl text-slate-600 leading-relaxed font-normal mb-10">
-            Collaborate on a unified 2-Way Live Team Inbox, deploy 24/7 AI auto-reply bots, recover abandoned carts on Shopify, and broadcast official Meta campaigns — flat plans from ₹1,000/mo or start a <strong>30-Day Trial for ₹500</strong> ⚡
+            Collaborate on a unified 2-Way Live Team Inbox, deploy 24/7 AI auto-reply bots, recover abandoned carts on Shopify, and broadcast official Meta campaigns — flat plans from ₹1,000 + GST/mo or start a <strong>30-Day Trial for ₹500 + GST</strong> ⚡
           </p>
 
           {/* Hero CTAs */}
@@ -201,7 +201,7 @@ export default function HomePage() {
               onClick={() => openPlanModal("TRIAL_VS_BASIC")}
               className="w-full sm:w-auto px-8 py-4 text-base font-extrabold text-white bg-[#00c853] hover:bg-[#00b248] rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Start 30-Day Trial (₹500)</span>
+              <span>Start 30-Day Trial (₹500 + GST)</span>
               <span>➔</span>
             </button>
             <Link
@@ -216,7 +216,7 @@ export default function HomePage() {
           {/* Micro trust indicators */}
           <div className="flex items-center justify-center gap-6 text-xs sm:text-sm font-semibold text-slate-500 flex-wrap mb-16">
             <span className="flex items-center gap-1.5 text-emerald-700">
-              <span className="text-emerald-500">✓</span> 30-Day Full Platform Access (₹500)
+              <span className="text-emerald-500">✓</span> 30-Day Full Platform Access (₹500 + GST)
             </span>
             <span className="flex items-center gap-1.5 text-emerald-700">
               <span className="text-emerald-500">✓</span> Official Meta Tech Partner
@@ -427,7 +427,7 @@ export default function HomePage() {
                 onClick={() => openPlanModal("TRIAL_VS_BASIC")}
                 className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#00c853] hover:bg-[#00b248] text-white font-extrabold text-sm rounded-xl shadow-md shadow-emerald-500/25 transition cursor-pointer"
               >
-                <span>Start 30-Day Trial (₹500)</span>
+                <span>Start 30-Day Trial (₹500 + GST)</span>
                 <span>➔</span>
               </button>
             </div>
@@ -955,7 +955,7 @@ export default function HomePage() {
                   <h4 className="font-extrabold text-slate-900 text-base">Transparent Flat Pricing</h4>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  While competitors lock chatbots behind $149 to $2,500/quarter recurring SaaS plans, Digital Beings gives you predictable plans starting at ₹1,000/mo, or get started with a 30-day trial for just ₹500.
+                  While competitors lock chatbots behind $149 to $2,500/quarter recurring SaaS plans, Digital Beings gives you predictable plans starting at ₹1,000 + GST/mo, or get started with a 30-day trial for just ₹500 + GST.
                 </p>
               </div>
 
@@ -1155,17 +1155,17 @@ export default function HomePage() {
                 <span className="text-xs text-emerald-700 font-bold">Official Meta Cloud API</span>
               </div>
               <div className="text-2xl font-black text-slate-900">
-                Flat ₹1,000/mo <span className="text-xs text-slate-500 font-normal">· Or 30-Day Trial for ₹500</span>
+                Flat ₹1,000 + GST/mo <span className="text-xs text-slate-500 font-normal">· Or 30-Day Trial for ₹500 + GST</span>
               </div>
               <ul className="space-y-3 text-xs text-slate-700 font-medium">
                 <li className="flex items-center gap-2 text-emerald-900 font-bold">
                   <span className="text-emerald-600 font-black">✓</span> Honest flat subscription with no lock-in — cancel or change anytime
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-emerald-600 font-bold">✓</span> Up to 6 team seats included free (extra seats only ₹500/month)
+                  <span className="text-emerald-600 font-bold">✓</span> Up to 6 team seats included free (extra seats only ₹500 + GST/month)
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-emerald-600 font-bold">✓</span> Transparent wholesale fuel: OTP ₹0.20, Utility ₹0.18, Marketing ₹1.15
+                  <span className="text-emerald-600 font-bold">✓</span> Transparent wholesale fuel (+ GST): OTP ₹0.20, Utility ₹0.18, Marketing ₹1.15
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-emerald-600 font-bold">✓</span> Official Green Tick (OBA) verification included FREE on Professional Plan
@@ -1328,7 +1328,7 @@ export default function HomePage() {
                 onClick={() => openPlanModal("TRIAL_VS_BASIC")}
                 className="inline-flex items-center gap-2 px-8 py-4 bg-[#00c853] hover:bg-[#00b248] text-white font-extrabold text-sm rounded-xl shadow-lg shadow-emerald-500/25 transition cursor-pointer"
               >
-                <span>Start 30-Day Trial (₹500)</span>
+                <span>Start 30-Day Trial (₹500 + GST)</span>
                 <span>➔</span>
               </button>
               </div>
@@ -1529,17 +1529,17 @@ print(res.json())`}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center divide-y sm:divide-y-0 sm:divide-x divide-slate-150">
               <div className="pt-2 sm:pt-0 sm:px-4 space-y-1">
                 <span className="text-xs font-bold text-slate-600 uppercase tracking-wide block">Authentication (OTP)</span>
-                <div className="text-2xl font-black text-emerald-600">₹0.20 <span className="text-xs font-semibold text-slate-500">/ delivered</span></div>
+                <div className="text-2xl font-black text-emerald-600">₹0.20 <sub className="text-[11px] font-bold text-emerald-800 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-500">/ delivered</span></div>
                 <p className="text-[11px] text-slate-500">One-time login passwords, zero-delay Meta priority</p>
               </div>
               <div className="pt-2 sm:pt-0 sm:px-4 space-y-1">
                 <span className="text-xs font-bold text-slate-600 uppercase tracking-wide block">Utility Messages</span>
-                <div className="text-2xl font-black text-blue-600">₹0.18 <span className="text-xs font-semibold text-slate-500">/ delivered</span></div>
+                <div className="text-2xl font-black text-blue-600">₹0.18 <sub className="text-[11px] font-bold text-blue-800 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-500">/ delivered</span></div>
                 <p className="text-[11px] text-slate-500">Order confirmations, payment receipts &amp; shipping alerts</p>
               </div>
               <div className="pt-2 sm:pt-0 sm:px-4 space-y-1">
                 <span className="text-xs font-bold text-slate-600 uppercase tracking-wide block">Marketing Broadcasts</span>
-                <div className="text-2xl font-black text-slate-900">₹1.15 <span className="text-xs font-semibold text-slate-500">/ delivered</span></div>
+                <div className="text-2xl font-black text-slate-900">₹1.15 <sub className="text-[11px] font-bold text-slate-600 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-500">/ delivered</span></div>
                 <p className="text-[11px] text-slate-500">Promotional campaigns, product launches &amp; re-engagement</p>
               </div>
             </div>
@@ -1554,8 +1554,9 @@ print(res.json())`}
                   <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">Starter Trial</span>
                   <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700">1 Month</span>
                 </div>
-                <div className="flex items-baseline gap-1">
+                <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span className="text-4xl font-black text-slate-900">₹500</span>
+                  <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
                   <span className="text-xs text-slate-500">/ 30-day trial</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[11px] font-black border border-emerald-200">
@@ -1573,7 +1574,7 @@ print(res.json())`}
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Utility &amp; Order Messages</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Basic Campaign Studio &amp; Templates</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> REST API &amp; Webhooks</li>
-                    <li className="flex items-center gap-2 text-slate-400"><span className="text-slate-400">·</span> OBA Green Tick (₹999 add-on)</li>
+                    <li className="flex items-center gap-2 text-slate-400"><span className="text-slate-400">·</span> OBA Green Tick (₹999 + GST add-on)</li>
                   </ul>
                 </div>
               </div>
@@ -1581,7 +1582,7 @@ print(res.json())`}
                 onClick={() => openPlanModal("TRIAL_VS_BASIC")}
                 className="w-full text-center py-3 rounded-xl border-2 border-slate-900 font-bold text-xs text-slate-900 hover:bg-slate-900 hover:text-white transition block cursor-pointer"
               >
-                Start 30-Day Trial (₹500)
+                Start 30-Day Trial (₹500 + GST)
               </button>
             </div>
 
@@ -1592,8 +1593,9 @@ print(res.json())`}
                   <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">Basic Plan</span>
                   <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">Growth</span>
                 </div>
-                <div className="flex items-baseline gap-1">
+                <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span className="text-4xl font-black text-slate-900">₹1,000</span>
+                  <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
                   <span className="text-xs text-slate-500">/ month</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 text-[11px] font-black border border-emerald-300">
@@ -1607,13 +1609,13 @@ print(res.json())`}
                   <ul className="space-y-2 text-xs text-slate-600 font-medium">
                     <li className="flex items-center gap-2 font-bold text-slate-800"><span className="text-emerald-600">✓</span> 1 Owner + 3 Support Seats (4 total)</li>
                     <li className="flex items-center gap-2 font-bold text-emerald-800"><span className="text-emerald-600 font-black">✓</span> Pre-loaded ₹200 Fuel (~1,000 OTPs)</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Extra seats at ₹500/mo each</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> WhatsApp OTP API Integration</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Order &amp; Payment Utility Messages</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Basic Campaign Broadcast Setup</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Template Approval Dashboard</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Live Chat Team Inbox &amp; Routing</li>
-                    <li className="flex items-center gap-2 text-slate-400"><span className="text-slate-400">·</span> OBA Green Tick (₹999 add-on)</li>
+                    <li className="flex items-center gap-2 text-slate-400"><span className="text-slate-400">·</span> OBA Green Tick (₹999 + GST add-on)</li>
                   </ul>
                 </div>
               </div>
@@ -1621,7 +1623,7 @@ print(res.json())`}
                 onClick={() => openPlanModal("TRIAL_VS_BASIC")}
                 className="w-full text-center py-3 rounded-xl border border-slate-300 font-bold text-xs text-slate-800 hover:bg-slate-50 transition block cursor-pointer"
               >
-                Get Basic Plan (₹1,000) ➔
+                Get Basic Plan (₹1,000 + GST) ➔
               </button>
             </div>
 
@@ -1635,8 +1637,9 @@ print(res.json())`}
                   <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider block">Professional Plan</span>
                   <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-200 border border-emerald-700">Scaling</span>
                 </div>
-                <div className="flex items-baseline gap-1">
+                <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span className="text-4xl font-black text-white">₹2,500</span>
+                  <sub className="text-xs font-black text-emerald-300 bottom-0 uppercase tracking-tight">+ GST</sub>
                   <span className="text-xs text-emerald-200">/ month</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-400 text-slate-950 text-[11px] font-black">
@@ -1650,11 +1653,11 @@ print(res.json())`}
                   <ul className="space-y-2 text-xs text-emerald-50 font-medium">
                     <li className="flex items-center gap-2 font-bold text-white"><span className="text-emerald-400">✓</span> 1 Owner + 5 Support Seats (6 total)</li>
                     <li className="flex items-center gap-2 font-bold text-emerald-300"><span className="text-emerald-400 font-black">✓</span> Pre-loaded ₹500 Fuel (~2,500 OTPs)</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Extra seats at ₹500/mo each</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> E-Commerce API (Shopify/Woo/Custom)</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> AI Assistant &amp; Smart Auto-Replies</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Complex Logic Campaigns (Read-Not-Replied)</li>
-                    <li className="flex items-center gap-2 font-bold text-emerald-300"><span className="text-emerald-400 font-bold">✓</span> FREE Official Green Tick Verification</li>
+                    <li className="flex items-center gap-2 font-bold text-emerald-300"><span className="text-emerald-400 font-bold">✓</span> FREE Official Green Tick Verification (Save ₹999 + GST)</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Priority Meta API Throughput Queuing</li>
                   </ul>
                 </div>
@@ -1663,7 +1666,7 @@ print(res.json())`}
                 onClick={() => openPlanModal("BASIC_VS_PRO")}
                 className="w-full text-center py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs shadow-md transition block cursor-pointer"
               >
-                Upgrade to Professional ➔
+                Upgrade to Professional (₹2,500 + GST) ➔
               </button>
             </div>
 
@@ -1736,7 +1739,7 @@ print(res.json())`}
             },
             {
               q: "How does the 30-day trial work?",
-              a: "For just ₹500, you get complete 30-day platform access for 1 user (owner account). This includes official WhatsApp OTP API setup, order & utility updates, template approval dashboard, and campaign broadcast studio. After 30 days, you can choose to continue with our Basic (₹1,000/mo) or Professional (₹2,500/mo) plan."
+              a: "For just ₹500 + GST, you get complete 30-day platform access for 1 user (owner account). This includes official WhatsApp OTP API setup, order & utility updates, template approval dashboard, and campaign broadcast studio. After 30 days, you can choose to continue with our Basic (₹1,000 + GST/mo) or Professional (₹2,500 + GST/mo) plan."
             }
           ].map((faq, idx) => (
             <div key={idx} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs">
@@ -1771,7 +1774,7 @@ print(res.json())`}
               onClick={() => openPlanModal("TRIAL_VS_BASIC")}
               className="w-full sm:w-auto px-8 py-4 bg-[#00c853] hover:bg-[#00b248] text-white font-extrabold text-sm rounded-xl shadow-lg shadow-emerald-500/30 transition flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Start 30-Day Trial (₹500)</span>
+              <span>Start 30-Day Trial (₹500 + GST)</span>
               <span>➔</span>
             </button>
             <Link

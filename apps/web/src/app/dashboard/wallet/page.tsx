@@ -535,12 +535,12 @@ export default function WalletPage() {
                 <div className="flex items-baseline gap-3">
                   <h3 className="text-2xl sm:text-3xl font-black text-white">
                     {subscription?.plan === "TRIAL"
-                      ? "Starter Trial (₹500 / 30 Days)"
+                      ? "Starter Trial (₹500 + GST / 30 Days)"
                       : subscription?.plan === "PROFESSIONAL"
-                      ? "Professional Plan (₹2,500 / month)"
+                      ? "Professional Plan (₹2,500 + GST / month)"
                       : subscription?.plan === "ENTERPRISE"
                       ? "Enterprise Custom Plan"
-                      : "Basic Plan (₹1,000 / month)"}
+                      : "Basic Plan (₹1,000 + GST / month)"}
                   </h3>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-emerald-100 font-medium pt-1">
@@ -548,10 +548,10 @@ export default function WalletPage() {
                     👥 <strong>{subscription?.usedSeats || 1} / {subscription?.totalSeats || 4} Seats Used</strong> ({subscription?.seatsAllowed || 4} included {subscription?.extraSeats ? `+ ${subscription.extraSeats} extra` : ""})
                   </span>
                   <span className="flex items-center gap-1.5">
-                    🟢 Green Tick (OBA): {subscription?.obaIncluded ? <span className="text-emerald-300 font-bold">✓ Included Free</span> : <span className="text-emerald-200">₹999 Add-on</span>}
+                    🟢 Green Tick (OBA): {subscription?.obaIncluded ? <span className="text-emerald-300 font-bold">✓ Included Free</span> : <span className="text-emerald-200">₹999 + GST Add-on</span>}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    ⚡ WhatsApp OTP: <span className="text-emerald-300 font-bold">₹0.20/msg</span> · Utility: <span className="text-emerald-300 font-bold">₹0.18/msg</span> · Marketing: <span className="text-emerald-300 font-bold">₹1.15/msg</span>
+                    ⚡ WhatsApp OTP: <span className="text-emerald-300 font-bold">₹0.20 + GST/msg</span> · Utility: <span className="text-emerald-300 font-bold">₹0.18 + GST/msg</span> · Marketing: <span className="text-emerald-300 font-bold">₹1.15 + GST/msg</span>
                   </span>
                 </div>
               </div>
@@ -561,7 +561,7 @@ export default function WalletPage() {
                   onClick={() => setShowSeatModal(true)}
                   className="px-4 py-2.5 rounded-xl bg-emerald-900/80 hover:bg-emerald-800 text-white font-bold text-xs border border-emerald-600 transition cursor-pointer"
                 >
-                  + Add Team Seats (₹500/mo)
+                  + Add Team Seats (₹500 + GST/mo)
                 </button>
                 <button
                   onClick={() => setShowSubscriptionModal(true)}
@@ -1190,9 +1190,10 @@ export default function WalletPage() {
                     <span className="text-xs font-bold text-slate-600 uppercase">Starter Trial</span>
                     <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-slate-100 text-slate-700">30 Days</span>
                   </div>
-                  <div>
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
                     <span className="text-3xl font-black text-slate-900">₹500</span>
-                    <span className="text-xs text-slate-500"> + 18% GST (₹590)</span>
+                    <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
+                    <span className="text-xs text-slate-500 font-semibold">(₹590 all-incl.)</span>
                   </div>
                   <p className="text-xs text-slate-600">
                     1 User (Owner profile only). Ideal for onboarding, verifying numbers, and testing OTP APIs.
@@ -1202,14 +1203,14 @@ export default function WalletPage() {
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Full OTP API &amp; Webhooks</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Utility &amp; Order Messages</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Basic Campaign Broadcasts</li>
-                    <li className="flex items-center gap-1.5 text-slate-400">· OBA Green Tick (₹999 add-on)</li>
+                    <li className="flex items-center gap-1.5 text-slate-400">· OBA Green Tick (₹999 + GST add-on)</li>
                   </ul>
                 </div>
                 <button
                   disabled={subscribing}
                   className="w-full py-2.5 rounded-xl border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-bold text-xs transition"
                 >
-                  {subscribing ? "Opening Checkout..." : "Start Trial (₹590)"}
+                  {subscribing ? "Opening Checkout..." : "Start Trial (₹500 + GST) ➔"}
                 </button>
               </div>
 
@@ -1223,27 +1224,28 @@ export default function WalletPage() {
                     <span className="text-xs font-bold text-slate-600 uppercase">Basic Plan</span>
                     <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">Popular</span>
                   </div>
-                  <div>
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
                     <span className="text-3xl font-black text-slate-900">₹1,000</span>
-                    <span className="text-xs text-slate-500"> / mo + GST (₹1,180)</span>
+                    <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
+                    <span className="text-xs text-slate-500 font-semibold">/ mo (₹1,180 all-incl.)</span>
                   </div>
                   <p className="text-xs text-slate-600">
                     For growing teams needing WhatsApp OTP, order confirmations, and customer support inbox.
                   </p>
                   <ul className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
                     <li className="flex items-center gap-1.5 font-bold text-slate-800"><span className="text-emerald-600">✓</span> 4 Seats (1 Owner + 3 Support)</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Extra seats at ₹500/mo each</li>
+                    <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> WhatsApp OTP &amp; Utility APIs</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Template Approval Dashboard</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Live Chat Team Inbox &amp; Routing</li>
-                    <li className="flex items-center gap-1.5 text-slate-400">· OBA Green Tick (₹999 add-on)</li>
+                    <li className="flex items-center gap-1.5 text-slate-400">· OBA Green Tick (₹999 + GST add-on)</li>
                   </ul>
                 </div>
                 <button
                   disabled={subscribing}
                   className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition"
                 >
-                  {subscribing ? "Opening Checkout..." : "Select Basic (₹1,180)"}
+                  {subscribing ? "Opening Checkout..." : "Select Basic (₹1,000 + GST) ➔"}
                 </button>
               </div>
 
@@ -1260,16 +1262,17 @@ export default function WalletPage() {
                     <span className="text-xs font-bold text-emerald-300 uppercase">Professional</span>
                     <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-900 text-emerald-200 border border-emerald-700">All-Inclusive</span>
                   </div>
-                  <div>
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
                     <span className="text-3xl font-black text-white">₹2,500</span>
-                    <span className="text-xs text-emerald-200"> / mo + GST (₹2,950)</span>
+                    <sub className="text-xs font-black text-emerald-300 bottom-0 uppercase tracking-tight">+ GST</sub>
+                    <span className="text-xs text-emerald-200 font-semibold">/ mo (₹2,950 all-incl.)</span>
                   </div>
                   <p className="text-xs text-emerald-100">
                     For scaling brands using e-commerce automations, AI auto-replies, and complex logic funnels.
                   </p>
                   <ul className="space-y-1.5 text-xs text-emerald-50 pt-2 border-t border-emerald-800/80">
                     <li className="flex items-center gap-1.5 font-bold text-white"><span className="text-emerald-400">✓</span> 6 Seats (1 Owner + 5 Support)</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Extra seats at ₹500/mo each</li>
+                    <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> E-Commerce API (Shopify, Woo, Custom)</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> AI Assistant &amp; Smart Auto-Replies</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Complex Logic Campaigns (Read-Not-Replied)</li>
@@ -1281,7 +1284,7 @@ export default function WalletPage() {
                   disabled={subscribing}
                   className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition"
                 >
-                  {subscribing ? "Opening Checkout..." : "Upgrade to Pro (₹2,950)"}
+                  {subscribing ? "Opening Checkout..." : "Upgrade to Pro (₹2,500 + GST) ➔"}
                 </button>
               </div>
             </div>
@@ -1349,7 +1352,7 @@ export default function WalletPage() {
 
                 <div className="pt-3 border-t border-slate-200 text-xs space-y-1.5">
                   <div className="flex justify-between text-slate-600">
-                    <span>Base Seat Fee ({extraSeatCount} × ₹500/mo)</span>
+                    <span>Base Seat Fee ({extraSeatCount} × ₹500 + GST/mo)</span>
                     <span className="font-mono font-bold text-slate-900">₹{(extraSeatCount * 500).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-slate-600">

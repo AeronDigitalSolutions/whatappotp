@@ -463,7 +463,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               <div>
                 <span className="font-extrabold text-amber-900 mr-1.5">🔒 Demo Preview Mode:</span>
                 <span className="text-amber-800">
-                  You are exploring the dashboard in demo mode. Activate the 30-Day Starter Trial (₹500) or Basic Plan (₹1,000) to enable live WhatsApp messaging and APIs.
+                  You are exploring the dashboard in demo mode. Activate the 30-Day Starter Trial (₹500 + GST) or Basic Plan (₹1,000 + GST) to enable live WhatsApp messaging and APIs.
                 </span>
               </div>
             </div>
@@ -472,7 +472,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               className="px-3.5 py-1.5 bg-[#154336] hover:bg-[#0f3127] text-white font-extrabold rounded-lg text-xs shadow-xs transition shrink-0 cursor-pointer flex items-center gap-1.5"
             >
               <span>⚡</span>
-              <span>Activate Workspace (From ₹500) ➔</span>
+              <span>Activate Workspace (From ₹500 + GST) ➔</span>
             </button>
           </div>
         )}

@@ -103,9 +103,10 @@ export default function ActivationPaywallModal({
             <div className="space-y-3">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Starter Trial</span>
               <div>
-                <div className="flex items-baseline gap-1">
+                <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span className="text-2xl sm:text-3xl font-black text-slate-900">₹500</span>
-                  <span className="text-[10px] text-slate-500 font-semibold">+ 18% GST</span>
+                  <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
+                  <span className="text-[10px] text-slate-500 font-semibold">/ 30 days</span>
                 </div>
                 <span className="text-[11px] text-slate-500 block">30 Days Platform Access</span>
                 <span className="mt-1 text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block">
@@ -136,7 +137,7 @@ export default function ActivationPaywallModal({
               disabled={loadingPlan !== null}
               className="w-full py-2.5 rounded-xl border border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-bold text-xs transition cursor-pointer disabled:opacity-50"
             >
-              {loadingPlan === "TRIAL" ? "Opening Razorpay..." : "Activate Trial (₹500) ➔"}
+              {loadingPlan === "TRIAL" ? "Opening Razorpay..." : "Activate Trial (₹500 + GST) ➔"}
             </button>
           </div>
 
@@ -148,8 +149,9 @@ export default function ActivationPaywallModal({
             <div className="space-y-3">
               <span className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider block">Basic Business</span>
               <div>
-                <div className="flex items-baseline gap-1">
+                <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span className="text-2xl sm:text-3xl font-black text-slate-900">₹1,000</span>
+                  <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
                   <span className="text-[10px] text-slate-500 font-semibold">/ month</span>
                 </div>
                 <span className="text-[11px] text-emerald-800 font-semibold block">4 Seats Included (1+3)</span>
@@ -181,7 +183,7 @@ export default function ActivationPaywallModal({
               disabled={loadingPlan !== null}
               className="w-full py-2.5 rounded-xl bg-[#154336] hover:bg-[#0f3127] text-white font-black text-xs transition shadow-xs cursor-pointer disabled:opacity-50"
             >
-              {loadingPlan === "BASIC" ? "Opening Razorpay..." : "Activate Basic (₹1,000) ➔"}
+              {loadingPlan === "BASIC" ? "Opening Razorpay..." : "Activate Basic (₹1,000 + GST) ➔"}
             </button>
           </div>
 
@@ -190,8 +192,9 @@ export default function ActivationPaywallModal({
             <div className="space-y-3">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Professional</span>
               <div>
-                <div className="flex items-baseline gap-1">
+                <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span className="text-2xl sm:text-3xl font-black text-slate-900">₹2,500</span>
+                  <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
                   <span className="text-[10px] text-slate-500 font-semibold">/ month</span>
                 </div>
                 <span className="text-[11px] text-slate-500 block">6 Seats + Shopify + AI</span>
@@ -213,7 +216,7 @@ export default function ActivationPaywallModal({
                   <span className="text-emerald-600">✓</span> 24/7 AI Chatbot Assistant
                 </li>
                 <li className="flex items-center gap-1.5 font-bold text-emerald-700">
-                  <span className="text-emerald-600">✓</span> FREE Green Tick Filing (Save ₹999)
+                  <span className="text-emerald-600">✓</span> FREE Green Tick Filing (Save ₹999 + GST)
                 </li>
               </ul>
             </div>
@@ -223,7 +226,7 @@ export default function ActivationPaywallModal({
               disabled={loadingPlan !== null}
               className="w-full py-2.5 rounded-xl border-2 border-[#154336] text-[#154336] hover:bg-[#154336] hover:text-white font-bold text-xs transition cursor-pointer disabled:opacity-50"
             >
-              {loadingPlan === "PROFESSIONAL" ? "Opening Razorpay..." : "Activate Pro (₹2,500) ➔"}
+              {loadingPlan === "PROFESSIONAL" ? "Opening Razorpay..." : "Activate Pro (₹2,500 + GST) ➔"}
             </button>
           </div>
         </div>

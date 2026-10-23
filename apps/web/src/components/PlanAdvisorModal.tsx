@@ -94,8 +94,8 @@ export default function PlanAdvisorModal({
               <span>⚡ Interactive Plan Comparison</span>
             </div>
             <h3 className="text-xl sm:text-2xl font-black tracking-tight">
-              {stage === "TRIAL_VS_BASIC" && "Starter Trial (₹500) vs. Basic Business (₹1,000)"}
-              {stage === "BASIC_VS_PRO" && "Basic Plan (₹1,000) vs. Professional Scale (₹2,500)"}
+              {stage === "TRIAL_VS_BASIC" && "Starter Trial (₹500 + GST) vs. Basic Business (₹1,000 + GST)"}
+              {stage === "BASIC_VS_PRO" && "Basic Plan (₹1,000 + GST) vs. Professional Scale (₹2,500 + GST)"}
               {stage === "ENTERPRISE" && "Custom High-Throughput Enterprise Architecture"}
             </h3>
             <p className="text-emerald-100/80 text-xs sm:text-sm mt-0.5">
@@ -194,11 +194,12 @@ export default function PlanAdvisorModal({
                       <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700">1 Month</span>
                     </div>
                     <div>
-                      <div className="flex items-baseline gap-1">
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
                         <span className="text-3xl sm:text-4xl font-black text-slate-900">₹500</span>
+                        <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
                         <span className="text-xs text-slate-500 font-semibold">/ 30 days total</span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">One-time payment (+18% GST). Perfect for solo developers.</p>
+                      <p className="text-xs text-slate-500 mt-1">One-time payment (+ 18% GST). Perfect for solo developers.</p>
                       <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-[11px] font-black border border-emerald-200">
                         <span>🎁 Includes ₹100 Free Starter OTP Fuel (~500 OTPs)</span>
                       </div>
@@ -227,7 +228,7 @@ export default function PlanAdvisorModal({
                         <span>✕</span> No multi-agent team seats
                       </div>
                       <div className="flex items-center gap-2 text-slate-400">
-                        <span>✕</span> OBA Green Tick is ₹999 add-on
+                        <span>✕</span> OBA Green Tick is ₹999 + GST add-on
                       </div>
                     </div>
                   </div>
@@ -237,7 +238,7 @@ export default function PlanAdvisorModal({
                     disabled={loadingPlan !== null}
                     className="w-full py-3 px-4 rounded-xl border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-black text-xs transition shadow-xs disabled:opacity-50 cursor-pointer"
                   >
-                    {loadingPlan === "TRIAL" ? "Opening Razorpay..." : "Start 30-Day Trial (₹500) ➔"}
+                    {loadingPlan === "TRIAL" ? "Opening Razorpay..." : "Start 30-Day Trial (₹500 + GST) ➔"}
                   </button>
                 </div>
 
@@ -253,12 +254,13 @@ export default function PlanAdvisorModal({
                       <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-900">4 Seats Included</span>
                     </div>
                     <div>
-                      <div className="flex items-baseline gap-1">
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
                         <span className="text-3xl sm:text-4xl font-black text-slate-900">₹1,000</span>
+                        <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
                         <span className="text-xs text-slate-500 font-semibold">/ month</span>
                       </div>
                       <p className="text-xs text-emerald-800 font-semibold mt-1">
-                        Only ₹500 more gets you 3 extra team seats &amp; ongoing monthly stability!
+                        Only ₹500 + GST more gets you 3 extra team seats &amp; ongoing monthly stability!
                       </p>
                       <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 text-[11px] font-black border border-emerald-300">
                         <span>🎁 Includes ₹200 Free Starter Fuel (~1,000 OTPs)</span>
@@ -266,7 +268,7 @@ export default function PlanAdvisorModal({
                     </div>
 
                     <div className="p-3 bg-emerald-100/70 rounded-xl border border-emerald-200 text-xs text-emerald-950 space-y-1">
-                      <span className="font-extrabold block">🎁 What You Gain Over the ₹500 Trial:</span>
+                      <span className="font-extrabold block">🎁 What You Gain Over the ₹500 + GST Trial:</span>
                       <p className="text-[11px] leading-relaxed">
                         • <strong>3 Extra Support Profiles Included</strong> (1 Owner + 3 Support = 4 Total Seats, saving ₹1,500/mo).<br />
                         • <strong>₹200 Pre-loaded Fuel Credit</strong> included directly in your wallet balance.<br />
@@ -284,7 +286,7 @@ export default function PlanAdvisorModal({
                         <span className="text-emerald-600 font-black">✓</span> Pre-loaded ₹200 Starter Wallet Fuel
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-emerald-600 font-bold">✓</span> Extra seats available at ₹500/month each
+                        <span className="text-emerald-600 font-bold">✓</span> Extra seats available at ₹500 + GST/month each
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-emerald-600 font-bold">✓</span> Live Chat Inbox &amp; Agent Routing
@@ -303,7 +305,7 @@ export default function PlanAdvisorModal({
                     disabled={loadingPlan !== null}
                     className="w-full py-3.5 px-4 rounded-xl bg-[#154336] hover:bg-[#0f3127] text-white font-black text-xs transition shadow-md disabled:opacity-50 cursor-pointer"
                   >
-                    {loadingPlan === "BASIC" ? "Opening Razorpay..." : "Choose Basic Business Plan (₹1,000/mo) ➔"}
+                    {loadingPlan === "BASIC" ? "Opening Razorpay..." : "Choose Basic Business Plan (₹1,000 + GST/mo) ➔"}
                   </button>
                 </div>
               </div>
@@ -317,7 +319,7 @@ export default function PlanAdvisorModal({
                   onClick={() => setStage("BASIC_VS_PRO")}
                   className="text-emerald-700 font-extrabold hover:text-emerald-800 hover:underline cursor-pointer shrink-0"
                 >
-                  Compare with Professional Plan (₹2,500) ➔
+                  Compare with Professional Plan (₹2,500 + GST) ➔
                 </button>
               </div>
             </div>
@@ -346,8 +348,9 @@ export default function PlanAdvisorModal({
                       <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700">4 Seats</span>
                     </div>
                     <div>
-                      <div className="flex items-baseline gap-1">
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
                         <span className="text-3xl sm:text-4xl font-black text-slate-900">₹1,000</span>
+                        <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
                         <span className="text-xs text-slate-500 font-semibold">/ month</span>
                       </div>
                       <p className="text-xs text-slate-500 mt-1">Best for standard WhatsApp support and notifications.</p>
@@ -373,7 +376,7 @@ export default function PlanAdvisorModal({
                         <span>✕</span> AI Chatbot auto-replies not included
                       </div>
                       <div className="flex items-center gap-2 text-slate-400">
-                        <span>✕</span> OBA Green Tick is ₹999 add-on
+                        <span>✕</span> OBA Green Tick is ₹999 + GST add-on
                       </div>
                     </div>
                   </div>
@@ -383,7 +386,7 @@ export default function PlanAdvisorModal({
                     disabled={loadingPlan !== null}
                     className="w-full py-3 px-4 rounded-xl border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-black text-xs transition shadow-xs disabled:opacity-50 cursor-pointer"
                   >
-                    {loadingPlan === "BASIC" ? "Opening Razorpay..." : "Select Basic Plan (₹1,000/mo) ➔"}
+                    {loadingPlan === "BASIC" ? "Opening Razorpay..." : "Select Basic Plan (₹1,000 + GST/mo) ➔"}
                   </button>
                 </div>
 
@@ -399,8 +402,9 @@ export default function PlanAdvisorModal({
                       <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-900/80 text-emerald-200 border border-emerald-700">6 Seats</span>
                     </div>
                     <div>
-                      <div className="flex items-baseline gap-1">
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
                         <span className="text-3xl sm:text-4xl font-black text-white">₹2,500</span>
+                        <sub className="text-xs font-black text-emerald-300 bottom-0 uppercase tracking-tight">+ GST</sub>
                         <span className="text-xs text-emerald-200 font-semibold">/ month</span>
                       </div>
                       <p className="text-xs text-emerald-200 mt-1">
@@ -419,7 +423,7 @@ export default function PlanAdvisorModal({
                         • <strong>Shopify &amp; WooCommerce Recipes</strong> (Cart recovery &amp; COD confirmation).<br />
                         • <strong>24/7 AI Chatbot Assistant</strong> with interactive buttons.<br />
                         • <strong>Complex Logic Campaigns</strong> (Read-Not-Replied follow-ups).<br />
-                        • <strong>FREE Official Green Tick (OBA) Filing</strong> (Saves ₹999!).
+                        • <strong>FREE Official Green Tick (OBA) Filing</strong> (Saves ₹999 + GST!).
                       </p>
                     </div>
 
@@ -450,7 +454,7 @@ export default function PlanAdvisorModal({
                     disabled={loadingPlan !== null}
                     className="w-full py-3.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition shadow-md disabled:opacity-50 cursor-pointer"
                   >
-                    {loadingPlan === "PROFESSIONAL" ? "Opening Razorpay..." : "Select Professional Plan (₹2,500/mo) ➔"}
+                    {loadingPlan === "PROFESSIONAL" ? "Opening Razorpay..." : "Select Professional Plan (₹2,500 + GST/mo) ➔"}
                   </button>
                 </div>
               </div>
@@ -530,7 +534,7 @@ export default function PlanAdvisorModal({
                   onClick={() => setStage("TRIAL_VS_BASIC")}
                   className="text-xs text-slate-500 font-bold hover:text-slate-900 cursor-pointer"
                 >
-                  ⬅ Back to Standard Plans (₹500 / ₹1,000 / ₹2,500)
+                  ⬅ Back to Standard Plans (₹500 + GST / ₹1,000 + GST / ₹2,500 + GST)
                 </button>
               </div>
             </div>

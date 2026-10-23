@@ -531,7 +531,7 @@ export default function WhatsAppVerificationPage() {
               className="px-3 py-2 bg-emerald-50 border border-emerald-200/90 text-emerald-800 text-[11px] font-bold rounded-xl hover:bg-emerald-100 transition shadow-2xs flex items-center gap-1.5"
             >
               <span>🟢</span>
-              <span>Included Free with Pro · ₹999 on Basic</span>
+              <span>Included Free with Pro · ₹999 + GST on Basic</span>
             </a>
             {selectedPhone && (
               <button
