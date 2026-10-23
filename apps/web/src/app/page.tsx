@@ -1559,8 +1559,8 @@ print(res.json())`}
                   <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
                   <span className="text-xs text-slate-500">/ 30-day trial</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[11px] font-black border border-emerald-200">
-                  🎁 Includes ₹100 Free Starter OTP Fuel
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-800 text-[11px] font-black border border-slate-200">
+                  ⚡ 30 Days Full Platform Access
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
                   1 Owner account for 30 days. Perfect for developers &amp; testing OTP API integration.
@@ -1569,7 +1569,7 @@ print(res.json())`}
                   <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider block mb-2">Included Features:</span>
                   <ul className="space-y-2 text-xs text-slate-600 font-medium">
                     <li className="flex items-center gap-2 font-bold text-slate-900"><span className="text-emerald-600 font-bold">✓</span> 1 User (Owner profile only)</li>
-                    <li className="flex items-center gap-2 font-bold text-emerald-800"><span className="text-emerald-600 font-black">✓</span> ₹100 Pre-loaded Fuel (~500 OTPs)</li>
+                    <li className="flex items-center gap-2 text-slate-600"><span className="text-emerald-600 font-bold">✓</span> Pay-as-you-go message fuel (Recharge anytime)</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Full WhatsApp OTP API Setup</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Utility &amp; Order Messages</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Basic Campaign Studio &amp; Templates</li>
@@ -1599,7 +1599,7 @@ print(res.json())`}
                   <span className="text-xs text-slate-500">/ month</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 text-[11px] font-black border border-emerald-300">
-                  🎁 Includes ₹200 Free Starter Fuel
+                  🎁 Includes ₹50 Free Wallet Balance (~250 OTPs)
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
                   For growing businesses needing WhatsApp OTP, utility receipts, and team inbox collaboration.
@@ -1608,7 +1608,7 @@ print(res.json())`}
                   <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider block mb-2">Included Features:</span>
                   <ul className="space-y-2 text-xs text-slate-600 font-medium">
                     <li className="flex items-center gap-2 font-bold text-slate-800"><span className="text-emerald-600">✓</span> 1 Owner + 3 Support Seats (4 total)</li>
-                    <li className="flex items-center gap-2 font-bold text-emerald-800"><span className="text-emerald-600 font-black">✓</span> Pre-loaded ₹200 Fuel (~1,000 OTPs)</li>
+                    <li className="flex items-center gap-2 font-bold text-emerald-800"><span className="text-emerald-600 font-black">✓</span> ₹50 Starter Wallet Balance Included (~250 OTPs)</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> WhatsApp OTP API Integration</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Order &amp; Payment Utility Messages</li>
@@ -1643,7 +1643,7 @@ print(res.json())`}
                   <span className="text-xs text-emerald-200">/ month</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-400 text-slate-950 text-[11px] font-black">
-                  🎁 Includes ₹500 Free Starter Fuel + Free OBA
+                  🎁 Includes ₹100 Free Wallet Balance + Free OBA
                 </div>
                 <p className="text-xs text-emerald-100 leading-relaxed">
                   For brands scaling e-commerce automations, AI support assistants, and intelligent funnel logic.
@@ -1652,7 +1652,7 @@ print(res.json())`}
                   <span className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider block mb-2">Everything in Basic, plus:</span>
                   <ul className="space-y-2 text-xs text-emerald-50 font-medium">
                     <li className="flex items-center gap-2 font-bold text-white"><span className="text-emerald-400">✓</span> 1 Owner + 5 Support Seats (6 total)</li>
-                    <li className="flex items-center gap-2 font-bold text-emerald-300"><span className="text-emerald-400 font-black">✓</span> Pre-loaded ₹500 Fuel (~2,500 OTPs)</li>
+                    <li className="flex items-center gap-2 font-bold text-emerald-300"><span className="text-emerald-400 font-black">✓</span> ₹100 Starter Wallet Balance Included (~500 OTPs)</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> E-Commerce API (Shopify/Woo/Custom)</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> AI Assistant &amp; Smart Auto-Replies</li>

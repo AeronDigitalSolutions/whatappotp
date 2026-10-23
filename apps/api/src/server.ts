@@ -1103,6 +1103,7 @@ fastify.get("/v1/billing/subscription/:organizationId", async (request: any, rep
           description: "For growing businesses needing WhatsApp OTP, transactional utility, and marketing.",
           features: [
             "1 Owner + 3 Support profiles (4 seats included)",
+            "₹50 Starter wallet balance included (~250 OTPs)",
             "Additional team seats at ₹500/month",
             "WhatsApp OTP authentication messages (₹0.20/msg)",
             "Utility & Order confirmation messages (₹0.18/msg)",
@@ -1123,6 +1124,7 @@ fastify.get("/v1/billing/subscription/:organizationId", async (request: any, rep
           description: "For scaling brands needing e-commerce APIs, AI assistants, and intelligent funnel logic.",
           features: [
             "1 Owner + 5 Support profiles (6 seats included)",
+            "₹100 Starter wallet balance included (~500 OTPs)",
             "Additional team seats at ₹500/month",
             "All Basic Plan features included",
             "E-Commerce API setup (Shopify, WooCommerce, Custom)",

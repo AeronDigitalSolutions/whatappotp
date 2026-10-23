@@ -1200,6 +1200,7 @@ export default function WalletPage() {
                   </p>
                   <ul className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> 1 Seat Included (Owner only)</li>
+                    <li className="flex items-center gap-1.5 text-slate-600"><span className="text-emerald-600 font-bold">✓</span> Pay-as-you-go message fuel</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Full OTP API &amp; Webhooks</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Utility &amp; Order Messages</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Basic Campaign Broadcasts</li>
@@ -1234,6 +1235,7 @@ export default function WalletPage() {
                   </p>
                   <ul className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
                     <li className="flex items-center gap-1.5 font-bold text-slate-800"><span className="text-emerald-600">✓</span> 4 Seats (1 Owner + 3 Support)</li>
+                    <li className="flex items-center gap-1.5 font-bold text-emerald-800"><span className="text-emerald-600 font-black">✓</span> ₹50 Starter Wallet Balance Included (~250 OTPs)</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> WhatsApp OTP &amp; Utility APIs</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Template Approval Dashboard</li>
@@ -1272,6 +1274,7 @@ export default function WalletPage() {
                   </p>
                   <ul className="space-y-1.5 text-xs text-emerald-50 pt-2 border-t border-emerald-800/80">
                     <li className="flex items-center gap-1.5 font-bold text-white"><span className="text-emerald-400">✓</span> 6 Seats (1 Owner + 5 Support)</li>
+                    <li className="flex items-center gap-1.5 font-bold text-emerald-300"><span className="text-emerald-400 font-black">✓</span> ₹100 Starter Wallet Balance Included (~500 OTPs)</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> E-Commerce API (Shopify, Woo, Custom)</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> AI Assistant &amp; Smart Auto-Replies</li>
