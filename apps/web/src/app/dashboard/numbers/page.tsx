@@ -234,30 +234,42 @@ export default function NumbersPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Phone Numbers & Routing</h1>
-          <p className="text-slate-500 text-sm mt-0.5">
-            Check the services each number should handle. A single number can be assigned to one, two, or all three services.
-          </p>
+      {/* Top Control Bar with Mode Toggle */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 text-base shrink-0 font-bold">
+            📞
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-800">
+                {numbers.length} Registered WhatsApp Number{numbers.length !== 1 ? "s" : ""}
+              </span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            </div>
+            <p className="text-[11px] text-slate-400">Meta Cloud API multi-service routing & fallback configuration</p>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={loadNumbers}
-            disabled={loading}
-            className="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 shadow-sm flex items-center gap-1.5"
-          >
-            <span className={loading ? "animate-spin" : ""}>🔄</span> Sync with Meta
-          </button>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-lg hover:bg-slate-800 shadow-sm"
-          >
-            + Link Number
-          </button>
+
+        {/* Right: Action Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={loadNumbers}
+              disabled={loading}
+              className="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <span className={loading ? "animate-spin" : ""}>🔄</span>
+              <span>Sync with Meta</span>
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-4 py-2 bg-[#064e3b] hover:bg-[#043d2e] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <span className="text-sm font-bold leading-none">+</span>
+              <span>Link Number</span>
+            </button>
+          </div>
         </div>
-      </div>
 
       {error && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center justify-between">
@@ -267,31 +279,34 @@ export default function NumbersPage() {
       )}
 
       {/* Services Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Services Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
         {/* Authentication Card */}
-        <div className="bg-amber-50/60 border border-amber-200 rounded-xl p-5 flex flex-col justify-between shadow-sm">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-700">Authentication / OTP</span>
-              <span className="text-lg">🔑</span>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600 text-xs shrink-0 font-bold">
+                🔑
+              </div>
+              <div>
+                <span className="text-xs font-bold text-slate-700">Authentication / OTP</span>
+                <p className="text-[10px] text-slate-400">High-priority 2FA & login codes</p>
+              </div>
             </div>
-            <p className="text-xs text-amber-800 mt-2">
-              Reserved for high-priority 2FA codes, login OTPs, and password resets.
-            </p>
           </div>
-          <div className="mt-4 pt-3 border-t border-amber-200/60">
+          <div className="mt-4 pt-3 border-t border-slate-100">
             {authNumbers.length > 0 ? (
               <div className="space-y-1.5">
                 {authNumbers.map((n) => (
                   <div key={n.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      <span className="font-bold text-sm text-slate-900 font-mono">{n.displayPhone}</span>
+                      <span className="font-bold text-xs text-slate-900 font-mono">{n.displayPhone}</span>
                     </div>
                     {n.isDefault ? (
-                      <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">Primary</span>
+                      <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-bold">Primary</span>
                     ) : (
-                      <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-medium">Assigned</span>
+                      <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded font-medium">Assigned</span>
                     )}
                   </div>
                 ))}
@@ -303,26 +318,28 @@ export default function NumbersPage() {
         </div>
 
         {/* Marketing Card */}
-        <div className="bg-purple-50/60 border border-purple-200 rounded-xl p-5 flex flex-col justify-between shadow-sm">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-purple-700">Marketing & Promo</span>
-              <span className="text-lg">📢</span>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 text-xs shrink-0 font-bold">
+                📢
+              </div>
+              <div>
+                <span className="text-xs font-bold text-slate-700">Marketing & Promo</span>
+                <p className="text-[10px] text-slate-400">Campaigns, offers & announcements</p>
+              </div>
             </div>
-            <p className="text-xs text-purple-800 mt-2">
-              Used for seasonal offers, discounts, customer announcements, and broadcasts.
-            </p>
           </div>
-          <div className="mt-4 pt-3 border-t border-purple-200/60">
+          <div className="mt-4 pt-3 border-t border-slate-100">
             {marketingNumbers.length > 0 ? (
               <div className="space-y-1.5">
                 {marketingNumbers.map((n) => (
                   <div key={n.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                      <span className="font-bold text-sm text-slate-900 font-mono">{n.displayPhone}</span>
+                      <span className="font-bold text-xs text-slate-900 font-mono">{n.displayPhone}</span>
                     </div>
-                    <span className="text-[10px] bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded font-bold">Active</span>
+                    <span className="text-[10px] bg-purple-50 text-purple-800 border border-purple-200 px-1.5 py-0.5 rounded font-bold">Active</span>
                   </div>
                 ))}
               </div>
@@ -333,26 +350,28 @@ export default function NumbersPage() {
         </div>
 
         {/* Utility Card */}
-        <div className="bg-blue-50/60 border border-blue-200 rounded-xl p-5 flex flex-col justify-between shadow-sm">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-700">Order Updates & Utility</span>
-              <span className="text-lg">📦</span>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 text-xs shrink-0 font-bold">
+                📦
+              </div>
+              <div>
+                <span className="text-xs font-bold text-slate-700">Order Updates & Utility</span>
+                <p className="text-[10px] text-slate-400">Order alerts, invoices & tracking</p>
+              </div>
             </div>
-            <p className="text-xs text-blue-800 mt-2">
-              Used for shipping confirmations, invoice delivery, and account notifications.
-            </p>
           </div>
-          <div className="mt-4 pt-3 border-t border-blue-200/60">
+          <div className="mt-4 pt-3 border-t border-slate-100">
             {utilityNumbers.length > 0 ? (
               <div className="space-y-1.5">
                 {utilityNumbers.map((n) => (
                   <div key={n.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                      <span className="font-bold text-sm text-slate-900 font-mono">{n.displayPhone}</span>
+                      <span className="font-bold text-xs text-slate-900 font-mono">{n.displayPhone}</span>
                     </div>
-                    <span className="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-bold">Active</span>
+                    <span className="text-[10px] bg-blue-50 text-blue-800 border border-blue-200 px-1.5 py-0.5 rounded font-bold">Active</span>
                   </div>
                 ))}
               </div>

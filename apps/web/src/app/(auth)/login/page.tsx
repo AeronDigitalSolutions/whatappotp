@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getApiUrl } from "@/lib/api";
@@ -10,7 +10,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const plan = params.get("plan") || localStorage.getItem("pendingPlan");
+      if (plan && (plan === "TRIAL" || plan === "BASIC" || plan === "PROFESSIONAL")) {
+        setSelectedPlan(plan);
+        localStorage.setItem("pendingPlan", plan);
+      }
+    }
+  }, []);
 
   const handleLogin = async (e: any) => {
     e.preventDefault();
@@ -30,7 +42,12 @@ export default function LoginPage() {
       localStorage.setItem("projectId", data.projectId);
       localStorage.setItem("organizationId", data.organizationId);
 
-      router.push("/dashboard/setup");
+      if (selectedPlan) {
+        localStorage.setItem("pendingPlan", selectedPlan);
+        router.push("/dashboard?activate=true");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -52,6 +69,27 @@ export default function LoginPage() {
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Welcome back</h1>
           <p className="text-slate-500 mt-1 text-xs">Sign in to your <b>Digital Beings</b> workspace</p>
         </div>
+
+        {selectedPlan && (
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-3 rounded-xl text-xs flex items-center justify-between shadow-2xs">
+            <div className="flex items-center gap-2">
+              <span className="text-base">🎁</span>
+              <div>
+                <span className="font-extrabold block">
+                  {selectedPlan === "TRIAL" && "Starter Trial (₹500 / 30 Days)"}
+                  {selectedPlan === "BASIC" && "Basic Business Plan (₹1,000 / month)"}
+                  {selectedPlan === "PROFESSIONAL" && "Professional Plan (₹2,500 / month)"}
+                </span>
+                <span className="text-[11px] text-emerald-700">
+                  Workspace activation will continue right after sign in
+                </span>
+              </div>
+            </div>
+            <span className="px-2 py-0.5 bg-emerald-200 text-emerald-900 font-extrabold rounded text-[10px]">
+              SELECTED
+            </span>
+          </div>
+        )}
 
         {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm border border-red-100">{error}</div>}
 
@@ -85,14 +123,14 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl hover:bg-slate-800 transition disabled:opacity-50 text-sm shadow-sm"
+            className="w-full bg-[#154336] hover:bg-[#0f3127] text-white font-bold py-2.5 rounded-xl transition disabled:opacity-50 text-sm shadow-sm cursor-pointer"
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {loading ? "Signing in..." : "Sign in to Dashboard"}
           </button>
         </form>
 
         <p className="text-center text-sm text-slate-500">
-          Don't have an account? <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-semibold">Sign up</Link>
+          Don't have an account? <Link href={`/signup${selectedPlan ? `?plan=${selectedPlan}` : ''}`} className="text-blue-600 hover:text-blue-700 font-semibold">Sign up</Link>
         </p>
       </div>
     </div>

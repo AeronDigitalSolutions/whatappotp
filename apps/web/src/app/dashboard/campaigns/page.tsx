@@ -755,83 +755,112 @@ export default function CampaignsPage() {
   }, [campaigns]);
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-16">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-2xl">📣</span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Broadcast Campaigns & Smart Audience Mapping
-            </h1>
-          </div>
-          <p className="text-sm text-slate-500">
-            Create high-engagement WhatsApp campaigns, upload Excel audiences with custom column mapping, and monitor real-time delivery funnels.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={loadCampaigns}
-            className="px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition shadow-xs flex items-center gap-2"
-          >
-            <span>🔄</span> Refresh
-          </button>
-          <button
-            onClick={() => {
-              resetWizard();
-              setShowWizard(true);
-            }}
-            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition shadow-sm hover:shadow-md flex items-center gap-2"
-          >
-            <span>✨</span> Create New Campaign
-          </button>
-        </div>
-      </div>
-
-      {/* KPI Hero Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Campaigns</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{stats.totalCamps}</p>
-            <p className="text-[11px] text-slate-500 mt-0.5">{stats.activeCount} currently active</p>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold">
-            📢
-          </div>
+    <div className="space-y-6 max-w-7xl mx-auto pb-16">
+      {/* Top Control Bar with Mode Toggle */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80">
+        {/* Left: Quick Broadcast Type Filter Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto">
+          {[
+            { id: "ALL", label: "All Broadcasts", icon: "📢", count: campaigns.length },
+            { id: "MARKETING", label: "Marketing", icon: "📣", count: campaigns.filter(c => c.service === "MARKETING").length },
+            { id: "UTILITY", label: "Utility", icon: "📋", count: campaigns.filter(c => c.service === "UTILITY").length }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setFilterService(tab.id)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                filterService === tab.id
+                  ? "bg-slate-900 text-white shadow-2xs"
+                  : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              <span>{tab.icon}</span>
+              <span>{tab.label}</span>
+              <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-mono ${
+                filterService === tab.id ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+              }`}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Audience</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{stats.totalRecipients.toLocaleString()}</p>
-            <p className="text-[11px] text-slate-500 mt-0.5">Contacts in campaigns</p>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl font-bold">
-            👥
+        {/* Right: Action Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={loadCampaigns}
+              disabled={loading}
+              className="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <span className={loading ? "animate-spin" : ""}>🔄</span>
+              <span>Refresh</span>
+            </button>
+            <button
+              onClick={() => {
+                resetWizard();
+                setShowWizard(true);
+              }}
+              className="px-4 py-2 bg-[#064e3b] hover:bg-[#043d2e] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <span className="text-sm font-bold leading-none">+</span>
+              <span>Create New Campaign</span>
+            </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Messages Sent</p>
-            <p className="text-2xl font-black text-emerald-600 mt-1">{stats.totalSent.toLocaleString()}</p>
-            <p className="text-[11px] text-slate-500 mt-0.5">Dispatched to Meta Cloud</p>
+      {/* KPI Hero Overview Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 text-xs shrink-0 font-bold">
+                📢
+              </div>
+              <span className="text-xs font-bold text-slate-700">Total Campaigns</span>
+            </div>
+            <span className="text-[11px] font-bold text-slate-400">{stats.activeCount} active</span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
-            🚀
-          </div>
+          <div className="mt-2.5 text-2xl font-black text-slate-900">{stats.totalCamps}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">All created broadcast runs</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Delivery Rate</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{stats.successRate}%</p>
-            <p className="text-[11px] text-slate-500 mt-0.5">Average dispatch health</p>
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 text-xs shrink-0 font-bold">
+                👥
+              </div>
+              <span className="text-xs font-bold text-slate-700">Total Audience</span>
+            </div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-bold">
-            ⚡
+          <div className="mt-2.5 text-2xl font-black text-slate-900">{stats.totalRecipients.toLocaleString()}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Contacts mapped in lists</div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 text-xs shrink-0 font-bold">
+                🚀
+              </div>
+              <span className="text-xs font-bold text-slate-700">Messages Sent</span>
+            </div>
           </div>
+          <div className="mt-2.5 text-2xl font-black text-emerald-600">{stats.totalSent.toLocaleString()}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Dispatched to Meta Cloud</div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600 text-xs shrink-0 font-bold">
+                ⚡
+              </div>
+              <span className="text-xs font-bold text-slate-700">Delivery Rate</span>
+            </div>
+          </div>
+          <div className="mt-2.5 text-2xl font-black text-slate-900">{stats.successRate}%</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Average dispatch health</div>
         </div>
       </div>
 
@@ -1207,7 +1236,7 @@ export default function CampaignsPage() {
                   <div className="bg-slate-100/80 border border-slate-200/80 rounded-xl p-3 mt-3 flex items-start gap-2.5 text-[11px] text-slate-600">
                     <span className="text-base shrink-0 mt-0.5">💡</span>
                     <span>
-                      <b>Looking for OTP / Authentication?</b> OTP is a real-time, 1-to-1 security trigger and cannot be sent via bulk Excel campaigns. Dispatch OTPs programmatically using your secret keys under <a href="/dashboard/api-keys" className="font-bold text-slate-900 underline hover:text-emerald-700">API Keys & Sandbox</a>.
+                      <b>Looking for OTP / Authentication?</b> OTP is a real-time, 1-to-1 security trigger and cannot be sent via bulk Excel campaigns. Dispatch OTPs programmatically using your secret keys under <a href="/dashboard/api-keys" className="font-bold text-slate-900 underline hover:text-emerald-700">API Keys & Gateway</a>.
                     </span>
                   </div>
                 </div>

@@ -102,6 +102,29 @@ export default function SetupPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleMetaMessage = (event: MessageEvent) => {
+      if (
+        event.origin &&
+        (event.origin.includes("facebook.com") || event.origin.includes("fb.com"))
+      ) {
+        try {
+          const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+          if (data && (data.type === "WA_EMBEDDED_SIGNUP" || data.event === "FINISH")) {
+            if (projectId) {
+              fetchProjectData(projectId);
+              fetchMetaAccounts(projectId);
+              fetchConnectedNumbers(projectId);
+            }
+          }
+        } catch (e) {}
+      }
+    };
+
+    window.addEventListener("message", handleMetaMessage);
+    return () => window.removeEventListener("message", handleMetaMessage);
+  }, [projectId]);
+
   const handleFacebookLogin = () => {
     if (!projectId) return showWarning("Please log in to your account first.", "Login Required");
     
@@ -271,27 +294,90 @@ export default function SetupPage() {
 
         {/* STATE 1: Connect Meta (First time) */}
         {!project?.metaAccessToken && (
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-10 flex flex-col items-center text-center space-y-6">
-            <div className="flex justify-center items-center space-x-4 mb-4">
-              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center text-xl font-bold">OS</div>
-              <div className="text-slate-300">● ● ●</div>
-              <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center">
-                <svg className="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-200/90 overflow-hidden">
+            {/* Top Reassurance Hero Banner */}
+            <div className="p-8 sm:p-10 bg-gradient-to-b from-emerald-50/60 via-slate-50/30 to-white text-center space-y-4 border-b border-slate-100">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-extrabold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Official Meta Cloud API • Zero Coding Required
               </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight max-w-xl mx-auto">
+                Connect or Register Your WhatsApp Number in Under 60 Seconds
+              </h2>
+              <p className="text-slate-500 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed">
+                Whether you have an established Meta Business Portfolio or just a brand-new SIM card, Meta will guide you through quick SMS verification directly inside the secure popup dialog.
+              </p>
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">Step 1: Connect with Meta</h2>
-              <p className="text-slate-500 text-sm mt-1 max-w-md mx-auto">Authorize your Facebook Business Manager to discover your Business Portfolios and WhatsApp phone numbers.</p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button onClick={handleFacebookLogin} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-xs transition flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                <span>Login with Facebook</span>
-              </button>
-              <button onClick={() => setShowTokenModal(true)} className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-6 rounded-xl shadow-xs transition flex items-center justify-center space-x-2">
-                <span>🔑</span>
-                <span>Paste System User Token</span>
-              </button>
+
+            {/* 3 Step Readiness Cards */}
+            <div className="p-6 sm:p-8 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg font-bold">
+                    📱
+                  </div>
+                  <h4 className="font-bold text-sm text-slate-900">1. Mobile Phone Ready</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Have your mobile phone nearby. Meta will send a 6-digit SMS verification code to verify number ownership.
+                  </p>
+                </div>
+
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold">
+                    ✨
+                  </div>
+                  <h4 className="font-bold text-sm text-slate-900">2. No Meta Setup Needed</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Don&apos;t have a Business Portfolio yet? Meta automatically creates your official profile on the fly inside the popup.
+                  </p>
+                </div>
+
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-lg font-bold">
+                    ⚡
+                  </div>
+                  <h4 className="font-bold text-sm text-slate-900">3. Fresh or Unlinked Number</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    If this number is on a personal WhatsApp phone app, simply tap &quot;Delete Account&quot; in your phone&apos;s WhatsApp settings first so Meta API can claim it.
+                  </p>
+                </div>
+              </div>
+
+              {/* Main Action Area */}
+              <div className="pt-2 flex flex-col items-center justify-center space-y-4">
+                <button
+                  onClick={handleFacebookLogin}
+                  className="w-full sm:w-auto px-8 py-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold rounded-2xl shadow-lg shadow-emerald-500/25 hover:shadow-xl transition flex items-center justify-center gap-3 text-base"
+                >
+                  <svg className="w-6 h-6 fill-current shrink-0" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                  </svg>
+                  <span>Connect with WhatsApp (Meta Official Popup)</span>
+                </button>
+                <p className="text-[11px] text-slate-400 font-medium">
+                  🔒 Opens Meta&apos;s verified authorization dialog. Everything happens inside the popup.
+                </p>
+
+                {/* Secondary Fallbacks for Agencies & System Users */}
+                <div className="pt-6 border-t border-slate-100 w-full flex flex-col sm:flex-row items-center justify-center gap-3 text-xs">
+                  <span className="text-slate-400 font-medium">Agency or Enterprise setup?</span>
+                  <button
+                    onClick={() => setShowTokenModal(true)}
+                    className="font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition"
+                  >
+                    🔑 Paste System User Token
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText("205078357411585");
+                      showSuccess("Copied Digital Being Partner ID (205078357411585)!", "Copied");
+                    }}
+                    className="font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition"
+                  >
+                    📋 Copy Partner ID (205078357411585)
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

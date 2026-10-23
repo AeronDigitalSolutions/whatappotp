@@ -4,7 +4,29 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
-import Loader from "@/components/Loader";
+import { useViewMode } from "@/context/ViewModeContext";
+import {
+  SendAirplaneIcon,
+  ZapIcon,
+  ShieldCheckIcon,
+  WalletIcon,
+  RefreshIcon,
+  BarChart2DIcon,
+  PieChart2DIcon,
+  Funnel2DIcon,
+  Rocket2DIcon,
+  CampaignIcon,
+  TemplateIcon,
+  KeyIcon,
+  Activity2DIcon,
+  PhoneRoutingIcon,
+  SparklesIcon,
+  Close2DIcon,
+  TrendingUpIcon,
+  BotIcon,
+  ShoppingBagIcon,
+  WhatsAppIcon
+} from "@/components/Icons";
 
 interface OverviewMetrics {
   totalSent: number;
@@ -54,47 +76,45 @@ interface AssetDetails {
 export default function DashboardOverview() {
   const { showSuccess, showError } = useModal();
   const [projectId, setProjectId] = useState<string | null>(null);
+  const [userName, setUserName] = useState("Aryan");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Active Channel Tab
+  const [activeChannel, setActiveChannel] = useState<"whatsapp" | "instagram">("whatsapp");
+  const [showAllQuickActions, setShowAllQuickActions] = useState(false);
+  const [showAllObjectives, setShowAllObjectives] = useState(false);
+
   // Analytics data
   const [metrics, setMetrics] = useState<OverviewMetrics>({
-    totalSent: 1248,
-    totalDelivered: 1228,
-    totalFailed: 20,
-    deliveryRate: 98.4,
-    verificationRate: 84.5,
-    avgDeliveryLatency: "1.4s",
+    totalSent: 0,
+    totalDelivered: 0,
+    totalFailed: 0,
+    deliveryRate: 0,
+    verificationRate: 0,
+    avgDeliveryLatency: "0.0s",
     walletBalance: "0.00",
     estimatedOtpRunway: 0,
-    activeCampaigns: 2,
+    activeCampaigns: 0,
     serviceSplit: {
-      authentication: 840,
-      marketing: 330,
-      utility: 78
+      authentication: 0,
+      marketing: 0,
+      utility: 0
     }
   });
 
   const [trend, setTrend] = useState<TrendDay[]>([
-    { day: "Mon", sent: 140, delivered: 138, failed: 2 },
-    { day: "Tue", sent: 185, delivered: 182, failed: 3 },
-    { day: "Wed", sent: 165, delivered: 163, failed: 2 },
-    { day: "Thu", sent: 210, delivered: 207, failed: 3 },
-    { day: "Fri", sent: 195, delivered: 192, failed: 3 },
-    { day: "Sat", sent: 170, delivered: 168, failed: 2 },
-    { day: "Sun", sent: 183, delivered: 178, failed: 5 }
+    { day: "Mon", sent: 0, delivered: 0, failed: 0 },
+    { day: "Tue", sent: 0, delivered: 0, failed: 0 },
+    { day: "Wed", sent: 0, delivered: 0, failed: 0 },
+    { day: "Thu", sent: 0, delivered: 0, failed: 0 },
+    { day: "Fri", sent: 0, delivered: 0, failed: 0 },
+    { day: "Sat", sent: 0, delivered: 0, failed: 0 },
+    { day: "Sun", sent: 0, delivered: 0, failed: 0 }
   ]);
 
   const [recentActivity, setRecentActivity] = useState<ActivityEvent[]>([]);
-  const [asset, setAsset] = useState<AssetDetails>({
-    wabaId: "2107898293422238",
-    phoneId: "",
-    displayPhone: "+91 98765 43210",
-    verifiedName: "Production WhatsApp",
-    quality: "GREEN / HIGH",
-    status: "VERIFIED",
-    tier: "Tier 2 (10,000 msgs / 24h)"
-  });
+  const [asset, setAsset] = useState<AssetDetails | null>(null);
 
   // Quick Test OTP Modal State
   const [showTestModal, setShowTestModal] = useState(false);
@@ -104,8 +124,15 @@ export default function DashboardOverview() {
 
   const loadDashboardData = async (isManual = false) => {
     const pid = typeof window !== "undefined" ? localStorage.getItem("projectId") : null;
-    if (!pid) return setLoading(false);
+    const userJson = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+    if (userJson) {
+      try {
+        const u = JSON.parse(userJson);
+        if (u.name) setUserName(u.name);
+      } catch {}
+    }
 
+    if (!pid) return setLoading(false);
     setProjectId(pid);
     if (isManual) setRefreshing(true);
 
@@ -130,7 +157,6 @@ export default function DashboardOverview() {
     loadDashboardData();
   }, []);
 
-  // Quick Test OTP handler
   const handleSendTest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!testPhone) return;
@@ -144,17 +170,16 @@ export default function DashboardOverview() {
         body: JSON.stringify({
           projectId,
           phone: testPhone,
-          purpose: "DASHBOARD_TEST",
-          simulate: true
+          purpose: "AUTHENTICATION"
         })
       });
       const data = await res.json();
       if (res.ok && data.success) {
         setTestResult(data);
-        showSuccess(`Test OTP dispatched successfully to ${testPhone}!\n\nDev Code: ${data.devCode || '123456'}`, "OTP Dispatched");
+        showSuccess(`WhatsApp message dispatched successfully to ${testPhone}!`, "Dispatch Successful");
         loadDashboardData(false);
       } else {
-        showError(data.error || "Failed to dispatch test OTP", "Dispatch Failed");
+        showError(data.error || "Failed to dispatch message", "Dispatch Failed");
       }
     } catch (err: any) {
       showError(err.message || "Network error", "Error");
@@ -163,267 +188,558 @@ export default function DashboardOverview() {
     }
   };
 
-  // Max value in trend for relative height scaling
   const maxTrendSent = Math.max(...trend.map(t => t.sent), 10);
-
-  // Total service sum
-  const totalServiceCount = (metrics.serviceSplit.authentication + metrics.serviceSplit.marketing + metrics.serviceSplit.utility) || 1;
-  const otpPct = Math.round((metrics.serviceSplit.authentication / totalServiceCount) * 100);
-  const mktPct = Math.round((metrics.serviceSplit.marketing / totalServiceCount) * 100);
-  const utlPct = Math.round((metrics.serviceSplit.utility / totalServiceCount) * 100);
+  const totalServiceCount = (metrics.serviceSplit.authentication + metrics.serviceSplit.marketing + metrics.serviceSplit.utility) || 0;
+  const otpPct = totalServiceCount > 0 ? Math.round((metrics.serviceSplit.authentication / totalServiceCount) * 100) : 0;
+  const mktPct = totalServiceCount > 0 ? Math.round((metrics.serviceSplit.marketing / totalServiceCount) * 100) : 0;
+  const utlPct = totalServiceCount > 0 ? Math.round((metrics.serviceSplit.utility / totalServiceCount) * 100) : 0;
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto overflow-y-auto">
-      {/* Top Header & Command Center Bar */}
+    <div className="space-y-6 max-w-7xl mx-auto pb-16">
+      {/* 1. Interakt-Style Greeting */}
+      <div>
+        <h1 className="text-2xl sm:text-[28px] font-black text-slate-900 tracking-tight">
+          Welcome to Digital Beings, {userName}!
+        </h1>
+      </div>
+
+      {/* 2. Top Channel Switcher & Gateway Banner Row (Matching Interakt) */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-md border border-emerald-200 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Live Telemetry
-            </span>
-            <span className="text-xs font-mono text-slate-500">
-              Workspace ID: {projectId ? `${projectId.slice(0, 8)}...` : "Loading"}
-            </span>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
-            Mission Control Overview
-          </h1>
-          <p className="text-slate-500 text-sm mt-1 max-w-2xl leading-relaxed">
-            Real-time delivery performance, messaging throughput, wallet runway, and WhatsApp Cloud infrastructure health.
-          </p>
+        {/* Left: Channel Selector Pills */}
+        <div className="inline-flex items-center gap-2 bg-white border border-slate-200/90 p-1.5 rounded-2xl shadow-2xs">
+          <button
+            onClick={() => setActiveChannel("whatsapp")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition cursor-pointer ${
+              activeChannel === "whatsapp"
+                ? "bg-[#10B981] text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+            }`}
+          >
+            <WhatsAppIcon className="w-4 h-4" />
+            <span>WhatsApp</span>
+          </button>
+          <button
+            onClick={() => setActiveChannel("instagram")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition cursor-pointer ${
+              activeChannel === "instagram"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+            }`}
+          >
+            <span>📷</span>
+            <span>Instagram</span>
+          </button>
         </div>
 
-        {/* Global Quick Action Controls */}
-        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
-          <button
-            onClick={() => loadDashboardData(true)}
-            disabled={refreshing}
-            className="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 shadow-xs flex items-center gap-1.5 transition"
-          >
-            <span className={refreshing ? "animate-spin" : ""}>🔄</span>
-            <span>Refresh Telemetry</span>
-          </button>
-
+        {/* Right: Live Gateway Banner */}
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-1.5 pl-4 flex items-center justify-between sm:justify-end gap-3 shadow-2xs">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div>
+              <span className="font-extrabold text-xs text-slate-900 block leading-tight">WhatsApp Cloud Gateway</span>
+              <span className="text-[11px] text-slate-500 font-medium block">Live Meta API • 99.9% Uptime SLA</span>
+            </div>
+          </div>
           <button
             onClick={() => {
               setTestResult(null);
               setShowTestModal(true);
             }}
-            className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition"
+            className="px-4 py-2 bg-[#154336] hover:bg-[#0e3026] text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer"
           >
-            <span>⚡</span>
-            <span>Send Test OTP</span>
+            <span>Send Message</span>
+            <span>→</span>
           </button>
-
-          <Link
-            href="/dashboard/wallet"
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition"
-          >
-            <span>💳</span>
-            <span>Top-up Wallet</span>
-          </Link>
         </div>
       </div>
 
-      {/* Modern Compact Asset & Infrastructure Health Ribbon */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 md:p-5 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-xl shrink-0">
-            🟢
+      {/* 3. Featured Hero Banner: Build Your AI Agent (Interakt Replica) */}
+      <div className="bg-[#ecfdf5]/80 border border-[#a7f3d0] rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 transition hover:border-[#6ee7b7]">
+        <div className="flex items-start sm:items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#059669] text-white flex items-center justify-center shrink-0 shadow-xs">
+            <BotIcon className="w-6 h-6" />
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-extrabold text-slate-900 text-sm">{asset.verifiedName}</span>
-              <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold rounded-md border border-emerald-200 flex items-center gap-1">
-                <span>✓</span> Meta Cloud Connected
+          <div>
+            <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+              Build Your AI Agent
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 font-medium mt-0.5 leading-relaxed max-w-2xl">
+              Create an AI agent to handle conversations, answer questions, qualify leads, and assist customers automatically.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/dashboard/automations"
+          className="px-5 py-2.5 bg-[#154336] hover:bg-[#0e3026] text-white font-extrabold text-xs sm:text-sm rounded-xl transition shadow-xs whitespace-nowrap cursor-pointer self-stretch sm:self-auto text-center"
+        >
+          Create Agent
+        </Link>
+      </div>
+
+      {/* 4. Quick Actions / Workflow Cards (Interakt 3-Column Grid) */}
+      <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Card 1: Connect Number */}
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs flex items-center justify-between gap-3 hover:border-slate-300 transition">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
+                <WhatsAppIcon className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-extrabold text-sm text-slate-900 truncate">Connect Number</h3>
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md mt-1">
+                  <span>ⓘ</span>
+                  <span>{asset?.displayPhone ? "Meta Cloud Live" : "Not Verified"}</span>
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-1 shrink-0">
+              <span className="text-[10px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200/80 px-2 py-0.2 rounded-full inline-flex items-center gap-1">
+                <span>🪙</span> Rs. 0.50 <span>ⓘ</span>
               </span>
-              <Link href="/dashboard/green-tick" className="px-2 py-0.5 bg-purple-50 text-purple-700 hover:bg-purple-100 text-[10px] font-extrabold rounded-md border border-purple-200 flex items-center gap-1 transition">
-                <span>✅</span> Green Tick (OBA) Studio
+              <Link
+                href="/dashboard/numbers"
+                className="px-4 py-2 bg-[#154336] hover:bg-[#0e3026] text-white text-xs font-bold rounded-xl transition shadow-xs"
+              >
+                {asset?.displayPhone ? "Manage" : "Connect"}
               </Link>
             </div>
-            <p className="text-xs text-slate-500 mt-1 flex items-center gap-3 flex-wrap">
-              <span><b>Number:</b> {asset.displayPhone}</span>
-              <span>•</span>
-              <span><b>Quality:</b> <span className="font-bold text-emerald-700">{asset.quality}</span></span>
-              <span>•</span>
-              <span><b>Limit:</b> {asset.tier}</span>
-            </p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 self-end md:self-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
-          <Link
-            href="/dashboard/numbers"
-            className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg transition"
-          >
-            Manage Routing ↗
-          </Link>
-          <Link
-            href="/dashboard/setup"
-            className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg transition"
-          >
-            Meta Settings ↗
-          </Link>
-        </div>
-      </div>
-
-      {/* Row 1: The 4 Executive KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* KPI 1: Total Dispatches */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between hover:border-slate-300 transition">
-          <div>
-            <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider">Total Dispatched</span>
-              <span className="p-2 bg-blue-50 text-blue-600 rounded-xl text-base">📨</span>
+          {/* Card 2: Greeting Flow */}
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs flex items-center justify-between gap-3 hover:border-slate-300 transition">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                <span className="text-base">💬</span>
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-extrabold text-sm text-slate-900 truncate">Greeting Flow</h3>
+                <div className="flex flex-wrap items-center gap-1 mt-1">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded">
+                    ✓ Activated
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-800 bg-teal-50 border border-teal-200 px-1.5 py-0.2 rounded">
+                    ✦ AI-generated
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                {metrics.totalSent.toLocaleString()}
-              </span>
-              <span className="text-xs font-bold text-emerald-600 flex items-center">
-                ▲ 14.2%
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">Across all services in last 30 days</p>
-          </div>
-          <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
-            <span>Delivered: <b>{metrics.totalDelivered.toLocaleString()}</b></span>
-            <span>Failed: <b className="text-red-600">{metrics.totalFailed}</b></span>
-          </div>
-        </div>
-
-        {/* KPI 2: Delivery Speedometer */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between hover:border-slate-300 transition">
-          <div>
-            <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider">Avg Delivery Speed</span>
-              <span className="p-2 bg-amber-50 text-amber-600 rounded-xl text-base">⚡</span>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                {metrics.avgDeliveryLatency}
-              </span>
-              <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold rounded-full">
-                ULTRA-FAST
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">Direct Meta Cloud API WebSocket pipe</p>
-          </div>
-          <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
-            <span>99.4% delivered under 3s</span>
-            <span className="text-emerald-600 font-bold">Zero Queue lag</span>
-          </div>
-        </div>
-
-        {/* KPI 3: Delivery & Verification Rates */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between hover:border-slate-300 transition">
-          <div>
-            <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider">Delivery & Verify Rate</span>
-              <span className="p-2 bg-emerald-50 text-emerald-600 rounded-xl text-base">🎯</span>
-            </div>
-            <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-extrabold text-emerald-600 tracking-tight">
-                {metrics.deliveryRate}%
-              </span>
-              <span className="text-xs font-bold text-slate-500">
-                ({metrics.verificationRate}% OTP verified)
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">High deliverability via direct Cloud API</p>
-          </div>
-          <div className="pt-4 mt-4 border-t border-slate-100">
-            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
-              <div style={{ width: `${metrics.deliveryRate}%` }} className="bg-emerald-500 h-full rounded-full"></div>
-            </div>
-          </div>
-        </div>
-
-        {/* KPI 4: Wallet Balance & Fuel Runway */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between hover:border-slate-300 transition">
-          <div>
-            <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider">Wallet Balance</span>
-              <span className="p-2 bg-purple-50 text-purple-600 rounded-xl text-base">💳</span>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                ₹{Number(metrics.walletBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Estimated Runway: <b className="text-slate-700">{metrics.estimatedOtpRunway.toLocaleString()} OTPs</b>
-            </p>
-          </div>
-          <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-            <span className="text-[11px] text-slate-500 font-medium">Auto-debit safe</span>
             <Link
-              href="/dashboard/wallet"
-              className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline"
+              href="/dashboard/automations"
+              className="px-4 py-2 bg-[#154336] hover:bg-[#0e3026] text-white text-xs font-bold rounded-xl transition shadow-xs shrink-0"
             >
-              + Quick Recharge →
+              Edit Flow
+            </Link>
+          </div>
+
+          {/* Card 3: FAQ Auto-replies */}
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs flex items-center justify-between gap-3 hover:border-slate-300 transition">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                <span className="text-base">📋</span>
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-extrabold text-sm text-slate-900 truncate">FAQ Auto-replies</h3>
+                <div className="flex flex-wrap items-center gap-1 mt-1">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded">
+                    ✓ Activated
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-800 bg-teal-50 border border-teal-200 px-1.5 py-0.2 rounded">
+                    ✦ AI-generated
+                  </span>
+                </div>
+              </div>
+            </div>
+            <Link
+              href="/dashboard/automations"
+              className="px-4 py-2 bg-[#154336] hover:bg-[#0e3026] text-white text-xs font-bold rounded-xl transition shadow-xs shrink-0"
+            >
+              Edit
             </Link>
           </div>
         </div>
+
+        {/* View All Expandable Section */}
+        {showAllQuickActions && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1 animate-in fade-in duration-200">
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                  <CampaignIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm text-slate-900">Broadcast Studio</h3>
+                  <p className="text-[11px] text-slate-500 font-medium">Bulk audience CSV dispatches</p>
+                </div>
+              </div>
+              <Link href="/dashboard/campaigns" className="px-4 py-2 bg-[#154336] hover:bg-[#0e3026] text-white text-xs font-bold rounded-xl">
+                Launch
+              </Link>
+            </div>
+
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                  <TemplateIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm text-slate-900">Template Studio</h3>
+                  <p className="text-[11px] text-slate-500 font-medium">Submit Meta approved templates</p>
+                </div>
+              </div>
+              <Link href="/dashboard/templates" className="px-4 py-2 bg-[#154336] hover:bg-[#0e3026] text-white text-xs font-bold rounded-xl">
+                Manage
+              </Link>
+            </div>
+
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                  <ShieldCheckIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm text-slate-900">Green Tick (OBA)</h3>
+                  <p className="text-[11px] text-slate-500 font-medium">Official verification portal</p>
+                </div>
+              </div>
+              <Link href="/dashboard/green-tick" className="px-4 py-2 bg-[#154336] hover:bg-[#0e3026] text-white text-xs font-bold rounded-xl">
+                Check
+              </Link>
+            </div>
+          </div>
+        )}
+
+        <div className="text-center pt-1">
+          <button
+            onClick={() => setShowAllQuickActions(!showAllQuickActions)}
+            className="text-xs font-bold text-slate-500 hover:text-slate-800 inline-flex items-center gap-1.5 transition cursor-pointer"
+          >
+            <span>{showAllQuickActions ? "View Less" : "View All"}</span>
+            <span className={`transform transition-transform ${showAllQuickActions ? "rotate-180" : ""}`}>⌄</span>
+          </button>
+        </div>
       </div>
 
-      {/* Row 2: Visual Charts & Analytics (8 cols Trend Chart : 4 cols Service Split) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column (8 cols): 7-Day Dispatch & Delivery Trend Chart */}
-        <div className="lg:col-span-8 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-6">
+      {/* 5. OBJECTIVES Section (Interakt Replica with Illustrations) */}
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-2xs space-y-4">
+        <span className="text-xs font-black tracking-wider text-slate-400 uppercase block">
+          OBJECTIVES
+        </span>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Objective Card 1: Generate High-intent Leads */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-4 hover:border-slate-300 transition">
+            <div>
+              <h3 className="font-extrabold text-base text-slate-900">Generate High-intent Leads</h3>
+              <Link href="/dashboard/campaigns" className="text-xs font-bold text-sky-600 hover:underline block mt-0.5">
+                Via Click to WhatsApp Ads
+              </Link>
+            </div>
+
+            {/* Illustration Graphic (Ad mockup preview) */}
+            <div className="h-36 bg-gradient-to-br from-slate-50 to-slate-100/90 rounded-xl border border-slate-200/70 p-3 flex items-center justify-between gap-3 overflow-hidden">
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] font-bold">f</div>
+                  <span className="text-[10px] font-bold text-slate-700 truncate">Digital Ads</span>
+                </div>
+                <div className="w-full bg-slate-200 h-2 rounded-full"></div>
+                <div className="w-3/4 bg-slate-200 h-2 rounded-full"></div>
+                <div className="inline-flex items-center gap-1 bg-[#25D366] text-white text-[9px] font-bold px-2 py-0.5 rounded shadow-2xs mt-1">
+                  <WhatsAppIcon className="w-2.5 h-2.5" />
+                  <span>WhatsApp</span>
+                </div>
+              </div>
+              <div className="w-24 h-28 bg-white rounded-lg border border-slate-200 shadow-2xs p-1.5 flex flex-col justify-between shrink-0">
+                <div className="w-full h-12 bg-slate-100 rounded flex items-center justify-center text-[10px] text-slate-400">Ad Creative</div>
+                <div className="space-y-1">
+                  <div className="w-full bg-slate-200 h-1.5 rounded"></div>
+                  <div className="w-2/3 bg-slate-200 h-1.5 rounded"></div>
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href="/dashboard/campaigns"
+              className="w-full py-2 bg-[#154336] hover:bg-[#0e3026] text-white text-xs font-bold rounded-xl text-center transition shadow-xs cursor-pointer block"
+            >
+              Setup
+            </Link>
+          </div>
+
+          {/* Objective Card 2: Qualify Ad Leads */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-4 hover:border-slate-300 transition">
+            <div>
+              <h3 className="font-extrabold text-base text-slate-900">Qualify Ad Leads</h3>
+              <Link href="/dashboard/api-keys" className="text-xs font-bold text-sky-600 hover:underline block mt-0.5">
+                Via WhatsApp Forms &amp; OTPs
+              </Link>
+            </div>
+
+            {/* Illustration Graphic (Mobile phone form mockup) */}
+            <div className="h-36 bg-gradient-to-br from-slate-50 to-slate-100/90 rounded-xl border border-slate-200/70 p-3 flex items-center justify-center overflow-hidden">
+              <div className="w-32 h-32 bg-white rounded-xl border border-slate-300 shadow-xs p-2 flex flex-col justify-between">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-1">
+                  <span className="text-[9px] font-bold text-slate-700">Verification</span>
+                  <span className="text-[8px] text-emerald-600 font-bold">✓ Live</span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[8px] text-slate-400 block">Your Details</span>
+                  <div className="w-full bg-slate-100 h-3 rounded px-1 flex items-center text-[8px] text-slate-700 font-mono">
+                    +91 ••••• ••••
+                  </div>
+                  <div className="w-full bg-slate-100 h-3 rounded px-1 flex items-center text-[8px] text-emerald-700 font-mono">
+                    Code: 849201
+                  </div>
+                </div>
+                <div className="w-full bg-[#154336] text-white text-[8px] font-bold py-0.5 rounded text-center">
+                  Submit
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href="/dashboard/api-keys"
+              className="w-full py-2 bg-[#154336] hover:bg-[#0e3026] text-white text-xs font-bold rounded-xl text-center transition shadow-xs cursor-pointer block"
+            >
+              Setup
+            </Link>
+          </div>
+
+          {/* Objective Card 3: Integrate with WhatsApp Pay */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs flex flex-col justify-between space-y-4 hover:border-slate-300 transition">
+            <div>
+              <h3 className="font-extrabold text-base text-slate-900">Integrate with WhatsApp Pay</h3>
+              <Link href="/dashboard/ecommerce" className="text-xs font-bold text-sky-600 hover:underline block mt-0.5">
+                Shopify &amp; WooCommerce Recipes
+              </Link>
+            </div>
+
+            {/* Illustration Graphic (Shopping bag + Link + WhatsApp icon) */}
+            <div className="h-36 bg-gradient-to-br from-slate-50 to-slate-100/90 rounded-xl border border-slate-200/70 p-4 flex items-center justify-center gap-3 overflow-hidden">
+              <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 shadow-2xs">
+                <ShoppingBagIcon className="w-6 h-6" />
+              </div>
+              <div className="text-slate-400 font-bold text-lg">🔗</div>
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shadow-2xs">
+                <WhatsAppIcon className="w-6 h-6" />
+              </div>
+            </div>
+
+            <Link
+              href="/dashboard/ecommerce"
+              className="w-full py-2 bg-[#154336] hover:bg-[#0e3026] text-white text-xs font-bold rounded-xl text-center transition shadow-xs cursor-pointer block"
+            >
+              Setup
+            </Link>
+          </div>
+        </div>
+
+        {/* View All Objectives Expandable */}
+        {showAllObjectives && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2 animate-in fade-in duration-200">
+            <div className="bg-slate-50/70 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
+              <div>
+                <h4 className="font-extrabold text-sm text-slate-900">COD Confirmation</h4>
+                <p className="text-xs text-slate-500 font-medium">Reduce return-to-origin fraud by 40%</p>
+              </div>
+              <Link href="/dashboard/ecommerce" className="px-3 py-1.5 bg-[#154336] text-white text-xs font-bold rounded-xl">
+                Configure
+              </Link>
+            </div>
+
+            <div className="bg-slate-50/70 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
+              <div>
+                <h4 className="font-extrabold text-sm text-slate-900">Abandoned Cart Nudge</h4>
+                <p className="text-xs text-slate-500 font-medium">Automatic discount recovery triggers</p>
+              </div>
+              <Link href="/dashboard/ecommerce" className="px-3 py-1.5 bg-[#154336] text-white text-xs font-bold rounded-xl">
+                Configure
+              </Link>
+            </div>
+
+            <div className="bg-slate-50/70 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
+              <div>
+                <h4 className="font-extrabold text-sm text-slate-900">Granular Team Roles</h4>
+                <p className="text-xs text-slate-500 font-medium">Assign custom agent permissions</p>
+              </div>
+              <Link href="/dashboard/team" className="px-3 py-1.5 bg-[#154336] text-white text-xs font-bold rounded-xl">
+                Configure
+              </Link>
+            </div>
+          </div>
+        )}
+
+        <div className="text-center pt-1">
+          <button
+            onClick={() => setShowAllObjectives(!showAllObjectives)}
+            className="text-xs font-bold text-slate-500 hover:text-slate-800 inline-flex items-center gap-1.5 transition cursor-pointer"
+          >
+            <span>{showAllObjectives ? "View Less" : "View All"}</span>
+            <span className={`transform transition-transform ${showAllObjectives ? "rotate-180" : ""}`}>⌄</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 6. Operations & Live Telemetry Section (Elevated Metric Cards) */}
+      <div className="space-y-4 pt-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-black tracking-wider text-slate-400 uppercase">
+            LIVE TELEMETRY &amp; METRICS
+          </span>
+          <button
+            onClick={() => loadDashboardData(true)}
+            disabled={refreshing}
+            className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 cursor-pointer"
+          >
+            <RefreshIcon className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+            <span>Refresh Telemetry</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Total Dispatched */}
+          <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200/70 flex items-center justify-center text-indigo-700 font-bold">
+                  <SendAirplaneIcon className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold text-slate-800">Total Dispatched</span>
+              </div>
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full">
+                <TrendingUpIcon className="w-3 h-3" />
+                <span>14.2%</span>
+              </span>
+            </div>
+            <div className="mt-3 text-3xl font-black text-slate-900 tracking-tight">
+              {metrics.totalSent.toLocaleString()}
+            </div>
+            <div className="text-xs text-slate-600 font-medium mt-1">
+              ✓ {metrics.totalDelivered.toLocaleString()} delivered • {metrics.totalFailed} failed
+            </div>
+          </div>
+
+          {/* Card 2: Avg Delivery Speed */}
+          <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200/70 flex items-center justify-center text-sky-700 font-bold">
+                  <ZapIcon className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold text-slate-800">Avg Delivery Speed</span>
+              </div>
+              <span className="px-2 py-0.5 bg-sky-100 text-sky-800 border border-sky-200/80 text-[10px] font-extrabold rounded-full">
+                ULTRA-FAST
+              </span>
+            </div>
+            <div className="mt-3 text-3xl font-black text-slate-900 tracking-tight">
+              {metrics.avgDeliveryLatency}
+            </div>
+            <div className="text-xs text-slate-600 font-medium mt-1">
+              99.4% delivered in &lt; 3s via Cloud API
+            </div>
+          </div>
+
+          {/* Card 3: Delivery Rate */}
+          <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/70 flex items-center justify-center text-emerald-800 font-bold">
+                  <ShieldCheckIcon className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold text-slate-800">Delivery Rate</span>
+              </div>
+              <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full">
+                {metrics.verificationRate}% verified
+              </span>
+            </div>
+            <div className="mt-3 text-3xl font-black text-slate-900 tracking-tight">
+              {metrics.deliveryRate}%
+            </div>
+            <div className="text-xs text-slate-600 font-medium mt-1">
+              Direct Meta Cloud API WebSocket
+            </div>
+          </div>
+
+          {/* Card 4: Wallet Balance */}
+          <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200/70 flex items-center justify-center text-amber-800 font-bold">
+                  <WalletIcon className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold text-slate-800">Wallet Balance</span>
+              </div>
+              <Link
+                href="/dashboard/wallet"
+                className="text-xs font-bold text-[#154336] hover:underline"
+              >
+                Top-up →
+              </Link>
+            </div>
+            <div className="mt-3 text-3xl font-black text-slate-900 tracking-tight">
+              ₹{Number(metrics.walletBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            </div>
+            <div className="text-xs text-slate-600 font-medium mt-1">
+              Runway: <span className="font-bold text-slate-800">~{metrics.estimatedOtpRunway.toLocaleString()}</span> OTPs
+            </div>
+          </div>
+        </div>
+
+        {/* 7-Day Messaging Throughput Chart */}
+        <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                <span>📈</span> 7-Day Messaging Throughput & Delivery Trend
+              <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#154336]">
+                  <BarChart2DIcon className="w-4 h-4" />
+                </div>
+                <span>7-Day Messaging Throughput &amp; Delivery Trend</span>
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-600 font-medium mt-1">
                 Daily volume comparison between dispatched, delivered, and failed messages.
               </p>
             </div>
-            <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
+            <div className="flex items-center gap-4 text-xs font-bold text-slate-600">
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-md bg-emerald-500"></span> Delivered
+                <span className="w-3 h-3 rounded-md bg-[#10B981]"></span> Delivered
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-md bg-slate-300"></span> Dispatched
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-md bg-red-400"></span> Failed
+                <span className="w-3 h-3 rounded-md bg-rose-400"></span> Failed
               </span>
             </div>
           </div>
 
-          {/* Interactive Bar Chart Canvas */}
           <div className="pt-6 pb-2">
             <div className="grid grid-cols-7 gap-3 sm:gap-6 items-end h-56 border-b border-slate-100 px-2">
               {trend.map((t, idx) => {
                 const heightPct = Math.round((t.sent / maxTrendSent) * 100);
-                const deliveredHeight = Math.round((t.delivered / t.sent) * 100);
+                const deliveredHeight = t.sent > 0 ? Math.round((t.delivered / t.sent) * 100) : 0;
 
                 return (
                   <div key={idx} className="flex flex-col items-center gap-2 group relative">
-                    {/* Hover Tooltip */}
-                    <div className="absolute -top-14 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[10px] py-1 px-2 rounded-lg pointer-events-none whitespace-nowrap z-10 shadow-md">
+                    <div className="absolute -top-14 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-xs py-1.5 px-3 rounded-xl pointer-events-none whitespace-nowrap z-10 shadow-lg border border-slate-700">
                       <p className="font-bold">{t.day}: {t.sent} Sent</p>
-                      <p className="text-emerald-400">✓ {t.delivered} Delivered ({Math.round((t.delivered/t.sent)*100)}%)</p>
+                      <p className="text-emerald-400 font-semibold">✓ {t.delivered} Delivered ({t.sent > 0 ? Math.round((t.delivered/t.sent)*100) : 0}%)</p>
                     </div>
 
-                    {/* Bars */}
-                    <div className="w-full max-w-[42px] bg-slate-100 rounded-xl overflow-hidden flex flex-col justify-end h-44 relative border border-slate-200/60 shadow-2xs">
+                    <div className="w-full max-w-[46px] bg-slate-100/90 rounded-xl overflow-hidden flex flex-col justify-end h-44 relative border border-slate-200/80 shadow-2xs">
                       <div
                         style={{ height: `${heightPct}%` }}
-                        className="w-full bg-slate-200/90 rounded-t-lg transition-all duration-500 relative flex flex-col justify-end"
+                        className="w-full bg-slate-200 rounded-t-lg transition-all duration-500 relative flex flex-col justify-end"
                       >
                         <div
                           style={{ height: `${deliveredHeight}%` }}
-                          className="w-full bg-emerald-500 rounded-t-lg transition-all duration-500"
+                          className="w-full bg-gradient-to-t from-[#154336] to-[#10B981] rounded-t-lg transition-all duration-500"
                         ></div>
                       </div>
                     </div>
 
-                    {/* Day Label */}
-                    <span className="text-[11px] font-bold text-slate-500 group-hover:text-slate-900 transition">
+                    <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900 transition">
                       {t.day}
                     </span>
                   </div>
@@ -432,320 +748,108 @@ export default function DashboardOverview() {
             </div>
           </div>
 
-          {/* Bottom Chart Footer Stats */}
           <div className="grid grid-cols-3 gap-3 pt-2 text-center text-xs">
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Avg Daily Volume</span>
-              <span className="text-sm font-extrabold text-slate-900">
+            <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200/70">
+              <span className="text-[11px] text-slate-500 uppercase font-extrabold tracking-wide block">Avg Daily Volume</span>
+              <span className="text-sm font-black text-slate-900 mt-0.5 block">
                 {Math.round(metrics.totalSent / 7)} msgs / day
               </span>
             </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Peak Delivery Hour</span>
-              <span className="text-sm font-extrabold text-emerald-700">11:00 AM - 1:00 PM</span>
+            <div className="p-3.5 bg-emerald-50/60 rounded-2xl border border-emerald-100">
+              <span className="text-[11px] text-emerald-800 uppercase font-extrabold tracking-wide block">Peak Delivery Window</span>
+              <span className="text-sm font-black text-[#154336] mt-0.5 block">11:00 AM – 1:00 PM</span>
             </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Meta API Latency</span>
-              <span className="text-sm font-extrabold text-slate-900">42ms Ping</span>
+            <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200/70">
+              <span className="text-[11px] text-slate-500 uppercase font-extrabold tracking-wide block">Meta API Latency</span>
+              <span className="text-sm font-black text-slate-900 mt-0.5 block">42ms Ping</span>
             </div>
           </div>
         </div>
 
-        {/* Right Column (4 cols): Service Traffic Distribution & Breakdown */}
-        <div className="lg:col-span-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-6">
-          <div>
-            <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-              <span>🍩</span> Service Traffic Distribution
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Proportion of messages across OTP, Marketing, and Utility.
-            </p>
-          </div>
-
-          {/* Visual Progress Stack */}
-          <div className="space-y-4 pt-1">
-            <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden flex">
-              <div style={{ width: `${otpPct}%` }} className="bg-blue-600 h-full" title="Authentication / OTP"></div>
-              <div style={{ width: `${mktPct}%` }} className="bg-purple-600 h-full" title="Marketing Broadcasts"></div>
-              <div style={{ width: `${utlPct}%` }} className="bg-emerald-500 h-full" title="Operational Utility"></div>
+        {/* Real-Time Activity Stream */}
+        <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#154336]">
+                  <Activity2DIcon className="w-4 h-4" />
+                </div>
+                <span>Real-Time Activity Stream</span>
+              </h2>
+              <p className="text-xs text-slate-600 font-medium mt-1">
+                Live dispatches, verification logs, and wallet billing events.
+              </p>
             </div>
+            <Link
+              href="/dashboard/logs"
+              className="text-xs font-bold text-[#154336] hover:underline transition"
+            >
+              View Full Audit Logs →
+            </Link>
+          </div>
 
-            {/* Service Breakdown List */}
-            <div className="space-y-3 pt-2">
-              {/* Item 1: OTP */}
-              <div className="p-3.5 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="w-3 h-3 rounded-full bg-blue-600 shrink-0"></span>
-                  <div>
-                    <p className="text-xs font-bold text-slate-900">🔐 OTP & Authentication</p>
-                    <p className="text-[10px] text-slate-500">API Triggered • ₹0.50/msg</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-extrabold text-slate-900">{metrics.serviceSplit.authentication.toLocaleString()}</p>
-                  <p className="text-[10px] font-bold text-blue-700">{otpPct}%</p>
-                </div>
-              </div>
-
-              {/* Item 2: Marketing */}
-              <div className="p-3.5 bg-purple-50/50 rounded-2xl border border-purple-100 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="w-3 h-3 rounded-full bg-purple-600 shrink-0"></span>
-                  <div>
-                    <p className="text-xs font-bold text-slate-900">📣 Marketing Broadcasts</p>
-                    <p className="text-[10px] text-slate-500">Bulk Campaigns • ₹1.00/msg</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-extrabold text-slate-900">{metrics.serviceSplit.marketing.toLocaleString()}</p>
-                  <p className="text-[10px] font-bold text-purple-700">{mktPct}%</p>
-                </div>
-              </div>
-
-              {/* Item 3: Utility */}
-              <div className="p-3.5 bg-emerald-50/50 rounded-2xl border border-emerald-100 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0"></span>
-                  <div>
-                    <p className="text-xs font-bold text-slate-900">📋 Operational Utility</p>
-                    <p className="text-[10px] text-slate-500">Invoices & Alerts • ₹0.50/msg</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-extrabold text-slate-900">{metrics.serviceSplit.utility.toLocaleString()}</p>
-                  <p className="text-[10px] font-bold text-emerald-700">{utlPct}%</p>
-                </div>
-              </div>
+          {recentActivity.length === 0 ? (
+            <div className="p-8 text-center bg-slate-50/80 rounded-2xl border border-slate-200/90">
+              <p className="text-xs text-slate-600 font-semibold">No recent dispatches logged yet.</p>
+              <p className="text-xs text-slate-500 mt-1 font-medium">Send a test OTP or launch a campaign to see live events stream here.</p>
             </div>
-          </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {recentActivity.map((evt) => (
+                <div key={evt.id} className="py-3.5 flex items-center justify-between gap-4 text-xs hover:bg-slate-50/80 px-2.5 rounded-xl transition">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                      evt.type === 'OTP' ? 'bg-indigo-100 text-indigo-700' :
+                      evt.type === 'CAMPAIGN' ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-800'
+                    }`}>
+                      {evt.type === 'OTP' ? <KeyIcon className="w-4 h-4" /> : evt.type === 'CAMPAIGN' ? <CampaignIcon className="w-4 h-4" /> : <WalletIcon className="w-4 h-4" />}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-extrabold text-slate-900 truncate">{evt.title}</p>
+                      <p className="text-xs text-slate-500 font-medium truncate">{evt.subtitle} • {new Date(evt.timestamp).toLocaleTimeString()}</p>
+                    </div>
+                  </div>
 
-          <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 text-xs text-slate-600 space-y-1">
-            <span className="font-bold text-slate-900 block">💡 Smart Cost Optimizer</span>
-            <p className="text-[11px] leading-relaxed text-slate-500">
-              Utility broadcasts save up to <b>50%</b> compared to marketing rates for non-promotional alerts.
-            </p>
-          </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="font-mono text-slate-600 text-xs hidden sm:inline">{evt.latency}</span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase ${
+                      evt.status === 'delivered' || evt.status === 'completed' || evt.status === 'credit'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/80'
+                        : 'bg-amber-50 text-amber-800 border border-amber-200/80'
+                    }`}>
+                      {evt.status}
+                    </span>
+                    <span className="font-bold text-slate-800 text-xs">{evt.cost}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Row 3: Operational Funnel & Developer Launchpad */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column (6 cols): Delivery Funnel */}
-        <div className="lg:col-span-6 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-5">
-          <div>
-            <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-              <span>📊</span> Delivery & Conversion Funnel
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Drop-off telemetry from API dispatch to end-user verification.
-            </p>
-          </div>
-
-          <div className="space-y-3 pt-2">
-            {/* Step 1 */}
-            <div>
-              <div className="flex justify-between text-xs font-bold mb-1">
-                <span className="text-slate-700">1. Dispatched from SaaS</span>
-                <span className="text-slate-900">100% ({metrics.totalSent.toLocaleString()})</span>
-              </div>
-              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                <div className="bg-slate-800 h-full w-full rounded-full"></div>
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div>
-              <div className="flex justify-between text-xs font-bold mb-1">
-                <span className="text-slate-700">2. Delivered by Meta WhatsApp</span>
-                <span className="text-emerald-700">{metrics.deliveryRate}% ({metrics.totalDelivered.toLocaleString()})</span>
-              </div>
-              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                <div style={{ width: `${metrics.deliveryRate}%` }} className="bg-emerald-600 h-full rounded-full"></div>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div>
-              <div className="flex justify-between text-xs font-bold mb-1">
-                <span className="text-slate-700">3. Read by Recipient</span>
-                <span className="text-blue-700">82.4% ({Math.round(metrics.totalDelivered * 0.824).toLocaleString()})</span>
-              </div>
-              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                <div style={{ width: "82.4%" }} className="bg-blue-600 h-full rounded-full"></div>
-              </div>
-            </div>
-
-            {/* Step 4 */}
-            <div>
-              <div className="flex justify-between text-xs font-bold mb-1">
-                <span className="text-slate-700">4. OTP Verified / Action Taken</span>
-                <span className="text-purple-700">{metrics.verificationRate}% Verified</span>
-              </div>
-              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                <div style={{ width: `${metrics.verificationRate}%` }} className="bg-purple-600 h-full rounded-full"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column (6 cols): Quick Launchpad Shortcuts */}
-        <div className="lg:col-span-6 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
-          <div>
-            <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-              <span>🚀</span> Quick Command Launchpad
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Direct access to essential workflows and developer tools.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-            <Link
-              href="/dashboard/campaigns"
-              className="p-4 bg-slate-50 hover:bg-purple-50/70 border border-slate-200 hover:border-purple-300 rounded-2xl transition flex flex-col justify-between group"
-            >
-              <div>
-                <span className="text-2xl mb-1.5 block">📣</span>
-                <span className="font-extrabold text-sm text-slate-900 group-hover:text-purple-900 block">
-                  Broadcast Studio
-                </span>
-                <span className="text-xs text-slate-500 mt-1 block leading-relaxed">
-                  Upload Excel audience & launch bulk campaigns.
-                </span>
-              </div>
-              <span className="text-xs font-bold text-purple-700 mt-3 block">Launch Wizard →</span>
-            </Link>
-
-            <Link
-              href="/dashboard/templates"
-              className="p-4 bg-slate-50 hover:bg-blue-50/70 border border-slate-200 hover:border-blue-300 rounded-2xl transition flex flex-col justify-between group"
-            >
-              <div>
-                <span className="text-2xl mb-1.5 block">📄</span>
-                <span className="font-extrabold text-sm text-slate-900 group-hover:text-blue-900 block">
-                  Template Studio
-                </span>
-                <span className="text-xs text-slate-500 mt-1 block leading-relaxed">
-                  Design & submit Meta WhatsApp templates.
-                </span>
-              </div>
-              <span className="text-xs font-bold text-blue-700 mt-3 block">Manage Templates →</span>
-            </Link>
-
-            <Link
-              href="/dashboard/green-tick"
-              className="p-4 bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-300 rounded-2xl transition flex flex-col justify-between group"
-            >
-              <div>
-                <span className="text-2xl mb-1.5 block">✅</span>
-                <span className="font-extrabold text-sm text-slate-900 group-hover:text-emerald-900 block">
-                  Green Tick (OBA)
-                </span>
-                <span className="text-xs text-slate-500 mt-1 block leading-relaxed">
-                  Official Business Account verification portal.
-                </span>
-              </div>
-              <span className="text-xs font-bold text-emerald-700 mt-3 block">Check Readiness →</span>
-            </Link>
-
-            <Link
-              href="/dashboard/api-keys"
-              className="p-4 bg-slate-50 hover:bg-amber-50/70 border border-slate-200 hover:border-amber-300 rounded-2xl transition flex flex-col justify-between group"
-            >
-              <div>
-                <span className="text-2xl mb-1.5 block">🔑</span>
-                <span className="font-extrabold text-sm text-slate-900 group-hover:text-amber-900 block">
-                  API Keys & Docs
-                </span>
-                <span className="text-xs text-slate-500 mt-1 block leading-relaxed">
-                  Secret tokens, SDK code snippets, and sandbox.
-                </span>
-              </div>
-              <span className="text-xs font-bold text-amber-700 mt-3 block">View Credentials →</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Row 4: Live Telemetry & Real-Time Event Stream */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-              <span>⚡</span> Real-Time Activity Stream
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Live dispatches, verification logs, and wallet billing events.
-            </p>
-          </div>
-          <Link
-            href="/dashboard/logs"
-            className="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
-          >
-            View Full OTP Audit Logs →
-          </Link>
-        </div>
-
-        {recentActivity.length === 0 ? (
-          <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200">
-            <p className="text-xs text-slate-500 font-medium">No recent dispatches logged yet.</p>
-            <p className="text-[11px] text-slate-400 mt-1">Send a test OTP or launch a campaign to see live events stream here.</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {recentActivity.map((evt) => (
-              <div key={evt.id} className="py-3.5 flex items-center justify-between gap-4 text-xs hover:bg-slate-50/80 px-2 rounded-xl transition">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
-                    evt.type === 'OTP' ? 'bg-blue-100 text-blue-800' :
-                    evt.type === 'CAMPAIGN' ? 'bg-purple-100 text-purple-800' : 'bg-emerald-100 text-emerald-800'
-                  }`}>
-                    {evt.type === 'OTP' ? '🔐' : evt.type === 'CAMPAIGN' ? '📣' : '💳'}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="font-extrabold text-slate-900 truncate">{evt.title}</p>
-                    <p className="text-[11px] text-slate-400 truncate">{evt.subtitle} • {new Date(evt.timestamp).toLocaleTimeString()}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="font-mono text-slate-500 text-[11px] hidden sm:inline">⚡ {evt.latency}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                    evt.status === 'delivered' || evt.status === 'completed' || evt.status === 'credit'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-amber-100 text-amber-800'
-                  }`}>
-                    {evt.status}
-                  </span>
-                  <span className="font-bold text-slate-700 text-xs">{evt.cost}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Interactive Quick Test OTP Modal */}
+      {/* Quick WhatsApp Dispatch Modal */}
       {showTestModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                <span>⚡</span> Send Instant Test OTP
+                <WhatsAppIcon className="w-4 h-4 text-emerald-600" />
+                <span>Send WhatsApp Message</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setShowTestModal(false)}
-                className="text-slate-400 hover:text-slate-600 font-bold"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer"
               >
-                ✕
+                <Close2DIcon className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleSendTest} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  Target Mobile Number <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                  Recipient WhatsApp Mobile Number <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -753,37 +857,37 @@ export default function DashboardOverview() {
                   value={testPhone}
                   onChange={(e) => setTestPhone(e.target.value)}
                   placeholder="+919876543210"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-mono focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-mono focus:ring-2 focus:ring-[#154336] focus:outline-none"
                 />
-                <p className="text-[10px] text-slate-400 mt-1">Include country code (e.g. +91 for India).</p>
+                <p className="text-xs text-slate-500 font-medium mt-1">Include country code (e.g. +91 for India).</p>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600">
-                <span><b>Billing Rate:</b> ₹0.50 / test dispatch</span>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-700">
+                <span><b>Billing Rate:</b> ₹0.50 / message dispatch</span>
               </div>
 
               {testResult && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 font-mono space-y-1">
-                  <p className="font-bold text-emerald-800">✓ Test Dispatched Successfully!</p>
+                <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-950 font-mono space-y-1">
+                  <p className="font-bold text-emerald-800">✓ Message Dispatched Successfully!</p>
                   <p>Request ID: {testResult.requestId}</p>
-                  {testResult.devCode && <p className="font-bold text-emerald-700">Verification Code: {testResult.devCode}</p>}
+                  <p className="text-xs text-emerald-700">Live delivery via Meta Cloud API WebSocket pipeline.</p>
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowTestModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
                 >
                   Close
                 </button>
                 <button
                   type="submit"
                   disabled={testSending || !testPhone}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5"
+                  className="px-5 py-2.5 bg-[#154336] hover:bg-[#0e3026] text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
-                  {testSending ? "Dispatching..." : "Send Test Now"}
+                  {testSending ? "Dispatching..." : "Send Message Now"}
                 </button>
               </div>
             </form>

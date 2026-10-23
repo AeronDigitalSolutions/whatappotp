@@ -14,6 +14,7 @@ model User {
   passwordHash  String?
   name          String?
   emailVerified Boolean      @default(false)
+  isSuperAdmin  Boolean      @default(false)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
@@ -21,25 +22,51 @@ model User {
 }
 
 model Organization {
-  id        String       @id @default(uuid())
-  name      String
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id            String       @id @default(uuid())
+  name          String
+  plan          String       @default("BASIC") // TRIAL, BASIC, PROFESSIONAL, ENTERPRISE
+  planExpiresAt DateTime?
+  seatsAllowed  Int          @default(4) // 1 for Trial, 4 for Basic (1+3), 6 for Professional (1+5)
+  extraSeats    Int          @default(0)
+  obaIncluded   Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
-  memberships Membership[]
-  projects    Project[]
-  wallet      Wallet?
+  memberships    Membership[]
+  roles          OrganizationRole[]
+  projects       Project[]
+  wallet         Wallet?
+  billingProfile CustomerBillingProfile?
+  invoices       Invoice[]
+}
+
+model OrganizationRole {
+  id              String        @id @default(uuid())
+  organizationId  String
+  name            String
+  description     String?
+  permissions     Json
+  isSystemDefault Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  organization    Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  memberships     Membership[]
+
+  @@index([organizationId], map: "idx_org_role_orgId")
 }
 
 model Membership {
-  id             String       @id @default(uuid())
+  id             String            @id @default(uuid())
   userId         String
   organizationId String
-  role           String       @default("viewer") // owner, admin, developer, viewer
-  createdAt      DateTime     @default(now())
+  role           String            @default("viewer") // owner, admin, developer, viewer
+  roleId         String?
+  createdAt      DateTime          @default(now())
 
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customRole     OrganizationRole? @relation(fields: [roleId], references: [id], onDelete: SetNull)
 
   @@unique([userId, organizationId])
 }
@@ -120,15 +147,18 @@ model OtpAttempt {
 // =======================
 
 model Wallet {
-  id             String       @id @default(uuid())
-  organizationId String       @unique
-  balance        Decimal      @default(0.00) @db.Decimal(10, 2)
-  currency       String       @default("INR")
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id              String       @id @default(uuid())
+  organizationId  String       @unique
+  balance         Decimal      @default(0.00) @db.Decimal(10, 2)
+  reservedBalance Decimal      @default(0.00) @db.Decimal(10, 4)
+  currency        String       @default("INR")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  transactions   WalletTransaction[]
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  transactions    WalletTransaction[]
+  reservations    WalletReservation[]
+  ledgerEntries   WalletLedgerEntry[]
 }
 
 model WalletTransaction {
@@ -141,6 +171,204 @@ model WalletTransaction {
   createdAt      DateTime     @default(now())
 
   wallet         Wallet       @relation(fields: [walletId], references: [id], onDelete: Cascade)
+}
+
+model WalletReservation {
+  id              String       @id @default(uuid())
+  walletId        String
+  amount          Decimal      @db.Decimal(10, 4)
+  currency        String       @default("INR")
+  status          String       @default("ACTIVE") // ACTIVE, COMMITTED, RELEASED, EXPIRED
+  referenceType   String       // OTP, CAMPAIGN, API_DISPATCH
+  referenceId     String       // e.g. otpRequest id or recipient id
+  rateId          String?
+  rateVersion     Int?
+  expiresAt       DateTime
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  wallet          Wallet       @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId, status])
+  @@index([referenceId])
+}
+
+model WalletLedgerEntry {
+  id              String       @id @default(uuid())
+  walletId        String
+  entryType       String       // CREDIT_RECHARGE, DEBIT_DISPATCH, DEBIT_RESERVATION, CREDIT_RELEASE, CREDIT_REFUND, ADJUSTMENT
+  amount          Decimal      @db.Decimal(10, 4) // positive for credit, negative for debit
+  balanceBefore   Decimal      @db.Decimal(10, 2)
+  balanceAfter    Decimal      @db.Decimal(10, 2)
+  reservedBefore  Decimal      @db.Decimal(10, 4)
+  reservedAfter   Decimal      @db.Decimal(10, 4)
+  currency        String       @default("INR")
+  referenceType   String?      // PAYMENT, MESSAGE_BILLING, ADMIN_CORRECTION
+  referenceId     String?
+  description     String
+  reason          String?      // Mandatory for adjustments
+  metadata        Json?
+  idempotencyKey  String?      @unique
+  createdAt       DateTime     @default(now())
+
+  wallet          Wallet       @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId, createdAt])
+  @@index([referenceId])
+}
+
+model CustomerBillingProfile {
+  id                String       @id @default(uuid())
+  organizationId    String       @unique
+  legalBusinessName String?
+  gstin             String?
+  pan               String?
+  billingAddress    String?      @db.Text
+  city              String?
+  state             String?
+  stateCode         String?      // e.g., "27" for Maharashtra
+  postalCode        String?
+  country           String       @default("India")
+  taxExempt         Boolean      @default(false)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model PricingRate {
+  id                  String       @id @default(uuid())
+  country             String       // e.g. "India", "United States"
+  isoCode             String       // e.g. "IN", "US"
+  countryDialCode     String       // e.g. "91", "1"
+  category            String       // AUTHENTICATION, UTILITY, MARKETING
+  basePrice           Decimal      @db.Decimal(10, 4) // Selling price in INR, excluding GST
+  providerCost        Decimal      @db.Decimal(10, 4) // Meta base cost in provider currency
+  providerCurrency    String       @default("INR") // INR or USD
+  fxRate              Decimal      @default(1.0000) @db.Decimal(10, 4)
+  fxBufferPercent     Decimal      @default(2.00) @db.Decimal(5, 2)
+  providerCostInr     Decimal      @db.Decimal(10, 4)
+  infraCostInr        Decimal      @default(0.0100) @db.Decimal(10, 4)
+  totalCostInr        Decimal      @db.Decimal(10, 4)
+  minMarginPercent    Decimal      @default(15.00) @db.Decimal(5, 2)
+  actualMarginPercent Decimal      @db.Decimal(5, 2)
+  marginInr           Decimal      @db.Decimal(10, 4)
+  status              String       @default("ACTIVE") // ACTIVE, INACTIVE, PENDING_REVIEW, SUSPENDED
+  lossRiskStatus      String       @default("SAFE") // SAFE, WARNING, UNSAFE_BLOCKED
+  effectiveFrom       DateTime     @default(now())
+  effectiveUntil      DateTime?
+  version             Int          @default(1)
+  rateCardVersion     String       @default("meta_v2026_q4")
+  createdBy           String?
+  approvedBy          String?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  audits              PricingRateAudit[]
+  billingRecords      MessageBillingRecord[]
+
+  @@unique([isoCode, category, version])
+  @@index([isoCode, category, status])
+}
+
+model PricingRateAudit {
+  id                  String       @id @default(uuid())
+  rateId              String
+  changeType          String       // CREATE, UPDATE, STATUS_CHANGE, MARGIN_OVERRIDE, AUTO_SUSPEND
+  oldValues           Json?
+  newValues           Json?
+  reason              String       @db.Text
+  actor               String
+  createdAt           DateTime     @default(now())
+
+  rate                PricingRate  @relation(fields: [rateId], references: [id], onDelete: Cascade)
+
+  @@index([rateId, createdAt])
+}
+
+model ExchangeRate {
+  id                  String       @id @default(uuid())
+  fromCurrency        String       @default("USD")
+  toCurrency          String       @default("INR")
+  baseRate            Decimal      @db.Decimal(10, 4) // e.g., 86.50
+  bufferPercent       Decimal      @default(2.50) @db.Decimal(5, 2)
+  effectiveRate       Decimal      @db.Decimal(10, 4) // e.g., 88.6625
+  source              String       @default("RBI_REFERENCE_AUDITED")
+  updatedAt           DateTime     @updatedAt
+}
+
+model TaxConfiguration {
+  id                  String       @id @default(uuid())
+  taxName             String       @default("GST")
+  taxRatePercent      Decimal      @default(18.00) @db.Decimal(5, 2)
+  cgstPercent         Decimal      @default(9.00) @db.Decimal(5, 2)
+  sgstPercent         Decimal      @default(9.00) @db.Decimal(5, 2)
+  igstPercent         Decimal      @default(18.00) @db.Decimal(5, 2)
+  supplierGstin       String       @default("27AABCU9603R1ZM")
+  supplierStateCode   String       @default("27") // Maharashtra
+  supplierLegalName   String       @default("Digital Beings Infotech Private Limited")
+  supplierAddress     String       @default("Mumbai, Maharashtra, India")
+  hsnSacCode          String       @default("998313")
+  updatedAt           DateTime     @updatedAt
+}
+
+model Invoice {
+  id                   String       @id @default(uuid())
+  organizationId       String
+  invoiceNumber        String       @unique // e.g. INV-DB-202610-0001
+  type                 String       @default("TAX_INVOICE") // TAX_INVOICE, CREDIT_NOTE
+  paymentReference     String?
+  orderId              String?
+  baseAmount           Decimal      @db.Decimal(10, 2) // Recharge credit amount (tax-exclusive)
+  gstRatePercent       Decimal      @default(18.00) @db.Decimal(5, 2)
+  cgstAmount           Decimal      @default(0.00) @db.Decimal(10, 2)
+  sgstAmount           Decimal      @default(0.00) @db.Decimal(10, 2)
+  igstAmount           Decimal      @default(0.00) @db.Decimal(10, 2)
+  totalTaxAmount       Decimal      @db.Decimal(10, 2)
+  totalAmount          Decimal      @db.Decimal(10, 2) // Base + Tax charged via Razorpay
+  customerGstin        String?
+  customerBusinessName String?
+  customerAddress      String?      @db.Text
+  customerState        String?
+  customerStateCode    String?
+  status               String       @default("PAID") // PAID, REFUNDED, VOID
+  pdfUrl               String?
+  createdAt            DateTime     @default(now())
+
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+}
+
+model MessageBillingRecord {
+  id                  String       @id @default(uuid())
+  projectId           String
+  metaMessageId       String?      @unique
+  recipientPhone      String
+  destinationCountry  String
+  isoCountryCode      String
+  category            String       // AUTHENTICATION, UTILITY, MARKETING
+  rateId              String?
+  rateVersion         Int?
+  sellingPrice        Decimal      @db.Decimal(10, 4) // Base price in INR (excl GST)
+  estimatedCost       Decimal      @db.Decimal(10, 4) // Estimated Meta + FX + Infra cost
+  actualCost          Decimal?     @db.Decimal(10, 4) // Reconciled Meta billing cost
+  grossMargin         Decimal      @db.Decimal(10, 4)
+  marginPercent       Decimal      @db.Decimal(5, 2)
+  currency            String       @default("INR")
+  status              String       @default("CHARGED") // RESERVED, CHARGED, REFUNDED, RECONCILED
+  reservationId       String?
+  ledgerEntryId       String?
+  reconciledAt        DateTime?
+  reconciliationNotes String?      @db.Text
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  rate                PricingRate? @relation(fields: [rateId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, createdAt])
+  @@index([recipientPhone])
+  @@index([destinationCountry, category])
 }
 
 model PricingRule {

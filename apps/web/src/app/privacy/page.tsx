@@ -8,17 +8,17 @@ export default function PrivacyPolicy() {
         <div className="space-y-6 text-slate-700 leading-relaxed">
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-3">1. Introduction</h2>
-            <p>Welcome to our WhatsApp OTP Platform ("we", "our", "us"). We respect your privacy and are committed to protecting your personal data. This privacy policy will inform you as to how we look after your personal data when you visit our website and use our API services.</p>
+            <p>Welcome to DIGITAL BEINGS ("we", "our", "us"). We respect your privacy and are committed to protecting your personal data. This privacy policy informs you how DIGITAL BEINGS looks after your personal data when you visit our website (digitalbeings.in) and use our WhatsApp Cloud API messaging and OTP verification services.</p>
           </section>
 
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-3">2. The Data We Collect</h2>
             <p>We may collect, use, store and transfer different kinds of personal data about you which we have grouped together as follows:</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
-              <li><strong>Identity Data:</strong> includes first name, last name, username or similar identifier.</li>
-              <li><strong>Contact Data:</strong> includes billing address, email address, and telephone numbers.</li>
-              <li><strong>Technical Data:</strong> includes internet protocol (IP) address, your login data, browser type and version, time zone setting and location.</li>
-              <li><strong>Platform Data:</strong> Phone numbers submitted to our API for the sole purpose of routing One-Time Passwords (OTPs) via WhatsApp.</li>
+              <li><strong>Identity Data:</strong> includes business name, first name, last name, username or authorized account representative identifier.</li>
+              <li><strong>Contact Data:</strong> includes billing address, email address, registered mobile numbers, and GSTIN identification.</li>
+              <li><strong>Technical Data:</strong> includes internet protocol (IP) address, login data, browser type and version, time zone setting, and API request telemetry.</li>
+              <li><strong>Platform &amp; Messaging Data:</strong> Phone numbers and message payloads submitted to our API for the sole purpose of routing transactional One-Time Passwords (OTPs), utility notifications, and marketing communications via the official Meta WhatsApp Business Cloud API.</li>
             </ul>
           </section>
 
@@ -26,31 +26,34 @@ export default function PrivacyPolicy() {
             <h2 className="text-xl font-bold text-slate-900 mb-3">3. How We Use Your Data</h2>
             <p>We will only use your personal data when the law allows us to. Most commonly, we will use your personal data in the following circumstances:</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
-              <li>To provide, operate, and maintain our API services.</li>
-              <li>To process and route WhatsApp messages securely through Meta's Cloud API.</li>
-              <li>To manage your account, including billing and API key generation.</li>
-              <li>To comply with legal and regulatory obligations.</li>
+              <li>To provide, operate, and maintain our enterprise WhatsApp SaaS and API infrastructure.</li>
+              <li>To process and route WhatsApp messages securely through Meta Platforms, Inc. (WhatsApp Cloud API).</li>
+              <li>To manage your workspace account, prepaid wallet balances, and statutory GST tax invoices.</li>
+              <li>To comply with Meta Business Messaging Policies and applicable Indian legal and regulatory standards.</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-3">4. Data Sharing and Third Parties</h2>
-            <p>We share necessary messaging data (such as recipient phone numbers) strictly with Meta Platforms, Inc. (WhatsApp) to facilitate the delivery of OTP messages. We do not sell your personal data to any third parties.</p>
+            <p>We share necessary messaging data (such as recipient telephone numbers and template parameters) strictly with Meta Platforms, Inc. to facilitate the direct delivery of WhatsApp messages. We do not sell, rent, or trade your personal or customer data to any third parties.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-slate-900 mb-3">5. Data Security</h2>
-            <p>We have put in place appropriate security measures to prevent your personal data from being accidentally lost, used, or accessed in an unauthorized way, altered, or disclosed. All OTP generation and verification hashes are secured using industry-standard cryptographic practices.</p>
+            <h2 className="text-xl font-bold text-slate-900 mb-3">5. Data Security &amp; Encryption</h2>
+            <p>We have implemented enterprise-grade administrative, technical, and physical security measures to safeguard your data. All OTP verification codes are hashed using cryptographic hashing algorithms, and API communications are secured via TLS/HTTPS encryption.</p>
           </section>
 
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-3">6. Your Legal Rights</h2>
-            <p>Under certain circumstances, you have rights under data protection laws in relation to your personal data, including the right to request access, correction, erasure, restriction, transfer, to object to processing, to portability of data and (where the lawful ground of processing is consent) to withdraw consent.</p>
+            <p>Under applicable data protection laws, you have the right to request access, correction, or deletion of your account data, or request account closure at any time.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-slate-900 mb-3">7. Contact Us</h2>
-            <p>If you have any questions about this privacy policy or our privacy practices, please contact us at support@yourdomain.com.</p>
+            <h2 className="text-xl font-bold text-slate-900 mb-3">7. Contact &amp; Data Controller</h2>
+            <p><strong>Entity:</strong> DIGITAL BEINGS</p>
+            <p><strong>Jurisdiction:</strong> India</p>
+            <p><strong>Email:</strong> support@digitalbeings.in</p>
+            <p><strong>Website:</strong> https://digitalbeings.in</p>
           </section>
         </div>
       </div>

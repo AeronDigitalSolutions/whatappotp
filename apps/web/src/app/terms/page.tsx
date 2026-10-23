@@ -8,12 +8,12 @@ export default function TermsOfService() {
         <div className="space-y-6 text-slate-700 leading-relaxed">
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-3">1. Acceptance of Terms</h2>
-            <p>By accessing or using our WhatsApp OTP Platform API and dashboard, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, you may not access the service.</p>
+            <p>By accessing or using the DIGITAL BEINGS platform, API, and dashboard (digitalbeings.in), you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access or use our services.</p>
           </section>
 
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-3">2. Description of Service</h2>
-            <p>We provide a SaaS platform and API that allows developers and businesses to send and verify One-Time Passwords (OTPs) via the WhatsApp Business Cloud API. You must have a valid Meta Business Account and comply with WhatsApp's Business Messaging Policies.</p>
+            <p>DIGITAL BEINGS provides a multi-tenant enterprise SaaS platform and REST API allowing registered businesses to send automated, template-based transactional notifications, One-Time Passwords (OTPs), and customer communications via the official Meta WhatsApp Business Cloud API.</p>
           </section>
 
           <section>

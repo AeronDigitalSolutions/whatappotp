@@ -609,4 +609,51 @@ body {
   animation: moveBox-9 4s infinite;
 }
 
+/* OBA Verification Application Smooth Animations */
+@keyframes workflowSlideRight {
+  0% {
+    opacity: 0;
+    transform: translateX(24px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes workflowSlideLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-24px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes workflowFade {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.workflow-step-forward {
+  animation: workflowSlideRight 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.workflow-step-backward {
+  animation: workflowSlideLeft 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.workflow-instruction-fade {
+  animation: workflowFade 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+
 

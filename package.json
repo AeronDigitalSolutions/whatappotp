@@ -19,5 +19,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "libphonenumber-js": "^1.13.15"
+  }
 }

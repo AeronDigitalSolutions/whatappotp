@@ -141,16 +141,12 @@ export default function ApiKeysPage() {
         body: JSON.stringify({
           projectId,
           phone: testPhone,
-          purpose: "DASHBOARD_TEST",
-          simulate: true // Dev simulation mode for instant sandbox testing
+          purpose: "AUTHENTICATION"
         })
       });
       const data = await res.json();
       if (res.ok && data.success) {
         setTestResult(data);
-        if (data.devCode) {
-          setVerifyCode(data.devCode);
-        }
       } else {
         setTestResult({ success: false, error: data.error || "Failed to send test OTP" });
       }
@@ -232,29 +228,39 @@ print(response.json())`
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">API Keys</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Generate and manage your secret authentication tokens to dispatch and verify WhatsApp OTPs.
-          </p>
+    <div className="max-w-6xl mx-auto space-y-6 pb-12">
+      {/* Top Control Bar with Mode Toggle */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 text-base shrink-0 font-bold">
+            🔑
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-800">
+                {keys.length} API Credential Key{keys.length !== 1 ? "s" : ""}
+              </span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            </div>
+            <p className="text-[11px] text-slate-400">Bearer tokens for programmatic WhatsApp OTP dispatch & delivery callbacks</p>
+          </div>
         </div>
-        <button
-          onClick={() => {
-            setKeyName("");
-            setEnvironment("test");
-            setCreatedSecret(null);
-            setShowCreateModal(true);
-          }}
-          className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-all"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Create New Key
-        </button>
+
+        {/* Right: Action Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => {
+              setKeyName("");
+              setEnvironment("test");
+              setCreatedSecret(null);
+              setShowCreateModal(true);
+            }}
+            className="px-4 py-2 bg-[#064e3b] hover:bg-[#043d2e] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span className="text-sm font-bold leading-none">+</span>
+            <span>Create New Key</span>
+          </button>
+        </div>
       </div>
 
       {/* Error Banner */}
@@ -386,20 +392,20 @@ print(response.json())`
         )}
       </div>
 
-      {/* Interactive Quick Test Sandbox */}
+      {/* Interactive Live Gateway Test */}
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-6 text-white shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-700/80 pb-4 mb-6">
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-              <h3 className="text-lg font-bold">Interactive Developer Sandbox</h3>
+              <h3 className="text-lg font-bold">Interactive Live Gateway Test</h3>
             </div>
             <p className="text-xs text-slate-300 mt-1">
-              Test sending and verifying an OTP right now directly against your backend.
+              Test sending and verifying an OTP live directly through your WhatsApp Cloud Gateway.
             </p>
           </div>
           <span className="text-xs font-mono bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700 text-emerald-400">
-            Rate: ₹0.50 / dispatch
+            Rate: ₹0.25 / dispatch (India)
           </span>
         </div>
 
@@ -437,7 +443,7 @@ print(response.json())`
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  Send Test OTP
+                  Send Live OTP
                 </>
               )}
             </button>
@@ -452,15 +458,10 @@ print(response.json())`
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                       </svg>
-                      OTP Dispatched Successfully!
+                      OTP Dispatched Successfully to WhatsApp!
                     </div>
                     <div>Request ID: <span className="text-white select-all">{testResult.requestId}</span></div>
-                    {testResult.devCode && (
-                      <div className="bg-emerald-900/80 p-2 rounded border border-emerald-600 text-white flex items-center justify-between">
-                        <span>Generated Code: <strong className="text-base text-yellow-300 tracking-wider ml-1">{testResult.devCode}</strong></span>
-                        <span className="text-[10px] text-emerald-300 uppercase">Test Simulation</span>
-                      </div>
-                    )}
+                    <div className="text-[11px] text-slate-300">Enter the verification code received on the mobile phone below.</div>
                   </>
                 ) : (
                   <div>Error: {testResult.error}</div>
