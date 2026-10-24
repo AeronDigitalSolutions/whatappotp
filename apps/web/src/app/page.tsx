@@ -22,11 +22,11 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans antialiased selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-white text-slate-900 font-sans antialiased selection:bg-emerald-500 selection:text-white overflow-x-hidden w-full">
       {/* 1. TOP ANNOUNCEMENT BANNER */}
       {showOfferBar && (
-        <div className="bg-[#00c853] text-white text-xs sm:text-sm font-semibold py-2 px-4 shadow-xs flex items-center justify-between relative z-50">
-          <div className="flex-1 flex items-center justify-center gap-2 sm:gap-3 flex-wrap text-center">
+        <div className="bg-[#00c853] text-white text-xs sm:text-sm font-semibold py-2 px-4 shadow-xs flex items-center justify-between relative z-50 w-full overflow-hidden">
+          <div className="flex-1 flex items-center justify-center gap-2 sm:gap-3 flex-wrap text-center max-w-7xl mx-auto">
             <span>Start your 30-Day WhatsApp Platform Trial for just ₹500 + GST 🎉</span>
             <button
               onClick={() => openPlanModal("TRIAL_VS_BASIC")}
@@ -45,9 +45,9 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 2. NAVIGATION BAR (MATCHING AISENSY NAVBAR) */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-2xs transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3 xl:gap-6">
+      {/* 2. NAVIGATION BAR */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-2xs transition-all w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             <img
@@ -65,25 +65,16 @@ export default function HomePage() {
             </div>
           </Link>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden lg:flex items-center gap-2.5 xl:gap-4 2xl:gap-5 text-[13px] xl:text-sm font-semibold text-slate-600">
-            <Link href="#inbox" className="hover:text-emerald-600 transition flex items-center gap-1.5 whitespace-nowrap">
-              <span>💬 Live Inbox</span>
-              <span className="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">2-Way</span>
+          {/* Desktop Nav Links - Clean service definitions */}
+          <nav className="hidden md:flex items-center gap-6 xl:gap-8 text-sm font-semibold text-slate-600">
+            <Link href="#features" className="hover:text-emerald-600 transition whitespace-nowrap">
+              Services
             </Link>
-            <Link href="#chatbots" className="hover:text-emerald-600 transition flex items-center gap-1.5 whitespace-nowrap">
-              <span>🤖 AI Chatbots</span>
-              <span className="text-[9px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.2 rounded">Auto</span>
-            </Link>
-            <Link href="#ecommerce" className="hover:text-emerald-600 transition flex items-center gap-1.5 whitespace-nowrap">
-              <span>🛍️ E-Commerce</span>
-              <span className="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded">Shopify</span>
+            <Link href="#developer" className="hover:text-emerald-600 transition whitespace-nowrap">
+              WhatsApp OTP
             </Link>
             <Link href="#broadcast" className="hover:text-emerald-600 transition whitespace-nowrap">
               Broadcasts
-            </Link>
-            <Link href="#developer" className="hover:text-emerald-600 transition whitespace-nowrap">
-              Developer OTP
             </Link>
             <Link href="#pricing" className="hover:text-emerald-600 transition whitespace-nowrap">
               Pricing
@@ -91,33 +82,26 @@ export default function HomePage() {
           </nav>
 
           {/* Right Action CTAs */}
-          <div className="hidden sm:flex items-center gap-2 xl:gap-3 shrink-0">
+          <div className="hidden sm:flex items-center gap-3 xl:gap-4 shrink-0">
             <Link
-              href="/dashboard"
-              className="px-3 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition"
+              href="/login"
+              className="text-sm font-bold text-slate-700 hover:text-emerald-600 px-2 py-1 transition whitespace-nowrap"
             >
-              Explore Live Demo
+              Login
             </Link>
             <button
               onClick={() => openPlanModal("TRIAL_VS_BASIC")}
-              className="px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-bold text-white bg-[#00c853] hover:bg-[#00b248] rounded-[10px] shadow-sm hover:shadow transition flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+              className="px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-bold text-white bg-[#00c853] hover:bg-[#00b248] rounded-xl shadow-xs hover:shadow transition flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
               <span>Start 30-Day Trial (₹500 + GST)</span>
               <span>➔</span>
             </button>
-            <Link
-              href="/login"
-              className="px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-bold text-slate-900 hover:text-emerald-600 border border-slate-900 hover:border-emerald-600 rounded-[10px] transition flex items-center gap-1 whitespace-nowrap shrink-0"
-            >
-              <span>Login</span>
-              <span>➔</span>
-            </Link>
           </div>
 
           {/* Mobile hamburger button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100"
+            className="md:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100"
             aria-label="Toggle menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,29 +117,20 @@ export default function HomePage() {
 
         {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-b border-slate-200 bg-white px-6 py-4 space-y-3">
-            <Link href="#inbox" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-between py-2 font-bold text-slate-700">
-              <span>💬 Live Chat Shared Inbox</span>
-              <span className="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">2-Way</span>
+          <div className="md:hidden border-b border-slate-200 bg-white px-6 py-4 space-y-3">
+            <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700 hover:text-emerald-600">
+              Services &amp; Features
             </Link>
-            <Link href="#chatbots" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-between py-2 font-bold text-slate-700">
-              <span>🤖 AI Chatbot Automations</span>
-              <span className="text-[9px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded">Auto</span>
+            <Link href="#developer" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700 hover:text-emerald-600">
+              WhatsApp OTP &amp; APIs
             </Link>
-            <Link href="#ecommerce" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-between py-2 font-bold text-slate-700">
-              <span>🛍️ E-Commerce Recipes (Shopify &amp; COD)</span>
-              <span className="text-[9px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">Shopify</span>
+            <Link href="#broadcast" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700 hover:text-emerald-600">
+              Broadcast Campaigns
             </Link>
-            <Link href="#broadcast" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700">
-              📣 Broadcast Campaigns
+            <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700 hover:text-emerald-600">
+              Pricing Plans
             </Link>
-            <Link href="#developer" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700">
-              ⚡ Developer OTP &amp; APIs
-            </Link>
-            <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700">
-              💳 Pricing Plans
-            </Link>
-            <div className="pt-3 flex flex-col gap-2">
+            <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
@@ -165,7 +140,7 @@ export default function HomePage() {
               >
                 Start 30-Day Trial (₹500 + GST) ➔
               </button>
-              <Link href="/login" className="w-full text-center py-2.5 font-bold border border-slate-300 rounded-xl">
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 font-bold border border-slate-300 rounded-xl text-slate-800">
                 Login
               </Link>
             </div>
@@ -1168,7 +1143,7 @@ export default function HomePage() {
                   <span className="text-emerald-600 font-bold">✓</span> Transparent wholesale fuel (+ GST): OTP ₹0.20, Utility ₹0.18, Marketing ₹1.15
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-emerald-600 font-bold">✓</span> Official Green Tick (OBA) verification included FREE on Professional Plan
+                  <span className="text-emerald-600 font-bold">✓</span> Meta Official Green Tick (OBA) filing &amp; compliance support included on Professional Plan
                 </li>
               </ul>
             </div>
@@ -1574,7 +1549,7 @@ print(res.json())`}
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Utility &amp; Order Messages</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Basic Campaign Studio &amp; Templates</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> REST API &amp; Webhooks</li>
-                    <li className="flex items-center gap-2 text-slate-400"><span className="text-slate-400">·</span> OBA Green Tick (₹999 + GST add-on)</li>
+                    <li className="flex items-center gap-2 text-slate-400"><span className="text-slate-400">·</span> Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
                   </ul>
                 </div>
               </div>
@@ -1615,7 +1590,7 @@ print(res.json())`}
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Basic Campaign Broadcast Setup</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Template Approval Dashboard</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Live Chat Team Inbox &amp; Routing</li>
-                    <li className="flex items-center gap-2 text-slate-400"><span className="text-slate-400">·</span> OBA Green Tick (₹999 + GST add-on)</li>
+                    <li className="flex items-center gap-2 text-slate-400"><span className="text-slate-400">·</span> Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
                   </ul>
                 </div>
               </div>
@@ -1643,7 +1618,7 @@ print(res.json())`}
                   <span className="text-xs text-emerald-200">/ month</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-400 text-slate-950 text-[11px] font-black">
-                  🎁 Includes ₹100 Free Wallet Balance + Free OBA
+                  🎁 Includes ₹100 Free Wallet Balance + OBA Filing Support
                 </div>
                 <p className="text-xs text-emerald-100 leading-relaxed">
                   For brands scaling e-commerce automations, AI support assistants, and intelligent funnel logic.
@@ -1657,7 +1632,7 @@ print(res.json())`}
                     <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> E-Commerce API (Shopify/Woo/Custom)</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> AI Assistant &amp; Smart Auto-Replies</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Complex Logic Campaigns (Read-Not-Replied)</li>
-                    <li className="flex items-center gap-2 font-bold text-emerald-300"><span className="text-emerald-400 font-bold">✓</span> FREE Official Green Tick Verification (Save ₹999 + GST)</li>
+                    <li className="flex items-center gap-2 font-bold text-emerald-300"><span className="text-emerald-400 font-bold">✓</span> Meta Official Green Tick (OBA) Filing Support Included (Subject to Meta approval)</li>
                     <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Priority Meta API Throughput Queuing</li>
                   </ul>
                 </div>

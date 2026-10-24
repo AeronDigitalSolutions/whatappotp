@@ -199,7 +199,7 @@ export default function ActivationPaywallModal({
                 </div>
                 <span className="text-[11px] text-slate-500 block">6 Seats + Shopify + AI</span>
                 <span className="mt-1 text-[10px] font-black text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 inline-block">
-                  🎁 Incl. ₹100 Free Wallet Balance + Free OBA
+                  🎁 Incl. ₹100 Free Wallet Balance + OBA Filing Support
                 </span>
               </div>
               <ul className="text-xs text-slate-600 space-y-1.5 pt-2 border-t border-slate-200/80">
@@ -216,7 +216,7 @@ export default function ActivationPaywallModal({
                   <span className="text-emerald-600">✓</span> 24/7 AI Chatbot Assistant
                 </li>
                 <li className="flex items-center gap-1.5 font-bold text-emerald-700">
-                  <span className="text-emerald-600">✓</span> FREE Green Tick Filing (Save ₹999 + GST)
+                  <span className="text-emerald-600">✓</span> Meta Green Tick Filing Support Included (Subject to Meta criteria)
                 </li>
               </ul>
             </div>

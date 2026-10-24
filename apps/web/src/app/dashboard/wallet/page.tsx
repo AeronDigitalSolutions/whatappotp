@@ -1204,7 +1204,7 @@ export default function WalletPage() {
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Full OTP API &amp; Webhooks</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Utility &amp; Order Messages</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Basic Campaign Broadcasts</li>
-                    <li className="flex items-center gap-1.5 text-slate-400">· OBA Green Tick (₹999 + GST add-on)</li>
+                    <li className="flex items-center gap-1.5 text-slate-400">· Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
                   </ul>
                 </div>
                 <button
@@ -1240,7 +1240,7 @@ export default function WalletPage() {
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> WhatsApp OTP &amp; Utility APIs</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Template Approval Dashboard</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-600 font-bold">✓</span> Live Chat Team Inbox &amp; Routing</li>
-                    <li className="flex items-center gap-1.5 text-slate-400">· OBA Green Tick (₹999 + GST add-on)</li>
+                    <li className="flex items-center gap-1.5 text-slate-400">· Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
                   </ul>
                 </div>
                 <button
@@ -1279,7 +1279,7 @@ export default function WalletPage() {
                     <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> E-Commerce API (Shopify, Woo, Custom)</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> AI Assistant &amp; Smart Auto-Replies</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Complex Logic Campaigns (Read-Not-Replied)</li>
-                    <li className="flex items-center gap-1.5 font-bold text-emerald-300"><span className="text-emerald-400">✓</span> FREE Official Green Tick Verification</li>
+                    <li className="flex items-center gap-1.5 font-bold text-emerald-300"><span className="text-emerald-400">✓</span> Meta Official Green Tick (OBA) Filing Support Included (Subject to Meta approval)</li>
                     <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Priority Meta API Throughput</li>
                   </ul>
                 </div>

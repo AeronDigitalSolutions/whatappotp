@@ -1090,7 +1090,7 @@ fastify.get("/v1/billing/subscription/:organizationId", async (request: any, rep
             "WhatsApp OTP authentication messages (₹0.20/msg)",
             "Utility & order confirmation messages (₹0.18/msg)",
             "Marketing broadcasts & Template Studio (₹1.15/msg)",
-            "Official Green Tick (OBA) available as ₹999 add-on"
+            "Official Green Tick (OBA) filing assistance available as ₹999 add-on"
           ]
         },
         {
@@ -1110,7 +1110,7 @@ fastify.get("/v1/billing/subscription/:organizationId", async (request: any, rep
             "Basic marketing broadcast campaigns (₹1.15/msg)",
             "Template approval dashboard",
             "Custom website API & Webhooks setup",
-            "Official Green Tick (OBA) available as ₹999 add-on"
+            "Official Green Tick (OBA) filing assistance available as ₹999 add-on"
           ]
         },
         {
@@ -1130,7 +1130,7 @@ fastify.get("/v1/billing/subscription/:organizationId", async (request: any, rep
             "E-Commerce API setup (Shopify, WooCommerce, Custom)",
             "AI Assistant with smart auto-replies & included credits",
             "Complex Logic & Triggered Campaigns (Read-Not-Replied, Drop-off recovery)",
-            "FREE Official Business Account (Green Tick) verification (Save ₹999)",
+            "Meta Official Business Account (Green Tick) filing & compliance support included (Subject to Meta approval criteria)",
             "Priority Meta API delivery & dedicated routing"
           ]
         },

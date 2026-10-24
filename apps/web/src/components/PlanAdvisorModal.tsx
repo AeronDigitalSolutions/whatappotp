@@ -228,7 +228,7 @@ export default function PlanAdvisorModal({
                         <span>✕</span> No multi-agent team seats
                       </div>
                       <div className="flex items-center gap-2 text-slate-400">
-                        <span>✕</span> OBA Green Tick is ₹999 + GST add-on
+                        <span>✕</span> Meta OBA Green Tick is ₹999 + GST add-on
                       </div>
                     </div>
                   </div>
@@ -313,7 +313,7 @@ export default function PlanAdvisorModal({
               {/* Bottom Navigation Link to Step 2 */}
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
                 <span className="text-slate-600">
-                  Looking for Shopify cart recovery, 24/7 AI auto-reply bots, or free Official Green Tick?
+                  Looking for Shopify cart recovery, 24/7 AI auto-reply bots, or Green Tick filing support?
                 </span>
                 <button
                   onClick={() => setStage("BASIC_VS_PRO")}
@@ -332,10 +332,10 @@ export default function PlanAdvisorModal({
             <div className="space-y-6">
               <div className="text-center max-w-xl mx-auto space-y-1">
                 <h4 className="text-base sm:text-lg font-black text-slate-900">
-                  Need E-Commerce Cart Recovery, AI Bots &amp; Green Tick?
+                  Need E-Commerce Cart Recovery, AI Bots &amp; Green Tick Filing Support?
                 </h4>
                 <p className="text-xs text-slate-500">
-                  Step up to Professional for automated Shopify cart recovery, intelligent conversational bots, and free Meta Green Tick verification.
+                  Step up to Professional for automated Shopify cart recovery, intelligent conversational bots, and Meta Green Tick filing support.
                 </p>
               </div>
 
@@ -376,7 +376,7 @@ export default function PlanAdvisorModal({
                         <span>✕</span> AI Chatbot auto-replies not included
                       </div>
                       <div className="flex items-center gap-2 text-slate-400">
-                        <span>✕</span> OBA Green Tick is ₹999 + GST add-on
+                        <span>✕</span> Meta OBA Green Tick is ₹999 + GST add-on
                       </div>
                     </div>
                   </div>
@@ -423,7 +423,7 @@ export default function PlanAdvisorModal({
                         • <strong>Shopify &amp; WooCommerce Recipes</strong> (Cart recovery &amp; COD confirmation).<br />
                         • <strong>24/7 AI Chatbot Assistant</strong> with interactive buttons.<br />
                         • <strong>Complex Logic Campaigns</strong> (Read-Not-Replied follow-ups).<br />
-                        • <strong>FREE Official Green Tick (OBA) Filing</strong> (Saves ₹999 + GST!).
+                        • <strong>Official Green Tick (OBA) Filing Support Included</strong> (Subject to Meta approval criteria, saves ₹999 + GST!).
                       </p>
                     </div>
 
@@ -444,7 +444,7 @@ export default function PlanAdvisorModal({
                         <span className="text-emerald-400 font-bold">✓</span> Complex Funnel Logic (Read-Not-Replied)
                       </div>
                       <div className="flex items-center gap-2 font-bold text-emerald-300">
-                        <span className="text-emerald-400 font-bold">✓</span> FREE Meta Official Green Tick Verification
+                        <span className="text-emerald-400 font-bold">✓</span> Meta Official Green Tick (OBA) Filing Support Included (Subject to Meta criteria)
                       </div>
                     </div>
                   </div>
