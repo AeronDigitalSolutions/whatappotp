@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { getApiUrl } from "@/lib/api";
+import { useSubscription } from "@/context/SubscriptionContext";
 
 interface PhoneNumberItem {
   id: string;
@@ -57,6 +58,7 @@ const QUICK_RESPONSES = [
 ];
 
 export default function LiveInboxPage() {
+  const { isDemo, triggerPaywall } = useSubscription();
   const [projectId, setProjectId] = useState<string>("");
   const [phoneNumbers, setPhoneNumbers] = useState<PhoneNumberItem[]>([]);
   const [selectedPhoneId, setSelectedPhoneId] = useState<string>("ALL");
@@ -275,6 +277,13 @@ export default function LiveInboxPage() {
   // Send outbound message
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To send live WhatsApp messages to customer contacts from the shared team inbox, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     if (!replyText.trim() || !activeConv || sending) return;
 
     setSending(true);

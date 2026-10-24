@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import Loader from "@/components/Loader";
 
 interface PhoneNumberItem {
@@ -123,6 +124,7 @@ const STEPS_CONFIG = [
 
 export default function WhatsAppVerificationPage() {
   const { showSuccess, showError, showWarning } = useModal();
+  const { isDemo, triggerPaywall } = useSubscription();
 
   // Navigation & Step state with Directional Animations
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -416,6 +418,13 @@ export default function WhatsAppVerificationPage() {
 
   // Final Application Submission (Step 5)
   const handleSubmitApplication = async () => {
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To submit an Official Green Tick (OBA) verification application to Meta, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST). Professional Plan includes filing support free!"
+      );
+      return;
+    }
     if (!selectedPhone) {
       showError("Please select a registered phone number.", "Selection Required");
       return;

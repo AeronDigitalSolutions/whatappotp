@@ -3,10 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import TokenUpdateModal from "@/components/TokenUpdateModal";
 
 export default function SettingsPage() {
   const { showSuccess, showError } = useModal();
+  const { isDemo, triggerPaywall } = useSubscription();
   const [projectId, setProjectId] = useState<string | null>(null);
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -42,6 +44,13 @@ export default function SettingsPage() {
   }, []);
 
   const handleSaveSettings = () => {
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To save custom workspace settings and OTP configuration, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     showSuccess("OTP settings updated successfully.", "Settings Saved");
   };
 

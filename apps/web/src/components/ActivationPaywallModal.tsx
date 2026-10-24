@@ -18,8 +18,8 @@ interface ActivationPaywallModalProps {
 export default function ActivationPaywallModal({
   isOpen,
   onClose,
-  title = "Activate Workspace for Live Operations",
-  subtitle = "You are currently in Demo Preview Mode. Choose a plan to unlock live WhatsApp Cloud APIs, production OTPs, and broadcast campaigns immediately.",
+  title = "To Continue, Please Take a Subscription",
+  subtitle = "To continue, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST) to unlock live WhatsApp operations.",
   defaultPlan = "TRIAL",
   organizationId,
   userName,
@@ -74,7 +74,7 @@ export default function ActivationPaywallModal({
         <div className="bg-[#154336] text-white p-5 sm:p-6 flex items-center justify-between">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider mb-1.5">
-              <span>🔒 Demo Mode Action Locked</span>
+              <span>🔒 Action Locked · Subscription Required</span>
             </div>
             <h3 className="text-xl sm:text-2xl font-black tracking-tight">{title}</h3>
             <p className="text-emerald-100/80 text-xs sm:text-sm mt-0.5 max-w-xl">{subtitle}</p>

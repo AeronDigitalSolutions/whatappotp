@@ -5,11 +5,13 @@ import Script from "next/script";
 import Link from "next/link";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import TokenUpdateModal from "@/components/TokenUpdateModal";
 import Loader from "@/components/Loader";
 
 export default function SetupPage() {
   const { showSuccess, showError, showWarning } = useModal();
+  const { isDemo, triggerPaywall } = useSubscription();
   const [projectId, setProjectId] = useState<string | null>(null);
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -159,6 +161,13 @@ export default function SetupPage() {
   };
 
   const saveSelection = async () => {
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To link your Meta WhatsApp Cloud API credentials to live production routes, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     if (!selectedWaba || !selectedPhone) return showWarning("Please select a WhatsApp Business Account and a phone number.", "Selection Required");
     setSaving(true);
     try {

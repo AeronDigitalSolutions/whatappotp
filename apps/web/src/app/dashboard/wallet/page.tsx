@@ -72,6 +72,8 @@ interface BillingProfile {
 
 interface SubscriptionInfo {
   plan: string;
+  isActivated?: boolean;
+  isDemo?: boolean;
   planExpiresAt?: string;
   daysRemaining: number;
   isExpired: boolean;
@@ -192,6 +194,13 @@ export default function WalletPage() {
   };
 
   const handleTopUp = async () => {
+    if (!subscription?.isActivated) {
+      showWarning(
+        "To recharge message fuel, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST). Please select a subscription plan below first.",
+        "Subscription Required"
+      );
+      return;
+    }
     if (amount < 100) return showWarning("Minimum wallet recharge base amount is ₹100.", "Minimum Top-up");
 
     setLoading(true);

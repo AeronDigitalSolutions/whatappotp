@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import * as XLSX from "xlsx";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import Loader from "@/components/Loader";
 
 interface PhoneNumberItem {
@@ -70,6 +71,7 @@ interface RecipientItem {
 
 export default function CampaignsPage() {
   const { showModal, showSuccess, showError, showWarning, showLoading } = useModal();
+  const { isDemo, triggerPaywall } = useSubscription();
 
   // Project ID from localStorage
   const [projectId, setProjectId] = useState<string>("");
@@ -460,6 +462,13 @@ export default function CampaignsPage() {
 
   // Send Test Message
   const handleSendTestMessage = async () => {
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To send live test WhatsApp broadcasts to phone numbers, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     if (!testPhoneNumber) {
       showError("Please enter a valid test WhatsApp number.");
       return;
@@ -507,6 +516,13 @@ export default function CampaignsPage() {
 
   // Create Campaign
   const handleCreateCampaign = async () => {
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To create and schedule broadcast campaigns for delivery, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     if (!campaignName.trim()) {
       showError("Please provide a name for this campaign.");
       setWizardStep(1);
@@ -610,6 +626,13 @@ export default function CampaignsPage() {
 
   // Launch Campaign
   const handleLaunchCampaign = (camp: CampaignItem) => {
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To launch and dispatch WhatsApp broadcast campaigns to customer contacts, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     showModal({
       title: `Launch Campaign "${camp.name}"?`,
       type: "info",

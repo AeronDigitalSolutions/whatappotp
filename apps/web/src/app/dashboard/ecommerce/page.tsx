@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
+import { useSubscription } from "@/context/SubscriptionContext";
 
 interface EcommerceConfig {
   id?: string;
@@ -45,6 +46,7 @@ interface EcommerceEvent {
 }
 
 export default function EcommerceTriggersPage() {
+  const { isDemo, triggerPaywall } = useSubscription();
   const [projectId, setProjectId] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
@@ -179,6 +181,13 @@ export default function EcommerceTriggersPage() {
 
   // Save Config
   const handleSaveConfig = async (updatedConfig: EcommerceConfig) => {
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To save e-commerce webhook configurations and automate WhatsApp notifications, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     setSaving(true);
     const currentPid = projectId || "default";
     try {
@@ -203,6 +212,13 @@ export default function EcommerceTriggersPage() {
 
   // Toggle Recipe helper
   const toggleRecipe = (field: keyof EcommerceConfig) => {
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To activate e-commerce recipes (Abandoned Cart, Order Confirmation, COD Verification), you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     const currentVal = Boolean(config[field]);
     const updated: EcommerceConfig = {
       ...config,
@@ -214,6 +230,13 @@ export default function EcommerceTriggersPage() {
 
   // Run Simulator with live Meta verification
   const handleRunSimulator = async (useStarterFallback = false) => {
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To simulate and trigger live WhatsApp e-commerce notifications, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     if (!simPhone.trim()) {
       alert("Please provide a destination phone number for the test.");
       return;

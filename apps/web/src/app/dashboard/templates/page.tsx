@@ -7,6 +7,7 @@ import { useModal } from "@/context/ModalContext";
 import Loader from "@/components/Loader";
 import TokenUpdateModal from "@/components/TokenUpdateModal";
 import { useViewMode } from "@/context/ViewModeContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 
 interface TemplateComponent {
   type: "HEADER" | "BODY" | "FOOTER" | "BUTTONS";
@@ -59,6 +60,7 @@ export interface VariableDef {
 export default function TemplatesPage() {
   const { mode, isDev, isUser } = useViewMode();
   const { showModal, showSuccess, showError, showLoading } = useModal();
+  const { isDemo, triggerPaywall } = useSubscription();
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -523,6 +525,13 @@ export default function TemplatesPage() {
   };
 
   const handleDelete = (name: string, id?: string) => {
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To delete production WhatsApp message templates, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     const isProtected = name.toLowerCase() === "hello_world" || name.toLowerCase().startsWith("sample_");
     if (isProtected) {
       showError(
@@ -579,6 +588,13 @@ export default function TemplatesPage() {
 
   const handleSubmitTemplate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To submit WhatsApp message templates to Meta for official review and approval, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     setSubmitting(true);
     setSubmitError(null);
 

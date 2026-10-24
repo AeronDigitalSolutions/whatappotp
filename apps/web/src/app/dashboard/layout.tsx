@@ -5,8 +5,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { PermissionProvider, usePermissions } from "@/context/PermissionContext";
 import { ViewModeProvider } from "@/context/ViewModeContext";
+import { SubscriptionProvider, useSubscription } from "@/context/SubscriptionContext";
 import { getApiUrl } from "@/lib/api";
-import ActivationPaywallModal from "@/components/ActivationPaywallModal";
 
 import {
   DashboardIcon,
@@ -74,8 +74,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [userEmail, setUserEmail] = useState("");
   const [orgId, setOrgId] = useState("");
   const [walletBalance, setWalletBalance] = useState("0.00");
-  const [subscriptionData, setSubscriptionData] = useState<any>(null);
-  const [showActivateModal, setShowActivateModal] = useState(false);
+  const { isActivated, isDemo, triggerPaywall, subscription: contextSub } = useSubscription();
 
   const { activeRole, activeRoleDef, hasAccess, canAccessPath, setActiveRole } = usePermissions();
 
@@ -118,12 +117,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 setWalletBalance(Number(data.wallet.availableBalance || data.wallet.balance || 0).toFixed(2));
               }
               if (data.success && data.subscription) {
-                setSubscriptionData(data.subscription);
                 if (!data.subscription.isActivated) {
                   if (typeof window !== "undefined") {
                     const params = new URLSearchParams(window.location.search);
                     if (params.get("activate") === "true" || localStorage.getItem("pendingPlan")) {
-                      setShowActivateModal(true);
+                      triggerPaywall();
                     }
                   }
                 }
@@ -456,7 +454,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Persistent Demo Mode Banner */}
-        {subscriptionData && !subscriptionData.isActivated && (
+        {isDemo && (
           <div className="bg-amber-500/15 border-b border-amber-500/30 px-5 py-2.5 text-xs text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
             <div className="flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
@@ -468,7 +466,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <button
-              onClick={() => setShowActivateModal(true)}
+              onClick={() => triggerPaywall()}
               className="px-3.5 py-1.5 bg-[#154336] hover:bg-[#0f3127] text-white font-extrabold rounded-lg text-xs shadow-xs transition shrink-0 cursor-pointer flex items-center gap-1.5"
             >
               <span>⚡</span>
@@ -504,22 +502,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             children
           )}
         </main>
-
-        {/* Activation Paywall Modal for Demo Mode */}
-        <ActivationPaywallModal
-          isOpen={showActivateModal}
-          onClose={() => setShowActivateModal(false)}
-          organizationId={orgId}
-          userName={userName}
-          userEmail={userEmail}
-          onActivationSuccess={() => {
-            setShowActivateModal(false);
-            if (typeof window !== "undefined") {
-              localStorage.removeItem("pendingPlan");
-            }
-            window.location.reload();
-          }}
-        />
       </div>
     </div>
   );
@@ -529,7 +511,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <ViewModeProvider>
       <PermissionProvider>
-        <DashboardLayoutContent>{children}</DashboardLayoutContent>
+        <SubscriptionProvider>
+          <DashboardLayoutContent>{children}</DashboardLayoutContent>
+        </SubscriptionProvider>
       </PermissionProvider>
     </ViewModeProvider>
   );

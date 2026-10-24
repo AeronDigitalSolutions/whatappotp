@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import Loader from "@/components/Loader";
 
 interface PhoneNumberItem {
@@ -20,6 +21,7 @@ interface PhoneNumberItem {
 
 export default function NumbersPage() {
   const { showSuccess, showError, showWarning } = useModal();
+  const { isDemo, triggerPaywall } = useSubscription();
   const [numbers, setNumbers] = useState<PhoneNumberItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -155,6 +157,13 @@ export default function NumbersPage() {
 
   const handleAddManual = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To link and register WhatsApp phone numbers for live messaging, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     try {
       const res = await fetch(`${getApiUrl()}/v1/meta/numbers/add-manual`, {
         method: "POST",

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { getApiUrl } from "@/lib/api";
 import { ALL_MODULES } from "@/context/PermissionContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import {
   TeamIcon,
   Shield2DIcon,
@@ -86,6 +87,7 @@ function getModule2DIcon(moduleKey: string) {
 }
 
 export default function TeamPage() {
+  const { isDemo, triggerPaywall } = useSubscription();
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [roles, setRoles] = useState<OrgRole[]>([]);
@@ -190,6 +192,13 @@ export default function TeamPage() {
   // Handle Invite Member
   const handleInviteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To invite team members and add staff seats to your workspace, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     if (!organizationId || !inviteEmail.trim()) return;
 
     setInviteLoading(true);
@@ -225,6 +234,13 @@ export default function TeamPage() {
   // Handle Save Role (Create or Edit)
   const handleRoleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To configure custom RBAC roles and permissions, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     if (!organizationId || !roleFormName.trim()) return;
 
     setRoleSaving(true);

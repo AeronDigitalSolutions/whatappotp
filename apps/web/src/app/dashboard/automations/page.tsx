@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { getApiUrl } from "@/lib/api";
+import { useSubscription } from "@/context/SubscriptionContext";
 
 interface QuickReplyButton {
   id: string;
@@ -24,6 +25,7 @@ interface AutomationRule {
 }
 
 export default function AutomationsPage() {
+  const { isDemo, triggerPaywall } = useSubscription();
   const [projectId, setProjectId] = useState<string>("");
   const [rules, setRules] = useState<AutomationRule[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -140,6 +142,13 @@ export default function AutomationsPage() {
   // Save rule
   const handleSaveRule = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To save and activate live 24/7 conversational chatbot rules on your WhatsApp number, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     if (!formName.trim() || !formResponseText.trim()) {
       alert("Please provide both rule name and response text.");
       return;

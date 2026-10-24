@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import Loader from "@/components/Loader";
 
 interface ApiKeyItem {
@@ -16,6 +17,7 @@ interface ApiKeyItem {
 
 export default function ApiKeysPage() {
   const { showError, showSuccess } = useModal();
+  const { isDemo, triggerPaywall } = useSubscription();
   const [keys, setKeys] = useState<ApiKeyItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +73,13 @@ export default function ApiKeysPage() {
 
   const handleCreateKey = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To generate production REST API keys for live OTP and notification dispatch, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     if (!projectId) return;
     setCreating(true);
     setError(null);
@@ -128,6 +137,13 @@ export default function ApiKeysPage() {
   };
 
   const handleSendTestOtp = async () => {
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To test live WhatsApp OTP dispatch to destination numbers, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     if (!projectId || !testPhone) return;
     setTestSending(true);
     setTestResult(null);

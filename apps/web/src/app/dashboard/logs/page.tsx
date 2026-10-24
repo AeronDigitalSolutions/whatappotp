@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import Loader from "@/components/Loader";
 
 interface AttemptItem {
@@ -29,6 +30,7 @@ interface OtpLogItem {
 
 export default function LogsPage() {
   const { showError, showSuccess } = useModal();
+  const { isDemo, triggerPaywall } = useSubscription();
   const [logs, setLogs] = useState<OtpLogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,6 +81,13 @@ export default function LogsPage() {
   }, [autoRefresh, projectId, filterStatus]);
 
   const handleResendOtp = async (requestId: string) => {
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To resend and dispatch live OTP messages to user handsets, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST)."
+      );
+      return;
+    }
     setResending(true);
     setResendMessage(null);
     try {
