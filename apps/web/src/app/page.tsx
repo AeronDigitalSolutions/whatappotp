@@ -1595,7 +1595,7 @@ print(res.json())`}
                 </div>
               </div>
               <button
-                onClick={() => openPlanModal("TRIAL_VS_BASIC")}
+                onClick={() => openPlanModal("BASIC_VS_PRO")}
                 className="w-full text-center py-3 rounded-xl border border-slate-300 font-bold text-xs text-slate-800 hover:bg-slate-50 transition block cursor-pointer"
               >
                 Get Basic Plan (₹1,000 + GST) ➔
@@ -1638,7 +1638,7 @@ print(res.json())`}
                 </div>
               </div>
               <button
-                onClick={() => openPlanModal("BASIC_VS_PRO")}
+                onClick={() => openPlanModal("PRO_VS_CUSTOM")}
                 className="w-full text-center py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs shadow-md transition block cursor-pointer"
               >
                 Upgrade to Professional (₹2,500 + GST) ➔

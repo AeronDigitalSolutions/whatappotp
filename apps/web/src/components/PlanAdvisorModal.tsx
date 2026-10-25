@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { startSubscriptionCheckout, PLAN_CONFIGS } from "@/lib/razorpay";
 
-export type PlanModalStage = "TRIAL_VS_BASIC" | "BASIC_VS_PRO" | "ENTERPRISE";
+export type PlanModalStage = "TRIAL_VS_BASIC" | "BASIC_VS_PRO" | "PRO_VS_CUSTOM" | "ENTERPRISE";
 
 interface PlanAdvisorModalProps {
   isOpen: boolean;
@@ -25,7 +25,7 @@ export default function PlanAdvisorModal({
 
   useEffect(() => {
     if (isOpen) {
-      setStage(initialStage);
+      setStage(initialStage === "ENTERPRISE" ? "PRO_VS_CUSTOM" : initialStage);
       setErrorMessage(null);
       setSuccessMessage(null);
       setLoadingPlan(null);
@@ -34,7 +34,11 @@ export default function PlanAdvisorModal({
 
   if (!isOpen) return null;
 
-  const handleSelectPlan = async (planId: "TRIAL" | "BASIC" | "PROFESSIONAL") => {
+  // Standardize active comparison stage: "ENTERPRISE" maps to "PRO_VS_CUSTOM"
+  const activeStage: "TRIAL_VS_BASIC" | "BASIC_VS_PRO" | "PRO_VS_CUSTOM" =
+    stage === "ENTERPRISE" ? "PRO_VS_CUSTOM" : stage;
+
+  const handleSelectPlan = async (planId: "TRIAL" | "BASIC" | "PROFESSIONAL" | "ENTERPRISE") => {
     setErrorMessage(null);
     setLoadingPlan(planId);
 
@@ -94,9 +98,9 @@ export default function PlanAdvisorModal({
               <span>⚡ Interactive Plan Comparison</span>
             </div>
             <h3 className="text-xl sm:text-2xl font-black tracking-tight">
-              {stage === "TRIAL_VS_BASIC" && "Starter Trial (₹500 + GST) vs. Basic Business (₹1,000 + GST)"}
-              {stage === "BASIC_VS_PRO" && "Basic Plan (₹1,000 + GST) vs. Professional Scale (₹2,500 + GST)"}
-              {stage === "ENTERPRISE" && "Custom High-Throughput Enterprise Architecture"}
+              {activeStage === "TRIAL_VS_BASIC" && "Starter Trial (₹500 + GST) vs. Basic Business (₹1,000 + GST)"}
+              {activeStage === "BASIC_VS_PRO" && "Basic Plan (₹1,000 + GST) vs. Professional Scale (₹2,500 + GST)"}
+              {activeStage === "PRO_VS_CUSTOM" && "Professional Scale (₹2,500 + GST) vs. Custom Enterprise"}
             </h3>
             <p className="text-emerald-100/80 text-xs sm:text-sm mt-0.5">
               Transparent Meta Cloud API platform · Direct Razorpay checkout with GST invoice
@@ -117,37 +121,37 @@ export default function PlanAdvisorModal({
             <button
               onClick={() => setStage("TRIAL_VS_BASIC")}
               className={`px-3 py-1.5 rounded-xl transition cursor-pointer flex items-center gap-1.5 ${
-                stage === "TRIAL_VS_BASIC"
+                activeStage === "TRIAL_VS_BASIC"
                   ? "bg-[#154336] text-white shadow-xs"
                   : "hover:bg-slate-200 text-slate-700"
               }`}
             >
               <span>1</span>
-              <span>Trial vs. Basic</span>
+              <span>Trial (₹500) vs. Basic (₹1,000)</span>
             </button>
             <span className="text-slate-300">➔</span>
             <button
               onClick={() => setStage("BASIC_VS_PRO")}
               className={`px-3 py-1.5 rounded-xl transition cursor-pointer flex items-center gap-1.5 ${
-                stage === "BASIC_VS_PRO"
+                activeStage === "BASIC_VS_PRO"
                   ? "bg-[#154336] text-white shadow-xs"
                   : "hover:bg-slate-200 text-slate-700"
               }`}
             >
               <span>2</span>
-              <span>Basic vs. Professional</span>
+              <span>Basic (₹1,000) vs. Pro (₹2,500)</span>
             </button>
             <span className="text-slate-300">➔</span>
             <button
-              onClick={() => setStage("ENTERPRISE")}
+              onClick={() => setStage("PRO_VS_CUSTOM")}
               className={`px-3 py-1.5 rounded-xl transition cursor-pointer flex items-center gap-1.5 ${
-                stage === "ENTERPRISE"
+                activeStage === "PRO_VS_CUSTOM"
                   ? "bg-[#154336] text-white shadow-xs"
                   : "hover:bg-slate-200 text-slate-700"
               }`}
             >
               <span>3</span>
-              <span>Enterprise Custom</span>
+              <span>Pro (₹2,500) vs. Custom</span>
             </button>
           </div>
           <span className="text-[11px] text-slate-400 hidden sm:inline">
@@ -174,7 +178,7 @@ export default function PlanAdvisorModal({
           {/* ========================================================== */}
           {/* STAGE 1: TRIAL (₹500) VS BASIC (₹1,000)                   */}
           {/* ========================================================== */}
-          {stage === "TRIAL_VS_BASIC" && (
+          {activeStage === "TRIAL_VS_BASIC" && (
             <div className="space-y-6">
               <div className="text-center max-w-xl mx-auto space-y-1">
                 <h4 className="text-base sm:text-lg font-black text-slate-900">
@@ -186,7 +190,7 @@ export default function PlanAdvisorModal({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
-                {/* Option 1: Starter Trial */}
+                {/* LEFT CARD: Starter Trial (Confirm & Pay ₹500) */}
                 <div className="bg-white rounded-2xl border-2 border-slate-200 p-6 flex flex-col justify-between hover:border-slate-300 transition shadow-xs space-y-5">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -210,7 +214,7 @@ export default function PlanAdvisorModal({
                         <span className="text-emerald-600 font-black">✓</span> 1 User Only (Owner Profile)
                       </div>
                       <div className="flex items-center gap-2 text-slate-600">
-                        <span className="text-emerald-600 font-bold">✓</span> Pay-as-you-go message fuel (Recharge wallet anytime)
+                        <span className="text-emerald-600 font-bold">✓</span> Pay-as-you-go message fuel (₹0 wallet bonus)
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-emerald-600 font-bold">✓</span> WhatsApp OTP API Integration &amp; REST Keys
@@ -233,16 +237,24 @@ export default function PlanAdvisorModal({
                     </div>
                   </div>
 
+                  {/* Left Button -> Confirms and Opens Razorpay for ₹500 */}
                   <button
                     onClick={() => handleSelectPlan("TRIAL")}
                     disabled={loadingPlan !== null}
-                    className="w-full py-3 px-4 rounded-xl border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-black text-xs transition shadow-xs disabled:opacity-50 cursor-pointer"
+                    className="w-full py-3.5 px-4 rounded-xl border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-black text-xs transition shadow-xs disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
                   >
-                    {loadingPlan === "TRIAL" ? "Opening Razorpay..." : "Start 30-Day Trial (₹500 + GST) ➔"}
+                    {loadingPlan === "TRIAL" ? (
+                      <span>Opening Razorpay...</span>
+                    ) : (
+                      <>
+                        <span>Start 30-Day Trial (₹500 + GST)</span>
+                        <span>➔</span>
+                      </>
+                    )}
                   </button>
                 </div>
 
-                {/* Option 2: Basic Business (Highlighted) */}
+                {/* RIGHT CARD: Basic Business (Upgrade & Advance to Stage 2) */}
                 <div className="bg-gradient-to-b from-emerald-50/60 via-white to-white rounded-2xl border-2 border-[#154336] p-6 flex flex-col justify-between shadow-md relative space-y-5">
                   <div className="absolute -top-3 right-6 bg-[#00c853] text-slate-950 font-black text-[10px] tracking-wider uppercase px-3 py-1 rounded-full shadow-xs">
                     🌟 RECOMMENDED VALUE
@@ -300,12 +312,13 @@ export default function PlanAdvisorModal({
                     </div>
                   </div>
 
+                  {/* Right Button -> Shifts to Stage 2 (₹1,000 on left, ₹2,500 on right) */}
                   <button
-                    onClick={() => handleSelectPlan("BASIC")}
-                    disabled={loadingPlan !== null}
-                    className="w-full py-3.5 px-4 rounded-xl bg-[#154336] hover:bg-[#0f3127] text-white font-black text-xs transition shadow-md disabled:opacity-50 cursor-pointer"
+                    onClick={() => setStage("BASIC_VS_PRO")}
+                    className="w-full py-3.5 px-4 rounded-xl bg-[#154336] hover:bg-[#0f3127] text-white font-black text-xs transition shadow-md cursor-pointer flex items-center justify-center gap-2 group"
                   >
-                    {loadingPlan === "BASIC" ? "Opening Razorpay..." : "Choose Basic Business Plan (₹1,000 + GST/mo) ➔"}
+                    <span>Select ₹1,000 &amp; Compare with ₹2,500</span>
+                    <span className="group-hover:translate-x-1 transition-transform">➔</span>
                   </button>
                 </div>
               </div>
@@ -328,7 +341,7 @@ export default function PlanAdvisorModal({
           {/* ========================================================== */}
           {/* STAGE 2: BASIC (₹1,000) VS PROFESSIONAL (₹2,500)          */}
           {/* ========================================================== */}
-          {stage === "BASIC_VS_PRO" && (
+          {activeStage === "BASIC_VS_PRO" && (
             <div className="space-y-6">
               <div className="text-center max-w-xl mx-auto space-y-1">
                 <h4 className="text-base sm:text-lg font-black text-slate-900">
@@ -340,7 +353,7 @@ export default function PlanAdvisorModal({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
-                {/* Option 1: Basic Business */}
+                {/* LEFT CARD: Basic Business (Confirm & Pay ₹1,000) */}
                 <div className="bg-white rounded-2xl border-2 border-slate-200 p-6 flex flex-col justify-between hover:border-slate-300 transition shadow-xs space-y-5">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -353,18 +366,24 @@ export default function PlanAdvisorModal({
                         <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
                         <span className="text-xs text-slate-500 font-semibold">/ month</span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">Best for standard WhatsApp support and notifications.</p>
+                      <p className="text-xs text-slate-500 mt-1">Best for standard WhatsApp support, OTP API and live team inbox.</p>
+                      <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 text-[11px] font-black border border-emerald-300">
+                        <span>🎁 Includes ₹50 Free Wallet Balance (~250 OTPs)</span>
+                      </div>
                     </div>
 
                     <div className="pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-600">
                       <div className="flex items-center gap-2 font-bold text-slate-900">
                         <span className="text-emerald-600 font-black">✓</span> 1 Owner + 3 Support Seats (4 Total)
                       </div>
+                      <div className="flex items-center gap-2 font-bold text-emerald-800">
+                        <span className="text-emerald-600 font-black">✓</span> ₹50 Starter Wallet Balance Included (~250 OTPs)
+                      </div>
                       <div className="flex items-center gap-2">
                         <span className="text-emerald-600 font-bold">✓</span> WhatsApp OTP &amp; Utility Receipts
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-emerald-600 font-bold">✓</span> 2-Way Live Team Inbox
+                        <span className="text-emerald-600 font-bold">✓</span> 2-Way Live Team Inbox &amp; Routing
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-emerald-600 font-bold">✓</span> Template Approval Dashboard
@@ -381,16 +400,24 @@ export default function PlanAdvisorModal({
                     </div>
                   </div>
 
+                  {/* Left Button -> Confirms and Opens Razorpay for ₹1,000 */}
                   <button
                     onClick={() => handleSelectPlan("BASIC")}
                     disabled={loadingPlan !== null}
-                    className="w-full py-3 px-4 rounded-xl border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-black text-xs transition shadow-xs disabled:opacity-50 cursor-pointer"
+                    className="w-full py-3.5 px-4 rounded-xl border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-black text-xs transition shadow-xs disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
                   >
-                    {loadingPlan === "BASIC" ? "Opening Razorpay..." : "Select Basic Plan (₹1,000 + GST/mo) ➔"}
+                    {loadingPlan === "BASIC" ? (
+                      <span>Opening Razorpay...</span>
+                    ) : (
+                      <>
+                        <span>Confirm &amp; Pay Basic Plan (₹1,000 + GST)</span>
+                        <span>➔</span>
+                      </>
+                    )}
                   </button>
                 </div>
 
-                {/* Option 2: Professional Scale (Featured) */}
+                {/* RIGHT CARD: Professional Scale (Upgrade & Advance to Stage 3) */}
                 <div className="bg-[#154336] text-white rounded-2xl p-6 flex flex-col justify-between shadow-xl relative border-2 border-emerald-400 space-y-5">
                   <div className="absolute -top-3.5 right-6 bg-gradient-to-r from-emerald-400 to-[#25D366] text-slate-950 font-black text-[10px] tracking-wider uppercase px-3 py-1 rounded-full shadow-xs">
                     MOST POPULAR FOR SCALE
@@ -449,12 +476,13 @@ export default function PlanAdvisorModal({
                     </div>
                   </div>
 
+                  {/* Right Button -> Shifts to Stage 3 (₹2,500 on left, Custom on right) */}
                   <button
-                    onClick={() => handleSelectPlan("PROFESSIONAL")}
-                    disabled={loadingPlan !== null}
-                    className="w-full py-3.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition shadow-md disabled:opacity-50 cursor-pointer"
+                    onClick={() => setStage("PRO_VS_CUSTOM")}
+                    className="w-full py-3.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition shadow-md cursor-pointer flex items-center justify-center gap-2 group"
                   >
-                    {loadingPlan === "PROFESSIONAL" ? "Opening Razorpay..." : "Select Professional Plan (₹2,500 + GST/mo) ➔"}
+                    <span>Select ₹2,500 &amp; Compare with Custom</span>
+                    <span className="group-hover:translate-x-1 transition-transform">➔</span>
                   </button>
                 </div>
               </div>
@@ -463,12 +491,13 @@ export default function PlanAdvisorModal({
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
                 <button
                   onClick={() => setStage("TRIAL_VS_BASIC")}
-                  className="text-slate-600 font-bold hover:text-slate-900 cursor-pointer"
+                  className="text-slate-600 font-bold hover:text-slate-900 cursor-pointer flex items-center gap-1.5"
                 >
-                  ⬅ Back to Starter vs. Basic
+                  <span>⬅</span>
+                  <span>Back to Starter Trial (₹500 + GST)</span>
                 </button>
                 <button
-                  onClick={() => setStage("ENTERPRISE")}
+                  onClick={() => setStage("PRO_VS_CUSTOM")}
                   className="text-emerald-700 font-extrabold hover:text-emerald-800 hover:underline cursor-pointer"
                 >
                   Sending &gt; 100,000 msgs/month? View Custom Enterprise ➔
@@ -478,63 +507,187 @@ export default function PlanAdvisorModal({
           )}
 
           {/* ========================================================== */}
-          {/* STAGE 3: ENTERPRISE CUSTOM TIER                           */}
+          {/* STAGE 3: PROFESSIONAL (₹2,500) VS CUSTOM ENTERPRISE       */}
           {/* ========================================================== */}
-          {stage === "ENTERPRISE" && (
+          {activeStage === "PRO_VS_CUSTOM" && (
             <div className="space-y-6">
               <div className="text-center max-w-xl mx-auto space-y-1">
                 <h4 className="text-base sm:text-lg font-black text-slate-900">
-                  Custom High-Throughput Enterprise Architecture
+                  Professional Scale vs. Custom High-Throughput Enterprise
                 </h4>
                 <p className="text-xs text-slate-500">
-                  Engineered for banks, large enterprises, and high-frequency OTP workloads exceeding 100,000+ messages per month.
+                  Choose Professional for turnkey automations &amp; team collaboration, or Custom Enterprise for dedicated infrastructure exceeding 100,000+ messages per month.
                 </p>
               </div>
 
-              <div className="bg-slate-900 text-white rounded-3xl p-7 sm:p-8 space-y-6 border border-slate-800 shadow-xl">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div className="p-4 bg-slate-800/80 rounded-xl space-y-1">
-                    <span className="font-extrabold text-emerald-400 block text-sm">⚡ 50+ Messages / Second</span>
-                    <p className="text-slate-300">Dedicated WABA Tier acceleration with zero API queue latency.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
+                {/* LEFT CARD: Professional (Confirm & Pay ₹2,500) */}
+                <div className="bg-white rounded-2xl border-2 border-slate-200 p-6 flex flex-col justify-between hover:border-slate-300 transition shadow-xs space-y-5">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Professional Plan</span>
+                      <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">6 Seats</span>
+                    </div>
+                    <div>
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
+                        <span className="text-3xl sm:text-4xl font-black text-slate-900">₹2,500</span>
+                        <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
+                        <span className="text-xs text-slate-500 font-semibold">/ month</span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1">Turnkey automations for scaling brands &amp; e-commerce businesses.</p>
+                      <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 text-[11px] font-black border border-emerald-300">
+                        <span>🎁 Includes ₹100 Free Wallet Balance (~500 OTPs)</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-600">
+                      <div className="flex items-center gap-2 font-bold text-slate-900">
+                        <span className="text-emerald-600 font-black">✓</span> 1 Owner + 5 Support Seats (6 Seats Total)
+                      </div>
+                      <div className="flex items-center gap-2 font-bold text-emerald-800">
+                        <span className="text-emerald-600 font-black">✓</span> ₹100 Starter Wallet Balance Included (~500 OTPs)
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-emerald-600 font-bold">✓</span> Extra seats available at ₹500 + GST/month each
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-emerald-600 font-bold">✓</span> Shopify &amp; WooCommerce Cart Recovery Recipes
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-emerald-600 font-bold">✓</span> 24/7 AI Chatbot Assistant &amp; Auto-Replies
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-emerald-600 font-bold">✓</span> Complex Funnel Logic (Read-Not-Replied)
+                      </div>
+                      <div className="flex items-center gap-2 font-bold text-emerald-800">
+                        <span className="text-emerald-600 font-bold">✓</span> Meta Official Green Tick (OBA) Filing Support Included
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-emerald-600 font-bold">✓</span> Priority Meta API Throughput Queuing
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-4 bg-slate-800/80 rounded-xl space-y-1">
-                    <span className="font-extrabold text-emerald-400 block text-sm">👥 Unlimited Seats &amp; Roles</span>
-                    <p className="text-slate-300">Enterprise SSO, audit logs, and custom access permissions.</p>
-                  </div>
-                  <div className="p-4 bg-slate-800/80 rounded-xl space-y-1">
-                    <span className="font-extrabold text-emerald-400 block text-sm">🛡️ 99.99% Uptime SLA</span>
-                    <p className="text-slate-300">Financial-grade deliverability SLA backed by official Meta direct routing.</p>
-                  </div>
-                  <div className="p-4 bg-slate-800/80 rounded-xl space-y-1">
-                    <span className="font-extrabold text-emerald-400 block text-sm">👨‍💼 Dedicated Account Manager</span>
-                    <p className="text-slate-300">24/7 priority hotline, technical onboarding &amp; custom webhooks.</p>
-                  </div>
+
+                  {/* Left Button -> Confirms and Opens Razorpay for ₹2,500 */}
+                  <button
+                    onClick={() => handleSelectPlan("PROFESSIONAL")}
+                    disabled={loadingPlan !== null}
+                    className="w-full py-3.5 px-4 rounded-xl border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-black text-xs transition shadow-xs disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    {loadingPlan === "PROFESSIONAL" ? (
+                      <span>Opening Razorpay...</span>
+                    ) : (
+                      <>
+                        <span>Confirm &amp; Pay Professional (₹2,500 + GST)</span>
+                        <span>➔</span>
+                      </>
+                    )}
+                  </button>
                 </div>
 
-                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-                  <a
-                    href="mailto:support@digitalbeings.in?subject=Enterprise%20WhatsApp%20API%20Inquiry"
-                    className="w-full sm:w-auto px-8 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition text-center"
-                  >
-                    Contact Enterprise Sales ➔
-                  </a>
-                  <a
-                    href="https://wa.me/?text=Hello%20I%20am%20interested%20in%20Digital%20Beings%20Enterprise%20WhatsApp%20API"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full sm:w-auto px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl border border-white/20 transition text-center"
-                  >
-                    Chat on WhatsApp
-                  </a>
+                {/* RIGHT CARD: Custom Enterprise (Goes to Payment Option) */}
+                <div className="bg-slate-900 text-white rounded-2xl p-6 flex flex-col justify-between shadow-xl relative border-2 border-emerald-400 space-y-5">
+                  <div className="absolute -top-3.5 right-6 bg-gradient-to-r from-emerald-400 to-[#25D366] text-slate-950 font-black text-[10px] tracking-wider uppercase px-3 py-1 rounded-full shadow-xs">
+                    ⚡ HIGH-VOLUME DEDICATED
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">Enterprise Architecture</span>
+                      <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-800 text-emerald-200 border border-slate-700">Custom Volume</span>
+                    </div>
+                    <div>
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
+                        <span className="text-3xl sm:text-4xl font-black text-white">Custom</span>
+                        <sub className="text-xs font-black text-emerald-300 bottom-0 uppercase tracking-tight">+ GST</sub>
+                        <span className="text-xs text-slate-400 font-semibold">/ tailored volume</span>
+                      </div>
+                      <p className="text-xs text-slate-300 mt-1">
+                        Engineered for banks, large enterprises, and high-frequency OTP workloads exceeding 100,000+ messages per month.
+                      </p>
+                      <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 text-emerald-300 text-[11px] font-black border border-slate-700">
+                        <span>🏢 Dedicated WABA Infrastructure &amp; 99.99% SLA</span>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-slate-800/90 rounded-xl border border-slate-700 text-xs text-slate-200 space-y-1">
+                      <span className="font-extrabold text-white block">⚡ Enterprise Exclusive Architecture:</span>
+                      <p className="text-[11px] leading-relaxed text-slate-300">
+                        • <strong>50+ Messages / Second Dedicated Throttle Speed</strong> (Zero queue latency).<br />
+                        • <strong>Unlimited Team Seats &amp; Custom Roles</strong> with SSO &amp; audit trails.<br />
+                        • <strong>Custom CRM, ERP &amp; Webhook Direct Integrations</strong>.<br />
+                        • <strong>Financial-grade 99.99% Deliverability SLA Guarantee</strong>.<br />
+                        • <strong>24/7 Dedicated Technical Account Manager</strong> &amp; priority phone hotline.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2 text-xs text-slate-300">
+                      <div className="flex items-center gap-2 font-bold text-white">
+                        <span className="text-emerald-400 font-black">✓</span> Unlimited Staff Profiles &amp; Department Routing
+                      </div>
+                      <div className="flex items-center gap-2 font-bold text-emerald-300">
+                        <span className="text-emerald-400 font-black">✓</span> Includes ₹250 Starter Fuel + Tailored Wholesale Per-Message Rates
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-emerald-400 font-bold">✓</span> Direct Meta Tier Escalation &amp; Highest API Priority
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-emerald-400 font-bold">✓</span> Official Green Tick (OBA) Filing Support Included
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Button -> Goes to Payment Option (Enterprise Custom Setup & Razorpay / Direct Hotline) */}
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => handleSelectPlan("ENTERPRISE")}
+                      disabled={loadingPlan !== null}
+                      className="w-full py-3.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition shadow-md cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {loadingPlan === "ENTERPRISE" ? (
+                        <span>Opening Razorpay...</span>
+                      ) : (
+                        <>
+                          <span>Proceed to Enterprise Custom Payment (₹5,000 + GST)</span>
+                          <span>➔</span>
+                        </>
+                      )}
+                    </button>
+
+                    <div className="flex items-center justify-between gap-2 pt-1 text-[11px]">
+                      <a
+                        href="https://wa.me/?text=Hello%20Digital%20Beings%2C%20I%20am%20interested%20in%20a%20Custom%20Enterprise%20WhatsApp%20API%20plan%20for%20high%20throughput"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 py-2 px-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg border border-white/20 transition text-center"
+                      >
+                        Chat on WhatsApp
+                      </a>
+                      <a
+                        href="mailto:support@digitalbeings.in?subject=Enterprise%20WhatsApp%20API%20Inquiry"
+                        className="flex-1 py-2 px-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg border border-white/20 transition text-center"
+                      >
+                        Email Enterprise Sales
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="text-center pt-2">
+              {/* Navigation Back / Next Links */}
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <button
+                  onClick={() => setStage("BASIC_VS_PRO")}
+                  className="text-slate-600 font-bold hover:text-slate-900 cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>⬅</span>
+                  <span>Back to Basic (₹1,000) vs. Professional (₹2,500)</span>
+                </button>
                 <button
                   onClick={() => setStage("TRIAL_VS_BASIC")}
-                  className="text-xs text-slate-500 font-bold hover:text-slate-900 cursor-pointer"
+                  className="text-slate-500 font-semibold hover:text-slate-800 cursor-pointer"
                 >
-                  ⬅ Back to Standard Plans (₹500 + GST / ₹1,000 + GST / ₹2,500 + GST)
+                  Start Over from Starter Trial (₹500 + GST) ↺
                 </button>
               </div>
             </div>

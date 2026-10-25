@@ -12,7 +12,7 @@ export interface CustomerBillingInfo {
 }
 
 export interface PlanConfig {
-  planId: "TRIAL" | "BASIC" | "PROFESSIONAL";
+  planId: "TRIAL" | "BASIC" | "PROFESSIONAL" | "ENTERPRISE";
   name: string;
   basePrice: number;
   description: string;
@@ -48,6 +48,15 @@ export const PLAN_CONFIGS: Record<string, PlanConfig> = {
     seats: "6 Seats (1 Owner + 5 Support)",
     bonusWalletCredit: 100,
     estimatedOtpsIncluded: 500
+  },
+  ENTERPRISE: {
+    planId: "ENTERPRISE",
+    name: "Custom Enterprise Plan",
+    basePrice: 5000,
+    description: "Dedicated High-Throughput Enterprise Architecture (>100k msgs/mo)",
+    seats: "Unlimited Seats",
+    bonusWalletCredit: 250,
+    estimatedOtpsIncluded: 1250
   }
 };
 
@@ -79,7 +88,7 @@ export async function startSubscriptionCheckout({
   onError,
   onDismiss
 }: {
-  planId: "TRIAL" | "BASIC" | "PROFESSIONAL";
+  planId: "TRIAL" | "BASIC" | "PROFESSIONAL" | "ENTERPRISE";
   organizationId: string;
   customerBilling?: CustomerBillingInfo;
   userEmail?: string;

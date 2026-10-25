@@ -454,7 +454,7 @@ export async function creditWalletWithGstInvoice(params: RechargeParams) {
 export interface SubscriptionPaymentParams {
   organizationId: string;
   type: "SUBSCRIPTION" | "ADDON_SEAT" | "ADDON_OBA";
-  planId?: "TRIAL" | "BASIC" | "PROFESSIONAL";
+  planId?: "TRIAL" | "BASIC" | "PROFESSIONAL" | "ENTERPRISE" | "CUSTOM" | string;
   extraSeatsCount?: number;
   baseAmount: number;
   paymentId: string;
@@ -566,7 +566,7 @@ export async function processSubscriptionPayment(params: SubscriptionPaymentPara
     if (!org) throw new Error(`Organization ${organizationId} not found`);
 
     if (type === "SUBSCRIPTION") {
-      const seats = planId === "TRIAL" ? 1 : planId === "BASIC" ? 4 : 6;
+      const seats = planId === "TRIAL" ? 1 : planId === "BASIC" ? 4 : (planId === "ENTERPRISE" || planId === "CUSTOM") ? 99 : 6;
       const currentExpiry = org.planExpiresAt && new Date(org.planExpiresAt) > now ? new Date(org.planExpiresAt) : now;
       const newExpiry = new Date(currentExpiry.getTime() + 30 * 24 * 60 * 60 * 1000);
 
@@ -576,7 +576,7 @@ export async function processSubscriptionPayment(params: SubscriptionPaymentPara
           plan: planId,
           seatsAllowed: seats,
           planExpiresAt: newExpiry,
-          obaIncluded: planId === "PROFESSIONAL" ? true : org.obaIncluded
+          obaIncluded: (planId === "PROFESSIONAL" || planId === "ENTERPRISE" || planId === "CUSTOM") ? true : org.obaIncluded
         }
       });
 
@@ -584,7 +584,8 @@ export async function processSubscriptionPayment(params: SubscriptionPaymentPara
       // ₹500 Trial: ₹0 (No wallet value)
       // ₹1,000 Basic: ₹50 wallet balance
       // ₹2,500 Professional: ₹100 wallet balance
-      const bonusFuel = planId === "BASIC" ? 50.0 : planId === "PROFESSIONAL" ? 100.0 : 0.0;
+      // Enterprise / Custom: ₹250 wallet balance
+      const bonusFuel = planId === "BASIC" ? 50.0 : planId === "PROFESSIONAL" ? 100.0 : (planId === "ENTERPRISE" || planId === "CUSTOM") ? 250.0 : 0.0;
       if (bonusFuel > 0) {
         const wallet = await tx.wallet.upsert({
           where: { organizationId },

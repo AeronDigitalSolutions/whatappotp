@@ -1185,6 +1185,7 @@ fastify.post("/v1/billing/order", async (request: any, reply) => {
     if (type === "SUBSCRIPTION") {
       if (planId === "TRIAL") cleanBaseAmount = 500;
       else if (planId === "PROFESSIONAL") cleanBaseAmount = 2500;
+      else if (planId === "ENTERPRISE" || planId === "CUSTOM") cleanBaseAmount = 5000;
       else cleanBaseAmount = 1000; // BASIC
     } else if (type === "ADDON_SEAT") {
       const seats = Math.max(1, Number(extraSeatsCount) || 1);
