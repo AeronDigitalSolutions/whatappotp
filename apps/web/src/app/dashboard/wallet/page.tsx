@@ -442,19 +442,19 @@ export default function WalletPage() {
 
       <div className="max-w-6xl mx-auto space-y-6 pb-16">
         {/* Top Control Bar with 2D Vector Icons */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200/90">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200/90 dark:border-white/[0.08]">
           <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/90 flex items-center justify-center text-emerald-700 shrink-0 font-bold shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/90 dark:border-emerald-500/20 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0 font-bold shadow-2xs">
               <WalletIcon className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2.5">
-                <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
+                <span className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                   Prepaid Balance: ₹{availableBalance.toFixed(2)}
                 </span>
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               </div>
-              <p className="text-xs text-slate-600 font-medium mt-0.5">
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
                 Atomic ledger billing with GST compliance &amp; margin guard
               </p>
             </div>

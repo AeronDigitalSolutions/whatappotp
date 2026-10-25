@@ -139,7 +139,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   if (!authChecked) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-medium text-sm">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#070b14] text-slate-500 dark:text-slate-400 font-medium text-sm">
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 border-2 border-[#154336] border-t-transparent rounded-full animate-spin"></div>
           Authenticating workspace...

@@ -132,35 +132,35 @@ export default function LogsPage() {
     switch (status.toLowerCase()) {
       case "verified":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             Verified
           </span>
         );
       case "sent":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
             Delivered
           </span>
         );
       case "failed":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-rose-500/20 text-red-800 dark:text-rose-300 border border-red-200 dark:border-rose-500/30">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
             Failed
           </span>
         );
       case "expired":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
             Expired
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-800">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-white/10">
             <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
             {status}
           </span>
@@ -171,14 +171,14 @@ export default function LogsPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* Top Control Bar with Mode Toggle */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-white/[0.08]">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 text-base shrink-0 font-bold">
+          <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-200 text-base shrink-0 font-bold">
             📋
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-800">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                 {totalDispatches.toLocaleString()} Total Dispatch Records
               </span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -217,32 +217,32 @@ export default function LogsPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 text-xs shrink-0 font-bold">
+            <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs shrink-0 font-bold">
               📨
             </div>
-            <span className="text-xs font-bold text-slate-700">Total Requests</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Total Requests</span>
           </div>
-          <div className="mt-2.5 text-2xl font-black text-slate-900">{totalDispatches.toLocaleString()}</div>
+          <div className="mt-2.5 text-2xl font-black text-slate-900 dark:text-white">{totalDispatches.toLocaleString()}</div>
           <div className="text-[11px] text-slate-400 mt-0.5">Dispatched all-time</div>
         </div>
 
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 text-xs shrink-0 font-bold">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs shrink-0 font-bold">
               ✓
             </div>
-            <span className="text-xs font-bold text-slate-700">Verification Rate</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Verification Rate</span>
           </div>
-          <div className="mt-2.5 text-2xl font-black text-slate-900">{successRate}%</div>
+          <div className="mt-2.5 text-2xl font-black text-slate-900 dark:text-white">{successRate}%</div>
           <div className="text-[11px] text-slate-400 mt-0.5">{verifiedCount.toLocaleString()} successfully verified</div>
         </div>
 
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600 text-xs shrink-0 font-bold">
+            <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200/80 dark:border-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 text-xs shrink-0 font-bold">
               ✕
             </div>
-            <span className="text-xs font-bold text-slate-700">Failed Dispatches</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Failed Dispatches</span>
           </div>
           <div className="mt-2.5 text-2xl font-black text-rose-600">{failedCount.toLocaleString()}</div>
           <div className="text-[11px] text-slate-400 mt-0.5">Automatically refunded</div>
@@ -250,12 +250,12 @@ export default function LogsPage() {
 
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 text-xs shrink-0 font-bold">
+            <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-200/80 dark:border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs shrink-0 font-bold">
               💳
             </div>
-            <span className="text-xs font-bold text-slate-700">Total Deducted</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Total Deducted</span>
           </div>
-          <div className="mt-2.5 text-2xl font-black text-slate-900">₹{totalCost.toFixed(2)}</div>
+          <div className="mt-2.5 text-2xl font-black text-slate-900 dark:text-white">₹{totalCost.toFixed(2)}</div>
           <div className="text-[11px] text-slate-400 mt-0.5">₹0.25 per sent OTP (India)</div>
         </div>
       </div>
@@ -270,8 +270,8 @@ export default function LogsPage() {
               onClick={() => setFilterStatus(status)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 filterStatus === status
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  ? "bg-slate-900 dark:bg-emerald-600 text-white shadow-sm"
+                  : "bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/[0.08] hover:bg-slate-200 dark:hover:bg-white/10"
               }`}
             >
               {status}
@@ -286,7 +286,7 @@ export default function LogsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by phone, request ID, purpose..."
-            className="w-full md:w-72 bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="w-full md:w-72 bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500"
           />
           <svg className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -303,7 +303,7 @@ export default function LogsPage() {
           </div>
         ) : filteredLogs.length === 0 ? (
           <div className="p-12 text-center space-y-2">
-            <div className="w-10 h-10 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+            <div className="w-10 h-10 bg-slate-100 dark:bg-white/[0.06] text-slate-400 dark:text-slate-300 border border-transparent dark:border-white/10 rounded-full flex items-center justify-center mx-auto">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -316,7 +316,7 @@ export default function LogsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+              <thead className="bg-slate-50 dark:bg-[#070b14] text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-white/[0.08]">
                 <tr>
                   <th className="px-5 py-3 font-semibold text-xs">Status</th>
                   <th className="px-5 py-3 font-semibold text-xs">Phone Number</th>
@@ -328,9 +328,9 @@ export default function LogsPage() {
                   <th className="px-5 py-3 font-semibold text-xs text-right">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06] text-slate-700 dark:text-slate-300">
                 {filteredLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50/70 transition-colors">
+                  <tr key={log.id} className="hover:bg-slate-50/70 dark:hover:bg-white/[0.02] transition-colors">
                     <td className="px-5 py-3.5">
                       {getStatusBadge(log.status)}
                     </td>
@@ -338,7 +338,7 @@ export default function LogsPage() {
                       <span className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100">{log.phone}</span>
                     </td>
                     <td className="px-5 py-3.5 text-xs text-slate-600">
-                      <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-medium">
+                      <span className="bg-slate-100 dark:bg-white/[0.08] text-slate-700 dark:text-slate-300 border border-transparent dark:border-white/10 px-2 py-0.5 rounded text-[11px] font-medium font-mono">
                         {log.purpose}
                       </span>
                     </td>
@@ -357,7 +357,7 @@ export default function LogsPage() {
                     <td className="px-5 py-3.5 text-xs text-slate-500">
                       {new Date(log.createdAt).toLocaleString()}
                     </td>
-                    <td className="px-5 py-3.5 text-xs font-mono font-medium text-right text-slate-900">
+                    <td className="px-5 py-3.5 text-xs font-mono font-medium text-right text-slate-900 dark:text-slate-100">
                       {log.cost > 0 ? `₹${log.cost.toFixed(2)}` : <span className="text-slate-400">₹0.00</span>}
                     </td>
                     <td className="px-5 py-3.5 text-right">
@@ -383,10 +383,10 @@ export default function LogsPage() {
       {selectedLog && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#0B101D] rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-white/10 space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">OTP Audit Details</h3>
-                <p className="text-xs text-slate-500">Request ID: <span className="font-mono text-slate-800">{selectedLog.id}</span></p>
+                <p className="text-xs text-slate-500">Request ID: <span className="font-mono text-slate-800 dark:text-slate-200">{selectedLog.id}</span></p>
               </div>
               <button
                 onClick={() => setSelectedLog(null)}
@@ -396,7 +396,7 @@ export default function LogsPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 dark:bg-[#070b14] p-3.5 rounded-xl border border-slate-200 dark:border-white/[0.08]">
               <div>
                 <span className="text-slate-500 block">Recipient Phone</span>
                 <span className="font-mono font-bold text-slate-900 dark:text-slate-100 text-sm">{selectedLog.phone}</span>
@@ -407,11 +407,11 @@ export default function LogsPage() {
               </div>
               <div>
                 <span className="text-slate-500 block">Dispatched Time</span>
-                <span className="text-slate-800">{new Date(selectedLog.createdAt).toLocaleString()}</span>
+                <span className="text-slate-800 dark:text-slate-200">{new Date(selectedLog.createdAt).toLocaleString()}</span>
               </div>
               <div>
                 <span className="text-slate-500 block">Expires At</span>
-                <span className="text-slate-800">{new Date(selectedLog.expiresAt).toLocaleString()}</span>
+                <span className="text-slate-800 dark:text-slate-200">{new Date(selectedLog.expiresAt).toLocaleString()}</span>
               </div>
               <div>
                 <span className="text-slate-500 block">Cost Deducted</span>
@@ -425,7 +425,7 @@ export default function LogsPage() {
 
             {/* Verification History */}
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
                 Verification Attempt Trail ({selectedLog.attemptsHistory?.length || 0})
               </h4>
               {selectedLog.attemptsHistory && selectedLog.attemptsHistory.length > 0 ? (
@@ -435,8 +435,8 @@ export default function LogsPage() {
                       key={att.id || idx}
                       className={`p-2 rounded-lg text-xs flex items-center justify-between border ${
                         att.successful
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                          : "bg-red-50 border-red-200 text-red-800"
+                          ? "bg-emerald-50 dark:bg-emerald-950/25 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300"
+                          : "bg-red-50 dark:bg-rose-950/25 border-red-200 dark:border-rose-500/30 text-red-800 dark:text-rose-300"
                       }`}
                     >
                       <span className="font-semibold flex items-center gap-1">
@@ -456,12 +456,12 @@ export default function LogsPage() {
             </div>
 
             {resendMessage && (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-lg font-medium">
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs rounded-lg font-medium">
                 {resendMessage}
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/10">
               {selectedLog.status !== "verified" ? (
                 <button
                   type="button"
@@ -480,7 +480,7 @@ export default function LogsPage() {
               <button
                 type="button"
                 onClick={() => setSelectedLog(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-lg"
               >
                 Close
               </button>

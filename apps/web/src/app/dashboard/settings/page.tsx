@@ -57,19 +57,19 @@ export default function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
       {/* Top Control Bar with Mode Toggle */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-white/[0.08]">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 text-base shrink-0 font-bold">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-base shrink-0 font-bold">
             ⚙️
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-800">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                 Workspace Configuration & Meta Credentials
               </span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             </div>
-            <p className="text-[11px] text-slate-400">Meta WhatsApp Cloud API credentials, permanent tokens & OTP policy</p>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500">Meta WhatsApp Cloud API credentials, permanent tokens & OTP policy</p>
           </div>
         </div>
 
@@ -78,7 +78,7 @@ export default function SettingsPage() {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => setShowTokenModal(true)}
-            className="px-4 py-2 bg-[#064e3b] hover:bg-[#043d2e] text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 bg-[#064e3b] dark:bg-emerald-600 hover:bg-[#043d2e] dark:hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
           >
             <span>🔑</span> Update Access Token
           </button>
@@ -87,55 +87,55 @@ export default function SettingsPage() {
 
       {/* 1. Meta WhatsApp Cloud API Credentials */}
       <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xs p-6 space-y-5 backdrop-blur-xl">
-        <div className="border-b border-slate-100 pb-3">
+        <div className="border-b border-slate-100 dark:border-white/[0.08] pb-3">
           <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Cloud API Connection Telemetry</h2>
           <p className="text-[11px] text-slate-400">Live token validity, Meta WABA ID, and primary WhatsApp sender phone ID</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+          <div className="p-4 bg-slate-50 dark:bg-[#070b14] rounded-2xl border border-slate-200 dark:border-white/10">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
               Token Status
             </span>
             <div className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${project?.metaAccessToken ? "bg-emerald-500 animate-pulse" : "bg-red-500"}`}></span>
-              <span className="text-sm font-extrabold text-slate-900">
+              <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
                 {project?.metaAccessToken ? "Token Connected" : "Not Connected"}
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
               {project?.metaAccessToken
                 ? "Token is saved in your project."
                 : "No Meta access token configured."}
             </p>
           </div>
 
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+          <div className="p-4 bg-slate-50 dark:bg-[#070b14] rounded-2xl border border-slate-200 dark:border-white/10">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
               WhatsApp Business Account (WABA)
             </span>
             <p className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 truncate">
               {project?.metaWabaId || "2107898293422238"}
             </p>
-            <p className="text-[11px] text-slate-500 mt-1">Primary Meta Business Account</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Primary Meta Business Account</p>
           </div>
 
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+          <div className="p-4 bg-slate-50 dark:bg-[#070b14] rounded-2xl border border-slate-200 dark:border-white/10">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
               Default Phone Number ID
             </span>
             <p className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 truncate">
               {project?.metaPhoneId || "1406142089245094"}
             </p>
-            <p className="text-[11px] text-slate-500 mt-1">Meta registered phone ID</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Meta registered phone ID</p>
           </div>
         </div>
 
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3 text-xs text-blue-900">
+        <div className="p-4 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-2xl flex items-start gap-3 text-xs text-blue-900 dark:text-blue-300">
           <span className="text-lg">💡</span>
           <div>
             <p className="font-bold">Permanent Token Recommendation</p>
-            <p className="mt-0.5 leading-relaxed text-blue-800">
+            <p className="mt-0.5 leading-relaxed text-blue-800 dark:text-blue-200">
               Temporary access tokens expire every 1–2 hours. To keep your OTP service and broadcast campaigns online 24/7 without interruption, use the "Update Access Token" button to paste a <strong>Permanent System User Token (Never Expires)</strong> from Meta Business Settings.
             </p>
           </div>
@@ -144,14 +144,14 @@ export default function SettingsPage() {
 
       {/* 2. OTP Delivery Rules */}
       <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl border border-slate-200 dark:border-white/[0.08] shadow-xs p-8 space-y-6 backdrop-blur-xl">
-        <div className="border-b border-slate-100 pb-5">
+        <div className="border-b border-slate-100 dark:border-white/[0.08] pb-5">
           <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">OTP Rules & Parameters</h2>
-          <p className="text-xs text-slate-500">Default security parameters for generated OTP codes</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Default security parameters for generated OTP codes</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
               OTP Code Length
             </label>
             <select
@@ -166,7 +166,7 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
               Code Expiry (Seconds)
             </label>
             <input
@@ -175,11 +175,11 @@ export default function SettingsPage() {
               onChange={(e) => setExpiry(Number(e.target.value))}
               className="w-full rounded-xl border border-slate-300 dark:border-white/10 p-3 bg-white dark:bg-[#070b14] text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
-            <p className="mt-1.5 text-[11px] text-slate-500">Default 300 seconds (5 minutes).</p>
+            <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">Default 300 seconds (5 minutes).</p>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
               Max Verification Attempts
             </label>
             <input
@@ -188,14 +188,14 @@ export default function SettingsPage() {
               onChange={(e) => setMaxAttempts(Number(e.target.value))}
               className="w-full rounded-xl border border-slate-300 dark:border-white/10 p-3 bg-white dark:bg-[#070b14] text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
-            <p className="mt-1.5 text-[11px] text-slate-500">Lock code after failed tries.</p>
+            <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">Lock code after failed tries.</p>
           </div>
         </div>
 
-        <div className="pt-4 border-t border-slate-100 flex justify-end">
+        <div className="pt-4 border-t border-slate-100 dark:border-white/[0.08] flex justify-end">
           <button
             onClick={handleSaveSettings}
-            className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl shadow-xs transition"
+            className="px-6 py-2.5 bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white font-bold text-sm rounded-xl shadow-xs transition"
           >
             Save OTP Rules
           </button>

@@ -206,14 +206,14 @@ export default function AutomationsPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16">
       {/* Top Control Bar with Mode Toggle */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-white/[0.08]">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 text-base shrink-0 font-bold">
+          <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-200/80 dark:border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 text-base shrink-0 font-bold">
             🤖
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-800">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                 {stats.active} Active Bot Rule{stats.active !== 1 ? "s" : ""}
               </span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -238,12 +238,12 @@ export default function AutomationsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 text-xs shrink-0 font-bold">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs shrink-0 font-bold">
               ⚡
             </div>
-            <span className="text-xs font-bold text-slate-700">Active Bots</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Active Bots</span>
           </div>
-          <div className="mt-2.5 text-2xl font-black text-slate-900">
+          <div className="mt-2.5 text-2xl font-black text-slate-900 dark:text-white">
             {stats.active} <span className="text-xs text-slate-400 font-normal">/ {stats.total} total</span>
           </div>
           <div className="text-[11px] text-slate-400 mt-0.5">Automated workflows running live</div>
@@ -251,12 +251,12 @@ export default function AutomationsPage() {
 
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 text-xs shrink-0 font-bold">
+            <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs shrink-0 font-bold">
               💬
             </div>
-            <span className="text-xs font-bold text-slate-700">Automated Replies Sent</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Automated Replies Sent</span>
           </div>
-          <div className="mt-2.5 text-2xl font-black text-slate-900">
+          <div className="mt-2.5 text-2xl font-black text-slate-900 dark:text-white">
             {stats.totalExecutions.toLocaleString()}
           </div>
           <div className="text-[11px] text-slate-400 mt-0.5">Dispatched without human intervention</div>
@@ -264,10 +264,10 @@ export default function AutomationsPage() {
 
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 text-xs shrink-0 font-bold">
+            <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-200/80 dark:border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs shrink-0 font-bold">
               🚀
             </div>
-            <span className="text-xs font-bold text-slate-700">Response Speed</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Response Speed</span>
           </div>
           <div className="mt-2.5 text-2xl font-black text-emerald-600">&lt; 1 Second</div>
           <div className="text-[11px] text-slate-400 mt-0.5">Direct Meta Cloud API webhook latency</div>
@@ -283,8 +283,8 @@ export default function AutomationsPage() {
       ) : rules.length === 0 ? (
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-12 text-center backdrop-blur-xl">
           <p className="text-4xl mb-3">🤖</p>
-          <h3 className="text-base font-bold text-slate-800">No automation bots configured yet</h3>
-          <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-5">
+          <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">No automation bots configured yet</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-1 mb-5">
             Create automated rules that trigger instant replies whenever customers message you on WhatsApp.
           </p>
           <button
@@ -300,14 +300,14 @@ export default function AutomationsPage() {
             <div
               key={rule.id}
               className={`bg-white dark:bg-[#0B101D]/80 rounded-xl border dark:border-white/[0.08] transition shadow-xs flex flex-col justify-between backdrop-blur-xl ${
-                rule.isActive ? "border-slate-200" : "border-slate-200 opacity-60 bg-slate-50/50"
+                rule.isActive ? "border-slate-200 dark:border-white/[0.08]" : "border-slate-200 dark:border-white/[0.08] opacity-60 bg-slate-50/50 dark:bg-white/[0.02]"
               }`}
             >
               <div className="p-5 space-y-4">
                 {/* Card Header & Toggle */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-base font-bold shrink-0">
+                    <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-base font-bold shrink-0">
                       🤖
                     </div>
                     <div>
@@ -332,7 +332,7 @@ export default function AutomationsPage() {
                       onChange={() => handleToggle(rule.id)}
                       className="sr-only peer"
                     />
-                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                    <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
                   </label>
                 </div>
 
@@ -346,7 +346,7 @@ export default function AutomationsPage() {
                       rule.keywords.map((kw, i) => (
                         <span
                           key={i}
-                          className="bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded text-[11px] font-mono font-medium"
+                          className="bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 px-2 py-0.5 rounded text-[11px] font-mono font-medium"
                         >
                           &quot;{kw}&quot;
                         </span>
@@ -362,7 +362,7 @@ export default function AutomationsPage() {
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                     Automated WhatsApp Reply
                   </p>
-                  <div className="bg-[#efeae2]/60 p-3.5 rounded-xl border border-amber-900/10 text-xs text-slate-800 space-y-2.5">
+                  <div className="bg-[#efeae2]/60 dark:bg-[#070b14]/90 p-3.5 rounded-xl border border-amber-900/10 dark:border-white/[0.08] text-xs text-slate-800 dark:text-slate-200 space-y-2.5">
                     <p className="whitespace-pre-wrap leading-relaxed">{rule.responseText}</p>
                     
                     {/* Interactive Buttons Preview */}
@@ -383,20 +383,20 @@ export default function AutomationsPage() {
               </div>
 
               {/* Card Footer Actions */}
-              <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 rounded-b-xl flex items-center justify-between text-xs">
+              <div className="px-5 py-3 bg-slate-50 dark:bg-[#070b14] border-t border-slate-100 dark:border-white/[0.08] rounded-b-xl flex items-center justify-between text-xs">
                 <span className="text-[10px] text-slate-400">
                   Updated {new Date(rule.updatedAt).toLocaleDateString()}
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => openModal(rule)}
-                    className="px-2.5 py-1 text-slate-700 hover:text-slate-900 font-semibold hover:bg-slate-200 rounded transition"
+                    className="px-2.5 py-1 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold hover:bg-slate-200 dark:hover:bg-white/[0.06] rounded transition"
                   >
                     ✏️ Edit
                   </button>
                   <button
                     onClick={() => handleDelete(rule.id)}
-                    className="px-2.5 py-1 text-red-600 hover:text-red-700 font-semibold hover:bg-red-50 rounded transition"
+                    className="px-2.5 py-1 text-red-600 hover:text-red-700 font-semibold hover:bg-red-50 dark:hover:bg-rose-950/30 rounded transition"
                   >
                     🗑️ Delete
                   </button>
@@ -411,7 +411,7 @@ export default function AutomationsPage() {
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#0B101D] rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
                 {editingRule ? "Edit Automation Rule" : "Create New Automation Rule"}
               </h3>
@@ -426,7 +426,7 @@ export default function AutomationsPage() {
             <form onSubmit={handleSaveRule} className="p-6 space-y-4">
               {/* Rule Name */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Rule Name *
                 </label>
                 <input
@@ -434,7 +434,7 @@ export default function AutomationsPage() {
                   placeholder="e.g. Welcome & Lead Bot, Refund Inquiries"
                   value={formName}
                   onChange={e => setFormName(e.target.value)}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full text-xs px-3 py-2 bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   required
                 />
               </div>
@@ -442,13 +442,13 @@ export default function AutomationsPage() {
               {/* Trigger Type */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Trigger Mode
                   </label>
                   <select
                     value={formTriggerType}
                     onChange={e => setFormTriggerType(e.target.value as any)}
-                    className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full text-xs px-3 py-2 bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="KEYWORD">Keyword Contains (Partial match)</option>
                     <option value="EXACT_MATCH">Exact Phrase Match</option>
@@ -456,12 +456,12 @@ export default function AutomationsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Target Language
                   </label>
                   <select
                     defaultValue="ALL"
-                    className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full text-xs px-3 py-2 bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="ALL">All Languages</option>
                     <option value="en">English</option>
@@ -472,7 +472,7 @@ export default function AutomationsPage() {
 
               {/* Trigger Keywords */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Trigger Keywords (Comma separated) *
                 </label>
                 <input
@@ -480,7 +480,7 @@ export default function AutomationsPage() {
                   placeholder="e.g. hello, hi, start, help, price"
                   value={formKeywords}
                   onChange={e => setFormKeywords(e.target.value)}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full text-xs px-3 py-2 bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   required
                 />
                 <p className="text-[10px] text-slate-400 mt-1">
@@ -490,7 +490,7 @@ export default function AutomationsPage() {
 
               {/* Bot Response Text */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   WhatsApp Reply Message *
                 </label>
                 <textarea
@@ -498,14 +498,14 @@ export default function AutomationsPage() {
                   placeholder="Enter the automated reply message..."
                   value={formResponseText}
                   onChange={e => setFormResponseText(e.target.value)}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full text-xs px-3 py-2 bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   required
                 />
               </div>
 
               {/* Quick Reply Buttons */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Interactive Quick Reply Buttons (Max 3)
                 </label>
                 <div className="space-y-2">
@@ -521,7 +521,7 @@ export default function AutomationsPage() {
                           setFormButtons(updated);
                         }}
                         placeholder={`Button ${idx + 1} text`}
-                        className="flex-1 text-xs px-3 py-1.5 border border-slate-300 rounded-lg"
+                        className="flex-1 text-xs px-3 py-1.5 bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg"
                       />
                       <button
                         type="button"
@@ -547,11 +547,11 @@ export default function AutomationsPage() {
               </div>
 
               {/* Modal Actions */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                  className="px-4 py-2 border border-slate-300 dark:border-white/10 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04] transition"
                 >
                   Cancel
                 </button>

@@ -267,14 +267,14 @@ export default function SetupPage() {
       <div className="max-w-5xl mx-auto py-10 px-4 sm:px-6 space-y-8">
         
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/[0.08] pb-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold mb-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Meta Cloud API Onboarding
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Connect Your WhatsApp Number</h1>
-            <p className="text-slate-500 text-sm mt-1">Manage Business Portfolios, registered WABAs, and active phone numbers.</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage Business Portfolios, registered WABAs, and active phone numbers.</p>
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
@@ -321,7 +321,7 @@ export default function SetupPage() {
             {/* 3 Step Readiness Cards */}
             <div className="p-6 sm:p-8 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+                <div className="p-5 bg-slate-50 dark:bg-[#070b14] rounded-2xl border border-slate-200/80 dark:border-white/[0.08] space-y-2">
                   <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg font-bold">
                     📱
                   </div>
@@ -331,7 +331,7 @@ export default function SetupPage() {
                   </p>
                 </div>
 
-                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+                <div className="p-5 bg-slate-50 dark:bg-[#070b14] rounded-2xl border border-slate-200/80 dark:border-white/[0.08] space-y-2">
                   <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold">
                     ✨
                   </div>
@@ -341,7 +341,7 @@ export default function SetupPage() {
                   </p>
                 </div>
 
-                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+                <div className="p-5 bg-slate-50 dark:bg-[#070b14] rounded-2xl border border-slate-200/80 dark:border-white/[0.08] space-y-2">
                   <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-lg font-bold">
                     ⚡
                   </div>
@@ -368,11 +368,11 @@ export default function SetupPage() {
                 </p>
 
                 {/* Secondary Fallbacks for Agencies & System Users */}
-                <div className="pt-6 border-t border-slate-100 w-full flex flex-col sm:flex-row items-center justify-center gap-3 text-xs">
+                <div className="pt-6 border-t border-slate-100 dark:border-white/[0.08] w-full flex flex-col sm:flex-row items-center justify-center gap-3 text-xs">
                   <span className="text-slate-400 font-medium">Agency or Enterprise setup?</span>
                   <button
                     onClick={() => setShowTokenModal(true)}
-                    className="font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition"
+                    className="font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/10 px-3 py-1.5 rounded-lg transition"
                   >
                     🔑 Paste System User Token
                   </button>
@@ -381,7 +381,7 @@ export default function SetupPage() {
                       navigator.clipboard.writeText("205078357411585");
                       showSuccess("Copied Digital Being Partner ID (205078357411585)!", "Copied");
                     }}
-                    className="font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition"
+                    className="font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg transition"
                   >
                     📋 Copy Partner ID (205078357411585)
                   </button>
@@ -394,15 +394,15 @@ export default function SetupPage() {
         {/* STATE 2: Cascading Profile Selection (First time or when Re-selecting) */}
         {project?.metaAccessToken && (!project?.metaWabaId || isEditing) && (
           <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl shadow-sm border border-slate-200 dark:border-white/[0.08] p-8 space-y-6 backdrop-blur-xl">
-            <div className="flex items-center justify-between border-b border-slate-150 pb-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.08] pb-4">
               <div>
                 <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Select Business Portfolio & Number</h2>
-                <p className="text-slate-500 text-xs mt-0.5">Pick the portfolio, WABA, and sender phone number to route traffic through.</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Pick the portfolio, WABA, and sender phone number to route traffic through.</p>
               </div>
               {isEditing && (
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="px-3.5 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg transition"
+                  className="px-3.5 py-1.5 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg transition"
                 >
                   ✕ Cancel &amp; Back to Portfolios
                 </button>
@@ -437,7 +437,7 @@ export default function SetupPage() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-5 bg-slate-50 p-6 rounded-2xl border border-slate-200 max-w-xl mx-auto">
+              <div className="space-y-5 bg-slate-50 dark:bg-[#070b14] p-6 rounded-2xl border border-slate-200 dark:border-white/[0.08] max-w-xl mx-auto">
                 {/* 1. Business Portfolio */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
@@ -466,7 +466,7 @@ export default function SetupPage() {
                       2. WhatsApp Business Account (WABA)
                     </label>
                     {currentWabas.length === 0 ? (
-                      <div className="p-4 bg-amber-50/90 border border-amber-200 rounded-2xl text-xs space-y-3">
+                      <div className="p-4 bg-amber-50/90 dark:bg-amber-950/25 border border-amber-200 dark:border-amber-500/30 rounded-2xl text-xs space-y-3 text-amber-900 dark:text-amber-200">
                         <div className="flex items-start gap-2.5">
                           <span className="text-lg shrink-0">ℹ️</span>
                           <div>
@@ -484,16 +484,16 @@ export default function SetupPage() {
                             👉 Two Fast Ways to Connect {currentBiz?.name || "this portfolio"}:
                           </p>
 
-                          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                          <div className="p-3 bg-slate-50 dark:bg-[#070b14] rounded-xl border border-slate-200 dark:border-white/[0.08] space-y-2">
                             <div className="flex items-center justify-between">
                               <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px]">
                                 Method 1: Assign Partner in Meta (Takes 15 Seconds)
                               </span>
-                              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+                              <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded">
                                 Recommended
                               </span>
                             </div>
-                            <ol className="list-decimal pl-4 space-y-1.5 text-[11px] text-slate-600">
+                            <ol className="list-decimal pl-4 space-y-1.5 text-[11px] text-slate-600 dark:text-slate-400">
                               <li>
                                 In your Meta Business Settings tab for <strong>{currentBiz?.name}</strong>, go to <strong>WhatsApp accounts</strong> ➔ <strong>Ishinna Sadana</strong>.
                               </li>
@@ -503,7 +503,7 @@ export default function SetupPage() {
                               <li>
                                 Enter Digital Being Partner Business ID:
                                 <div className="mt-1 flex items-center gap-2">
-                                  <code className="bg-slate-200 px-2 py-1 rounded text-slate-900 font-mono font-bold text-xs">
+                                  <code className="bg-slate-200 dark:bg-white/10 px-2 py-1 rounded text-slate-900 dark:text-slate-200 font-mono font-bold text-xs">
                                     205078357411585
                                   </code>
                                   <button
@@ -522,7 +522,7 @@ export default function SetupPage() {
                             </ol>
                           </div>
 
-                          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                          <div className="p-3 bg-slate-50 dark:bg-[#070b14] rounded-xl border border-slate-200 dark:border-white/[0.08] space-y-2">
                             <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px]">
                               Method 2: Generate Token directly inside {currentBiz?.name}
                             </span>
@@ -587,7 +587,7 @@ export default function SetupPage() {
                       3. Sender Phone Number
                     </label>
                     {currentPhones.length === 0 ? (
-                      <div className="text-xs text-amber-800 p-3 bg-amber-50 rounded-xl border border-amber-200 space-y-1">
+                      <div className="text-xs text-amber-800 dark:text-amber-200 p-3 bg-amber-50 dark:bg-amber-950/25 rounded-xl border border-amber-200 dark:border-amber-500/30 space-y-1">
                         <p className="font-bold">0 phone numbers registered in this WABA.</p>
                         <p>Register a phone number in Meta Business Settings first.</p>
                       </div>
@@ -707,7 +707,7 @@ export default function SetupPage() {
                   <h3 className="text-lg font-black text-slate-900 dark:text-slate-100 tracking-tight">Business Portfolios &amp; Connected Profiles</h3>
                   <p className="text-xs text-slate-500 mt-0.5">Explore each portfolio, inspect phone numbers, and link them to your workspace.</p>
                 </div>
-                <span className="text-xs font-mono text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.06] border border-transparent dark:border-white/10 px-2.5 py-1 rounded-md">
                   {businesses.length} Portfolios Found
                 </span>
               </div>
@@ -738,19 +738,19 @@ export default function SetupPage() {
                         }`}
                       >
                         {/* Portfolio Header Bar */}
-                        <div className="p-6 bg-slate-50/80 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="p-6 bg-slate-50/80 dark:bg-[#070b14] border-b border-slate-200 dark:border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
                               🏢
                             </div>
                             <div>
                               <div className="flex items-center gap-2 flex-wrap">
-                                <h4 className="font-extrabold text-base text-slate-900">{biz.name}</h4>
+                                <h4 className="font-extrabold text-base text-slate-900 dark:text-slate-100">{biz.name}</h4>
                                 <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 px-2 py-0.5 rounded">
                                   ID: {biz.id}
                                 </span>
                               </div>
-                              <p className="text-xs text-slate-500 mt-0.5">
+                              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                                 {biz.wabas?.length || 0} WhatsApp Business Accounts registered
                               </p>
                             </div>
@@ -758,12 +758,12 @@ export default function SetupPage() {
 
                           <div>
                             {isBizConnected ? (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full text-xs font-bold whitespace-nowrap shadow-2xs">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 rounded-full text-xs font-bold whitespace-nowrap shadow-2xs">
                                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                                 Connected to Workspace
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 rounded-full text-xs font-semibold whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 rounded-full text-xs font-semibold whitespace-nowrap">
                                 ⚪ Available in Meta (Not Connected)
                               </span>
                             )}
@@ -773,15 +773,15 @@ export default function SetupPage() {
                         {/* WABAs and Phone Numbers list */}
                         <div className="p-6 space-y-4">
                           {!biz.wabas || biz.wabas.length === 0 ? (
-                            <div className="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-                              <span className="text-slate-500">
+                            <div className="p-4 bg-slate-50 dark:bg-[#070b14] rounded-2xl border border-dashed border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                              <span className="text-slate-500 dark:text-slate-400">
                                 No WhatsApp Business Accounts found in this portfolio.
                               </span>
                               <a
                                 href="https://business.facebook.com/settings/whatsapp-business-accounts"
                                 target="_blank"
                                 rel="noreferrer"
-                                className="font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                                className="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1"
                               >
                                 <span>Create WABA on Meta</span>
                                 <span>↗</span>
@@ -792,14 +792,14 @@ export default function SetupPage() {
                               const isWabaConnected = waba.id === project?.metaWabaId || connectedNumbers.some(n => n.wabaId === waba.id);
 
                               return (
-                                <div key={waba.id} className="bg-slate-50/50 rounded-2xl p-4 border border-slate-200/90 space-y-3">
-                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 pb-2">
+                                <div key={waba.id} className="bg-slate-50/50 dark:bg-[#070b14] rounded-2xl p-4 border border-slate-200/90 dark:border-white/[0.08] space-y-3">
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 dark:border-white/[0.08] pb-2">
                                     <div className="flex items-center gap-2 flex-wrap">
-                                      <span className="text-sm font-bold text-slate-800">💼 {waba.name}</span>
+                                      <span className="text-sm font-bold text-slate-800 dark:text-slate-200">💼 {waba.name}</span>
                                       <span className="text-[10px] font-mono text-slate-400">WABA ID: {waba.id}</span>
                                     </div>
                                     <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded ${
-                                      isWabaConnected ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-600"
+                                      isWabaConnected ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300" : "bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400"
                                     }`}>
                                       {isWabaConnected ? "Active WABA" : "Meta WABA"}
                                     </span>
@@ -807,13 +807,13 @@ export default function SetupPage() {
 
                                   {/* Phone Numbers under WABA */}
                                   {!waba.phones || waba.phones.length === 0 ? (
-                                    <div className="text-xs text-slate-500 py-1 flex items-center justify-between">
+                                    <div className="text-xs text-slate-500 dark:text-slate-400 py-1 flex items-center justify-between">
                                       <span>0 phone numbers registered in this WABA.</span>
                                       <a
                                         href="https://business.facebook.com/settings/whatsapp-business-accounts"
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="text-blue-600 hover:underline font-semibold"
+                                        className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
                                       >
                                         Add Number in Meta ↗
                                       </a>
@@ -827,27 +827,27 @@ export default function SetupPage() {
                                         return (
                                           <div
                                             key={phone.id}
-                                            className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 bg-white dark:bg-[#070b14] dark:border-white/10 ${
+                                            className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 bg-white dark:bg-[#0B101D] dark:border-white/10 ${
                                               isPhoneConnected ? "border-emerald-300 shadow-2xs" : "border-slate-200"
                                             }`}
                                           >
                                             <div className="min-w-0">
                                               <div className="flex items-center gap-1.5 flex-wrap">
-                                                <span className="font-extrabold text-xs text-slate-900">{phone.number}</span>
+                                                <span className="font-extrabold text-xs text-slate-900 dark:text-slate-100">{phone.number}</span>
                                                 {isDefaultSender && (
                                                   <span className="px-1.5 py-0.2 bg-emerald-500 text-white font-bold text-[9px] rounded">
                                                     Default Sender
                                                   </span>
                                                 )}
                                               </div>
-                                              <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                                              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
                                                 {phone.verifiedName || "WhatsApp Phone"} • ID: {phone.id}
                                               </p>
                                             </div>
 
                                             <div className="shrink-0">
                                               {isPhoneConnected ? (
-                                                <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[11px] font-bold rounded-lg border border-emerald-200 flex items-center gap-1">
+                                                <span className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold rounded-lg border border-emerald-200 dark:border-emerald-500/30 flex items-center gap-1">
                                                   <span>✓</span>
                                                   <span>Connected</span>
                                                 </span>
@@ -855,7 +855,7 @@ export default function SetupPage() {
                                                 <button
                                                   onClick={() => connectSpecificPhone(waba, phone)}
                                                   disabled={connectingPhoneId === phone.id}
-                                                  className="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-2xs transition disabled:opacity-50"
+                                                  className="px-3 py-1 bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-2xs transition disabled:opacity-50"
                                                 >
                                                   {connectingPhoneId === phone.id ? "Connecting..." : "+ Connect"}
                                                 </button>

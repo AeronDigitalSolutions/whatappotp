@@ -248,7 +248,7 @@ print(response.json())`
       {/* Top Control Bar with Mode Toggle */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 text-base shrink-0 font-bold">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-base shrink-0 font-bold">
             🔑
           </div>
           <div>
@@ -289,7 +289,7 @@ print(response.json())`
 
       {/* Keys Table Card */}
       <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] shadow-sm overflow-hidden backdrop-blur-xl">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-white/[0.08] flex items-center justify-between bg-slate-50/50 dark:bg-[#070b14]">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <h2 className="text-sm font-semibold text-slate-700">Active API Keys ({keys.filter(k => !k.revokedAt).length})</h2>
@@ -337,7 +337,7 @@ print(response.json())`
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+              <thead className="bg-slate-50 dark:bg-[#070b14] text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-white/[0.08]">
                 <tr>
                   <th className="px-6 py-3 font-semibold">Name & Environment</th>
                   <th className="px-6 py-3 font-semibold">Key Token Prefix</th>
@@ -352,7 +352,7 @@ print(response.json())`
                   const isRevoked = !!key.revokedAt;
                   const isTest = key.prefix.includes("test");
                   return (
-                    <tr key={key.id} className={isRevoked ? "bg-slate-50/60 opacity-60" : "hover:bg-slate-50/50"}>
+                    <tr key={key.id} className={isRevoked ? "bg-slate-50/60 dark:bg-white/[0.02] opacity-60" : "hover:bg-slate-50/50 dark:hover:bg-white/[0.02]"}>
                       <td className="px-6 py-4">
                         <div className="font-semibold text-slate-900 dark:text-slate-100">{key.name}</div>
                         <span className={`inline-block mt-0.5 px-2 py-0.5 text-[10px] font-bold rounded ${
@@ -362,7 +362,7 @@ print(response.json())`
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="font-mono text-xs bg-slate-100 px-2 py-1 rounded text-slate-800 border border-slate-200">
+                        <span className="font-mono text-xs bg-slate-100 dark:bg-white/10 px-2 py-1 rounded text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10">
                           {key.prefix}
                         </span>
                       </td>
@@ -553,7 +553,7 @@ print(response.json())`
             <h3 className="font-bold text-slate-900 dark:text-slate-100">Developer Quickstart</h3>
             <p className="text-xs text-slate-500">Integrate WhatsApp OTP dispatch into your application in seconds.</p>
           </div>
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/[0.06] border border-transparent dark:border-white/10 p-1 rounded-lg">
             {(["curl", "node", "python"] as const).map((tab) => (
               <button
                 key={tab}
@@ -620,46 +620,46 @@ print(response.json())`
                     value={keyName}
                     onChange={(e) => setKeyName(e.target.value)}
                     placeholder="e.g., Staging Server, Mobile App, Production Backend"
-                    className="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full border border-slate-300 dark:border-white/10 dark:bg-[#070b14] dark:text-slate-100 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-2">Environment</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Environment</label>
                   <div className="grid grid-cols-2 gap-3">
                     <label
                       onClick={() => setEnvironment("test")}
                       className={`cursor-pointer border p-3 rounded-lg flex flex-col gap-1 transition-all ${
-                        environment === "test" ? "border-amber-500 bg-amber-50/50 ring-1 ring-amber-500" : "border-slate-200 hover:border-slate-300"
+                        environment === "test" ? "border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 ring-1 ring-amber-500" : "border-slate-200 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-white/20"
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs text-amber-900">Development / Test</span>
+                        <span className="font-bold text-xs text-amber-900 dark:text-amber-300">Development / Test</span>
                         <input type="radio" checked={environment === "test"} readOnly className="accent-amber-600" />
                       </div>
-                      <span className="text-[11px] text-slate-500">Prefix: wotp_test_...</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">Prefix: wotp_test_...</span>
                     </label>
 
                     <label
                       onClick={() => setEnvironment("live")}
                       className={`cursor-pointer border p-3 rounded-lg flex flex-col gap-1 transition-all ${
-                        environment === "live" ? "border-emerald-500 bg-emerald-50/50 ring-1 ring-emerald-500" : "border-slate-200 hover:border-slate-300"
+                        environment === "live" ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 ring-1 ring-emerald-500" : "border-slate-200 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-white/20"
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs text-emerald-900">Production / Live</span>
+                        <span className="font-bold text-xs text-emerald-900 dark:text-emerald-300">Production / Live</span>
                         <input type="radio" checked={environment === "live"} readOnly className="accent-emerald-600" />
                       </div>
-                      <span className="text-[11px] text-slate-500">Prefix: wotp_live_...</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">Prefix: wotp_live_...</span>
                     </label>
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/[0.08]">
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                    className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-lg"
                   >
                     Cancel
                   </button>
@@ -675,19 +675,19 @@ print(response.json())`
             ) : (
               /* Success: Display Secret Key ONCE */
               <div className="space-y-5">
-                <div className="flex items-center gap-3 text-emerald-600">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">API Key Created!</h3>
-                    <p className="text-xs text-slate-500">Save this secret key in a secure password manager or .env file.</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Save this secret key in a secure password manager or .env file.</p>
                   </div>
                 </div>
 
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-start gap-2">
+                <div className="p-3 bg-amber-50 dark:bg-amber-950/25 border border-amber-200 dark:border-amber-500/30 rounded-lg text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2">
                   <svg className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
@@ -697,13 +697,13 @@ print(response.json())`
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Your Secret API Key</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Your Secret API Key</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
                       readOnly
                       value={createdSecret}
-                      className="w-full font-mono text-xs bg-slate-100 border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 select-all"
+                      className="w-full font-mono text-xs bg-slate-100 dark:bg-[#070b14] border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2.5 text-slate-900 dark:text-emerald-400 select-all"
                     />
                     <button
                       type="button"
@@ -715,14 +715,14 @@ print(response.json())`
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-3 border-t border-slate-100">
+                <div className="flex justify-end pt-3 border-t border-slate-100 dark:border-white/[0.08]">
                   <button
                     type="button"
                     onClick={() => {
                       setShowCreateModal(false);
                       setCreatedSecret(null);
                     }}
-                    className="px-5 py-2 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg"
+                    className="px-5 py-2 text-sm font-semibold text-white bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 rounded-lg"
                   >
                     Done & Close
                   </button>
@@ -744,15 +744,15 @@ print(response.json())`
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Revoke API Key?</h3>
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Are you sure you want to revoke <strong>{revokeTarget.name}</strong> ({revokeTarget.prefix})? Any server or integration currently using this key will immediately be rejected.
               </p>
             </div>
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/[0.08]">
               <button
                 type="button"
                 onClick={() => setRevokeTarget(null)}
-                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-lg"
               >
                 Cancel
               </button>

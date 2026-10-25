@@ -373,7 +373,7 @@ export default function TeamPage() {
       {/* Top Control Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200/90">
         <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200/90 flex items-center justify-center text-indigo-700 shrink-0 font-bold shadow-2xs">
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/90 dark:border-indigo-500/20 flex items-center justify-center text-indigo-700 dark:text-indigo-400 shrink-0 font-bold shadow-2xs">
             <TeamIcon className="w-5 h-5" />
           </div>
           <div>
@@ -381,11 +381,11 @@ export default function TeamPage() {
               <span className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                 {members.length} Team Member{members.length !== 1 ? "s" : ""} • {roles.length} Custom Role{roles.length !== 1 ? "s" : ""}
               </span>
-              <span className="text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <span className="text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
                 {planInfo.plan} Plan: {members.length} / {planInfo.totalSeats} Seats Used
               </span>
             </div>
-            <p className="text-xs text-slate-600 font-medium mt-0.5">
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
               {planInfo.seatsAllowed} seat(s) included {planInfo.extraSeats ? `+ ${planInfo.extraSeats} add-ons` : ""} • Extra seats at ₹500/mo
             </p>
           </div>
@@ -412,7 +412,7 @@ export default function TeamPage() {
 
       {/* Seat Limit Warning Banner */}
       {members.length >= planInfo.totalSeats && planInfo.plan !== "ENTERPRISE" && (
-        <div className="bg-amber-50 border border-amber-200/90 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900 shadow-2xs">
+        <div className="bg-amber-50 dark:bg-amber-950/25 border border-amber-200/90 dark:border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900 dark:text-amber-200 shadow-2xs">
           <div className="flex items-center gap-2.5">
             <span className="text-base">⚠️</span>
             <div>
@@ -436,7 +436,7 @@ export default function TeamPage() {
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition cursor-pointer ${
             activeTab === "members"
               ? "bg-slate-900 text-white shadow-xs"
-              : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.04]"
           }`}
         >
           <TeamIcon className="w-4 h-4" />
@@ -447,7 +447,7 @@ export default function TeamPage() {
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition cursor-pointer ${
             activeTab === "roles"
               ? "bg-slate-900 text-white shadow-xs"
-              : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.04]"
           }`}
         >
           <Shield2DIcon className="w-4 h-4" />
@@ -458,14 +458,14 @@ export default function TeamPage() {
       {/* Tab 1: Team Members List */}
       {activeTab === "members" && (
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xs overflow-hidden backdrop-blur-xl">
-          <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between">
+          <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-white/[0.08] flex items-center justify-between">
             <div>
-              <h2 className="text-base font-extrabold text-slate-900">Workspace Members</h2>
-              <p className="text-xs text-slate-600 font-medium mt-0.5">
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-100">Workspace Members</h2>
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
                 Colleagues with access to this business workspace and their assigned module powers.
               </p>
             </div>
-            <span className="text-xs font-bold text-slate-700 bg-slate-100/90 border border-slate-200 px-3 py-1 rounded-lg">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100/90 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 px-3 py-1 rounded-lg">
               {members.length} Total Users
             </span>
           </div>
@@ -473,7 +473,7 @@ export default function TeamPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50/90 border-b border-slate-200/80 text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <tr className="bg-slate-50/90 dark:bg-[#070b14] border-b border-slate-200/80 dark:border-white/[0.08] text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   <th className="py-3.5 px-5">Colleague</th>
                   <th className="py-3.5 px-5">Assigned Role</th>
                   <th className="py-3.5 px-5">Active Module Powers</th>
@@ -492,7 +492,7 @@ export default function TeamPage() {
                   members.map((m) => {
                     const isOwner = m.baseRole === "owner";
                     return (
-                      <tr key={m.membershipId} className="hover:bg-slate-50/70 transition">
+                      <tr key={m.membershipId} className="hover:bg-slate-50/70 dark:hover:bg-white/[0.02] transition">
                         <td className="py-4 px-5">
                           <div className="flex items-center gap-3">
                             <span className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center font-extrabold text-indigo-700 text-xs shrink-0 shadow-2xs">
@@ -502,7 +502,7 @@ export default function TeamPage() {
                               <div className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
                                 <span>{m.name || "Colleague"}</span>
                                 {isOwner && (
-                                  <span className="text-[10px] uppercase font-black text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                  <span className="text-[10px] uppercase font-black text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-500/30">
                                     Owner
                                   </span>
                                 )}
@@ -515,10 +515,10 @@ export default function TeamPage() {
                         <td className="py-4 px-5">
                           <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${
                             isOwner
-                              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                              ? "bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30"
                               : m.customRoleName
-                              ? "bg-indigo-50 text-indigo-900 border-indigo-200"
-                              : "bg-slate-100 text-slate-700 border-slate-200"
+                              ? "bg-indigo-50 dark:bg-indigo-500/20 text-indigo-900 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/30"
+                              : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10"
                           }`}>
                             <Shield2DIcon className="w-3.5 h-3.5" />
                             <span>{m.customRoleName || (isOwner ? "Company Owner" : "Member")}</span>
@@ -532,7 +532,7 @@ export default function TeamPage() {
 
                         <td className="py-4 px-5">
                           {isOwner ? (
-                            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-500/30">
                               <SparklesIcon className="w-3.5 h-3.5 text-emerald-600" />
                               <span>All Modules Unrestricted</span>
                             </span>
@@ -543,7 +543,7 @@ export default function TeamPage() {
                                 return (
                                   <span
                                     key={p}
-                                    className="inline-flex items-center gap-1 text-[11px] font-semibold bg-slate-100/90 text-slate-700 border border-slate-200/80 px-2 py-0.5 rounded-md"
+                                    className="inline-flex items-center gap-1 text-[11px] font-semibold bg-slate-100/90 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 px-2 py-0.5 rounded-md"
                                   >
                                     {getModule2DIcon(p)}
                                     <span>{modDef?.label || p}</span>
@@ -578,7 +578,7 @@ export default function TeamPage() {
                             {!isOwner && (
                               <button
                                 onClick={() => handleRemoveMember(m.membershipId, m.email)}
-                                className="px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl border border-transparent hover:border-rose-200 transition cursor-pointer"
+                                className="px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl border border-transparent hover:border-rose-200 dark:hover:border-rose-500/30 transition cursor-pointer"
                                 title="Remove member"
                               >
                                 ✕
@@ -609,23 +609,23 @@ export default function TeamPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 tracking-tight">{r.name}</h3>
-                      <p className="text-xs text-slate-600 font-medium mt-1 min-h-[32px] leading-relaxed">
+                      <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-1 min-h-[32px] leading-relaxed">
                         {r.description || "Custom configured workspace role."}
                       </p>
                     </div>
                     {r.isSystemDefault ? (
-                      <span className="text-[10px] uppercase font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full shrink-0">
+                      <span className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 px-2.5 py-0.5 rounded-full shrink-0">
                         Default
                       </span>
                     ) : (
-                      <span className="text-[10px] uppercase font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full shrink-0">
+                      <span className="text-[10px] uppercase font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 px-2.5 py-0.5 rounded-full shrink-0">
                         Custom
                       </span>
                     )}
                   </div>
 
                   {/* Modules Tagged */}
-                  <div className="mt-4 pt-3.5 border-t border-slate-100">
+                  <div className="mt-4 pt-3.5 border-t border-slate-100 dark:border-white/[0.08]">
                     <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block mb-2.5">
                       Permitted Modules ({r.permissions.length})
                     </span>
@@ -635,7 +635,7 @@ export default function TeamPage() {
                         return (
                           <span
                             key={p}
-                            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg"
                           >
                             {getModule2DIcon(p)}
                             <span>{modDef?.label || p}</span>
@@ -647,7 +647,7 @@ export default function TeamPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="pt-3.5 border-t border-slate-100 flex items-center justify-end gap-2">
+                <div className="pt-3.5 border-t border-slate-100 dark:border-white/[0.08] flex items-center justify-end gap-2">
                   <button
                     onClick={() => openEditRoleModal(r)}
                     className="px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.1] rounded-xl transition shadow-2xs cursor-pointer"
@@ -677,17 +677,17 @@ export default function TeamPage() {
             onSubmit={handleInviteSubmit}
             className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 animate-in zoom-in-95 duration-150"
           >
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.08] pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-400 flex items-center justify-center">
                   <User2DIcon className="w-4 h-4" />
                 </div>
-                <h3 className="font-extrabold text-base text-slate-900">Invite Team Member</h3>
+                <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100">Invite Team Member</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowInviteModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-500 dark:text-slate-400 flex items-center justify-center transition"
               >
                 <Close2DIcon className="w-4 h-4" />
               </button>
@@ -695,34 +695,34 @@ export default function TeamPage() {
 
             <div className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-bold text-slate-800 mb-1.5">Colleague Full Name</label>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1.5">Colleague Full Name</label>
                 <input
                   type="text"
                   placeholder="e.g. Sarah Jenkins"
                   value={inviteName}
                   onChange={(e) => setInviteName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 font-medium text-xs"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-xs"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-800 mb-1.5">Email Address <span className="text-rose-500">*</span></label>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1.5">Email Address <span className="text-rose-500">*</span></label>
                 <input
                   type="email"
                   required
                   placeholder="colleague@company.com"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 font-medium text-xs"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-xs"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-800 mb-1.5">Assign Initial Role</label>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1.5">Assign Initial Role</label>
                 <select
                   value={inviteRoleId}
                   onChange={(e) => setInviteRoleId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800 text-xs"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-xs"
                 >
                   <option value="">Default Member (Standard Access)</option>
                   {roles.map((r) => (
@@ -734,18 +734,18 @@ export default function TeamPage() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <div className="pt-3 border-t border-slate-100 dark:border-white/[0.08] flex items-center justify-end gap-2.5">
               <button
                 type="button"
                 onClick={() => setShowInviteModal(false)}
-                className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition"
+                className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-xl transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={inviteLoading}
-                className="px-5 py-2.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition shadow-xs disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2.5 text-xs font-bold bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white rounded-xl transition shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {inviteLoading ? "Adding..." : "Add Team Member"}
               </button>
@@ -761,16 +761,16 @@ export default function TeamPage() {
             onSubmit={handleRoleSave}
             className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-white/10 space-y-5 animate-in zoom-in-95 duration-150"
           >
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.08] pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-400 flex items-center justify-center">
                   <Shield2DIcon className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base text-slate-900">
+                  <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100">
                     {editingRoleId ? "Edit Role Powers" : "Create New Custom Role"}
                   </h3>
-                  <p className="text-xs text-slate-600 font-medium">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
                     Name any role and assign granular module permissions.
                   </p>
                 </div>
@@ -778,7 +778,7 @@ export default function TeamPage() {
               <button
                 type="button"
                 onClick={() => setShowRoleModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-500 dark:text-slate-400 flex items-center justify-center transition"
               >
                 <Close2DIcon className="w-4 h-4" />
               </button>
@@ -787,46 +787,46 @@ export default function TeamPage() {
             <div className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block font-bold text-slate-800 mb-1.5">Role Title / Name <span className="text-rose-500">*</span></label>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1.5">Role Title / Name <span className="text-rose-500">*</span></label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Customer Support Lead, Catalog Editor"
                     value={roleFormName}
                     onChange={(e) => setRoleFormName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-xs text-slate-900"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-xs"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-800 mb-1.5">Description (Optional)</label>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1.5">Description (Optional)</label>
                   <input
                     type="text"
                     placeholder="Brief description of job powers"
                     value={roleFormDesc}
                     onChange={(e) => setRoleFormDesc(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-xs text-slate-900"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-xs"
                   />
                 </div>
               </div>
 
               {/* Module Checkbox Grid */}
-              <div className="pt-2 border-t border-slate-100">
+              <div className="pt-2 border-t border-slate-100 dark:border-white/[0.08]">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="font-extrabold text-slate-800 text-xs">
+                  <span className="font-extrabold text-slate-800 dark:text-slate-200 text-xs">
                     Permitted Dashboard Modules ({roleFormPerms.length} selected)
                   </span>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setRoleFormPerms(ALL_MODULES.filter(m => m.key !== "super_admin").map(m => m.key))}
-                      className="px-2.5 py-1 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
+                      className="px-2.5 py-1 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg transition"
                     >
                       Select All
                     </button>
                     <button
                       type="button"
                       onClick={() => setRoleFormPerms([])}
-                      className="px-2.5 py-1 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition"
+                      className="px-2.5 py-1 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 rounded-lg transition"
                     >
                       Clear All
                     </button>
@@ -841,8 +841,8 @@ export default function TeamPage() {
                         key={mod.key}
                         className={`flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition select-none ${
                           isChecked
-                            ? "bg-indigo-50/80 border-indigo-200 text-indigo-950 font-semibold"
-                            : "bg-slate-50/70 border-slate-200 text-slate-700 hover:bg-slate-100/70"
+                            ? "bg-indigo-50/80 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-500/30 text-indigo-950 dark:text-indigo-200 font-semibold"
+                            : "bg-slate-50/70 dark:bg-[#070b14] border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100/70 dark:hover:bg-white/[0.04]"
                         }`}
                       >
                         <input
@@ -851,7 +851,7 @@ export default function TeamPage() {
                           onChange={() => toggleFormPerm(mod.key)}
                           className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
                         />
-                        <span className="text-slate-700">{getModule2DIcon(mod.key)}</span>
+                        <span className="text-slate-700 dark:text-slate-300">{getModule2DIcon(mod.key)}</span>
                         <span className="text-xs font-bold">{mod.label}</span>
                       </label>
                     );
@@ -860,18 +860,18 @@ export default function TeamPage() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <div className="pt-3 border-t border-slate-100 dark:border-white/[0.08] flex items-center justify-end gap-2.5">
               <button
                 type="button"
                 onClick={() => setShowRoleModal(false)}
-                className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition"
+                className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-xl transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={roleSaving}
-                className="px-5 py-2.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition shadow-xs disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2.5 text-xs font-bold bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white rounded-xl transition shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {roleSaving ? "Saving Role..." : editingRoleId ? "Update Role" : "Create Role"}
               </button>
@@ -884,18 +884,18 @@ export default function TeamPage() {
       {changeRoleMember && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-white/10 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-extrabold text-base text-slate-900">Change Member Role</h3>
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.08] pb-3">
+              <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100">Change Member Role</h3>
               <button
                 onClick={() => setChangeRoleMember(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-500 dark:text-slate-400 flex items-center justify-center transition"
               >
                 <Close2DIcon className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-600 font-medium">
-              Select a new role for <strong className="text-slate-900">{changeRoleMember.name || changeRoleMember.email}</strong>:
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+              Select a new role for <strong className="text-slate-900 dark:text-slate-100">{changeRoleMember.name || changeRoleMember.email}</strong>:
             </p>
 
             <select
@@ -914,13 +914,13 @@ export default function TeamPage() {
             <div className="pt-2 flex justify-end gap-2.5">
               <button
                 onClick={() => setChangeRoleMember(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition"
+                className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-xl transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleChangeRoleSubmit}
-                className="px-4 py-2 text-xs font-bold bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
+                className="px-4 py-2 text-xs font-bold bg-slate-900 dark:bg-emerald-600 text-white rounded-xl hover:bg-slate-800 dark:hover:bg-emerald-500 transition cursor-pointer"
               >
                 Save Assignment
               </button>

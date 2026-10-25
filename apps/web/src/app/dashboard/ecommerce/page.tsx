@@ -338,7 +338,7 @@ export default function EcommerceTriggersPage() {
 
         {/* Right: Webhook status & Refresh */}
         <div className="flex items-center gap-2 shrink-0">
-            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 text-[11px] font-bold rounded-xl border border-emerald-200/80 flex items-center gap-1.5 shadow-2xs">
+            <span className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold rounded-xl border border-emerald-200/80 dark:border-emerald-500/20 flex items-center gap-1.5 shadow-2xs">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               Webhooks Ready
             </span>
@@ -376,9 +376,9 @@ export default function EcommerceTriggersPage() {
             const isCopied = copiedUrl === item.event;
 
             return (
-              <div key={item.event} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1.5">
+              <div key={item.event} className="p-3 bg-slate-50 dark:bg-[#070b14] rounded-lg border border-slate-200 dark:border-white/[0.08] space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-800">{item.label}</span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{item.label}</span>
                   <span className="text-[10px] text-slate-400">{item.desc}</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -404,7 +404,7 @@ export default function EcommerceTriggersPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-2 text-xs gap-2">
           <div className="flex items-center gap-2 text-slate-500">
             <span>🔒 Webhook Secret:</span>
-            <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-bold">
+            <span className="font-mono bg-slate-100 dark:bg-[#070b14] border border-slate-200/60 dark:border-white/10 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300 font-bold">
               {config?.webhookSecret || "whsec_default"}
             </span>
             <button
@@ -434,7 +434,7 @@ export default function EcommerceTriggersPage() {
           <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-lg font-bold">
+                <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center text-lg font-bold">
                   🛒
                 </div>
                 <div>
@@ -452,17 +452,17 @@ export default function EcommerceTriggersPage() {
                   onChange={() => toggleRecipe("abandonedCartEnabled")}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
               </label>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               Sends an automated reminder message with item names, product photo, and an exclusive checkout link 45 minutes after customer leaves without purchasing.
             </p>
 
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-700 space-y-1">
-              <p className="font-semibold text-slate-800">Preview Message:</p>
-              <p className="italic text-slate-600">
+            <div className="bg-slate-50 dark:bg-[#070b14] p-3 rounded-lg border border-slate-100 dark:border-white/[0.08] text-xs text-slate-700 dark:text-slate-300 space-y-1">
+              <p className="font-semibold text-slate-800 dark:text-slate-200">Preview Message:</p>
+              <p className="italic text-slate-600 dark:text-slate-400">
                 &quot;Hey Rahul, you left something behind! Complete your order within the next 2 hours and enjoy 10% OFF with code SAVE10.&quot;
               </p>
               <div className="pt-1.5 flex gap-2">
@@ -473,19 +473,19 @@ export default function EcommerceTriggersPage() {
             </div>
 
             {/* Meta Template Verification Strip */}
-            <div className="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100">
-              <span className="text-slate-500">
-                Template: <code className="font-mono font-bold text-slate-800">{config.abandonedCartTemplate || "cart_recovery_discount"}</code>
+            <div className="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100 dark:border-white/[0.08]">
+              <span className="text-slate-500 dark:text-slate-400">
+                Template: <code className="font-mono font-bold text-slate-800 dark:text-slate-200">{config.abandonedCartTemplate || "cart_recovery_discount"}</code>
               </span>
               {getTemplateMeta(config.abandonedCartTemplate || "cart_recovery_discount")?.status === "APPROVED" ? (
-                <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
+                <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                   Approved on Meta
                 </span>
               ) : (
                 <a
                   href="/dashboard/templates"
-                  className="text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 transition"
+                  className="text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 transition"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                   Not Approved · Submit in Studio →
@@ -498,7 +498,7 @@ export default function EcommerceTriggersPage() {
           <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-lg font-bold">
+                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 flex items-center justify-center text-lg font-bold">
                   📦
                 </div>
                 <div>
@@ -516,35 +516,35 @@ export default function EcommerceTriggersPage() {
                   onChange={() => toggleRecipe("orderConfirmationEnabled")}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
               </label>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               Immediately alerts customer that payment was received, order is being packed, and includes complete item summary and expected delivery date.
             </p>
 
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-700 space-y-1">
-              <p className="font-semibold text-slate-800">Preview Message:</p>
-              <p className="italic text-slate-600">
+            <div className="bg-slate-50 dark:bg-[#070b14] p-3 rounded-lg border border-slate-100 dark:border-white/[0.08] text-xs text-slate-700 dark:text-slate-300 space-y-1">
+              <p className="font-semibold text-slate-800 dark:text-slate-200">Preview Message:</p>
+              <p className="italic text-slate-600 dark:text-slate-400">
                 &quot;Thank you for your order #89214! We have received your payment of ₹1,899. Your package is scheduled to dispatch tomorrow.&quot;
               </p>
             </div>
 
             {/* Meta Template Verification Strip */}
-            <div className="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100">
-              <span className="text-slate-500">
-                Template: <code className="font-mono font-bold text-slate-800">{config.orderConfirmationTemplate || "order_confirmation_v2"}</code>
+            <div className="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100 dark:border-white/[0.08]">
+              <span className="text-slate-500 dark:text-slate-400">
+                Template: <code className="font-mono font-bold text-slate-800 dark:text-slate-200">{config.orderConfirmationTemplate || "order_confirmation_v2"}</code>
               </span>
               {getTemplateMeta(config.orderConfirmationTemplate || "order_confirmation_v2")?.status === "APPROVED" ? (
-                <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
+                <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                   Approved on Meta
                 </span>
               ) : (
                 <a
                   href="/dashboard/templates"
-                  className="text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 transition"
+                  className="text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 transition"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                   Not Approved · Submit in Studio →
@@ -557,7 +557,7 @@ export default function EcommerceTriggersPage() {
           <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold">
+                <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-lg font-bold">
                   💰
                 </div>
                 <div>
@@ -575,17 +575,17 @@ export default function EcommerceTriggersPage() {
                   onChange={() => toggleRecipe("codVerificationEnabled")}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
               </label>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               Prompts customer with 2 interactive WhatsApp buttons: [✅ Confirm Order] or [❌ Cancel]. Unconfirmed orders can be put on hold before shipping.
             </p>
 
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-700 space-y-1">
-              <p className="font-semibold text-slate-800">Preview Message:</p>
-              <p className="italic text-slate-600">
+            <div className="bg-slate-50 dark:bg-[#070b14] p-3 rounded-lg border border-slate-100 dark:border-white/[0.08] text-xs text-slate-700 dark:text-slate-300 space-y-1">
+              <p className="font-semibold text-slate-800 dark:text-slate-200">Preview Message:</p>
+              <p className="italic text-slate-600 dark:text-slate-400">
                 &quot;Hi Priya, please confirm your COD order #99214 of ₹1,450 to proceed with express courier shipping.&quot;
               </p>
               <div className="pt-1.5 flex gap-2">
@@ -599,19 +599,19 @@ export default function EcommerceTriggersPage() {
             </div>
 
             {/* Meta Template Verification Strip */}
-            <div className="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100">
-              <span className="text-slate-500">
-                Template: <code className="font-mono font-bold text-slate-800">{config.codVerificationTemplate || "cod_verification_interactive"}</code>
+            <div className="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100 dark:border-white/[0.08]">
+              <span className="text-slate-500 dark:text-slate-400">
+                Template: <code className="font-mono font-bold text-slate-800 dark:text-slate-200">{config.codVerificationTemplate || "cod_verification_interactive"}</code>
               </span>
               {getTemplateMeta(config.codVerificationTemplate || "cod_verification_interactive")?.status === "APPROVED" ? (
-                <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
+                <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                   Approved on Meta
                 </span>
               ) : (
                 <a
                   href="/dashboard/templates"
-                  className="text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 transition"
+                  className="text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 transition"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                   Not Approved · Submit in Studio →
@@ -624,7 +624,7 @@ export default function EcommerceTriggersPage() {
           <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center text-lg font-bold">
+                <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 flex items-center justify-center text-lg font-bold">
                   🚚
                 </div>
                 <div>
@@ -642,35 +642,35 @@ export default function EcommerceTriggersPage() {
                   onChange={() => toggleRecipe("shippingUpdatesEnabled")}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
               </label>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               Sends automated dispatch, in-transit, and out-for-delivery notifications with direct courier tracking links.
             </p>
 
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-700 space-y-1">
-              <p className="font-semibold text-slate-800">Preview Message:</p>
-              <p className="italic text-slate-600">
+            <div className="bg-slate-50 dark:bg-[#070b14] p-3 rounded-lg border border-slate-100 dark:border-white/[0.08] text-xs text-slate-700 dark:text-slate-300 space-y-1">
+              <p className="font-semibold text-slate-800 dark:text-slate-200">Preview Message:</p>
+              <p className="italic text-slate-600 dark:text-slate-400">
                 &quot;Great news! Your package has been dispatched via BlueDart (AWB #8271928). Expected delivery tomorrow by 6 PM.&quot;
               </p>
             </div>
 
             {/* Meta Template Verification Strip */}
-            <div className="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100">
-              <span className="text-slate-500">
-                Template: <code className="font-mono font-bold text-slate-800">{config.shippingUpdatesTemplate || "shipping_transit_update"}</code>
+            <div className="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100 dark:border-white/[0.08]">
+              <span className="text-slate-500 dark:text-slate-400">
+                Template: <code className="font-mono font-bold text-slate-800 dark:text-slate-200">{config.shippingUpdatesTemplate || "shipping_transit_update"}</code>
               </span>
               {getTemplateMeta(config.shippingUpdatesTemplate || "shipping_transit_update")?.status === "APPROVED" ? (
-                <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
+                <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                   Approved on Meta
                 </span>
               ) : (
                 <a
                   href="/dashboard/templates"
-                  className="text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 transition"
+                  className="text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 transition"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                   Not Approved · Submit in Studio →
@@ -695,11 +695,11 @@ export default function EcommerceTriggersPage() {
 
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Select Event Type</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">Select Event Type</label>
               <select
                 value={simEventType}
                 onChange={e => setSimEventType(e.target.value)}
-                className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full text-xs px-3 py-2 bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 <option value="ABANDONED_CART">🛒 Abandoned Cart Recovery</option>
                 <option value="ORDER_CREATED">📦 Order Confirmation</option>
@@ -714,7 +714,7 @@ export default function EcommerceTriggersPage() {
               const tplMeta = getTemplateMeta(tplName);
               const isApproved = tplMeta && tplMeta.status === "APPROVED";
               return (
-                <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
+                <div className="p-2.5 bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/[0.08] rounded-lg text-xs space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] uppercase font-bold text-slate-400">Mapped Template:</span>
                     {isApproved ? (
@@ -733,7 +733,7 @@ export default function EcommerceTriggersPage() {
                           customerPhone: simPhone.trim(),
                           errorMessage: `Template "${tplName}" is not approved on Meta.`
                         })}
-                        className="text-[10px] font-bold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full inline-flex items-center gap-1 transition"
+                        className="text-[10px] font-bold text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-300 dark:border-amber-500/40 px-2 py-0.5 rounded-full inline-flex items-center gap-1 transition"
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                         ⚠️ Not Approved · Details
@@ -741,7 +741,7 @@ export default function EcommerceTriggersPage() {
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <code className="font-mono text-[11px] text-slate-800 font-bold">{tplName}</code>
+                    <code className="font-mono text-[11px] text-slate-800 dark:text-slate-200 font-bold">{tplName}</code>
                     <a href="/dashboard/templates" className="text-[10px] text-emerald-600 hover:text-emerald-700 font-semibold underline">
                       Manage in Studio
                     </a>
@@ -751,7 +751,7 @@ export default function EcommerceTriggersPage() {
             })()}
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
                 Recipient Mobile Number *
               </label>
               <input
@@ -759,7 +759,7 @@ export default function EcommerceTriggersPage() {
                 value={simPhone}
                 onChange={e => setSimPhone(e.target.value)}
                 placeholder="e.g. +91 98765 43210"
-                className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+                className="w-full text-xs px-3 py-2 bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
               />
               <span className="text-[10px] text-slate-400 mt-1 block">
                 Include country code (e.g. +91 for India)
@@ -798,8 +798,8 @@ export default function EcommerceTriggersPage() {
               <div
                 className={`p-3 rounded-lg border text-xs ${
                   simResult.success
-                    ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                    : "bg-red-50 border-red-200 text-red-800"
+                    ? "bg-emerald-50 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300"
+                    : "bg-red-50 dark:bg-rose-950/25 border-red-200 dark:border-rose-500/30 text-red-800 dark:text-rose-300"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -845,7 +845,7 @@ export default function EcommerceTriggersPage() {
             </div>
             <button
               onClick={fetchData}
-              className="text-xs font-semibold px-2.5 py-1 text-slate-700 hover:bg-slate-100 rounded border border-slate-200 transition"
+              className="text-xs font-semibold px-2.5 py-1 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] rounded border border-slate-200 dark:border-white/10 transition"
             >
               🔄 Refresh
             </button>
@@ -865,7 +865,7 @@ export default function EcommerceTriggersPage() {
               </div>
             ) : (
               <table className="w-full text-xs text-left">
-                <thead className="bg-slate-50 text-slate-400 uppercase text-[10px] font-bold">
+                <thead className="bg-slate-50 dark:bg-[#070b14] text-slate-400 uppercase text-[10px] font-bold border-b border-slate-200 dark:border-white/[0.08]">
                   <tr>
                     <th className="p-2.5">Time</th>
                     <th className="p-2.5">Event</th>
@@ -875,7 +875,7 @@ export default function EcommerceTriggersPage() {
                     <th className="p-2.5">Message ID / Meta WAMID</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
                   {events.map(ev => {
                     const evType = String(ev.eventType || "").toUpperCase();
                     const label =
@@ -893,11 +893,11 @@ export default function EcommerceTriggersPage() {
                     const isFailed = ev.status === "FAILED" || messageId.startsWith("meta_err_");
 
                     return (
-                      <tr key={ev.id} className="hover:bg-slate-50 transition">
+                      <tr key={ev.id} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition">
                         <td className="p-2.5 text-slate-500 whitespace-nowrap">{timeStr}</td>
-                        <td className="p-2.5 font-bold text-slate-800 whitespace-nowrap">{label}</td>
+                        <td className="p-2.5 font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap">{label}</td>
                         <td className="p-2.5">
-                          <span className="font-medium text-slate-800 block truncate max-w-[120px]">
+                          <span className="font-medium text-slate-800 dark:text-slate-200 block truncate max-w-[120px]">
                             {ev.customerName || "Customer"}
                           </span>
                           <span className="font-mono text-[11px] text-slate-500">
@@ -932,7 +932,7 @@ export default function EcommerceTriggersPage() {
                               ✕ FAILED
                             </span>
                           ) : (
-                            <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded whitespace-nowrap">
+                            <span className="bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-bold px-2 py-0.5 rounded whitespace-nowrap">
                               {ev.status || "PROCESSED"}
                             </span>
                           )}
@@ -965,7 +965,7 @@ export default function EcommerceTriggersPage() {
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#0B101D] rounded-2xl max-w-lg w-full border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="bg-amber-50 border-b border-amber-100 p-5 flex items-start gap-3">
+            <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-100 dark:border-amber-500/20 p-5 flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xl shrink-0 shadow-xs">
                 ⚠️
               </div>
@@ -986,7 +986,7 @@ export default function EcommerceTriggersPage() {
             {/* Modal Body */}
             <div className="p-6 space-y-4">
               {/* Event & Template Details Card */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 text-xs">
+              <div className="bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/[0.08] rounded-xl p-3.5 space-y-2 text-xs">
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Trigger Event:</span>
                   <span className="font-bold text-slate-800">
@@ -1001,7 +1001,7 @@ export default function EcommerceTriggersPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Meta Approval Status:</span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
                     {unapprovedModal.templateStatus || "NOT APPROVED"}
                   </span>
                 </div>
@@ -1020,7 +1020,7 @@ export default function EcommerceTriggersPage() {
                   <br />
                   Meta WhatsApp Cloud API enforces strict anti-spam regulations. Any automated notification (like Abandoned Cart or Order Confirmation) must be submitted and approved in your WhatsApp Business Account before Meta allows delivery to real devices.
                 </p>
-                <div className="bg-amber-50/70 border border-amber-200 p-3 rounded-lg text-amber-900 text-xs space-y-1">
+                <div className="bg-amber-50/70 dark:bg-amber-950/25 border border-amber-200 dark:border-amber-500/30 p-3 rounded-lg text-amber-900 dark:text-amber-200 text-xs space-y-1">
                   <p className="font-bold">📋 Required Next Step:</p>
                   <p>
                     Please verify or submit <code className="font-mono font-bold bg-white dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-300 dark:border-amber-500/40 text-amber-900 dark:text-amber-200">{unapprovedModal.templateName}</code> in <strong>Template Studio</strong>. Meta reviews and approves standard e-commerce templates within 1 minute.
@@ -1029,7 +1029,7 @@ export default function EcommerceTriggersPage() {
               </div>
 
               {/* One-Click Proof Option with Approved hello_world */}
-              <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3.5 text-xs space-y-2">
+              <div className="bg-emerald-50/70 dark:bg-emerald-950/25 border border-emerald-200 dark:border-emerald-500/30 rounded-xl p-3.5 text-xs space-y-2">
                 <div className="flex items-center gap-2 text-emerald-900 font-bold">
                   <span>💡</span>
                   <span>Want to verify real WhatsApp delivery right now?</span>
@@ -1051,7 +1051,7 @@ export default function EcommerceTriggersPage() {
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   onClick={() => setUnapprovedModal(null)}
-                  className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold transition"
+                  className="px-4 py-2 border border-slate-300 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.04] text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition"
                 >
                   Dismiss
                 </button>

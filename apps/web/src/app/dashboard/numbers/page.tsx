@@ -244,14 +244,14 @@ export default function NumbersPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* Top Control Bar with Mode Toggle */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-white/[0.08]">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 text-base shrink-0 font-bold">
+          <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 text-base shrink-0 font-bold">
             📞
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-800">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                 {numbers.length} Registered WhatsApp Number{numbers.length !== 1 ? "s" : ""}
               </span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -281,7 +281,7 @@ export default function NumbersPage() {
         </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center justify-between">
+        <div className="p-4 bg-red-50 dark:bg-rose-950/25 border border-red-200 dark:border-rose-500/30 rounded-xl text-red-700 dark:text-rose-300 text-sm flex items-center justify-between">
           <span>{error}</span>
           <button onClick={loadNumbers} className="underline font-semibold hover:text-red-900">Retry</button>
         </div>
@@ -294,28 +294,28 @@ export default function NumbersPage() {
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition flex flex-col justify-between backdrop-blur-xl">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600 text-xs shrink-0 font-bold">
+              <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 text-xs shrink-0 font-bold">
                 🔑
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-700">Authentication / OTP</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Authentication / OTP</span>
                 <p className="text-[10px] text-slate-400">High-priority 2FA & login codes</p>
               </div>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100">
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.06]">
             {authNumbers.length > 0 ? (
               <div className="space-y-1.5">
                 {authNumbers.map((n) => (
                   <div key={n.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      <span className="font-bold text-xs text-slate-900 font-mono">{n.displayPhone}</span>
+                      <span className="font-bold text-xs text-slate-900 dark:text-slate-100 font-mono">{n.displayPhone}</span>
                     </div>
                     {n.isDefault ? (
-                      <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-bold">Primary</span>
+                      <span className="text-[10px] bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 px-1.5 py-0.5 rounded font-bold">Primary</span>
                     ) : (
-                      <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded font-medium">Assigned</span>
+                      <span className="text-[10px] bg-amber-50 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 px-1.5 py-0.5 rounded font-medium">Assigned</span>
                     )}
                   </div>
                 ))}
@@ -330,11 +330,11 @@ export default function NumbersPage() {
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition flex flex-col justify-between backdrop-blur-xl">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 text-xs shrink-0 font-bold">
+              <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-200/80 dark:border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs shrink-0 font-bold">
                 📢
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-700">Marketing & Promo</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Marketing & Promo</span>
                 <p className="text-[10px] text-slate-400">Campaigns, offers & announcements</p>
               </div>
             </div>
@@ -348,7 +348,7 @@ export default function NumbersPage() {
                       <span className="w-2 h-2 rounded-full bg-purple-500"></span>
                       <span className="font-bold text-xs text-slate-900 font-mono">{n.displayPhone}</span>
                     </div>
-                    <span className="text-[10px] bg-purple-50 text-purple-800 border border-purple-200 px-1.5 py-0.5 rounded font-bold">Active</span>
+                    <span className="text-[10px] bg-purple-50 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 px-1.5 py-0.5 rounded font-bold">Active</span>
                   </div>
                 ))}
               </div>
@@ -362,11 +362,11 @@ export default function NumbersPage() {
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition flex flex-col justify-between backdrop-blur-xl">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 text-xs shrink-0 font-bold">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs shrink-0 font-bold">
                 📦
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-700">Order Updates & Utility</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Order Updates & Utility</span>
                 <p className="text-[10px] text-slate-400">Order alerts, invoices & tracking</p>
               </div>
             </div>
@@ -380,7 +380,7 @@ export default function NumbersPage() {
                       <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                       <span className="font-bold text-xs text-slate-900 font-mono">{n.displayPhone}</span>
                     </div>
-                    <span className="text-[10px] bg-blue-50 text-blue-800 border border-blue-200 px-1.5 py-0.5 rounded font-bold">Active</span>
+                    <span className="text-[10px] bg-blue-50 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 px-1.5 py-0.5 rounded font-bold">Active</span>
                   </div>
                 ))}
               </div>
@@ -393,10 +393,10 @@ export default function NumbersPage() {
 
       {/* Connected WhatsApp Numbers Table */}
       <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-sm overflow-hidden backdrop-blur-xl">
-        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-[#070b14] flex justify-between items-center">
           <div>
-            <h2 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Connected WhatsApp Numbers</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Check or uncheck services to route traffic across your numbers.</p>
+            <h2 className="font-bold text-slate-800 dark:text-slate-200 text-sm uppercase tracking-wider">Connected WhatsApp Numbers</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Check or uncheck services to route traffic across your numbers.</p>
           </div>
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 px-2.5 py-1 rounded-md">
             {numbers.length} registered {numbers.length === 1 ? "number" : "numbers"}
@@ -410,13 +410,13 @@ export default function NumbersPage() {
           </div>
         ) : numbers.length === 0 ? (
           <div className="p-12 text-center space-y-3">
-            <p className="text-slate-600 font-medium">No numbers registered yet.</p>
+            <p className="text-slate-600 dark:text-slate-300 font-medium">No numbers registered yet.</p>
             <p className="text-xs text-slate-400">Click "+ Link Number" above to register a phone number manually or sync with Meta.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase">
+              <thead className="bg-slate-50 dark:bg-[#070b14] text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-white/[0.08] text-xs uppercase">
                 <tr>
                   <th className="px-6 py-3 font-semibold">Phone Number</th>
                   <th className="px-6 py-3 font-semibold">Portfolio / WABA</th>
@@ -426,7 +426,7 @@ export default function NumbersPage() {
                   <th className="px-6 py-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06] text-slate-700 dark:text-slate-300">
                 {numbers.map((item) => {
                   const hasAuth = !!item.service?.includes("AUTHENTICATION");
                   const hasMarketing = !!item.service?.includes("MARKETING");
@@ -434,7 +434,7 @@ export default function NumbersPage() {
                   const totalActiveServices = [hasAuth, hasMarketing, hasUtility].filter(Boolean).length;
 
                   return (
-                    <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={item.id} className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors">
                       {/* Phone Info */}
                       <td className="px-6 py-4">
                         <div className="font-bold text-slate-900 dark:text-slate-100 font-mono text-sm">{item.displayPhone}</div>
@@ -456,8 +456,8 @@ export default function NumbersPage() {
                             <label
                               className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border select-none transition-all ${
                                 hasAuth
-                                  ? "bg-amber-50 text-amber-900 border-amber-300 ring-1 ring-amber-300 shadow-sm"
-                                  : "bg-slate-50 text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600"
+                                  ? "bg-amber-50 dark:bg-amber-500/20 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-500/40 ring-1 ring-amber-300 dark:ring-amber-500/40 shadow-sm"
+                                  : "bg-slate-50 dark:bg-[#070b14] text-slate-400 dark:text-slate-500 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-600 dark:hover:text-slate-300"
                               }`}
                             >
                               <input
@@ -473,8 +473,8 @@ export default function NumbersPage() {
                             <label
                               className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border select-none transition-all ${
                                 hasMarketing
-                                  ? "bg-purple-50 text-purple-900 border-purple-300 ring-1 ring-purple-300 shadow-sm"
-                                  : "bg-slate-50 text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600"
+                                  ? "bg-purple-50 dark:bg-purple-500/20 text-purple-900 dark:text-purple-200 border-purple-300 dark:border-purple-500/40 ring-1 ring-purple-300 dark:ring-purple-500/40 shadow-sm"
+                                  : "bg-slate-50 dark:bg-[#070b14] text-slate-400 dark:text-slate-500 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-600 dark:hover:text-slate-300"
                               }`}
                             >
                               <input
@@ -490,8 +490,8 @@ export default function NumbersPage() {
                             <label
                               className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border select-none transition-all ${
                                 hasUtility
-                                  ? "bg-blue-50 text-blue-900 border-blue-300 ring-1 ring-blue-300 shadow-sm"
-                                  : "bg-slate-50 text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600"
+                                  ? "bg-blue-50 dark:bg-blue-500/20 text-blue-900 dark:text-blue-200 border-blue-300 dark:border-blue-500/40 ring-1 ring-blue-300 dark:ring-blue-500/40 shadow-sm"
+                                  : "bg-slate-50 dark:bg-[#070b14] text-slate-400 dark:text-slate-500 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-600 dark:hover:text-slate-300"
                               }`}
                             >
                               <input
@@ -506,7 +506,7 @@ export default function NumbersPage() {
 
                           <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
                             {totalActiveServices === 3 ? (
-                              <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold border border-emerald-200">
+                              <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 px-2 py-0.5 rounded font-bold border border-emerald-200 dark:border-emerald-500/30">
                                 🌟 All 3 Services Active (Shared Number)
                               </span>
                             ) : totalActiveServices > 0 ? (
@@ -528,7 +528,7 @@ export default function NumbersPage() {
                       {/* Priority / Default */}
                       <td className="px-6 py-4">
                         {item.isDefault ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2.5 py-1 rounded-full">
                             ★ Primary
                           </span>
                         ) : (
@@ -543,7 +543,7 @@ export default function NumbersPage() {
 
                       {/* Quality */}
                       <td className="px-6 py-4">
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300">
                           {item.quality || "GREEN"}
                         </span>
                       </td>
@@ -580,20 +580,20 @@ export default function NumbersPage() {
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-[#0B101D] rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4 border border-slate-200 dark:border-white/10">
-            <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="font-bold text-lg text-slate-900">Link WhatsApp Phone Number</h3>
+            <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">Link WhatsApp Phone Number</h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
             </div>
             <form onSubmit={handleAddManual} className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-600 uppercase">Display Phone Number</label>
+                <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Display Phone Number</label>
                 <input
                   type="text"
                   required
                   placeholder="+91 99190 00095"
                   value={newNumber.displayPhone}
                   onChange={(e) => setNewNumber({ ...newNumber, displayPhone: e.target.value })}
-                  className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full mt-1 bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -605,7 +605,7 @@ export default function NumbersPage() {
                     placeholder="e.g. 1406142089245094"
                     value={newNumber.phoneId}
                     onChange={(e) => setNewNumber({ ...newNumber, phoneId: e.target.value })}
-                    className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full mt-1 bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
@@ -615,7 +615,7 @@ export default function NumbersPage() {
                     placeholder="e.g. Ishinna Sadana"
                     value={newNumber.verifiedName}
                     onChange={(e) => setNewNumber({ ...newNumber, verifiedName: e.target.value })}
-                    className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full mt-1 bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
@@ -628,7 +628,7 @@ export default function NumbersPage() {
                     placeholder="e.g. 1985971052790608"
                     value={newNumber.wabaId}
                     onChange={(e) => setNewNumber({ ...newNumber, wabaId: e.target.value })}
-                    className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full mt-1 bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
@@ -638,7 +638,7 @@ export default function NumbersPage() {
                     placeholder="e.g. ishinna_b_sadana"
                     value={newNumber.wabaName}
                     onChange={(e) => setNewNumber({ ...newNumber, wabaName: e.target.value })}
-                    className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full mt-1 bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
@@ -654,7 +654,7 @@ export default function NumbersPage() {
                       <label
                         key={svc}
                         className={`border rounded-lg p-2.5 flex items-center gap-2 cursor-pointer text-xs font-semibold select-none ${
-                          isChecked ? "bg-emerald-50 border-emerald-300 text-emerald-900" : "bg-slate-50 border-slate-200 text-slate-500"
+                          isChecked ? "bg-emerald-50 dark:bg-emerald-500/20 border-emerald-300 dark:border-emerald-500/40 text-emerald-900 dark:text-emerald-200" : "bg-slate-50 dark:bg-[#070b14] border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400"
                         }`}
                       >
                         <input
@@ -676,11 +676,11 @@ export default function NumbersPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border rounded-lg text-slate-600 text-sm font-semibold hover:bg-slate-50"
+                  className="px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-white/[0.04]"
                 >
                   Cancel
                 </button>
@@ -700,9 +700,9 @@ export default function NumbersPage() {
       {testModal.open && testModal.phone && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-[#0B101D] rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4 border border-slate-200 dark:border-white/10">
-            <div className="flex justify-between items-center border-b pb-3">
+            <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3">
               <div>
-                <h3 className="font-bold text-lg text-slate-900">Send Test WhatsApp Message</h3>
+                <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">Send Test WhatsApp Message</h3>
                 <p className="text-xs text-slate-500 font-mono">From: {testModal.phone.displayPhone}</p>
               </div>
               <button
@@ -724,8 +724,8 @@ export default function NumbersPage() {
                       onClick={() => setTestModal((prev) => ({ ...prev, selectedService: svc }))}
                       className={`py-2 px-2 rounded-lg text-xs font-semibold border transition-all ${
                         testModal.selectedService === svc
-                          ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                          : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                          ? "bg-slate-900 dark:bg-emerald-600 text-white border-slate-900 dark:border-emerald-600 shadow-sm"
+                          : "bg-slate-50 dark:bg-[#070b14] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/[0.04]"
                       }`}
                     >
                       {svc === "AUTHENTICATION" ? "🔑 OTP" : svc === "MARKETING" ? "📢 Promo" : "📦 Utility"}
@@ -741,12 +741,12 @@ export default function NumbersPage() {
                   placeholder="+919876543210"
                   value={testModal.to}
                   onChange={(e) => setTestModal((prev) => ({ ...prev, to: e.target.value }))}
-                  className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full mt-1 bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1">
-                <p className="font-semibold text-slate-800">
+              <div className="p-3 bg-slate-50 dark:bg-[#070b14] rounded-lg border border-slate-200 dark:border-white/10 text-xs text-slate-600 dark:text-slate-300 space-y-1">
+                <p className="font-semibold text-slate-800 dark:text-slate-200">
                   Template Used: <span className="font-mono text-emerald-700">hello_world</span>
                 </p>
                 <p>Dispatches through Meta Cloud API and checks route mapping.</p>
@@ -756,8 +756,8 @@ export default function NumbersPage() {
                 <div
                   className={`p-3 rounded-lg text-xs font-medium ${
                     testModal.result.startsWith("Success")
-                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                      : "bg-red-50 text-red-800 border border-red-200"
+                      ? "bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30"
+                      : "bg-red-50 dark:bg-rose-950/25 text-red-800 dark:text-rose-300 border border-red-200 dark:border-rose-500/30"
                   }`}
                 >
                   {testModal.result}
@@ -765,10 +765,10 @@ export default function NumbersPage() {
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-white/10">
               <button
                 onClick={() => setTestModal((prev) => ({ ...prev, open: false }))}
-                className="px-4 py-2 border rounded-lg text-slate-600 text-sm font-semibold hover:bg-slate-50"
+                className="px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-white/[0.04]"
               >
                 Close
               </button>

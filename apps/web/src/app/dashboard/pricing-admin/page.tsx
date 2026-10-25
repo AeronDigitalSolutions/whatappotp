@@ -273,7 +273,7 @@ export default function PricingAdminPage() {
         <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] p-6 rounded-3xl shadow-2xs backdrop-blur-xl">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Tax Treatment</span>
-            <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] px-2 py-0.5 rounded-full font-bold">GST Standard</span>
+            <span className="bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold">GST Standard</span>
           </div>
           <div className="text-2xl font-black text-slate-900">
             {formatPercent(taxConfig?.taxRatePercent || 18, 0)}% GST
@@ -290,15 +290,15 @@ export default function PricingAdminPage() {
         <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] p-6 rounded-3xl shadow-2xs backdrop-blur-xl">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">USD/INR Exchange Rate</span>
-            <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] px-2 py-0.5 rounded-full font-bold">RBI Ref + Buffer</span>
+            <span className="bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold">RBI Ref + Buffer</span>
           </div>
-          <div className="text-2xl font-black text-slate-900">
+          <div className="text-2xl font-black text-slate-900 dark:text-slate-100">
             ₹{formatCurrency(exchangeRate?.effectiveRate || 88.66, 2)}
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Base: ₹{formatCurrency(exchangeRate?.baseRate || 86.50, 2)} with {formatPercent(exchangeRate?.bufferPercent || 2.5, 1)}% FX volatility buffer
           </p>
-          <div className="pt-3 mt-3 border-t border-slate-100 text-[10px] text-slate-400 font-mono">
+          <div className="pt-3 mt-3 border-t border-slate-100 dark:border-white/[0.08] text-[10px] text-slate-400 font-mono">
             Source: {exchangeRate?.source || "RBI_REFERENCE_AUDITED"}
           </div>
         </div>
@@ -307,7 +307,7 @@ export default function PricingAdminPage() {
         <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] p-6 rounded-3xl shadow-2xs backdrop-blur-xl">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Messaging Routes</span>
-            <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] px-2 py-0.5 rounded-full font-bold">Margin Guard Active</span>
+            <span className="bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold">Margin Guard Active</span>
           </div>
           <div className="text-2xl font-black text-slate-900">
             {activeRoutesCount} <span className="text-sm font-normal text-slate-400">/ {rates.length} total</span>
@@ -361,7 +361,7 @@ export default function PricingAdminPage() {
                   const isSafeMargin = actualMargin >= minMargin;
 
                   return (
-                    <tr key={r.id} className="hover:bg-slate-50/80 transition">
+                    <tr key={r.id} className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition">
                       <td className="py-4 px-3 font-bold text-slate-900 dark:text-slate-100">
                         {r.country} <span className="text-xs font-mono text-slate-400">({r.isoCode})</span>
                       </td>
@@ -387,8 +387,8 @@ export default function PricingAdminPage() {
                       <td className="py-4 px-3">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           r.lossRiskStatus === "SAFE"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-red-50 text-red-700 border border-red-200"
+                            ? "bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30"
+                            : "bg-red-50 dark:bg-rose-500/20 text-red-700 dark:text-rose-300 border border-red-200 dark:border-rose-500/30"
                         }`}>
                           {r.lossRiskStatus === "SAFE" ? "SAFE" : "UNSAFE_BLOCKED"}
                         </span>
@@ -396,8 +396,8 @@ export default function PricingAdminPage() {
                       <td className="py-4 px-3">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           r.status === "ACTIVE"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                            ? "bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30"
+                            : "bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10"
                         }`}>
                           {r.status}
                         </span>
@@ -407,15 +407,15 @@ export default function PricingAdminPage() {
                           onClick={() => handleToggleStatus(r)}
                           className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
                             r.status === "ACTIVE"
-                              ? "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200"
-                              : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200"
+                              ? "bg-amber-50 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30"
+                              : "bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/30 border border-emerald-200 dark:border-emerald-500/30"
                           }`}
                         >
                           {r.status === "ACTIVE" ? "Suspend" : "Activate"}
                         </button>
                         <button
                           onClick={() => handleEditRate(r)}
-                          className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition"
+                          className="px-2.5 py-1 bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition"
                         >
                           Edit
                         </button>
@@ -450,7 +450,7 @@ export default function PricingAdminPage() {
                     step="0.01"
                     value={editPrice}
                     onChange={(e) => setEditPrice(Number(e.target.value))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-emerald-500"
                     required
                   />
                 </div>
@@ -463,7 +463,7 @@ export default function PricingAdminPage() {
                     step="0.0001"
                     value={editProviderCost}
                     onChange={(e) => setEditProviderCost(Number(e.target.value))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-emerald-500"
                     required
                   />
                 </div>
@@ -477,7 +477,7 @@ export default function PricingAdminPage() {
                     step="0.005"
                     value={editInfraCost}
                     onChange={(e) => setEditInfraCost(Number(e.target.value))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-emerald-500"
                     required
                   />
                 </div>
@@ -488,7 +488,7 @@ export default function PricingAdminPage() {
                     step="1"
                     value={editMinMargin}
                     onChange={(e) => setEditMinMargin(Number(e.target.value))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-emerald-500"
                     required
                   />
                 </div>
@@ -499,7 +499,7 @@ export default function PricingAdminPage() {
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-emerald-500"
+                  className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm focus:outline-emerald-500"
                 >
                   <option value="ACTIVE">ACTIVE (Dispatches Allowed)</option>
                   <option value="SUSPENDED">SUSPENDED (Dispatches Blocked)</option>
@@ -515,7 +515,7 @@ export default function PricingAdminPage() {
                   onChange={(e) => setAuditReason(e.target.value)}
                   placeholder="e.g. Meta Q4 rate card revision verified with finance"
                   rows={2}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-emerald-500"
+                  className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-xl px-4 py-2 text-sm focus:outline-emerald-500"
                   required
                 />
               </div>
@@ -524,7 +524,7 @@ export default function PricingAdminPage() {
                 <button
                   type="button"
                   onClick={() => setEditingRate(null)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]"
                 >
                   Cancel
                 </button>
@@ -558,7 +558,7 @@ export default function PricingAdminPage() {
                   value={adjustOrgId}
                   onChange={(e) => setAdjustOrgId(e.target.value)}
                   placeholder="Enter organizationId"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-emerald-500"
+                  className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-emerald-500"
                   required
                 />
               </div>
@@ -571,7 +571,7 @@ export default function PricingAdminPage() {
                   value={adjustAmount}
                   onChange={(e) => setAdjustAmount(Number(e.target.value))}
                   placeholder="Positive to credit (+), Negative to debit (-)"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-emerald-500"
+                  className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-emerald-500"
                   required
                 />
                 <span className="text-[11px] text-slate-400">Use positive value for credit, negative for debit.</span>
@@ -584,7 +584,7 @@ export default function PricingAdminPage() {
                   onChange={(e) => setAdjustReason(e.target.value)}
                   placeholder="e.g. Compensating credit for verified downstream carrier latency"
                   rows={2}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-emerald-500"
+                  className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-xl px-4 py-2 text-sm focus:outline-emerald-500"
                   required
                 />
               </div>
@@ -593,7 +593,7 @@ export default function PricingAdminPage() {
                 <button
                   type="button"
                   onClick={() => setShowAdjustModal(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.04]"
                 >
                   Cancel
                 </button>
