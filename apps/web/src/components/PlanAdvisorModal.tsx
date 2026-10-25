@@ -195,7 +195,7 @@ export default function PlanAdvisorModal({
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Starter Trial</span>
-                      <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700">1 Month</span>
+                      <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-200">One-Time Only</span>
                     </div>
                     <div>
                       <div className="flex items-baseline gap-1.5 flex-wrap">
@@ -203,7 +203,7 @@ export default function PlanAdvisorModal({
                         <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
                         <span className="text-xs text-slate-500 font-semibold">/ 30 days total</span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">One-time payment (+ 18% GST). Perfect for solo developers.</p>
+                      <p className="text-xs text-slate-500 mt-1">One-time introductory evaluation (+ 18% GST). First-time users only.</p>
                       <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 text-[11px] font-black border border-slate-200">
                         <span>⚡ 30 Days Full Platform Access</span>
                       </div>

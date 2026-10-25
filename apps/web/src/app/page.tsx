@@ -1527,7 +1527,7 @@ print(res.json())`}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">Starter Trial</span>
-                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700">1 Month</span>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200">One-Time Only</span>
                 </div>
                 <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span className="text-4xl font-black text-slate-900">₹500</span>

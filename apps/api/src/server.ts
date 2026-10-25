@@ -1013,10 +1013,13 @@ fastify.get("/v1/wallet/:organizationId", async (request: any, reply) => {
     const isExpired = org?.planExpiresAt ? new Date(org.planExpiresAt) < new Date() : (plan === "UNPAID");
     const isPaidPlan = plan !== "UNPAID" && Boolean(org?.planExpiresAt) && !isExpired;
 
+    const hasUsedTrial = invoices.some(inv => Number(inv.baseAmount) === 500) || (plan === "TRIAL");
+
     const subscription = {
       plan,
       isActivated: isPaidPlan,
       isDemo: !isPaidPlan,
+      hasUsedTrial,
       planExpiresAt: org?.planExpiresAt,
       daysRemaining,
       isExpired,
@@ -1183,7 +1186,24 @@ fastify.post("/v1/billing/order", async (request: any, reply) => {
     let cleanBaseAmount = 100;
 
     if (type === "SUBSCRIPTION") {
-      if (planId === "TRIAL") cleanBaseAmount = 500;
+      if (planId === "TRIAL") {
+        // Enforce that TRIAL is strictly a one-time introductory plan per organization
+        const existingTrial = await prisma.invoice.findFirst({
+          where: {
+            organizationId: orgId,
+            baseAmount: 500
+          }
+        });
+        const currentOrg = await prisma.organization.findUnique({
+          where: { id: orgId }
+        });
+        if (existingTrial || (currentOrg?.plan === "TRIAL" && currentOrg?.planExpiresAt)) {
+          return reply.status(400).send({
+            error: "The 30-Day Starter Trial (₹500 + GST) is an introductory plan for first-time evaluation only. Your workspace has already utilized this trial. Please upgrade to the Basic Plan (₹1,000 + GST) or Professional Plan (₹2,500 + GST) monthly subscription to continue."
+          });
+        }
+        cleanBaseAmount = 500;
+      }
       else if (planId === "PROFESSIONAL") cleanBaseAmount = 2500;
       else if (planId === "ENTERPRISE" || planId === "CUSTOM") cleanBaseAmount = 5000;
       else cleanBaseAmount = 1000; // BASIC

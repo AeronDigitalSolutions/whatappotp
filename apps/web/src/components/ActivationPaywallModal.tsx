@@ -101,14 +101,17 @@ export default function ActivationPaywallModal({
           {/* Card 1: Starter Trial */}
           <div className="bg-slate-50 rounded-2xl border-2 border-slate-200 p-5 flex flex-col justify-between hover:border-slate-300 transition space-y-4">
             <div className="space-y-3">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Starter Trial</span>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Starter Trial</span>
+                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-200">One-Time Only</span>
+              </div>
               <div>
                 <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span className="text-2xl sm:text-3xl font-black text-slate-900">₹500</span>
                   <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
-                  <span className="text-[10px] text-slate-500 font-semibold">/ 30 days</span>
+                  <span className="text-[10px] text-slate-500 font-semibold">/ 30 days total</span>
                 </div>
-                <span className="text-[11px] text-slate-500 block">30 Days Platform Access</span>
+                <span className="text-[11px] text-slate-500 block">30 Days Introductory Trial (First-time users only)</span>
                 <span className="mt-1 text-[10px] font-black text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 inline-block">
                   ⚡ 30 Days Full Platform Access
                 </span>
