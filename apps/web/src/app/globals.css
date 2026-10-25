@@ -159,6 +159,29 @@ html:not(.dark) .apple-glass-card {
   box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
 }
 
+/* Dashboard Left Menu Bar in Light Mode: Dark Green (#154336) with Pure White Text & Icons */
+html:not(.dark) #dashboard-sidebar {
+  background-color: #154336 !important;
+  border-right: 1px solid #10382d !important;
+  color: #ffffff !important;
+}
+
+html:not(.dark) #dashboard-sidebar .text-white,
+html:not(.dark) #dashboard-sidebar a.text-white,
+html:not(.dark) #dashboard-sidebar span.text-white,
+html:not(.dark) #dashboard-sidebar p.text-white {
+  color: #ffffff !important;
+}
+
+html:not(.dark) #dashboard-sidebar svg {
+  color: #ffffff !important;
+  stroke: currentColor;
+}
+
+html:not(.dark) #dashboard-sidebar [class*="text-slate-"] {
+  color: #ffffff !important;
+}
+
 /* Protect light text inside dark cards/containers in light mode */
 html:not(.dark) [class*="bg-slate-900"] .text-slate-300,
 html:not(.dark) [class*="bg-slate-900"] .text-slate-400,

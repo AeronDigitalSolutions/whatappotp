@@ -153,12 +153,20 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     router.push("/login");
   };
 
+  const iconClass = (path: string) => {
+    const isActive = pathname === path;
+    if (isActive) {
+      return "w-4 h-4 shrink-0 text-white dark:text-emerald-400";
+    }
+    return "w-4 h-4 shrink-0 text-white group-hover:text-white dark:text-slate-400 dark:group-hover:text-slate-200 transition-colors";
+  };
+
   const navLinkClass = (path: string) => {
     const isActive = pathname === path;
     if (isActive) {
-      return "relative flex items-center justify-between px-3.5 py-2.5 bg-emerald-500/15 dark:bg-gradient-to-r dark:from-emerald-500/20 dark:via-emerald-500/10 dark:to-transparent text-emerald-950 dark:text-slate-100 font-extrabold border border-emerald-500/40 rounded-xl text-[13.5px] shadow-[0_0_20px_rgba(16,185,129,0.14)] ring-1 ring-emerald-500/20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]";
+      return "relative flex items-center justify-between px-3.5 py-2.5 bg-white/20 dark:bg-gradient-to-r dark:from-emerald-500/20 dark:via-emerald-500/10 dark:to-transparent text-white dark:text-slate-100 font-extrabold border border-white/25 dark:border-emerald-500/40 rounded-xl text-[13.5px] shadow-sm dark:shadow-[0_0_20px_rgba(16,185,129,0.14)] ring-1 ring-white/20 dark:ring-emerald-500/20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]";
     }
-    return "relative flex items-center justify-between px-3.5 py-2.5 text-slate-900 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-white/[0.05] hover:border-slate-300/80 dark:hover:border-white/[0.08] border border-transparent rounded-xl text-[13.5px] font-bold transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group";
+    return "relative flex items-center justify-between px-3.5 py-2.5 text-white hover:text-white dark:text-slate-300 dark:hover:text-white hover:bg-white/10 dark:hover:bg-white/[0.05] hover:border-white/15 dark:hover:border-white/[0.08] border border-transparent rounded-xl text-[13.5px] font-bold transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group";
   };
 
   const isCurrentPathAllowed = canAccessPath(pathname);
@@ -189,8 +197,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#fbfbfd] dark:bg-[#04060c] flex text-slate-900 dark:text-slate-100 transition-colors duration-300">
       {/* Sidebar with Apple VisionOS/macOS-Grade Frosted Glass Navigation */}
-      <aside className="w-[276px] bg-white/90 dark:bg-[#070b14]/95 backdrop-blur-2xl border-r border-slate-200/80 dark:border-white/[0.08] hidden md:flex flex-col shrink-0 h-screen sticky top-0 shadow-[4px_0_24px_rgba(0,0,0,0.03)] dark:shadow-[4px_0_30px_rgba(0,0,0,0.6)] z-20 text-slate-700 dark:text-slate-200 transition-colors duration-300">
-        <div className="h-16 flex items-center px-5 border-b border-slate-200/80 dark:border-white/[0.08] shrink-0">
+      <aside
+        id="dashboard-sidebar"
+        className="w-[276px] bg-[#154336] dark:bg-[#070b14]/95 backdrop-blur-2xl border-r border-[#10382d] dark:border-white/[0.08] hidden md:flex flex-col shrink-0 h-screen sticky top-0 shadow-[4px_0_24px_rgba(21,67,54,0.15)] dark:shadow-[4px_0_30px_rgba(0,0,0,0.6)] z-20 text-white dark:text-slate-200 transition-colors duration-300"
+      >
+        <div className="h-16 flex items-center px-5 border-b border-white/10 dark:border-white/[0.08] shrink-0">
           <Link href="/dashboard" className="flex items-center gap-3 group">
             <div className="relative">
               <img
@@ -198,13 +209,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 alt="Digital Beings"
                 className="w-8 h-8 rounded-xl object-contain shadow-md shrink-0 group-hover:scale-105 transition duration-300"
               />
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#070b14] shadow-[0_0_8px_#10b981]" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#154336] dark:border-[#070b14] shadow-[0_0_8px_#10b981]" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-bold text-base tracking-tight text-slate-900 dark:text-slate-100 leading-tight flex items-center gap-1">
-                Digital<span className="apple-emerald-gradient">Beings</span>
+              <span className="font-bold text-base tracking-tight text-white dark:text-slate-100 leading-tight flex items-center gap-1">
+                Digital<span className="text-emerald-300 dark:apple-emerald-gradient">Beings</span>
               </span>
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">
+              <span className="text-[10px] font-bold text-white/80 dark:text-slate-400 tracking-wider uppercase">
                 Secure • Connect • Grow
               </span>
             </div>
@@ -216,31 +227,31 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* Section 1: Core Messaging */}
           {showConversationsSection && (
             <div className="space-y-1">
-              <p className="px-3 text-[10.5px] font-black text-slate-800 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+              <p className="px-3 text-[10.5px] font-black text-white/80 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
                 <span>Conversations &amp; Engagement</span>
               </p>
               <Link href="/dashboard" className={navLinkClass("/dashboard")}>
                 <div className="flex items-center gap-3 min-w-0">
-                  <DashboardIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                  <DashboardIcon className={iconClass("/dashboard")} />
                   <span className="truncate">Overview</span>
                 </div>
                 {pathname === "/dashboard" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-white dark:bg-emerald-400 shadow-[0_0_8px_#ffffff] dark:shadow-[0_0_8px_#34d399]" />
                 )}
               </Link>
               {hasAccess("inbox") && (
                 <Link href="/dashboard/inbox" className={navLinkClass("/dashboard/inbox")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <InboxIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/inbox" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <InboxIcon className={iconClass("/dashboard/inbox")} />
                     <span className="truncate">Live Chat Inbox</span>
                   </div>
-                  <span className="text-[10px] bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold shadow-[0_0_10px_rgba(16,185,129,0.2)]">2-Way</span>
+                  <span className="text-[10px] bg-white/15 text-white dark:bg-emerald-500/15 dark:text-emerald-300 border border-white/20 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold shadow-xs">2-Way</span>
                 </Link>
               )}
               {hasAccess("automations") && (
                 <Link href="/dashboard/automations" className={navLinkClass("/dashboard/automations")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <BotIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/automations" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <BotIcon className={iconClass("/dashboard/automations")} />
                     <span className="truncate">Chatbot Automations</span>
                   </div>
                   <span className="text-[10px] bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-2 py-0.5 rounded-full font-extrabold shadow-[0_0_10px_rgba(168,85,247,0.4)]">New</span>
@@ -249,25 +260,25 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               {hasAccess("ecommerce") && (
                 <Link href="/dashboard/ecommerce" className={navLinkClass("/dashboard/ecommerce")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <ShoppingBagIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/ecommerce" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <ShoppingBagIcon className={iconClass("/dashboard/ecommerce")} />
                     <span className="truncate">E-Commerce Recipes</span>
                   </div>
-                  <span className="text-[10px] bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold shadow-[0_0_10px_rgba(245,158,11,0.2)]">Shopify</span>
+                  <span className="text-[10px] bg-amber-400/20 text-white dark:bg-amber-500/15 dark:text-amber-300 border border-amber-300/30 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold shadow-xs">Shopify</span>
                 </Link>
               )}
               {hasAccess("campaigns") && (
                 <Link href="/dashboard/campaigns" className={navLinkClass("/dashboard/campaigns")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <CampaignIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/campaigns" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <CampaignIcon className={iconClass("/dashboard/campaigns")} />
                     <span className="truncate">Broadcast Campaigns</span>
                   </div>
-                  <span className="text-[10px] bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-white/10 px-2 py-0.5 rounded-full font-bold">Bulk</span>
+                  <span className="text-[10px] bg-white/15 text-white dark:bg-white/10 dark:text-slate-300 border border-white/20 dark:border-white/10 px-2 py-0.5 rounded-full font-bold">Bulk</span>
                 </Link>
               )}
               {hasAccess("templates") && (
                 <Link href="/dashboard/templates" className={navLinkClass("/dashboard/templates")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <TemplateIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/templates" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <TemplateIcon className={iconClass("/dashboard/templates")} />
                     <span className="truncate">Template Studio</span>
                   </div>
                 </Link>
@@ -278,13 +289,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* Section 2: Numbers & Compliance */}
           {showVerificationSection && (
             <div className="space-y-1">
-              <p className="px-3 text-[10.5px] font-black text-slate-800 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+              <p className="px-3 text-[10.5px] font-black text-white/80 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
                 <span>WhatsApp &amp; Verification</span>
               </p>
               {hasAccess("numbers") && (
                 <Link href="/dashboard/numbers" className={navLinkClass("/dashboard/numbers")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <PhoneRoutingIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/numbers" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <PhoneRoutingIcon className={iconClass("/dashboard/numbers")} />
                     <span className="truncate">Numbers &amp; Routing</span>
                   </div>
                 </Link>
@@ -292,7 +303,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               {hasAccess("green-tick") && (
                 <Link href="/dashboard/green-tick" className={navLinkClass("/dashboard/green-tick")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <ShieldCheckIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/green-tick" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <ShieldCheckIcon className={iconClass("/dashboard/green-tick")} />
                     <span className="truncate">WhatsApp Verification</span>
                   </div>
                 </Link>
@@ -300,7 +311,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               {hasAccess("logs") && (
                 <Link href="/dashboard/logs" className={navLinkClass("/dashboard/logs")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <AuditLogsIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/logs" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <AuditLogsIcon className={iconClass("/dashboard/logs")} />
                     <span className="truncate">Logs &amp; Audits</span>
                   </div>
                 </Link>
@@ -311,13 +322,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* Section 3: Wallet & Billing */}
           {showBillingSection && (
             <div className="space-y-1">
-              <p className="px-3 text-[10.5px] font-black text-slate-800 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+              <p className="px-3 text-[10.5px] font-black text-white/80 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
                 <span>Wallet &amp; Developers</span>
               </p>
               {hasAccess("wallet") && (
                 <Link href="/dashboard/wallet" className={navLinkClass("/dashboard/wallet")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <WalletIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/wallet" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <WalletIcon className={iconClass("/dashboard/wallet")} />
                     <span className="truncate">Wallet &amp; Billing</span>
                   </div>
                 </Link>
@@ -325,7 +336,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               {hasAccess("pricing_admin") && (
                 <Link href="/dashboard/pricing-admin" className={navLinkClass("/dashboard/pricing-admin")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <PricingAdminIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/pricing-admin" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <PricingAdminIcon className={iconClass("/dashboard/pricing-admin")} />
                     <span className="truncate">Pricing &amp; Safety Admin</span>
                   </div>
                 </Link>
@@ -333,7 +344,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               {hasAccess("api_keys") && (
                 <Link href="/dashboard/api-keys" className={navLinkClass("/dashboard/api-keys")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <KeyIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/api-keys" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <KeyIcon className={iconClass("/dashboard/api-keys")} />
                     <span className="truncate">API Keys</span>
                   </div>
                 </Link>
@@ -341,7 +352,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               {hasAccess("settings") && (
                 <Link href="/dashboard/settings" className={navLinkClass("/dashboard/settings")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <SettingsIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/settings" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <SettingsIcon className={iconClass("/dashboard/settings")} />
                     <span className="truncate">Settings</span>
                   </div>
                 </Link>
@@ -351,26 +362,26 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
           {/* Section 4: Administration & Team Roles */}
           {showAdminSection && (
-            <div className="space-y-1 pt-2 border-t border-slate-200/80 dark:border-white/[0.08]">
-              <p className="px-3 text-[10.5px] font-black text-slate-800 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+            <div className="space-y-1 pt-2 border-t border-white/10 dark:border-white/[0.08]">
+              <p className="px-3 text-[10.5px] font-black text-white/80 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
                 <span>Team &amp; Governance</span>
               </p>
               {hasAccess("team") && (
                 <Link href="/dashboard/team" className={navLinkClass("/dashboard/team")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <TeamIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/team" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <TeamIcon className={iconClass("/dashboard/team")} />
                     <span className="truncate">Team &amp; Custom Roles</span>
                   </div>
-                  <span className="text-[10px] bg-purple-500/15 text-purple-800 dark:text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full font-bold">RBAC</span>
+                  <span className="text-[10px] bg-purple-400/20 text-white dark:bg-purple-500/15 dark:text-purple-300 border border-purple-300/30 dark:border-purple-500/30 px-2 py-0.5 rounded-full font-bold">RBAC</span>
                 </Link>
               )}
               {hasAccess("super_admin") && (
                 <Link href="/dashboard/super-admin" className={navLinkClass("/dashboard/super-admin")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <SuperAdminIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/super-admin" ? "text-emerald-500" : "text-slate-700 dark:text-slate-400 group-hover:text-black dark:group-hover:text-slate-200"}`} />
+                    <SuperAdminIcon className={iconClass("/dashboard/super-admin")} />
                     <span className="truncate">Platform Super Admin</span>
                   </div>
-                  <span className="text-[10px] bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-400/40 px-2 py-0.5 rounded-full font-bold shadow-[0_0_10px_rgba(52,211,153,0.3)]">Master</span>
+                  <span className="text-[10px] bg-emerald-400/20 text-white dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-300/30 dark:border-emerald-400/40 px-2 py-0.5 rounded-full font-bold shadow-[0_0_10px_rgba(52,211,153,0.3)]">Master</span>
                 </Link>
               )}
             </div>
@@ -378,14 +389,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Current Active Role Footer Tag */}
-        <div className="p-3.5 bg-slate-50/90 dark:bg-white/[0.02] border-t border-slate-200/90 dark:border-white/[0.08] shrink-0">
+        <div className="p-3.5 bg-black/15 dark:bg-white/[0.02] border-t border-white/10 dark:border-white/[0.08] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.1] flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-inner">
-              <ShieldCheckIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <div className="w-8 h-8 rounded-xl bg-white/10 dark:bg-white/[0.05] border border-white/15 dark:border-white/[0.1] flex items-center justify-center text-white dark:text-emerald-400 shrink-0 shadow-inner">
+              <ShieldCheckIcon className="w-4 h-4 text-white dark:text-emerald-400" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[10px] uppercase font-black text-slate-800 dark:text-slate-400 tracking-wider">Active Workspace Role</span>
-              <span className="text-xs font-black text-slate-950 dark:text-white truncate">{activeRoleDef.badge}</span>
+              <span className="text-[10px] uppercase font-bold text-white/80 dark:text-slate-400 tracking-wider">Active Workspace Role</span>
+              <span className="text-xs font-black text-white truncate">{activeRoleDef.badge}</span>
             </div>
           </div>
         </div>
