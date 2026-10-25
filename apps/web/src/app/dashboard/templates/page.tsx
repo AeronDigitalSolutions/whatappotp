@@ -860,12 +860,12 @@ export default function TemplatesPage() {
       {/* ========================================================================= */}
       {isUser ? (
         /* USER MODE: Compact Unified Toolbar */
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-4 border-b border-slate-200/80">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-white/[0.08]">
           {/* Left: Dual Portfolio & Number Selectors in place of the heading */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 max-w-2xl">
             {/* Custom Business Portfolio Dropdown */}
             <div className="relative" ref={bizDropdownRef}>
-              <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block mb-1.5">
+              <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">
                 Select Business Portfolio
               </label>
               <button
@@ -875,21 +875,21 @@ export default function TemplatesPage() {
                   setPhoneDropdownOpen(false);
                 }}
                 disabled={loadingBusinesses || businesses.length === 0}
-                className="w-full bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-slate-300 rounded-2xl p-2.5 shadow-2xs hover:shadow-xs transition text-left flex items-center justify-between gap-3 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full bg-white dark:bg-[#0B101D]/80 hover:bg-slate-50/80 dark:hover:bg-[#0E1526] border border-slate-200 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-emerald-500/30 rounded-2xl p-2.5 shadow-2xs hover:shadow-xs transition text-left flex items-center justify-between gap-3 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 aria-haspopup="listbox"
                 aria-expanded={bizDropdownOpen}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition shadow-2xs">
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition shadow-2xs">
                     🏢
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-xs font-black text-slate-900 truncate">
+                    <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
                       {loadingBusinesses
                         ? "Loading Portfolios..."
                         : activeBusiness?.name || "No Portfolio Selected"}
                     </div>
-                    <div className="text-[10px] text-slate-400 font-medium truncate flex items-center gap-1.5 mt-0.5">
+                    <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium truncate flex items-center gap-1.5 mt-0.5">
                       {activeBusiness ? (
                         <>
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
@@ -902,7 +902,7 @@ export default function TemplatesPage() {
                   </div>
                 </div>
                 <svg
-                  className={`w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-200 shrink-0 ${
+                  className={`w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-transform duration-200 shrink-0 ${
                     bizDropdownOpen ? "rotate-180" : ""
                   }`}
                   fill="none"
@@ -915,12 +915,12 @@ export default function TemplatesPage() {
 
               {/* Portfolio Dropdown Menu */}
               {bizDropdownOpen && (
-                <div className="absolute left-0 top-full mt-2 w-full min-w-[300px] bg-white rounded-2xl border border-slate-200/90 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                  <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
-                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                <div className="absolute left-0 top-full mt-2 w-full min-w-[300px] bg-white dark:bg-[#0B101D] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="px-3 py-2 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                       Meta Business Portfolios
                     </span>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                    <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-100 dark:border-emerald-500/30">
                       {businesses.length} Connected
                     </span>
                   </div>
@@ -943,23 +943,23 @@ export default function TemplatesPage() {
                             }}
                             className={`w-full text-left p-2.5 rounded-xl transition flex items-center justify-between gap-3 cursor-pointer ${
                               isSelected
-                                ? "bg-slate-900 text-white shadow-xs"
-                                : "hover:bg-slate-50 text-slate-800"
+                                ? "bg-slate-900 dark:bg-emerald-500/20 text-white dark:text-emerald-300 shadow-xs"
+                                : "hover:bg-slate-50 dark:hover:bg-white/[0.05] text-slate-800 dark:text-slate-200"
                             }`}
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               <div
                                 className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 ${
-                                  isSelected ? "bg-slate-800 text-emerald-400" : "bg-slate-100 text-slate-700"
+                                  isSelected ? "bg-slate-800 dark:bg-emerald-500/30 text-emerald-400" : "bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300"
                                 }`}
                               >
                                 🏢
                               </div>
                               <div className="min-w-0">
-                                <div className={`text-xs font-bold truncate ${isSelected ? "text-white" : "text-slate-900"}`}>
+                                <div className={`text-xs font-bold truncate ${isSelected ? "text-white dark:text-emerald-200" : "text-slate-900 dark:text-slate-100"}`}>
                                   {b.name}
                                 </div>
-                                <div className={`text-[10px] truncate ${isSelected ? "text-slate-300" : "text-slate-400"}`}>
+                                <div className={`text-[10px] truncate ${isSelected ? "text-slate-300 dark:text-emerald-300/80" : "text-slate-400 dark:text-slate-500"}`}>
                                   {b.wabas?.length || 0} WhatsApp Account{b.wabas?.length === 1 ? "" : "s"}
                                 </div>
                               </div>
@@ -980,7 +980,7 @@ export default function TemplatesPage() {
 
             {/* Custom WhatsApp Number Dropdown */}
             <div className="relative" ref={phoneDropdownRef}>
-              <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block mb-1.5">
+              <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">
                 Select WhatsApp Number
               </label>
               <button
@@ -990,19 +990,19 @@ export default function TemplatesPage() {
                   setBizDropdownOpen(false);
                 }}
                 disabled={loadingBusinesses || !activeBusiness?.wabas?.length}
-                className="w-full bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-slate-300 rounded-2xl p-2.5 shadow-2xs hover:shadow-xs transition text-left flex items-center justify-between gap-3 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full bg-white dark:bg-[#0B101D]/80 hover:bg-slate-50/80 dark:hover:bg-[#0E1526] border border-slate-200 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-emerald-500/30 rounded-2xl p-2.5 shadow-2xs hover:shadow-xs transition text-left flex items-center justify-between gap-3 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 aria-haspopup="listbox"
                 aria-expanded={phoneDropdownOpen}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-600 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition shadow-2xs font-bold">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200/80 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition shadow-2xs font-bold">
                     📞
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-xs font-black text-slate-900 truncate font-mono">
+                    <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate font-mono">
                       {activePhone?.number || (!activeBusiness?.wabas?.length ? "No registered numbers" : "Select WhatsApp Number")}
                     </div>
-                    <div className="text-[10px] text-emerald-700 font-bold truncate flex items-center gap-1 mt-0.5">
+                    <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold truncate flex items-center gap-1 mt-0.5">
                       {activePhone?.verifiedName ? (
                         <>
                           <span className="text-emerald-500">✓</span>
@@ -1011,13 +1011,13 @@ export default function TemplatesPage() {
                       ) : activeWaba?.name ? (
                         <span>{activeWaba.name}</span>
                       ) : (
-                        <span className="text-slate-400">Cloud API</span>
+                        <span className="text-slate-400 dark:text-slate-500">Cloud API</span>
                       )}
                     </div>
                   </div>
                 </div>
                 <svg
-                  className={`w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-200 shrink-0 ${
+                  className={`w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-transform duration-200 shrink-0 ${
                     phoneDropdownOpen ? "rotate-180" : ""
                   }`}
                   fill="none"
@@ -1030,12 +1030,12 @@ export default function TemplatesPage() {
 
               {/* Phone Dropdown Menu */}
               {phoneDropdownOpen && (
-                <div className="absolute left-0 top-full mt-2 w-full min-w-[320px] bg-white rounded-2xl border border-slate-200/90 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                  <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
-                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                <div className="absolute left-0 top-full mt-2 w-full min-w-[320px] bg-white dark:bg-[#0B101D] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="px-3 py-2 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                       WhatsApp Accounts
                     </span>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                    <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-100 dark:border-emerald-500/30">
                       {activeBusiness?.wabas?.length || 0} Available
                     </span>
                   </div>
@@ -1060,23 +1060,23 @@ export default function TemplatesPage() {
                             }}
                             className={`w-full text-left p-2.5 rounded-xl transition flex items-center justify-between gap-3 cursor-pointer ${
                               isSelected
-                                ? "bg-slate-900 text-white shadow-xs"
-                                : "hover:bg-slate-50 text-slate-800"
+                                ? "bg-slate-900 dark:bg-emerald-500/20 text-white dark:text-emerald-300 shadow-xs"
+                                : "hover:bg-slate-50 dark:hover:bg-white/[0.05] text-slate-800 dark:text-slate-200"
                             }`}
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               <div
                                 className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
-                                  isSelected ? "bg-slate-800 text-emerald-400" : "bg-emerald-50 text-emerald-600"
+                                  isSelected ? "bg-slate-800 dark:bg-emerald-500/30 text-emerald-400" : "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
                                 }`}
                               >
                                 📞
                               </div>
                               <div className="min-w-0">
-                                <div className={`text-xs font-bold font-mono truncate ${isSelected ? "text-white" : "text-slate-900"}`}>
+                                <div className={`text-xs font-bold font-mono truncate ${isSelected ? "text-white dark:text-emerald-200" : "text-slate-900 dark:text-slate-100"}`}>
                                   {phone}
                                 </div>
-                                <div className={`text-[10px] truncate ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
+                                <div className={`text-[10px] truncate ${isSelected ? "text-slate-300 dark:text-emerald-300/80" : "text-slate-500 dark:text-slate-400"}`}>
                                   {verifiedName ? `✓ ${verifiedName}` : w.name}
                                 </div>
                               </div>
@@ -1101,7 +1101,7 @@ export default function TemplatesPage() {
             <button
               onClick={() => loadBusinesses(selectedWabaId)}
               disabled={loading || loadingBusinesses}
-              className="px-3.5 py-2.5 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 transition shadow-2xs flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+              className="px-3.5 py-2.5 bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.05] transition shadow-2xs flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
             >
               <span className={`text-sm ${loading || loadingBusinesses ? "animate-spin" : ""}`}>🔄</span>
               <span>Refresh</span>
@@ -1127,7 +1127,7 @@ export default function TemplatesPage() {
                 setCreateModalWabaId(selectedWabaId || wabaId);
                 setShowCreateModal(true);
               }}
-              className="px-5 py-2.5 bg-[#064e3b] hover:bg-[#043d2e] text-white text-xs font-extrabold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.3)] transition flex items-center gap-1.5 cursor-pointer"
             >
               <span className="text-sm font-bold leading-none">+</span>
               <span>Create Template</span>
@@ -1153,14 +1153,14 @@ export default function TemplatesPage() {
           <div className="flex items-center gap-2 flex-wrap shrink-0">
               <button
                 onClick={() => setShowTokenModal(true)}
-                className="px-3.5 py-2.5 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 shadow-2xs transition flex items-center gap-1.5"
+                className="px-3.5 py-2.5 bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.05] shadow-2xs transition flex items-center gap-1.5"
               >
                 <span>🔑</span> Meta Token
               </button>
               <button
                 onClick={() => loadBusinesses(selectedWabaId)}
                 disabled={loading || loadingBusinesses}
-                className="px-3.5 py-2.5 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3.5 py-2.5 bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.05] shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50"
               >
                 <span className={`text-sm ${loading || loadingBusinesses ? "animate-spin" : ""}`}>🔄</span>
                 {loading || loadingBusinesses ? "Syncing..." : "Sync from Meta"}
@@ -1335,18 +1335,18 @@ export default function TemplatesPage() {
             onClick={() => setFilterStatus("ALL")}
             className={`p-4 sm:p-5 rounded-2xl border text-left transition cursor-pointer ${
               filterStatus === "ALL"
-                ? "bg-white border-slate-900 ring-2 ring-slate-900/10 shadow-xs"
-                : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs"
+                ? "bg-white dark:bg-[#0B101D] border-slate-900 dark:border-emerald-500 ring-2 ring-slate-900/10 dark:ring-emerald-500/20 shadow-xs"
+                : "bg-white dark:bg-[#0B101D]/80 border-slate-200/90 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-white/20 shadow-2xs"
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-600 text-xs shrink-0 font-bold">
+              <div className="w-7 h-7 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-slate-300 text-xs shrink-0 font-bold">
                 📄
               </div>
-              <span className="text-xs font-bold text-slate-700">All Templates</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">All Templates</span>
             </div>
-            <div className="mt-2.5 text-2xl font-black text-slate-900">{templates.length}</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">Total in selected portfolio</div>
+            <div className="mt-2.5 text-2xl font-bold text-slate-900 dark:text-slate-100">{templates.length}</div>
+            <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Total in selected portfolio</div>
           </button>
 
           <button
@@ -1354,18 +1354,18 @@ export default function TemplatesPage() {
             onClick={() => setFilterStatus(filterStatus === "APPROVED" ? "ALL" : "APPROVED")}
             className={`p-4 sm:p-5 rounded-2xl border text-left transition cursor-pointer ${
               filterStatus === "APPROVED"
-                ? "bg-emerald-50/40 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs"
-                : "bg-white border-slate-200/90 hover:border-emerald-300 shadow-2xs"
+                ? "bg-emerald-50/40 dark:bg-emerald-500/15 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs"
+                : "bg-white dark:bg-[#0B101D]/80 border-slate-200/90 dark:border-white/[0.08] hover:border-emerald-300 dark:hover:border-emerald-500/30 shadow-2xs"
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 text-xs shrink-0 font-black">
+              <div className="w-7 h-7 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200/80 dark:border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs shrink-0 font-black">
                 ✓
               </div>
-              <span className="text-xs font-bold text-emerald-900">Approved &amp; Ready</span>
+              <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">Approved &amp; Ready</span>
             </div>
-            <div className="mt-2.5 text-2xl font-black text-slate-900">{totalApproved}</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">Ready to send to customers</div>
+            <div className="mt-2.5 text-2xl font-bold text-slate-900 dark:text-slate-100">{totalApproved}</div>
+            <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Ready to send to customers</div>
           </button>
 
           <button
@@ -1373,18 +1373,18 @@ export default function TemplatesPage() {
             onClick={() => setFilterStatus(filterStatus === "PENDING" ? "ALL" : "PENDING")}
             className={`p-4 sm:p-5 rounded-2xl border text-left transition cursor-pointer ${
               filterStatus === "PENDING"
-                ? "bg-amber-50/40 border-amber-500 ring-2 ring-amber-500/20 shadow-xs"
-                : "bg-white border-slate-200/90 hover:border-amber-300 shadow-2xs"
+                ? "bg-amber-50/40 dark:bg-amber-500/15 border-amber-500 ring-2 ring-amber-500/20 shadow-xs"
+                : "bg-white dark:bg-[#0B101D]/80 border-slate-200/90 dark:border-white/[0.08] hover:border-amber-300 dark:hover:border-amber-500/30 shadow-2xs"
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600 text-xs shrink-0 font-bold">
+              <div className="w-7 h-7 rounded-xl bg-amber-50 dark:bg-amber-500/15 border border-amber-200/80 dark:border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 text-xs shrink-0 font-bold">
                 🕒
               </div>
-              <span className="text-xs font-bold text-amber-900">In Review by Meta</span>
+              <span className="text-xs font-bold text-amber-900 dark:text-amber-300">In Review by Meta</span>
             </div>
-            <div className="mt-2.5 text-2xl font-black text-slate-900">{totalPending}</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">Waiting for Meta approval</div>
+            <div className="mt-2.5 text-2xl font-bold text-slate-900 dark:text-slate-100">{totalPending}</div>
+            <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Waiting for Meta approval</div>
           </button>
 
           <button
@@ -1392,18 +1392,18 @@ export default function TemplatesPage() {
             onClick={() => setFilterStatus(filterStatus === "REJECTED" ? "ALL" : "REJECTED")}
             className={`p-4 sm:p-5 rounded-2xl border text-left transition cursor-pointer ${
               filterStatus === "REJECTED"
-                ? "bg-rose-50/40 border-rose-500 ring-2 ring-rose-500/20 shadow-xs"
-                : "bg-white border-slate-200/90 hover:border-rose-300 shadow-2xs"
+                ? "bg-rose-50/40 dark:bg-rose-500/15 border-rose-500 ring-2 ring-rose-500/20 shadow-xs"
+                : "bg-white dark:bg-[#0B101D]/80 border-slate-200/90 dark:border-white/[0.08] hover:border-rose-300 dark:hover:border-rose-500/30 shadow-2xs"
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600 text-xs shrink-0 font-black">
+              <div className="w-7 h-7 rounded-xl bg-rose-50 dark:bg-rose-500/15 border border-rose-200/80 dark:border-rose-500/30 flex items-center justify-center text-rose-600 dark:text-rose-400 text-xs shrink-0 font-black">
                 !
               </div>
-              <span className="text-xs font-bold text-rose-900">Needs Revision</span>
+              <span className="text-xs font-bold text-rose-900 dark:text-rose-300">Needs Revision</span>
             </div>
-            <div className="mt-2.5 text-2xl font-black text-slate-900">{totalRejected}</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">
+            <div className="mt-2.5 text-2xl font-bold text-slate-900 dark:text-slate-100">{totalRejected}</div>
+            <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
               {totalRejected > 0 ? "Rejected by Meta policy" : "0 rejected templates"}
             </div>
           </button>
@@ -1411,60 +1411,60 @@ export default function TemplatesPage() {
       ) : (
         /* DEVELOPER MODE: Full Bento KPI Strip with SLA Metrics */
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs">
+          <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] p-5 shadow-2xs">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Templates</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Templates</span>
               <span className="text-xl">📄</span>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-slate-900">{templates.length}</span>
-              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded">
+              <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">{templates.length}</span>
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.06] px-1.5 py-0.2 rounded">
                 {activeBusiness?.name ? activeBusiness.name.slice(0, 14) : "In WABA"}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">Discovered on Meta Graph API</p>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Discovered on Meta Graph API</p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs">
+          <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] p-5 shadow-2xs">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Approved &amp; Live</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Approved &amp; Live</span>
               <span className="text-xl">🟢</span>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-emerald-600">{totalApproved}</span>
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+              <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{totalApproved}</span>
+              <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/15 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-500/30">
                 Ready to Send
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">Passing all Meta safety guidelines</p>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Passing all Meta safety guidelines</p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs">
+          <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] p-5 shadow-2xs">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">In Review by Meta</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">In Review by Meta</span>
               <span className="text-xl">⏳</span>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-amber-600">{totalPending}</span>
-              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+              <span className="text-2xl font-bold text-amber-600 dark:text-amber-400">{totalPending}</span>
+              <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/15 px-1.5 py-0.2 rounded border border-amber-200 dark:border-amber-500/30">
                 AI Evaluating
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">Automated Meta review in progress</p>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Automated Meta review in progress</p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs">
+          <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] p-5 shadow-2xs">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Auto-Approval SLA</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Auto-Approval SLA</span>
               <span className="text-xl">⚡</span>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-indigo-600">~2 Mins</span>
-              <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200">
+              <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">~2 Mins</span>
+              <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 px-1.5 py-0.2 rounded border border-indigo-200 dark:border-indigo-500/30">
                 Meta Cloud
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">Typical turnaround for new designs</p>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Typical turnaround for new designs</p>
           </div>
         </div>
       )}
@@ -1473,16 +1473,16 @@ export default function TemplatesPage() {
       {error && (
         <div className={`p-5 rounded-3xl text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs ${
           error === "Meta WhatsApp not connected"
-            ? "bg-emerald-50/80 border border-emerald-200 text-emerald-950"
-            : "bg-rose-50 border border-rose-200 text-rose-800"
+            ? "bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-500/30 text-emerald-950 dark:text-emerald-100"
+            : "bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/30 text-rose-800 dark:text-rose-200"
         }`}>
           <div className="flex items-start gap-3">
             <span className="text-2xl shrink-0">{error === "Meta WhatsApp not connected" ? "🔗" : "⚠️"}</span>
             <div>
-              <p className={`font-extrabold text-sm ${error === "Meta WhatsApp not connected" ? "text-emerald-950" : "text-rose-900"}`}>
+              <p className={`font-bold text-sm ${error === "Meta WhatsApp not connected" ? "text-emerald-950 dark:text-emerald-100" : "text-rose-900 dark:text-rose-100"}`}>
                 {error === "Meta WhatsApp not connected" ? "Connect Your WhatsApp Business Account" : "Meta WhatsApp API Error"}
               </p>
-              <p className={`text-xs mt-0.5 leading-relaxed ${error === "Meta WhatsApp not connected" ? "text-emerald-800" : "text-rose-700"}`}>
+              <p className={`text-xs mt-0.5 leading-relaxed ${error === "Meta WhatsApp not connected" ? "text-emerald-800 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"}`}>
                 {error === "Meta WhatsApp not connected"
                   ? "Link your Meta WhatsApp Cloud API token to view, create, and submit templates for instant Meta approval."
                   : error}
@@ -1493,7 +1493,7 @@ export default function TemplatesPage() {
             onClick={() => setShowTokenModal(true)}
             className={`px-4 py-2 text-white font-bold text-xs rounded-xl shadow-2xs transition shrink-0 cursor-pointer ${
               error === "Meta WhatsApp not connected"
-                ? "bg-[#064e3b] hover:bg-[#043d2e]"
+                ? "bg-[#064e3b] dark:bg-emerald-600 hover:bg-[#043d2e] dark:hover:bg-emerald-500"
                 : "bg-rose-600 hover:bg-rose-700"
             }`}
           >
@@ -1503,16 +1503,16 @@ export default function TemplatesPage() {
       )}
 
       {/* CONTROLS BAR: SEGMENTED TABS, STATUS FILTER, SEARCH & VIEW TOGGLE */}
-      <div className="bg-white p-3.5 sm:p-4 rounded-3xl border border-slate-200/90 shadow-2xs space-y-3">
+      <div className="bg-white dark:bg-[#0B101D]/80 p-3.5 sm:p-4 rounded-3xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xs space-y-3">
         {/* Row 1: Category Segmented Tabs & View Mode Switcher */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 bg-slate-100/90 p-1 rounded-2xl overflow-x-auto max-w-full">
+          <div className="flex items-center gap-1.5 bg-slate-100/90 dark:bg-white/[0.04] border border-transparent dark:border-white/[0.06] p-1 rounded-2xl overflow-x-auto max-w-full">
             <button
               onClick={() => setFilterCategory("ALL")}
               className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition whitespace-nowrap ${
                 filterCategory === "ALL"
-                  ? "bg-[#e6f7ef] text-emerald-950 border border-emerald-200/80 shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900 font-semibold"
+                  ? "bg-[#e6f7ef] dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-500/30 shadow-2xs"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold"
               }`}
             >
               All Templates ({templates.length})
@@ -1521,12 +1521,12 @@ export default function TemplatesPage() {
               onClick={() => setFilterCategory("MARKETING")}
               className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition whitespace-nowrap flex items-center gap-1.5 ${
                 filterCategory === "MARKETING"
-                  ? "bg-purple-50 text-purple-900 border border-purple-200 shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900 font-semibold"
+                  ? "bg-purple-50 dark:bg-purple-500/20 text-purple-900 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 shadow-2xs"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold"
               }`}
             >
               <span>📢 Marketing</span>
-              <span className="text-[10px] bg-purple-100 text-purple-800 px-1.5 py-0.2 rounded-full font-extrabold">
+              <span className="text-[10px] bg-purple-100 dark:bg-purple-500/30 text-purple-800 dark:text-purple-300 px-1.5 py-0.2 rounded-full font-extrabold">
                 {totalMarketing}
               </span>
             </button>
@@ -1534,12 +1534,12 @@ export default function TemplatesPage() {
               onClick={() => setFilterCategory("UTILITY")}
               className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition whitespace-nowrap flex items-center gap-1.5 ${
                 filterCategory === "UTILITY"
-                  ? "bg-blue-50 text-blue-900 border border-blue-200 shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900 font-semibold"
+                  ? "bg-blue-50 dark:bg-blue-500/20 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 shadow-2xs"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold"
               }`}
             >
               <span>📦 Utility</span>
-              <span className="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded-full font-extrabold">
+              <span className="text-[10px] bg-blue-100 dark:bg-blue-500/30 text-blue-800 dark:text-blue-300 px-1.5 py-0.2 rounded-full font-extrabold">
                 {totalUtility}
               </span>
             </button>
@@ -1547,36 +1547,36 @@ export default function TemplatesPage() {
               onClick={() => setFilterCategory("AUTHENTICATION")}
               className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition whitespace-nowrap flex items-center gap-1.5 ${
                 filterCategory === "AUTHENTICATION"
-                  ? "bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900 font-semibold"
+                  ? "bg-amber-50 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 shadow-2xs"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold"
               }`}
             >
               <span>🔑 Authentication / OTP</span>
-              <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded-full font-extrabold">
+              <span className="text-[10px] bg-amber-100 dark:bg-amber-500/30 text-amber-800 dark:text-amber-300 px-1.5 py-0.2 rounded-full font-extrabold">
                 {totalAuth}
               </span>
             </button>
           </div>
 
           {/* View Mode Switcher */}
-          <div className="flex items-center gap-1 bg-slate-100/90 p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-slate-100/90 dark:bg-white/[0.04] border border-transparent dark:border-white/[0.06] p-1 rounded-xl">
             <button
               onClick={() => setViewMode("cards")}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition flex items-center gap-1.5 ${
                 viewMode === "cards"
-                  ? "bg-white text-emerald-900 shadow-2xs font-bold"
-                  : "text-slate-500 hover:text-slate-800"
+                  ? "bg-white dark:bg-white/10 text-emerald-900 dark:text-emerald-300 shadow-2xs font-bold"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
               }`}
             >
-              <span className={viewMode === "cards" ? "text-emerald-700 text-sm font-bold" : "text-sm"}>⊞</span>
+              <span className={viewMode === "cards" ? "text-emerald-700 dark:text-emerald-400 text-sm font-bold" : "text-sm"}>⊞</span>
               <span>Chat Cards</span>
             </button>
             <button
               onClick={() => setViewMode("table")}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition flex items-center gap-1.5 ${
                 viewMode === "table"
-                  ? "bg-white text-slate-900 shadow-2xs"
-                  : "text-slate-500 hover:text-slate-800 font-semibold"
+                  ? "bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-2xs"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-semibold"
               }`}
             >
               <span className="text-sm">☰</span>
@@ -1586,20 +1586,20 @@ export default function TemplatesPage() {
         </div>
 
         {/* Row 2: Search Input & Status Filter */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1 border-t border-slate-100">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1 border-t border-slate-100 dark:border-white/[0.06]">
           <div className="relative w-full sm:flex-1">
             <input
               type="text"
               placeholder="Search templates by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-8 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition shadow-2xs"
+              className="w-full pl-9 pr-8 py-2.5 bg-slate-50 dark:bg-white/[0.04] hover:bg-white dark:hover:bg-white/[0.08] focus:bg-white dark:focus:bg-[#070b14] border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition shadow-2xs"
             />
             <span className="absolute left-3 top-3 text-slate-400 text-xs">🔍</span>
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-200 text-xs font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -1607,16 +1607,16 @@ export default function TemplatesPage() {
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status:</span>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status:</span>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-3.5 py-2.5 bg-white border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 cursor-pointer shadow-2xs transition"
+              className="px-3.5 py-2.5 bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 cursor-pointer shadow-2xs transition"
             >
-              <option value="ALL">All Statuses ({templates.length})</option>
-              <option value="APPROVED">Approved Only</option>
-              <option value="PENDING">In Review Only</option>
-              <option value="REJECTED">Rejected Only</option>
+              <option value="ALL" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">All Statuses ({templates.length})</option>
+              <option value="APPROVED" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Approved Only</option>
+              <option value="PENDING" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">In Review Only</option>
+              <option value="REJECTED" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Rejected Only</option>
             </select>
           </div>
         </div>
@@ -1624,24 +1624,24 @@ export default function TemplatesPage() {
 
       {/* CONTENT: CARDS VIEW VS TABLE VIEW */}
       {loading ? (
-        <div className="bg-white rounded-3xl border border-slate-200/80 p-16 text-center shadow-2xs space-y-3">
-          <Loader scale={0.9} color="#0f172a" />
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Syncing templates from Meta Graph API...</p>
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl border border-slate-200/80 dark:border-white/[0.08] p-16 text-center shadow-2xs space-y-3">
+          <Loader scale={0.9} color="#10b981" />
+          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Syncing templates from Meta Graph API...</p>
         </div>
       ) : filteredTemplates.length === 0 ? (
-        <div className="bg-white border border-slate-200/90 rounded-3xl p-16 text-center space-y-4 shadow-2xs">
-          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-3xl mx-auto">
+        <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200/90 dark:border-white/[0.08] rounded-3xl p-16 text-center space-y-4 shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+          <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/10 flex items-center justify-center text-3xl mx-auto text-slate-600 dark:text-slate-300">
             📄
           </div>
           <div>
-            <h3 className="text-base font-extrabold text-slate-900">No templates found</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">No templates found</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-1">
               No WhatsApp templates match your selected filters. Design a new message and submit it to Meta for instant review.
             </p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-xs transition"
+            className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 rounded-xl text-xs font-black shadow-[0_0_15px_rgba(16,185,129,0.3)] transition cursor-pointer"
           >
             + Create New Template
           </button>
@@ -1661,18 +1661,18 @@ export default function TemplatesPage() {
             return (
               <div
                 key={template.id}
-                className="bg-white border border-slate-200/90 rounded-3xl shadow-xs overflow-hidden flex flex-col justify-between hover:border-slate-300 hover:shadow-md transition duration-200 group"
+                className="bg-white dark:bg-[#0B101D]/80 border border-slate-200/90 dark:border-white/[0.08] rounded-3xl shadow-xs overflow-hidden flex flex-col justify-between hover:border-slate-300 dark:hover:border-emerald-500/30 hover:shadow-md transition duration-200 group"
               >
                 <div className="p-5 space-y-4">
                   {/* Card Header */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-extrabold text-slate-900 text-base tracking-tight truncate" title={template.name}>
+                      <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base tracking-tight truncate" title={template.name}>
                         {template.name}
                       </h3>
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                         {getCategoryBadge(template.category)}
-                        <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 border border-slate-200/80 px-2 py-0.5 rounded">
+                        <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/10 px-2 py-0.5 rounded">
                           {template.language}
                         </span>
                       </div>
@@ -1681,7 +1681,7 @@ export default function TemplatesPage() {
                       {getStatusBadge(template.status)}
                       <button
                         onClick={() => copyTemplateName(template.name)}
-                        className="text-slate-400 hover:text-slate-700 p-1 text-base font-bold transition cursor-pointer"
+                        className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 text-base font-bold transition cursor-pointer"
                         title="Template options"
                       >
                         ⋮
@@ -1690,19 +1690,19 @@ export default function TemplatesPage() {
                   </div>
 
                   {/* WhatsApp Realistic Chat Bubble Container with subtle wallpaper texture */}
-                  <div className="p-4 rounded-2xl border border-[#e4ded5] space-y-2 relative shadow-inner bg-[#efeae2] bg-[radial-gradient(#d3cbbe_0.75px,transparent_0.75px)] [background-size:12px_12px]">
+                  <div className="p-4 rounded-2xl border border-[#e4ded5] dark:border-white/10 space-y-2 relative shadow-inner bg-[#efeae2] dark:bg-[#080d18] bg-[radial-gradient(#d3cbbe_0.75px,transparent_0.75px)] dark:bg-[radial-gradient(rgba(255,255,255,0.06)_0.75px,transparent_0.75px)] [background-size:12px_12px]">
                     {/* Speech Bubble */}
-                    <div className="bg-white rounded-2xl rounded-tl-none p-3.5 shadow-2xs border border-slate-200/50 text-xs space-y-2 text-slate-800">
+                    <div className="bg-white dark:bg-[#121c2e] rounded-2xl rounded-tl-none p-3.5 shadow-2xs border border-slate-200/50 dark:border-white/10 text-xs space-y-2 text-slate-800 dark:text-slate-200">
                       {header && (
-                        <div className="font-extrabold text-slate-900 border-b border-black/5 pb-1">
+                        <div className="font-bold text-slate-900 dark:text-white border-b border-black/5 dark:border-white/10 pb-1">
                           {header.format === "IMAGE" ? "🖼️ [Image Header]" : header.text}
                         </div>
                       )}
 
-                      <div className="whitespace-pre-line leading-relaxed text-slate-800 text-[11px] sm:text-xs">
+                      <div className="whitespace-pre-line leading-relaxed text-slate-800 dark:text-slate-200 text-[11px] sm:text-xs">
                         {template.name.toLowerCase() === "hello_world" ? (
                           <>
-                            <div className="font-extrabold text-slate-900 mb-1">Hello World</div>
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">Hello World</div>
                             <div>Welcome and congratulations!! This message demonstrates your ability to send a WhatsApp message notification from the Cloud API, hosted by Meta. Thank you for taking the time to test with us.</div>
                           </>
                         ) : template.category === "AUTHENTICATION" ? (
@@ -1712,13 +1712,13 @@ export default function TemplatesPage() {
                         )}
                       </div>
 
-                      <div className="text-[10px] text-slate-400 pt-0.5 border-t border-black/5">
+                      <div className="text-[10px] text-slate-400 dark:text-slate-400 pt-0.5 border-t border-black/5 dark:border-white/10">
                         {template.name.toLowerCase() === "hello_world"
                           ? "WhatsApp Business Platform sample message"
                           : footer?.text || (template.category === "AUTHENTICATION" ? "Expires in 10 minutes." : null)}
                       </div>
 
-                      <div className="text-[9px] text-slate-400 text-right flex items-center justify-end gap-1 pt-0.5">
+                      <div className="text-[9px] text-slate-400 dark:text-slate-400 text-right flex items-center justify-end gap-1 pt-0.5">
                         <span>12:00 PM</span>
                         <span className="text-sky-500 font-bold">✓✓</span>
                       </div>
@@ -1726,7 +1726,7 @@ export default function TemplatesPage() {
 
                     {/* Action Buttons */}
                     {template.category === "AUTHENTICATION" ? (
-                      <div className="bg-white text-sky-600 font-bold text-center py-2 rounded-xl border border-slate-200 text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer mt-1">
+                      <div className="bg-white dark:bg-[#18263e] text-sky-600 dark:text-sky-400 font-bold text-center py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer mt-1">
                         <span>🔗</span>
                         <span>Copy code</span>
                       </div>
@@ -1735,7 +1735,7 @@ export default function TemplatesPage() {
                         {buttonsComp.buttons.map((btn, idx) => (
                           <div
                             key={idx}
-                            className="bg-white text-sky-600 font-bold text-center py-2 rounded-xl border border-slate-200 text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="bg-white dark:bg-[#18263e] text-sky-600 dark:text-sky-400 font-bold text-center py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer"
                           >
                             {btn.type === "URL" && <span>🔗</span>}
                             {btn.type === "QUICK_REPLY" && <span>💬</span>}
@@ -1748,14 +1748,14 @@ export default function TemplatesPage() {
 
                     {/* Dynamic Excel Variables Cloud */}
                     {tplVars.length > 0 && (
-                      <div className="pt-2 border-t border-black/10 flex flex-wrap items-center gap-1.5">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                      <div className="pt-2 border-t border-black/10 dark:border-white/10 flex flex-wrap items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                           Excel Variables:
                         </span>
                         {tplVars.map((v: any, idx: number) => (
                           <span
                             key={idx}
-                            className="inline-flex items-center gap-1 bg-purple-50 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-purple-200"
+                            className="inline-flex items-center gap-1 bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-purple-200 dark:border-purple-500/30"
                           >
                             <span className="text-purple-400">&#123;&#123;{v.index}&#125;&#125;</span>
                             <span>{v.label}</span>
@@ -1767,18 +1767,18 @@ export default function TemplatesPage() {
                 </div>
 
                 {/* Card Action Footer */}
-                <div className="px-5 py-3.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs">
+                <div className="px-5 py-3.5 bg-slate-50/80 dark:bg-white/[0.02] border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between text-xs">
                   {template.status === "APPROVED" && template.category !== "AUTHENTICATION" ? (
                     <Link
                       href={`/dashboard/campaigns`}
-                      className="inline-flex items-center gap-1.5 font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl transition border border-emerald-300 shadow-2xs text-xs"
+                      className="inline-flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/15 hover:bg-emerald-100 dark:hover:bg-emerald-500/25 px-3 py-1.5 rounded-xl transition border border-emerald-300 dark:border-emerald-500/30 shadow-2xs text-xs"
                     >
                       <span>🚀</span>
                       <span>Launch Broadcast</span>
                     </Link>
                   ) : (
-                    <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-700">
-                      <span className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-[10px] font-black">
+                    <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-700 dark:text-emerald-400">
+                      <span className="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-700 dark:text-emerald-300 text-[10px] font-black">
                         ✓
                       </span>
                       <span>Ready for System Use</span>
@@ -1788,7 +1788,7 @@ export default function TemplatesPage() {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => copyTemplateName(template.name)}
-                      className="text-slate-600 hover:text-slate-900 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                      className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
                     >
                       <span>📋</span>
                       <span>Copy Name</span>
@@ -1796,7 +1796,7 @@ export default function TemplatesPage() {
                     {!isProtected && (
                       <button
                         onClick={() => handleDelete(template.name, template.id)}
-                        className="text-rose-600 hover:text-rose-700 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                        className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-bold text-xs flex items-center gap-1 cursor-pointer"
                       >
                         <span>🗑️</span>
                         <span>Delete</span>
@@ -1810,11 +1810,11 @@ export default function TemplatesPage() {
         </div>
       ) : (
         /* TABLE VIEW (Dense enterprise management) */
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xs overflow-hidden">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200/80 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                <tr className="bg-slate-50 dark:bg-white/[0.04] border-b border-slate-200/80 dark:border-white/[0.08] text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   <th className="p-4">Template Name</th>
                   <th className="p-4">Category</th>
                   <th className="p-4">Language</th>
@@ -1823,19 +1823,19 @@ export default function TemplatesPage() {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
                 {filteredTemplates.map((t) => {
                   const isProtected = t.name.toLowerCase() === "hello_world" || t.name.toLowerCase().startsWith("sample_");
                   const tplVars = savedTemplateVars[t.name] || (typeof window !== "undefined" ? JSON.parse(localStorage.getItem(`tpl_vars_${t.name}`) || "[]") : []);
 
                   return (
-                    <tr key={t.id} className="hover:bg-slate-50/60 transition">
+                    <tr key={t.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition">
                       <td className="p-4">
-                        <div className="font-extrabold text-slate-900">{t.name}</div>
-                        <div className="text-[10px] text-slate-400 font-mono">ID: {t.id}</div>
+                        <div className="font-bold text-slate-900 dark:text-slate-100">{t.name}</div>
+                        <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ID: {t.id}</div>
                       </td>
                       <td className="p-4">{getCategoryBadge(t.category)}</td>
-                      <td className="p-4 font-mono uppercase text-slate-600 font-bold">{t.language}</td>
+                      <td className="p-4 font-mono uppercase text-slate-600 dark:text-slate-400 font-bold">{t.language}</td>
                       <td className="p-4">{getStatusBadge(t.status)}</td>
                       <td className="p-4">
                         {tplVars.length > 0 ? (
@@ -1843,28 +1843,28 @@ export default function TemplatesPage() {
                             {tplVars.map((v: any, idx: number) => (
                               <span
                                 key={idx}
-                                className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded text-[10px] font-bold border border-purple-200"
+                                className="bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded text-[10px] font-bold border border-purple-200 dark:border-purple-500/30"
                               >
                                 &#123;&#123;{v.index}&#125;&#125; {v.label}
                               </span>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-slate-400 italic">Static Template</span>
+                          <span className="text-slate-400 dark:text-slate-500 italic">Static Template</span>
                         )}
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => copyTemplateName(t.name)}
-                            className="px-2.5 py-1 text-slate-600 hover:text-slate-900 bg-slate-100 rounded-lg font-semibold"
+                            className="px-2.5 py-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-white/[0.06] rounded-lg font-semibold"
                           >
                             Copy Name
                           </button>
                           {!isProtected && (
                             <button
                               onClick={() => handleDelete(t.name, t.id)}
-                              className="px-2.5 py-1 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg font-semibold"
+                              className="px-2.5 py-1 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg font-semibold"
                             >
                               Delete
                             </button>
@@ -1888,26 +1888,26 @@ export default function TemplatesPage() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl max-w-5xl w-full shadow-2xl flex flex-col max-h-[92vh] border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-5xl w-full shadow-2xl flex flex-col max-h-[92vh] border border-slate-200 dark:border-white/10 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
           >
             {/* Modal Header */}
-            <div className="shrink-0 flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-white z-10">
+            <div className="shrink-0 flex justify-between items-center px-6 py-4 border-b border-slate-100 dark:border-white/10 bg-white dark:bg-[#0B101D] z-10">
               <div>
-                <h3 className="font-extrabold text-lg sm:text-xl text-slate-900 flex items-center gap-2">
+                <h3 className="font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white flex items-center gap-2">
                   <span>✨</span> Create &amp; Submit WhatsApp Template
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Design with custom variable brackets like <code className="font-mono text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded font-bold">&#123;&#123;Customer_Name&#125;&#125;</code>. Meta AI evaluates in ~2 minutes.
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Design with custom variable brackets like <code className="font-mono text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 px-1.5 py-0.5 rounded font-bold">&#123;&#123;Customer_Name&#125;&#125;</code>. Meta AI evaluates in ~2 minutes.
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="hidden sm:inline-block text-[11px] text-slate-400 font-medium bg-slate-100 px-2 py-1 rounded-md">
+                <span className="hidden sm:inline-block text-[11px] text-slate-400 font-medium bg-slate-100 dark:bg-white/10 px-2 py-1 rounded-md">
                   ESC to close
                 </span>
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold text-xl transition cursor-pointer"
+                  className="w-9 h-9 rounded-full bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white flex items-center justify-center font-bold text-xl transition cursor-pointer"
                 >
                   ✕
                 </button>
@@ -1916,7 +1916,7 @@ export default function TemplatesPage() {
 
             {/* Error Banner */}
             {submitError && (
-              <div className="shrink-0 mx-6 mt-4 p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-rose-700 text-xs sm:text-sm font-semibold flex items-center gap-2">
+              <div className="shrink-0 mx-6 mt-4 p-3.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/30 rounded-2xl text-rose-700 dark:text-rose-300 text-xs sm:text-sm font-semibold flex items-center gap-2">
                 <span className="text-base">⚠️</span>
                 <div>
                   <strong>Meta Submission Error:</strong> {submitError}
@@ -1929,45 +1929,45 @@ export default function TemplatesPage() {
               <form id="createTemplateForm" onSubmit={handleSubmitTemplate} className="space-y-6">
                 
                 {/* QUICK STARTER PRESET BAR */}
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2">
+                <div className="bg-slate-50 dark:bg-white/[0.03] p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                       <span>⚡</span> 1-Click Starter Presets:
                     </span>
-                    <span className="text-[10px] text-slate-400">Click to instantly populate template &amp; variables</span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500">Click to instantly populate template &amp; variables</span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <button
                       type="button"
                       onClick={() => loadPreset("ORDER")}
-                      className="p-2 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded-xl text-left transition"
+                      className="p-2 bg-white dark:bg-[#070b14] hover:bg-blue-50 dark:hover:bg-blue-950/30 border border-slate-200 dark:border-white/10 hover:border-blue-200 dark:hover:border-blue-500/30 rounded-xl text-left transition"
                     >
-                      <div className="text-xs font-bold text-slate-900">🛍️ Order Update</div>
-                      <div className="text-[10px] text-slate-500">Utility Category</div>
+                      <div className="text-xs font-bold text-slate-900 dark:text-slate-100">🛍️ Order Update</div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400">Utility Category</div>
                     </button>
                     <button
                       type="button"
                       onClick={() => loadPreset("CART")}
-                      className="p-2 bg-white hover:bg-purple-50 border border-slate-200 hover:border-purple-200 rounded-xl text-left transition"
+                      className="p-2 bg-white dark:bg-[#070b14] hover:bg-purple-50 dark:hover:bg-purple-950/30 border border-slate-200 dark:border-white/10 hover:border-purple-200 dark:hover:border-purple-500/30 rounded-xl text-left transition"
                     >
-                      <div className="text-xs font-bold text-slate-900">🛒 Cart Recovery</div>
-                      <div className="text-[10px] text-slate-500">Marketing Category</div>
+                      <div className="text-xs font-bold text-slate-900 dark:text-slate-100">🛒 Cart Recovery</div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400">Marketing Category</div>
                     </button>
                     <button
                       type="button"
                       onClick={() => loadPreset("DELIVERY")}
-                      className="p-2 bg-white hover:bg-amber-50 border border-slate-200 hover:border-amber-200 rounded-xl text-left transition"
+                      className="p-2 bg-white dark:bg-[#070b14] hover:bg-amber-50 dark:hover:bg-amber-950/30 border border-slate-200 dark:border-white/10 hover:border-amber-200 dark:hover:border-amber-500/30 rounded-xl text-left transition"
                     >
-                      <div className="text-xs font-bold text-slate-900">📦 Out for Delivery</div>
-                      <div className="text-[10px] text-slate-500">Utility Category</div>
+                      <div className="text-xs font-bold text-slate-900 dark:text-slate-100">📦 Out for Delivery</div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400">Utility Category</div>
                     </button>
                     <button
                       type="button"
                       onClick={() => loadPreset("OTP")}
-                      className="p-2 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-xl text-left transition"
+                      className="p-2 bg-white dark:bg-[#070b14] hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-slate-200 dark:border-white/10 hover:border-emerald-200 dark:hover:border-emerald-500/30 rounded-xl text-left transition"
                     >
-                      <div className="text-xs font-bold text-slate-900">🔑 1-Tap OTP</div>
-                      <div className="text-[10px] text-slate-500">Auth Category</div>
+                      <div className="text-xs font-bold text-slate-900 dark:text-slate-100">🔑 1-Tap OTP</div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400">Auth Category</div>
                     </button>
                   </div>
                 </div>
@@ -1976,12 +1976,12 @@ export default function TemplatesPage() {
                   {/* Left Column: Editor Inputs */}
                   <div className="lg:col-span-7 space-y-4">
                     {/* Target Business Portfolio / WABA Selector */}
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-1.5">
+                    <div className="bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl p-3.5 space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <label className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
                           <span>🏢</span> Target Brand Portfolio &amp; Number <span className="text-rose-500">*</span>
                         </label>
-                        <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-200">
+                        <span className="text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full font-bold border border-emerald-200 dark:border-emerald-500/30">
                           {isDev ? "Meta API Target" : "Brand Portfolio"}
                         </span>
                       </div>
@@ -1989,26 +1989,26 @@ export default function TemplatesPage() {
                         value={createModalWabaId || selectedWabaId}
                         onChange={(e) => setCreateModalWabaId(e.target.value)}
                         aria-label="Target Meta Business Portfolio & WABA"
-                        className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none cursor-pointer"
+                        className="w-full border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none cursor-pointer"
                       >
                         {businesses.map((b) => (
-                          <optgroup key={b.id} label={`📁 Portfolio: ${b.name}`}>
+                          <optgroup key={b.id} label={`📁 Portfolio: ${b.name}`} className="bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100">
                             {b.wabas?.map((w) => (
-                              <option key={w.id} value={w.id}>
+                              <option key={w.id} value={w.id} className="bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100">
                                 {w.name} {w.phones?.[0]?.number ? `• ${w.phones[0].number}` : ""} {isDev ? `[WABA: ${w.id}]` : ""}
                               </option>
                             ))}
                           </optgroup>
                         ))}
                       </select>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
                         {isDev
                           ? "Meta AI will register this template under the selected portfolio so it stays segregated."
                           : "This template will be saved and approved for your selected brand."}
                       </p>
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1">
                         Template Name <span className="text-rose-500">*</span>
                       </label>
                       <input
@@ -2017,18 +2017,18 @@ export default function TemplatesPage() {
                         placeholder="e.g. order_alert_v1"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "_") })}
-                        className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-mono focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+                        className="w-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 rounded-xl px-3.5 py-2.5 text-sm font-mono focus:ring-2 focus:ring-emerald-500/20 focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
                       />
-                      <p className="text-[11px] text-slate-400 mt-1">Lowercase letters, numbers, and underscores only.</p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Lowercase letters, numbers, and underscores only.</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Category</label>
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1">Category</label>
                         <select
                           value={formData.category}
                           onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+                          className="w-full border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2.5 text-sm font-semibold bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
                         >
                           <option value="MARKETING">📢 Marketing / Promotions</option>
                           <option value="UTILITY">📦 Utility / Orders</option>
@@ -2036,11 +2036,11 @@ export default function TemplatesPage() {
                         </select>
                       </div>
                       <div>
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Language</label>
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1">Language</label>
                         <select
                           value={formData.language}
                           onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+                          className="w-full border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2.5 text-sm font-semibold bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
                         >
                           <option value="en_US">English (en_US)</option>
                           <option value="hi">Hindi (hi)</option>
@@ -2052,11 +2052,11 @@ export default function TemplatesPage() {
                       <>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Header Type</label>
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1">Header Type</label>
                             <select
                               value={formData.headerType}
                               onChange={(e) => setFormData({ ...formData, headerType: e.target.value as any })}
-                              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white"
+                              className="w-full border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100"
                             >
                               <option value="NONE">None</option>
                               <option value="TEXT">Text Header</option>
@@ -2065,13 +2065,13 @@ export default function TemplatesPage() {
                           </div>
                           {formData.headerType === "TEXT" && (
                             <div>
-                              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Header Text</label>
+                              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1">Header Text</label>
                               <input
                                 type="text"
                                 placeholder="e.g. Order Update"
                                 value={formData.headerText}
                                 onChange={(e) => setFormData({ ...formData, headerText: e.target.value })}
-                                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm"
+                                className="w-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-sm"
                               />
                             </div>
                           )}
@@ -2080,59 +2080,59 @@ export default function TemplatesPage() {
                         {/* Body Text & Variable Inserters */}
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
-                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                               Body Message <span className="text-rose-500">*</span>
                             </label>
-                            <span className="text-[11px] text-slate-400">
+                            <span className="text-[11px] text-slate-400 dark:text-slate-500">
                               {detectedVariables.length} variable{detectedVariables.length !== 1 ? "s" : ""} detected
                             </span>
                           </div>
 
                           {/* Quick Insert Pills */}
-                          <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200 space-y-2">
-                            <span className="text-[11px] font-bold text-slate-700 block">
+                          <div className="bg-slate-50 dark:bg-white/[0.03] p-2.5 rounded-2xl border border-slate-200 dark:border-white/10 space-y-2">
+                            <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
                               ⚡ Click pill to insert at cursor:
                             </span>
                             <div className="flex flex-wrap gap-1.5">
                               <button
                                 type="button"
                                 onClick={() => insertVariableAtCursor("Customer_Name")}
-                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 transition shadow-2xs"
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white dark:bg-[#070b14] hover:bg-purple-50 dark:hover:bg-purple-950/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 transition shadow-2xs"
                               >
                                 👤 + &#123;&#123;Customer_Name&#125;&#125;
                               </button>
                               <button
                                 type="button"
                                 onClick={() => insertVariableAtCursor("Order_ID")}
-                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 transition shadow-2xs"
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white dark:bg-[#070b14] hover:bg-blue-50 dark:hover:bg-blue-950/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 transition shadow-2xs"
                               >
                                 📦 + &#123;&#123;Order_ID&#125;&#125;
                               </button>
                               <button
                                 type="button"
                                 onClick={() => insertVariableAtCursor("Product_Name")}
-                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-200 transition shadow-2xs"
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white dark:bg-[#070b14] hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 transition shadow-2xs"
                               >
                                 🛍️ + &#123;&#123;Product_Name&#125;&#125;
                               </button>
                               <button
                                 type="button"
                                 onClick={() => insertVariableAtCursor("Offer_Discount")}
-                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 transition shadow-2xs"
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white dark:bg-[#070b14] hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 transition shadow-2xs"
                               >
                                 🏷️ + &#123;&#123;Offer_Discount&#125;&#125;
                               </button>
                               <button
                                 type="button"
                                 onClick={() => insertVariableAtCursor("Delivery_Date")}
-                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 transition shadow-2xs"
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white dark:bg-[#070b14] hover:bg-indigo-50 dark:hover:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 transition shadow-2xs"
                               >
                                 📅 + &#123;&#123;Delivery_Date&#125;&#125;
                               </button>
                               <button
                                 type="button"
                                 onClick={() => insertVariableAtCursor("Custom_Field", true)}
-                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition shadow-2xs"
+                                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 transition shadow-2xs"
                               >
                                 ✨ + Custom &#123;&#123;...&#125;&#125;
                               </button>
@@ -2145,26 +2145,26 @@ export default function TemplatesPage() {
                             required
                             value={formData.bodyText}
                             onChange={(e) => setFormData({ ...formData, bodyText: e.target.value })}
-                            className="w-full border border-slate-200 rounded-xl p-3.5 text-sm font-sans focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+                            className="w-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 rounded-xl p-3.5 text-sm font-sans focus:ring-2 focus:ring-emerald-500/20 focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
                             placeholder="Type message here... Click buttons above to insert variable brackets."
                           />
                         </div>
 
                         {/* Dynamic Variable Definition & Excel Mapping Table */}
                         {detectedVariables.length > 0 && (
-                          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                          <div className="bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl p-4 space-y-3">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1.5">
                                 <span className="text-sm">📊</span>
-                                <span className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                                <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
                                   Excel Column Mapping ({detectedVariables.length} fields)
                                 </span>
                               </div>
-                              <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-200">
+                              <span className="text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full font-bold border border-emerald-200 dark:border-emerald-500/30">
                                 Auto-translates to Meta &#123;&#123;1&#125;&#125;, &#123;&#123;2&#125;&#125;
                               </span>
                             </div>
-                            <p className="text-[11px] text-slate-500">
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
                               These labels will be used when uploading Excel sheets to automatically populate recipient messages.
                             </p>
 
@@ -2175,23 +2175,23 @@ export default function TemplatesPage() {
                                 return (
                                   <div
                                     key={v}
-                                    className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-2 text-xs"
+                                    className="bg-white dark:bg-[#070b14] p-3 rounded-xl border border-slate-200 dark:border-white/10 shadow-2xs space-y-2 text-xs"
                                   >
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-2">
-                                        <span className="font-mono font-extrabold text-xs px-2 py-0.5 rounded bg-purple-100 text-purple-800 border border-purple-200">
+                                        <span className="font-mono font-extrabold text-xs px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30">
                                           &#123;&#123;{metaIdx}&#125;&#125;
                                         </span>
-                                        <span className="font-mono text-[11px] text-slate-700 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                        <span className="font-mono text-[11px] text-slate-700 dark:text-slate-300 font-bold bg-slate-100 dark:bg-white/10 px-2 py-0.5 rounded border border-slate-200 dark:border-white/10">
                                           &#123;&#123;{v}&#125;&#125;
                                         </span>
                                       </div>
-                                      <span className="text-[10px] text-slate-400 font-mono">Meta Positional #{metaIdx}</span>
+                                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">Meta Positional #{metaIdx}</span>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-2.5">
                                       <div>
-                                        <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">
+                                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-0.5">
                                           Excel Column Label:
                                         </label>
                                         <input
@@ -2209,11 +2209,11 @@ export default function TemplatesPage() {
                                             }));
                                           }}
                                           placeholder={`e.g. ${v}`}
-                                          className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                                          className="w-full px-2.5 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1424] rounded-lg text-xs font-bold text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
                                         />
                                       </div>
                                       <div>
-                                        <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">
+                                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-0.5">
                                           Sample Value (Required by Meta):
                                         </label>
                                         <input
@@ -2231,7 +2231,7 @@ export default function TemplatesPage() {
                                             }));
                                           }}
                                           placeholder="e.g. Rahul Sharma"
-                                          className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                                          className="w-full px-2.5 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1424] rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
                                         />
                                       </div>
                                     </div>
@@ -2243,7 +2243,7 @@ export default function TemplatesPage() {
                         )}
 
                         <div>
-                          <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1">
                             Footer Text (Optional)
                           </label>
                           <input
@@ -2251,19 +2251,19 @@ export default function TemplatesPage() {
                             placeholder="e.g. Reply STOP to unsubscribe"
                             value={formData.footerText}
                             onChange={(e) => setFormData({ ...formData, footerText: e.target.value })}
-                            className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm"
+                            className="w-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-sm"
                           />
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1">
                               Button Action
                             </label>
                             <select
                               value={formData.buttonType}
                               onChange={(e) => setFormData({ ...formData, buttonType: e.target.value as any })}
-                              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold bg-white"
+                              className="w-full border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-semibold bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100"
                             >
                               <option value="NONE">None</option>
                               <option value="URL">Website Link</option>
@@ -2272,7 +2272,7 @@ export default function TemplatesPage() {
                           </div>
                           {formData.buttonType !== "NONE" && (
                             <div>
-                              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1">
                                 Button Label
                               </label>
                               <input
@@ -2280,7 +2280,7 @@ export default function TemplatesPage() {
                                 placeholder="e.g. Track Order"
                                 value={formData.buttonText}
                                 onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })}
-                                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm"
+                                className="w-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-sm"
                               />
                             </div>
                           )}
@@ -2288,7 +2288,7 @@ export default function TemplatesPage() {
 
                         {formData.buttonType === "URL" && (
                           <div>
-                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1">
                               Destination URL
                             </label>
                             <input
@@ -2296,7 +2296,7 @@ export default function TemplatesPage() {
                               placeholder="https://..."
                               value={formData.buttonUrl}
                               onChange={(e) => setFormData({ ...formData, buttonUrl: e.target.value })}
-                              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono"
+                              className="w-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-sm font-mono"
                             />
                           </div>
                         )}
@@ -2304,7 +2304,7 @@ export default function TemplatesPage() {
                     )}
 
                     {formData.category === "AUTHENTICATION" && (
-                      <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-900 space-y-2">
+                      <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-2xl border border-amber-200 dark:border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 space-y-2">
                         <p className="font-bold flex items-center gap-1.5">
                           <span>🔒</span> Meta Standard Authentication Format
                         </p>
@@ -2316,24 +2316,24 @@ export default function TemplatesPage() {
                   </div>
 
                   {/* Right Column: Ultra-Realistic iPhone Simulator */}
-                  <div className="lg:col-span-5 bg-slate-50 p-6 rounded-3xl border border-slate-200 flex flex-col items-center">
+                  <div className="lg:col-span-5 bg-slate-50 dark:bg-white/[0.02] p-6 rounded-3xl border border-slate-200 dark:border-white/10 flex flex-col items-center">
                     <div className="w-full flex items-center justify-between mb-4">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                         Live WhatsApp Preview
                       </span>
                       {formData.category !== "AUTHENTICATION" && (
-                        <div className="flex bg-slate-200 p-0.5 rounded-lg text-[10px] font-bold">
+                        <div className="flex bg-slate-200 dark:bg-white/10 p-0.5 rounded-lg text-[10px] font-bold">
                           <button
                             type="button"
                             onClick={() => setPreviewMode("live")}
-                            className={`px-2 py-0.5 rounded-md transition ${previewMode === "live" ? "bg-white text-emerald-700 shadow-2xs" : "text-slate-600"}`}
+                            className={`px-2 py-0.5 rounded-md transition ${previewMode === "live" ? "bg-white dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 shadow-2xs" : "text-slate-600 dark:text-slate-400"}`}
                           >
                             👁️ Customer View
                           </button>
                           <button
                             type="button"
                             onClick={() => setPreviewMode("raw")}
-                            className={`px-2 py-0.5 rounded-md transition ${previewMode === "raw" ? "bg-white text-emerald-700 shadow-2xs" : "text-slate-600"}`}
+                            className={`px-2 py-0.5 rounded-md transition ${previewMode === "raw" ? "bg-white dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 shadow-2xs" : "text-slate-600 dark:text-slate-400"}`}
                           >
                             🔍 Code View
                           </button>
@@ -2347,9 +2347,9 @@ export default function TemplatesPage() {
                       <div className="w-20 h-4 bg-slate-950 rounded-full mx-auto mb-2.5"></div>
 
                       {/* WhatsApp Chat Area */}
-                      <div className="bg-[#E5DDD5] rounded-[24px] overflow-hidden min-h-[390px] flex flex-col justify-between p-3 border border-slate-300 relative text-xs">
+                      <div className="bg-[#E5DDD5] dark:bg-[#080d18] rounded-[24px] overflow-hidden min-h-[390px] flex flex-col justify-between p-3 border border-slate-300 dark:border-white/10 relative text-xs">
                         {/* Chat Header */}
-                        <div className="bg-[#075E54] text-white p-2.5 -mx-3 -mt-3 flex items-center justify-between mb-3 shadow-sm">
+                        <div className="bg-[#075E54] dark:bg-[#0a1b24] text-white p-2.5 -mx-3 -mt-3 flex items-center justify-between mb-3 shadow-sm border-b dark:border-white/5">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 rounded-full bg-emerald-400 flex items-center justify-center text-[10px] font-bold text-slate-900">
                               WA
@@ -2365,14 +2365,14 @@ export default function TemplatesPage() {
                         </div>
 
                         {/* Speech Bubble */}
-                        <div className="bg-white rounded-2xl rounded-tl-none p-3 shadow-sm border border-slate-100 space-y-2 max-w-[95%]">
+                        <div className="bg-white dark:bg-[#121c2e] rounded-2xl rounded-tl-none p-3 shadow-sm border border-slate-100 dark:border-white/10 space-y-2 max-w-[95%]">
                           {formData.category === "AUTHENTICATION" ? (
                             <>
-                              <div className="text-xs text-slate-800 leading-relaxed">
-                                <span className="font-mono bg-slate-100 px-2 py-0.5 rounded font-bold text-slate-900">123456</span> is your verification code. Valid for 10 minutes. For your security, do not share this code.
+                              <div className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed">
+                                <span className="font-mono bg-slate-100 dark:bg-white/10 px-2 py-0.5 rounded font-bold text-slate-900 dark:text-white">123456</span> is your verification code. Valid for 10 minutes. For your security, do not share this code.
                               </div>
-                              <div className="pt-2 border-t border-black/10">
-                                <div className="bg-white text-blue-600 font-bold text-center py-2 rounded-xl text-xs shadow-2xs border border-slate-200 flex items-center justify-center gap-1">
+                              <div className="pt-2 border-t border-black/10 dark:border-white/10">
+                                <div className="bg-white dark:bg-[#1a263d] text-blue-600 dark:text-blue-400 font-bold text-center py-2 rounded-xl text-xs shadow-2xs border border-slate-200 dark:border-white/10 flex items-center justify-center gap-1">
                                   <span>📋</span> Copy Code
                                 </div>
                               </div>
@@ -2380,24 +2380,24 @@ export default function TemplatesPage() {
                           ) : (
                             <>
                               {formData.headerType === "TEXT" && formData.headerText && (
-                                <div className="font-bold text-slate-900 text-xs border-b border-black/5 pb-1">
+                                <div className="font-bold text-slate-900 dark:text-white text-xs border-b border-black/5 dark:border-white/10 pb-1">
                                   {formData.headerText}
                                 </div>
                               )}
                               {formData.headerType === "IMAGE" && (
-                                <div className="h-28 bg-slate-200 rounded-lg flex items-center justify-center text-slate-500 text-[11px] font-semibold border border-slate-300">
+                                <div className="h-28 bg-slate-200 dark:bg-white/10 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 text-[11px] font-semibold border border-slate-300 dark:border-white/10">
                                   🖼️ [Image Header Preview]
                                 </div>
                               )}
-                              <div className="text-xs text-slate-800 whitespace-pre-line leading-relaxed">
+                              <div className="text-xs text-slate-800 dark:text-slate-200 whitespace-pre-line leading-relaxed">
                                 {livePreviewBodyText}
                               </div>
                               {formData.footerText && (
-                                <div className="text-[10px] text-slate-400 pt-0.5">
+                                <div className="text-[10px] text-slate-400 dark:text-slate-400 pt-0.5">
                                   {formData.footerText}
                                 </div>
                               )}
-                              <div className="text-[9px] text-slate-400 text-right flex items-center justify-end gap-1 pt-1">
+                              <div className="text-[9px] text-slate-400 dark:text-slate-400 text-right flex items-center justify-end gap-1 pt-1">
                                 <span>12:00 PM</span>
                                 <span className="text-blue-500 font-bold">✓✓</span>
                               </div>
@@ -2408,7 +2408,7 @@ export default function TemplatesPage() {
                         {/* Buttons */}
                         {formData.category !== "AUTHENTICATION" && formData.buttonType !== "NONE" && formData.buttonText && (
                           <div className="pt-2 space-y-1.5">
-                            <div className="bg-white text-blue-600 font-bold text-center py-2 rounded-xl text-xs shadow-2xs border border-slate-200 flex items-center justify-center gap-1.5">
+                            <div className="bg-white dark:bg-[#1a263d] text-blue-600 dark:text-blue-400 font-bold text-center py-2 rounded-xl text-xs shadow-2xs border border-slate-200 dark:border-white/10 flex items-center justify-center gap-1.5">
                               {formData.buttonType === "URL" && <span>🔗</span>}
                               {formData.buttonType === "QUICK_REPLY" && <span>💬</span>}
                               <span>{formData.buttonText}</span>
@@ -2419,7 +2419,7 @@ export default function TemplatesPage() {
                     </div>
 
                     <div className="mt-4 text-center">
-                      <span className="text-[11px] text-slate-500 font-medium">
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                         {previewMode === "live" ? "Showing customer view with sample variables" : "Showing template code structure"}
                       </span>
                     </div>
@@ -2429,11 +2429,11 @@ export default function TemplatesPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="shrink-0 flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-100 z-10">
+            <div className="shrink-0 flex items-center justify-between px-6 py-4 bg-slate-50 dark:bg-[#0B101D] border-t border-slate-100 dark:border-white/10 z-10">
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-slate-600 hover:text-slate-900 text-xs font-semibold hover:bg-slate-200/60 rounded-xl transition cursor-pointer"
+                className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold hover:bg-slate-200/60 dark:hover:bg-white/10 rounded-xl transition cursor-pointer"
               >
                 Cancel
               </button>

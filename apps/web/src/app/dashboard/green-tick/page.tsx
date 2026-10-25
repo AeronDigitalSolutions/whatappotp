@@ -499,10 +499,10 @@ export default function WhatsAppVerificationPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16">
       {/* Top Control Bar with Mode Toggle */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-white/[0.08]">
         {/* Left: Account / Phone Number Selector */}
         <div>
-          <label className="text-xs font-bold text-slate-700 block mb-1.5">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 dark:text-slate-300 block mb-1.5">
             Select WhatsApp Number for Verification
           </label>
           <div className="flex items-center gap-2">
@@ -516,7 +516,7 @@ export default function WhatsAppVerificationPage() {
                     loadObaStatus(target);
                   }
                 }}
-                className="bg-white border border-slate-200 hover:border-slate-300 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 cursor-pointer shadow-2xs transition"
+                className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 cursor-pointer shadow-2xs transition"
               >
                 {numbers.map(n => (
                   <option key={n.id} value={n.phoneId}>
@@ -546,7 +546,7 @@ export default function WhatsAppVerificationPage() {
               <button
                 onClick={() => loadObaStatus(selectedPhone)}
                 disabled={loadingOba}
-                className="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-3.5 py-2 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.1] transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <span className={loadingOba ? "animate-spin" : ""}>🔄</span>
                 <span>Refresh Status</span>
@@ -567,13 +567,13 @@ export default function WhatsAppVerificationPage() {
         </div>
 
       {/* Official Clarification Banner (Trustworthy Positioning) */}
-      <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 md:p-5 text-xs text-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="bg-slate-50 dark:bg-[#0B101D]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-4 md:p-5 text-xs text-slate-700 dark:text-slate-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 backdrop-blur-xl">
         <div className="flex items-start gap-3">
           <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm shrink-0">
             ℹ️
           </div>
           <div>
-            <span className="font-bold text-slate-900 block mb-0.5">
+            <span className="font-bold text-slate-900 dark:text-slate-100 block mb-0.5">
               Official Business Account vs. Meta Verified
             </span>
             <p className="text-slate-600 leading-relaxed max-w-3xl">
@@ -650,7 +650,7 @@ export default function WhatsAppVerificationPage() {
                 <button
                   type="button"
                   onClick={() => setShowApplicationDetails(!showApplicationDetails)}
-                  className="px-3.5 py-2 bg-white border border-amber-300 text-amber-900 text-xs font-semibold rounded-xl hover:bg-amber-100/60 shadow-2xs transition"
+                  className="px-3.5 py-2 bg-white dark:bg-amber-950/40 border border-amber-300 dark:border-amber-500/40 text-amber-900 dark:text-amber-200 text-xs font-semibold rounded-xl hover:bg-amber-100/60 dark:hover:bg-amber-950/60 shadow-2xs transition"
                 >
                   {showApplicationDetails ? "Hide Dossier Details" : "View Submitted Dossier"}
                 </button>
@@ -699,17 +699,17 @@ export default function WhatsAppVerificationPage() {
           {/* Collapsible Submitted Dossier Details */}
           {showApplicationDetails && lastApp && (
             <div className="mt-6 pt-5 border-t border-black/5 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              <div className="p-3 bg-white/70 rounded-xl border border-black/5">
+              <div className="p-3 bg-white/70 dark:bg-white/[0.04] rounded-xl border border-black/5 dark:border-white/[0.08]">
                 <span className="font-bold text-slate-500 block uppercase text-[10px] tracking-wider mb-1">Brand Name</span>
                 <span className="font-semibold text-slate-900 text-sm">{lastApp.brandName}</span>
                 <p className="text-slate-500 text-[11px] mt-0.5 truncate">{lastApp.websiteUrl}</p>
               </div>
-              <div className="p-3 bg-white/70 rounded-xl border border-black/5">
+              <div className="p-3 bg-white/70 dark:bg-white/[0.04] rounded-xl border border-black/5 dark:border-white/[0.08]">
                 <span className="font-bold text-slate-500 block uppercase text-[10px] tracking-wider mb-1">Industry & Country</span>
                 <span className="font-semibold text-slate-900">{lastApp.industry || "Retail & E-commerce"}</span>
                 <p className="text-slate-500 text-[11px] mt-0.5">{lastApp.operatingCountry || "India"}</p>
               </div>
-              <div className="p-3 bg-white/70 rounded-xl border border-black/5">
+              <div className="p-3 bg-white/70 dark:bg-white/[0.04] rounded-xl border border-black/5 dark:border-white/[0.08]">
                 <span className="font-bold text-slate-500 block uppercase text-[10px] tracking-wider mb-1">Submitted Media Links</span>
                 <span className="font-semibold text-slate-900">
                   {Array.isArray(lastApp.mediaLinks) ? `${lastApp.mediaLinks.length} articles attached` : "Press references attached"}
@@ -728,7 +728,7 @@ export default function WhatsAppVerificationPage() {
           <div ref={leftColRef} className={`${isLong ? "sticky bottom-6" : "sticky top-6"} space-y-6`}>
 
           {/* Dynamic Animated Workflow Header & Active Step Banner */}
-          <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#0B101D]/80 p-5 md:p-6 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-4 backdrop-blur-xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3.5">
                 <div className="w-11 h-11 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-xl font-bold shadow-xs shrink-0">
@@ -744,7 +744,7 @@ export default function WhatsAppVerificationPage() {
                       {STEPS_CONFIG[currentStep - 1]?.tag}
                     </span>
                   </div>
-                  <h2 className="text-base font-bold text-slate-900 mt-0.5">
+                  <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
                     {STEPS_CONFIG[currentStep - 1]?.title}
                   </h2>
                 </div>
@@ -760,7 +760,7 @@ export default function WhatsAppVerificationPage() {
                   type="button"
                   onClick={() => handleSaveDraft(currentStep)}
                   disabled={savingDraft || !selectedPhone}
-                  className="px-3.5 py-1.5 bg-white border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl hover:bg-slate-50 shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                  className="px-3.5 py-1.5 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.1] shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                 >
                   <span>💾</span> {savingDraft ? "Saving..." : "Save Draft"}
                 </button>
@@ -831,9 +831,9 @@ export default function WhatsAppVerificationPage() {
 
           {/* ================= STEP 1: BUSINESS ACCOUNT SELECTION ================= */}
           {currentStep === 1 && (
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
-              <div className="border-b border-slate-100 pb-4">
-                <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+            <div className="bg-white dark:bg-[#0B101D]/80 p-6 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-6 backdrop-blur-xl">
+              <div className="border-b border-slate-100 dark:border-white/[0.06] pb-4">
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base flex items-center gap-2">
                   <span>📱</span> Step 1: Select WhatsApp Business Account
                 </h3>
                 <p className="text-slate-500 text-xs mt-1 leading-relaxed">
@@ -855,7 +855,7 @@ export default function WhatsAppVerificationPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-xs font-bold text-slate-700">Available Business Phone Numbers ({numbers.length}):</p>
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Available Business Phone Numbers ({numbers.length}):</p>
                   <div className="grid grid-cols-1 gap-3">
                     {numbers.map((phone) => {
                       const isSelected = selectedPhone?.phoneId === phone.phoneId;
@@ -873,7 +873,7 @@ export default function WhatsAppVerificationPage() {
                         >
                           <div className="flex items-start gap-3 min-w-0">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${
-                              isSelected ? "bg-emerald-600 text-white" : "bg-white border border-slate-200 text-slate-700"
+                              isSelected ? "bg-emerald-600 text-white" : "bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300"
                             }`}>
                               📱
                             </div>
@@ -942,11 +942,11 @@ export default function WhatsAppVerificationPage() {
 
           {/* ================= STEP 2: REQUIREMENTS & READINESS CHECKLIST ================= */}
           {currentStep === 2 && (
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
-              <div className="border-b border-slate-100 pb-4">
+            <div className="bg-white dark:bg-[#0B101D]/80 p-6 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-6 backdrop-blur-xl">
+              <div className="border-b border-slate-100 dark:border-white/[0.06] pb-4">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
-                    <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                    <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base flex items-center gap-2">
                       <span>🛡️</span> Step 2: Meta Requirements & Readiness Checklist
                     </h3>
                     <p className="text-slate-500 text-xs mt-1">
@@ -1000,7 +1000,7 @@ export default function WhatsAppVerificationPage() {
                             </p>
                             <div className="mt-2 text-[11px] text-slate-500 flex items-center gap-1.5">
                               <span className="font-semibold text-slate-700">Status value:</span>
-                              <span className="font-mono bg-white/80 px-1.5 py-0.5 rounded border border-black/5 text-slate-800">
+                              <span className="font-mono bg-white/80 dark:bg-white/[0.08] px-1.5 py-0.5 rounded border border-black/5 dark:border-white/10 text-slate-800 dark:text-slate-200">
                                 {item.value}
                               </span>
                             </div>
@@ -1012,7 +1012,7 @@ export default function WhatsAppVerificationPage() {
                             href={item.metaUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="px-3 py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-[11px] font-bold rounded-lg shadow-2xs flex items-center gap-1 transition"
+                            className="px-3 py-1.5 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.1] text-[11px] font-bold rounded-lg shadow-2xs flex items-center gap-1 transition"
                           >
                             <span>Meta Settings ↗</span>
                           </a>
@@ -1064,9 +1064,9 @@ export default function WhatsAppVerificationPage() {
 
           {/* ================= STEP 3: BRAND INFORMATION ================= */}
           {currentStep === 3 && (
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
-              <div className="border-b border-slate-100 pb-4">
-                <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+            <div className="bg-white dark:bg-[#0B101D]/80 p-6 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-6 backdrop-blur-xl">
+              <div className="border-b border-slate-100 dark:border-white/[0.06] pb-4">
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base flex items-center gap-2">
                   <span>🏢</span> Step 3: Brand Identity & Organization Details
                 </h3>
                 <p className="text-slate-500 text-xs mt-1 leading-relaxed">
@@ -1247,11 +1247,11 @@ export default function WhatsAppVerificationPage() {
 
           {/* ================= STEP 4: SUPPORTING EVIDENCE (NOTABILITY DOSSIER) ================= */}
           {currentStep === 4 && (
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
-              <div className="border-b border-slate-100 pb-4">
+            <div className="bg-white dark:bg-[#0B101D]/80 p-6 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-6 backdrop-blur-xl">
+              <div className="border-b border-slate-100 dark:border-white/[0.06] pb-4">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
-                    <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                    <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base flex items-center gap-2">
                       <span>📰</span> Step 4: Editorial Press Evidence Dossier
                     </h3>
                     <p className="text-slate-500 text-xs mt-1">
@@ -1303,7 +1303,7 @@ export default function WhatsAppVerificationPage() {
                 {formData.evidenceArticles.map((article, idx) => (
                   <div key={article.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                         <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">
                           #{idx + 1}
                         </span>
@@ -1322,7 +1322,7 @@ export default function WhatsAppVerificationPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="sm:col-span-2">
-                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                           Article URL <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -1330,12 +1330,12 @@ export default function WhatsAppVerificationPage() {
                           value={article.url}
                           onChange={(e) => handleArticleChange(idx, "url", e.target.value)}
                           placeholder="https://economictimes.indiatimes.com/tech/startups/yourbrand-funding..."
-                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                          className="w-full bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                           Publication Name <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -1343,14 +1343,14 @@ export default function WhatsAppVerificationPage() {
                           value={article.publication}
                           onChange={(e) => handleArticleChange(idx, "publication", e.target.value)}
                           placeholder="e.g. The Economic Times"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                          className="w-full bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="sm:col-span-2">
-                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                           Headline / Summary
                         </label>
                         <input
@@ -1358,18 +1358,18 @@ export default function WhatsAppVerificationPage() {
                           value={article.headline}
                           onChange={(e) => handleArticleChange(idx, "headline", e.target.value)}
                           placeholder="Headline describing brand milestone or coverage..."
-                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                          className="w-full bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                           Evidence Type
                         </label>
                         <select
                           value={article.evidenceType}
                           onChange={(e) => handleArticleChange(idx, "evidenceType", e.target.value as any)}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                          className="w-full bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         >
                           <option value="EDITORIAL_NEWS">Editorial News Article</option>
                           <option value="BUSINESS_FEATURE">Major Business Profile</option>
@@ -1452,9 +1452,9 @@ export default function WhatsAppVerificationPage() {
 
           {/* ================= STEP 5: REVIEW AND SUBMIT ================= */}
           {currentStep === 5 && (
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
-              <div className="border-b border-slate-100 pb-4">
-                <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+            <div className="bg-white dark:bg-[#0B101D]/80 p-6 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-6 backdrop-blur-xl">
+              <div className="border-b border-slate-100 dark:border-white/[0.06] pb-4">
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base flex items-center gap-2">
                   <span>📋</span> Step 5: Final Review & Submission Declaration
                 </h3>
                 <p className="text-slate-500 text-xs mt-1">
@@ -1467,7 +1467,7 @@ export default function WhatsAppVerificationPage() {
                 {/* Account Card */}
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-700 uppercase text-[10px] tracking-wider">Business Account</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300 uppercase text-[10px] tracking-wider">Business Account</span>
                     <button type="button" onClick={() => goToStep(1)} className="text-blue-600 hover:underline text-[11px] font-bold cursor-pointer">Edit</button>
                   </div>
                   <p className="text-sm font-bold text-slate-900">{selectedPhone?.displayPhone}</p>
@@ -1478,7 +1478,7 @@ export default function WhatsAppVerificationPage() {
                 {/* Requirements Checklist Card */}
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-700 uppercase text-[10px] tracking-wider">Prerequisites Standing</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300 uppercase text-[10px] tracking-wider">Prerequisites Standing</span>
                     <button type="button" onClick={() => goToStep(2)} className="text-blue-600 hover:underline text-[11px] font-bold cursor-pointer">Inspect</button>
                   </div>
                   <p className="text-sm font-bold text-emerald-700">{checklistSummary.summaryText}</p>
@@ -1491,7 +1491,7 @@ export default function WhatsAppVerificationPage() {
                 {/* Brand Identity Card */}
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-700 uppercase text-[10px] tracking-wider">Brand Information</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300 uppercase text-[10px] tracking-wider">Brand Information</span>
                     <button type="button" onClick={() => goToStep(3)} className="text-blue-600 hover:underline text-[11px] font-bold cursor-pointer">Edit</button>
                   </div>
                   <p className="text-sm font-bold text-slate-900">{formData.brandName || "Not set"}</p>
@@ -1504,7 +1504,7 @@ export default function WhatsAppVerificationPage() {
                 {/* Evidence Summary Card */}
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-700 uppercase text-[10px] tracking-wider">Notability Evidence</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300 uppercase text-[10px] tracking-wider">Notability Evidence</span>
                     <button type="button" onClick={() => goToStep(4)} className="text-blue-600 hover:underline text-[11px] font-bold cursor-pointer">Edit</button>
                   </div>
                   <p className="text-sm font-bold text-slate-900">
@@ -1521,19 +1521,19 @@ export default function WhatsAppVerificationPage() {
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                 <h4 className="font-bold text-slate-900 text-xs">What Happens After Submission:</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
-                  <div className="p-2.5 bg-white rounded-lg border border-slate-200/80">
+                  <div className="p-2.5 bg-white dark:bg-[#070b14] rounded-lg border border-slate-200/80 dark:border-white/10">
                     <span className="font-bold text-slate-800 block mb-0.5">1. Submission Logged</span>
                     <span className="text-slate-500 leading-relaxed">
                       Application reference ID is recorded and sent to Meta Review queue.
                     </span>
                   </div>
-                  <div className="p-2.5 bg-white rounded-lg border border-slate-200/80">
+                  <div className="p-2.5 bg-white dark:bg-[#070b14] rounded-lg border border-slate-200/80 dark:border-white/10">
                     <span className="font-bold text-slate-800 block mb-0.5">2. Editorial Assessment</span>
                     <span className="text-slate-500 leading-relaxed">
                       Meta reviewers independently assess organic press coverage (2–4 business days).
                     </span>
                   </div>
-                  <div className="p-2.5 bg-white rounded-lg border border-slate-200/80">
+                  <div className="p-2.5 bg-white dark:bg-[#070b14] rounded-lg border border-slate-200/80 dark:border-white/10">
                     <span className="font-bold text-slate-800 block mb-0.5">3. Badge Activation</span>
                     <span className="text-slate-500 leading-relaxed">
                       Upon approval, the green tick badge appears automatically across all customer chats.
@@ -1609,8 +1609,8 @@ export default function WhatsAppVerificationPage() {
         <div className="lg:col-span-4 space-y-5">
 
           {/* Dynamic Contextual Guidance Card for Active Step */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="bg-white dark:bg-[#0B101D]/80 p-5 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xs space-y-4 backdrop-blur-xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/[0.06]">
               <div className="flex items-center gap-2">
                 <span className="text-base">💡</span>
                 <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider">
@@ -1818,7 +1818,7 @@ export default function WhatsAppVerificationPage() {
           </div>
 
           {/* Application Pipeline Navigator Card */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
+          <div className="bg-white dark:bg-[#0B101D]/80 p-5 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xs space-y-3 backdrop-blur-xl">
             <h4 className="font-bold text-slate-900 text-xs flex items-center justify-between uppercase tracking-wider text-slate-500">
               <span className="flex items-center gap-1.5"><span>🧭</span> Application Pipeline</span>
               <span className="text-[10px] text-emerald-700 font-bold">{currentStep}/5 Active</span>
@@ -1872,7 +1872,7 @@ export default function WhatsAppVerificationPage() {
           </div>
 
           {/* Prerequisites Standing Scorecard */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
+          <div className="bg-white dark:bg-[#0B101D]/80 p-5 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xs space-y-3 backdrop-blur-xl">
             <div className="flex items-center justify-between">
               <h4 className="font-bold text-slate-900 text-xs flex items-center gap-1.5 uppercase tracking-wider text-slate-500">
                 <span>🛡️</span> Technical Readiness
@@ -1903,7 +1903,7 @@ export default function WhatsAppVerificationPage() {
 
           {/* Past Applications Log */}
           {applications.length > 0 && (
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#0B101D]/80 p-5 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-3 backdrop-blur-xl">
               <h4 className="font-bold text-slate-900 text-xs flex items-center gap-1.5 uppercase tracking-wider text-slate-500">
                 <span>📋</span> Application History ({applications.length})
               </h4>
@@ -1939,7 +1939,7 @@ export default function WhatsAppVerificationPage() {
 
           {/* Meta Cloud Platform Integrity Policy Notice */}
           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 text-[11px] text-slate-500 space-y-1">
-            <span className="font-bold text-slate-700 block">Digital Beings Compliance Assurance</span>
+            <span className="font-bold text-slate-700 dark:text-slate-300 block">Digital Beings Compliance Assurance</span>
             <p className="leading-relaxed">
               Digital Beings connects directly via Meta's official Cloud API. We do not charge fees for Official Business Account badge evaluation or guarantee editorial outcomes.
             </p>

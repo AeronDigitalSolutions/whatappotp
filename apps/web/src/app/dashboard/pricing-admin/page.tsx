@@ -253,7 +253,7 @@ export default function PricingAdminPage() {
         <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setShowAdjustModal(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.1] transition shadow-2xs cursor-pointer"
             >
               <span>⚖️</span> Manual Adjustment
             </button>
@@ -270,7 +270,7 @@ export default function PricingAdminPage() {
       {/* Global Config Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Tax Config */}
-        <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-2xs">
+        <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] p-6 rounded-3xl shadow-2xs backdrop-blur-xl">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Tax Treatment</span>
             <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] px-2 py-0.5 rounded-full font-bold">GST Standard</span>
@@ -287,7 +287,7 @@ export default function PricingAdminPage() {
         </div>
 
         {/* FX Source */}
-        <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-2xs">
+        <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] p-6 rounded-3xl shadow-2xs backdrop-blur-xl">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">USD/INR Exchange Rate</span>
             <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] px-2 py-0.5 rounded-full font-bold">RBI Ref + Buffer</span>
@@ -304,7 +304,7 @@ export default function PricingAdminPage() {
         </div>
 
         {/* Route Stats */}
-        <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-2xs">
+        <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] p-6 rounded-3xl shadow-2xs backdrop-blur-xl">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Messaging Routes</span>
             <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] px-2 py-0.5 rounded-full font-bold">Margin Guard Active</span>
@@ -322,10 +322,10 @@ export default function PricingAdminPage() {
       </div>
 
       {/* Master Rates Table */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+      <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-sm backdrop-blur-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
           <div>
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">Configured Messaging Routes & Rates</h3>
+            <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Configured Messaging Routes & Rates</h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Live database rates used by the message evaluation engine for OTP, Utility, and Marketing dispatches.
             </p>
@@ -362,7 +362,7 @@ export default function PricingAdminPage() {
 
                   return (
                     <tr key={r.id} className="hover:bg-slate-50/80 transition">
-                      <td className="py-4 px-3 font-bold text-slate-900">
+                      <td className="py-4 px-3 font-bold text-slate-900 dark:text-slate-100">
                         {r.country} <span className="text-xs font-mono text-slate-400">({r.isoCode})</span>
                       </td>
                       <td className="py-4 px-3 font-semibold text-slate-700 text-xs">
@@ -432,7 +432,7 @@ export default function PricingAdminPage() {
       {/* MODAL: Edit Rate */}
       {editingRate && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 space-y-5">
+          <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 dark:border-white/10 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-xl font-black text-slate-900">Edit Route Pricing</h3>
@@ -544,7 +544,7 @@ export default function PricingAdminPage() {
       {/* MODAL: Manual Balance Adjustment */}
       {showAdjustModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 space-y-5">
+          <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 dark:border-white/10 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-xl font-black text-slate-900">Compensating Ledger Adjustment</h3>
               <button onClick={() => setShowAdjustModal(false)} className="text-slate-400 hover:text-slate-700 text-xl font-bold">×</button>

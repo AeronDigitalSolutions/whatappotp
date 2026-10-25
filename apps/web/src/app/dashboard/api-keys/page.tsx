@@ -288,7 +288,7 @@ print(response.json())`
       )}
 
       {/* Keys Table Card */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] shadow-sm overflow-hidden backdrop-blur-xl">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -318,7 +318,7 @@ print(response.json())`
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
             </div>
-            <h3 className="text-base font-semibold text-slate-900">No API Keys Yet</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">No API Keys Yet</h3>
             <p className="text-sm text-slate-500 max-w-md mx-auto">
               Generate an API key to authenticate your backend servers, mobile apps, or scripts when sending WhatsApp OTPs.
             </p>
@@ -354,7 +354,7 @@ print(response.json())`
                   return (
                     <tr key={key.id} className={isRevoked ? "bg-slate-50/60 opacity-60" : "hover:bg-slate-50/50"}>
                       <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-900">{key.name}</div>
+                        <div className="font-semibold text-slate-900 dark:text-slate-100">{key.name}</div>
                         <span className={`inline-block mt-0.5 px-2 py-0.5 text-[10px] font-bold rounded ${
                           isTest ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
                         }`}>
@@ -547,10 +547,10 @@ print(response.json())`
       </div>
 
       {/* Quickstart Integration Code Snippets */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] shadow-sm overflow-hidden backdrop-blur-xl">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-slate-900">Developer Quickstart</h3>
+            <h3 className="font-bold text-slate-900 dark:text-slate-100">Developer Quickstart</h3>
             <p className="text-xs text-slate-500">Integrate WhatsApp OTP dispatch into your application in seconds.</p>
           </div>
           <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
@@ -559,7 +559,7 @@ print(response.json())`
                 key={tab}
                 onClick={() => setCodeTab(tab)}
                 className={`px-3 py-1 rounded text-xs font-semibold capitalize transition-all ${
-                  codeTab === tab ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                  codeTab === tab ? "bg-white dark:bg-white/[0.1] text-slate-900 dark:text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 {tab === "curl" ? "cURL" : tab === "node" ? "Node.js" : "Python"}
@@ -598,11 +598,11 @@ print(response.json())`
       {/* Modal: Create API Key */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+          <div className="bg-white dark:bg-[#0B101D] rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-white/10">
             {!createdSecret ? (
               <form onSubmit={handleCreateKey} className="space-y-5">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <h3 className="text-lg font-bold text-slate-900">Create New API Key</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Create New API Key</h3>
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
@@ -682,7 +682,7 @@ print(response.json())`
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-slate-900">API Key Created!</h3>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">API Key Created!</h3>
                     <p className="text-xs text-slate-500">Save this secret key in a secure password manager or .env file.</p>
                   </div>
                 </div>
@@ -736,14 +736,14 @@ print(response.json())`
       {/* Modal: Revoke Confirmation */}
       {revokeTarget && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+          <div className="bg-white dark:bg-[#0B101D] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-white/10 space-y-4">
             <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900">Revoke API Key?</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Revoke API Key?</h3>
               <p className="text-sm text-slate-500 mt-1">
                 Are you sure you want to revoke <strong>{revokeTarget.name}</strong> ({revokeTarget.prefix})? Any server or integration currently using this key will immediately be rejected.
               </p>

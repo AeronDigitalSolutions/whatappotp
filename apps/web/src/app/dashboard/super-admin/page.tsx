@@ -127,7 +127,7 @@ export default function SuperAdminPage() {
           <button
             onClick={fetchPlatformData}
             disabled={loading}
-            className="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            className="px-3.5 py-2 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.1] transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             <span className={`text-sm ${loading ? "animate-spin" : ""}`}>🔄</span>
             <span>Refresh Console</span>
@@ -137,7 +137,7 @@ export default function SuperAdminPage() {
 
       {/* Platform Metric KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 text-xs shrink-0 font-bold">
               🏢
@@ -150,7 +150,7 @@ export default function SuperAdminPage() {
           <div className="text-[11px] text-slate-400 mt-0.5">Active business tenants</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 text-xs shrink-0 font-bold">
               👥
@@ -163,7 +163,7 @@ export default function SuperAdminPage() {
           <div className="text-[11px] text-slate-400 mt-0.5">Owners, admins & staff</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 text-xs shrink-0 font-bold">
               💳
@@ -176,7 +176,7 @@ export default function SuperAdminPage() {
           <div className="text-[11px] text-slate-400 mt-0.5">Total platform float</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600 text-xs shrink-0 font-bold">
               🚀
@@ -191,7 +191,7 @@ export default function SuperAdminPage() {
       </div>
 
       {/* Main Tabbed Directory Card */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl border border-slate-200/90 dark:border-white/[0.08] shadow-xs overflow-hidden backdrop-blur-xl">
         {/* Navigation Tabs & Search Toolbar */}
         <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
@@ -199,7 +199,7 @@ export default function SuperAdminPage() {
               onClick={() => setActiveTab("businesses")}
               className={`px-4 py-2 text-xs font-bold rounded-lg transition ${
                 activeTab === "businesses"
-                  ? "bg-white text-slate-900 shadow-xs"
+                  ? "bg-white dark:bg-white/[0.1] text-slate-900 dark:text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -209,7 +209,7 @@ export default function SuperAdminPage() {
               onClick={() => setActiveTab("users")}
               className={`px-4 py-2 text-xs font-bold rounded-lg transition ${
                 activeTab === "users"
-                  ? "bg-white text-slate-900 shadow-xs"
+                  ? "bg-white dark:bg-white/[0.1] text-slate-900 dark:text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -223,7 +223,7 @@ export default function SuperAdminPage() {
               placeholder={activeTab === "businesses" ? "Search businesses or owners..." : "Search users, emails, or roles..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <span className="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
           </div>
@@ -255,7 +255,7 @@ export default function SuperAdminPage() {
                   filteredBusinesses.map((b) => (
                     <tr key={b.id} className="hover:bg-slate-50/60 transition">
                       <td className="p-4">
-                        <div className="font-bold text-slate-900">{b.name}</div>
+                        <div className="font-bold text-slate-900 dark:text-slate-100">{b.name}</div>
                         <div className="text-[10px] text-slate-400 font-mono">ID: {b.id.slice(0, 12)}...</div>
                       </td>
                       <td className="p-4">
@@ -329,7 +329,7 @@ export default function SuperAdminPage() {
                     return (
                       <tr key={u.id + (u.organizationId || "")} className="hover:bg-slate-50/60 transition">
                         <td className="p-4">
-                          <div className="font-bold text-slate-900">{u.name || "User"}</div>
+                          <div className="font-bold text-slate-900 dark:text-slate-100">{u.name || "User"}</div>
                           <div className="text-[11px] text-slate-500 font-mono">{u.email}</div>
                         </td>
                         <td className="p-4">
@@ -402,7 +402,7 @@ export default function SuperAdminPage() {
       {/* Inspect Business Details Modal */}
       {selectedBusiness && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5">
+          <div className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-white/10 space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
                 <span className="text-2xl">🏢</span>

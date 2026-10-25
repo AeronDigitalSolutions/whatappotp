@@ -378,7 +378,7 @@ export default function TeamPage() {
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
+              <span className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                 {members.length} Team Member{members.length !== 1 ? "s" : ""} • {roles.length} Custom Role{roles.length !== 1 ? "s" : ""}
               </span>
               <span className="text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
@@ -395,7 +395,7 @@ export default function TeamPage() {
         <div className="flex items-center gap-2.5 shrink-0">
           <button
             onClick={openCreateRoleModal}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200/90 hover:border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-white/[0.06] border border-slate-200/90 dark:border-white/10 hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer"
           >
             <SparklesIcon className="w-3.5 h-3.5 text-indigo-600" />
             <span>Create Custom Role</span>
@@ -430,7 +430,7 @@ export default function TeamPage() {
       )}
 
       {/* Navigation Tabs */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 p-1.5 inline-flex items-center gap-1.5 shadow-2xs">
+      <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] p-1.5 inline-flex items-center gap-1.5 shadow-2xs backdrop-blur-xl">
         <button
           onClick={() => setActiveTab("members")}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition cursor-pointer ${
@@ -457,7 +457,7 @@ export default function TeamPage() {
 
       {/* Tab 1: Team Members List */}
       {activeTab === "members" && (
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xs overflow-hidden">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xs overflow-hidden backdrop-blur-xl">
           <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h2 className="text-base font-extrabold text-slate-900">Workspace Members</h2>
@@ -571,7 +571,7 @@ export default function TeamPage() {
                                 setChangeRoleMember(m);
                                 setSelectedNewRoleId(m.roleId || "");
                               }}
-                              className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200/90 hover:bg-slate-50 rounded-xl transition shadow-2xs cursor-pointer"
+                              className="px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-white/[0.06] border border-slate-200/90 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.1] rounded-xl transition shadow-2xs cursor-pointer"
                             >
                               Change Role
                             </button>
@@ -603,12 +603,12 @@ export default function TeamPage() {
             {roles.map((r) => (
               <div
                 key={r.id}
-                className="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs hover:border-slate-300 flex flex-col justify-between space-y-4 transition"
+                className="bg-white dark:bg-[#0B101D]/80 rounded-3xl border border-slate-200/90 dark:border-white/[0.08] p-5 sm:p-6 shadow-2xs hover:border-slate-300 dark:hover:border-white/20 flex flex-col justify-between backdrop-blur-xl space-y-4 transition"
               >
                 <div>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="font-extrabold text-base text-slate-900 tracking-tight">{r.name}</h3>
+                      <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 tracking-tight">{r.name}</h3>
                       <p className="text-xs text-slate-600 font-medium mt-1 min-h-[32px] leading-relaxed">
                         {r.description || "Custom configured workspace role."}
                       </p>
@@ -650,7 +650,7 @@ export default function TeamPage() {
                 <div className="pt-3.5 border-t border-slate-100 flex items-center justify-end gap-2">
                   <button
                     onClick={() => openEditRoleModal(r)}
-                    className="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition shadow-2xs cursor-pointer"
+                    className="px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.1] rounded-xl transition shadow-2xs cursor-pointer"
                   >
                     Edit Powers
                   </button>
@@ -675,7 +675,7 @@ export default function TeamPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
           <form
             onSubmit={handleInviteSubmit}
-            className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in zoom-in-95 duration-150"
+            className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 animate-in zoom-in-95 duration-150"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
@@ -701,7 +701,7 @@ export default function TeamPage() {
                   placeholder="e.g. Sarah Jenkins"
                   value={inviteName}
                   onChange={(e) => setInviteName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 font-medium text-xs"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 font-medium text-xs"
                 />
               </div>
 
@@ -713,7 +713,7 @@ export default function TeamPage() {
                   placeholder="colleague@company.com"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 font-medium text-xs"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 font-medium text-xs"
                 />
               </div>
 
@@ -722,7 +722,7 @@ export default function TeamPage() {
                 <select
                   value={inviteRoleId}
                   onChange={(e) => setInviteRoleId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-semibold text-slate-800 text-xs"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800 text-xs"
                 >
                   <option value="">Default Member (Standard Access)</option>
                   {roles.map((r) => (
@@ -759,7 +759,7 @@ export default function TeamPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
           <form
             onSubmit={handleRoleSave}
-            className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in zoom-in-95 duration-150"
+            className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-white/10 space-y-5 animate-in zoom-in-95 duration-150"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
@@ -794,7 +794,7 @@ export default function TeamPage() {
                     placeholder="e.g. Customer Support Lead, Catalog Editor"
                     value={roleFormName}
                     onChange={(e) => setRoleFormName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium text-xs text-slate-900"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-xs text-slate-900"
                   />
                 </div>
                 <div>
@@ -804,7 +804,7 @@ export default function TeamPage() {
                     placeholder="Brief description of job powers"
                     value={roleFormDesc}
                     onChange={(e) => setRoleFormDesc(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium text-xs text-slate-900"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-xs text-slate-900"
                   />
                 </div>
               </div>
@@ -883,7 +883,7 @@ export default function TeamPage() {
       {/* Modal 3: Change Member Role */}
       {changeRoleMember && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+          <div className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-white/10 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-base text-slate-900">Change Member Role</h3>
               <button
@@ -901,7 +901,7 @@ export default function TeamPage() {
             <select
               value={selectedNewRoleId}
               onChange={(e) => setSelectedNewRoleId(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070b14] text-xs font-semibold text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:bg-white dark:focus:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="">Default Member (Standard Access)</option>
               {roles.map((r) => (

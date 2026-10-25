@@ -327,7 +327,7 @@ export default function EcommerceTriggersPage() {
                 className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition cursor-pointer shadow-2xs ${
                   currentPlatformUpper === plat
                     ? "bg-[#064e3b] text-white border-[#064e3b]"
-                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                    : "bg-white dark:bg-[#070b14] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.04]"
                 }`}
               >
                 {plat === "SHOPIFY" ? "🛍️ Shopify" : plat === "WOOCOMMERCE" ? "🟣 WooCommerce" : "⚡ Custom API"}
@@ -345,7 +345,7 @@ export default function EcommerceTriggersPage() {
             <button
               onClick={() => fetchData()}
               disabled={loading}
-              className="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-3.5 py-2 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.1] transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <span className={loading ? "animate-spin" : ""}>🔄</span>
               <span>Refresh</span>
@@ -354,10 +354,10 @@ export default function EcommerceTriggersPage() {
         </div>
 
       {/* Store Connection & Webhook URLs Panel */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
+      <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] p-5 sm:p-6 space-y-4 shadow-2xs backdrop-blur-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
           <div>
-            <h2 className="text-xs sm:text-sm font-bold text-slate-900">Dedicated Store Webhook Endpoints</h2>
+            <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">Dedicated Store Webhook Endpoints</h2>
             <p className="text-[11px] text-slate-400">
               Copy these URLs directly into your {currentPlatformUpper === "SHOPIFY" ? "Shopify Admin > Notifications > Webhooks" : currentPlatformUpper === "WOOCOMMERCE" ? "WooCommerce Settings > Advanced > Webhooks" : "Custom Backend Application"}.
             </p>
@@ -386,7 +386,7 @@ export default function EcommerceTriggersPage() {
                     type="text"
                     readOnly
                     value={url}
-                    className="flex-1 text-[11px] font-mono bg-white border border-slate-200 rounded px-2.5 py-1 text-slate-600 select-all"
+                    className="flex-1 text-[11px] font-mono bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded px-2.5 py-1 text-slate-600 dark:text-slate-300 select-all"
                   />
                   <button
                     onClick={() => copyToClipboard(url, item.event)}
@@ -423,7 +423,7 @@ export default function EcommerceTriggersPage() {
       {/* 4 Pre-built High-Converting Automation Recipes */}
       <div className="space-y-3">
         <div>
-          <h2 className="text-sm font-bold text-slate-900">Pre-Built High-Converting Recipes</h2>
+          <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Pre-Built High-Converting Recipes</h2>
           <p className="text-xs text-slate-500">
             Turnkey workflows designed to recover lost revenue and reduce shipping returns on WhatsApp.
           </p>
@@ -431,14 +431,14 @@ export default function EcommerceTriggersPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Recipe 1: Abandoned Cart */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4 shadow-xs">
+          <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-lg font-bold">
                   🛒
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Abandoned Cart Recovery</h3>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Abandoned Cart Recovery</h3>
                   <span className="text-[10px] font-semibold text-emerald-600">
                     📈 Recovers up to 28% abandoned checkouts
                   </span>
@@ -466,7 +466,7 @@ export default function EcommerceTriggersPage() {
                 &quot;Hey Rahul, you left something behind! Complete your order within the next 2 hours and enjoy 10% OFF with code SAVE10.&quot;
               </p>
               <div className="pt-1.5 flex gap-2">
-                <span className="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded text-emerald-700 font-semibold">
+                <span className="text-[10px] bg-white dark:bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/20 px-2 py-0.5 rounded text-emerald-700 dark:text-emerald-400 font-semibold">
                   [Complete Checkout]
                 </span>
               </div>
@@ -495,14 +495,14 @@ export default function EcommerceTriggersPage() {
           </div>
 
           {/* Recipe 2: Order Confirmation */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4 shadow-xs">
+          <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-lg font-bold">
                   📦
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Instant Order Confirmation</h3>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Instant Order Confirmation</h3>
                   <span className="text-[10px] font-semibold text-blue-600">
                     ⚡ 98% Open Rate within 3 minutes
                   </span>
@@ -554,14 +554,14 @@ export default function EcommerceTriggersPage() {
           </div>
 
           {/* Recipe 3: COD Verification */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4 shadow-xs">
+          <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold">
                   💰
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Cash on Delivery (COD) Verification</h3>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Cash on Delivery (COD) Verification</h3>
                   <span className="text-[10px] font-semibold text-emerald-600">
                     🛡️ Cuts RTO & fake orders by 45%
                   </span>
@@ -589,10 +589,10 @@ export default function EcommerceTriggersPage() {
                 &quot;Hi Priya, please confirm your COD order #99214 of ₹1,450 to proceed with express courier shipping.&quot;
               </p>
               <div className="pt-1.5 flex gap-2">
-                <span className="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded text-emerald-700 font-semibold">
+                <span className="text-[10px] bg-white dark:bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/20 px-2 py-0.5 rounded text-emerald-700 dark:text-emerald-400 font-semibold">
                   [✅ Confirm Order]
                 </span>
-                <span className="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded text-red-600 font-semibold">
+                <span className="text-[10px] bg-white dark:bg-red-500/10 border border-slate-200 dark:border-red-500/20 px-2 py-0.5 rounded text-red-600 dark:text-red-400 font-semibold">
                   [❌ Cancel Order]
                 </span>
               </div>
@@ -621,14 +621,14 @@ export default function EcommerceTriggersPage() {
           </div>
 
           {/* Recipe 4: Shipping Transit Alerts */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4 shadow-xs">
+          <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center text-lg font-bold">
                   🚚
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Shipping & Delivery Alerts</h3>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Shipping & Delivery Alerts</h3>
                   <span className="text-[10px] font-semibold text-purple-600">
                     🔔 Eliminates &quot;Where is my order&quot; support tickets
                   </span>
@@ -684,10 +684,10 @@ export default function EcommerceTriggersPage() {
       {/* Simulator & Live Event Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Simulator Card */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 shadow-xs space-y-4 backdrop-blur-xl">
           <div className="flex items-center gap-2">
             <span className="text-lg">⚡</span>
-            <h3 className="text-sm font-bold text-slate-900">Live Event Dispatch Tester</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Live Event Dispatch Tester</h3>
           </div>
           <p className="text-xs text-slate-500">
             Dispatch a real WhatsApp event trigger to verify Meta template formatting and mobile delivery.
@@ -790,7 +790,7 @@ export default function EcommerceTriggersPage() {
                 className="text-[11px] text-emerald-700 hover:text-emerald-800 font-semibold inline-flex items-center gap-1.5 transition py-1 px-2 rounded hover:bg-emerald-50 border border-dashed border-emerald-200"
               >
                 <span>⚡ Test Live Delivery via Approved</span>
-                <code className="font-mono bg-white px-1 py-0.2 rounded border border-emerald-300 text-emerald-900 font-bold">hello_world</code>
+                <code className="font-mono bg-white dark:bg-emerald-950/40 px-1 py-0.2 rounded border border-emerald-300 dark:border-emerald-500/40 text-emerald-900 dark:text-emerald-300 font-bold">hello_world</code>
               </button>
             </div>
 
@@ -837,10 +837,10 @@ export default function EcommerceTriggersPage() {
         </div>
 
         {/* Live Event Activity Feed */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div className="lg:col-span-2 bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 shadow-xs space-y-4 backdrop-blur-xl">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Recent E-Commerce Activity</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Recent E-Commerce Activity</h3>
               <p className="text-xs text-slate-500">Live feed of inbound webhooks and dispatched messages</p>
             </div>
             <button
@@ -963,14 +963,14 @@ export default function EcommerceTriggersPage() {
       {/* DIALOG BOX (MODAL): TEMPLATE NOT APPROVED BY META */}
       {unapprovedModal && unapprovedModal.isOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-[#0B101D] rounded-2xl max-w-lg w-full border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="bg-amber-50 border-b border-amber-100 p-5 flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xl shrink-0 shadow-xs">
                 ⚠️
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-bold text-slate-900">Message Template Not Approved by Meta</h3>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Message Template Not Approved by Meta</h3>
                 <p className="text-xs text-amber-800 mt-0.5">
                   Meta strictly blocks sending this automated message to real WhatsApp numbers until it is approved.
                 </p>
@@ -995,7 +995,7 @@ export default function EcommerceTriggersPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Mapped Template Name:</span>
-                  <code className="font-mono bg-white px-2 py-0.5 rounded border border-slate-300 font-bold text-slate-900">
+                  <code className="font-mono bg-white dark:bg-white/[0.08] px-2 py-0.5 rounded border border-slate-300 dark:border-white/10 font-bold text-slate-900 dark:text-slate-100 dark:text-slate-100">
                     {unapprovedModal.templateName}
                   </code>
                 </div>
@@ -1023,7 +1023,7 @@ export default function EcommerceTriggersPage() {
                 <div className="bg-amber-50/70 border border-amber-200 p-3 rounded-lg text-amber-900 text-xs space-y-1">
                   <p className="font-bold">📋 Required Next Step:</p>
                   <p>
-                    Please verify or submit <code className="font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-amber-300">{unapprovedModal.templateName}</code> in <strong>Template Studio</strong>. Meta reviews and approves standard e-commerce templates within 1 minute.
+                    Please verify or submit <code className="font-mono font-bold bg-white dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-300 dark:border-amber-500/40 text-amber-900 dark:text-amber-200">{unapprovedModal.templateName}</code> in <strong>Template Studio</strong>. Meta reviews and approves standard e-commerce templates within 1 minute.
                   </p>
                 </div>
               </div>
@@ -1035,7 +1035,7 @@ export default function EcommerceTriggersPage() {
                   <span>Want to verify real WhatsApp delivery right now?</span>
                 </div>
                 <p className="text-emerald-800 text-[11px] leading-relaxed">
-                  Meta provides a pre-approved starter template (<code className="font-mono font-bold bg-white px-1 py-0.5 rounded border border-emerald-300">hello_world</code>) that can be dispatched immediately to your phone to confirm your number is working.
+                  Meta provides a pre-approved starter template (<code className="font-mono font-bold bg-white dark:bg-emerald-950/40 px-1 py-0.5 rounded border border-emerald-300 dark:border-emerald-500/40 text-emerald-900 dark:text-emerald-300">hello_world</code>) that can be dispatched immediately to your phone to confirm your number is working.
                 </p>
                 <button
                   type="button"

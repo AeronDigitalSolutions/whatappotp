@@ -236,7 +236,7 @@ export default function AutomationsPage() {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 text-xs shrink-0 font-bold">
               ⚡
@@ -249,7 +249,7 @@ export default function AutomationsPage() {
           <div className="text-[11px] text-slate-400 mt-0.5">Automated workflows running live</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 text-xs shrink-0 font-bold">
               💬
@@ -262,7 +262,7 @@ export default function AutomationsPage() {
           <div className="text-[11px] text-slate-400 mt-0.5">Dispatched without human intervention</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 text-xs shrink-0 font-bold">
               🚀
@@ -276,12 +276,12 @@ export default function AutomationsPage() {
 
       {/* Automations Grid */}
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400 text-xs">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-12 text-center text-slate-400 dark:text-slate-500 text-xs backdrop-blur-xl">
           <div className="w-7 h-7 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
           Loading your automation rules...
         </div>
       ) : rules.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-12 text-center backdrop-blur-xl">
           <p className="text-4xl mb-3">🤖</p>
           <h3 className="text-base font-bold text-slate-800">No automation bots configured yet</h3>
           <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-5">
@@ -299,7 +299,7 @@ export default function AutomationsPage() {
           {rules.map(rule => (
             <div
               key={rule.id}
-              className={`bg-white rounded-xl border transition shadow-xs flex flex-col justify-between ${
+              className={`bg-white dark:bg-[#0B101D]/80 rounded-xl border dark:border-white/[0.08] transition shadow-xs flex flex-col justify-between backdrop-blur-xl ${
                 rule.isActive ? "border-slate-200" : "border-slate-200 opacity-60 bg-slate-50/50"
               }`}
             >
@@ -311,7 +311,7 @@ export default function AutomationsPage() {
                       🤖
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-slate-900 leading-snug">{rule.name}</h3>
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">{rule.name}</h3>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                           {rule.triggerType === "EXACT_MATCH" ? "Exact Match" : "Keyword Contains"}
@@ -371,7 +371,7 @@ export default function AutomationsPage() {
                         {rule.buttons.map((btn, i) => (
                           <div
                             key={i}
-                            className="bg-white border border-slate-200/90 text-center py-1.5 px-3 rounded-lg text-emerald-700 font-semibold text-[11px] shadow-2xs flex items-center justify-center gap-1.5"
+                            className="bg-white dark:bg-white/[0.06] border border-slate-200/90 dark:border-white/10 text-center py-1.5 px-3 rounded-lg text-emerald-700 dark:text-emerald-400 font-semibold text-[11px] shadow-2xs flex items-center justify-center gap-1.5"
                           >
                             <span>💬</span> {btn.title}
                           </div>
@@ -410,9 +410,9 @@ export default function AutomationsPage() {
       {/* Create / Edit Rule Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-200">
+          <div className="bg-white dark:bg-[#0B101D] rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10">
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
                 {editingRule ? "Edit Automation Rule" : "Create New Automation Rule"}
               </h3>
               <button

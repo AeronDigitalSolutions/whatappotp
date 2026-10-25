@@ -793,14 +793,14 @@ export default function CampaignsPage() {
               onClick={() => setFilterService(tab.id)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 filterService === tab.id
-                  ? "bg-slate-900 text-white shadow-2xs"
-                  : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                  ? "bg-slate-900 dark:bg-emerald-600 text-white shadow-2xs"
+                  : "bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.05]"
               }`}
             >
               <span>{tab.icon}</span>
               <span>{tab.label}</span>
               <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-mono ${
-                filterService === tab.id ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+                filterService === tab.id ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300"
               }`}>
                 {tab.count}
               </span>
@@ -813,7 +813,7 @@ export default function CampaignsPage() {
             <button
               onClick={loadCampaigns}
               disabled={loading}
-              className="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-3.5 py-2 bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.05] transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <span className={loading ? "animate-spin" : ""}>🔄</span>
               <span>Refresh</span>
@@ -823,7 +823,7 @@ export default function CampaignsPage() {
                 resetWizard();
                 setShowWizard(true);
               }}
-              className="px-4 py-2 bg-[#064e3b] hover:bg-[#043d2e] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
             >
               <span className="text-sm font-bold leading-none">+</span>
               <span>Create New Campaign</span>
@@ -833,69 +833,69 @@ export default function CampaignsPage() {
 
       {/* KPI Hero Overview Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 text-xs shrink-0 font-bold">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-white/[0.06] border border-blue-200/80 dark:border-white/10 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs shrink-0 font-bold">
                 📢
               </div>
-              <span className="text-xs font-bold text-slate-700">Total Campaigns</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Total Campaigns</span>
             </div>
-            <span className="text-[11px] font-bold text-slate-400">{stats.activeCount} active</span>
+            <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500">{stats.activeCount} active</span>
           </div>
-          <div className="mt-2.5 text-2xl font-black text-slate-900">{stats.totalCamps}</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">All created broadcast runs</div>
+          <div className="mt-2.5 text-2xl font-black text-slate-900 dark:text-slate-100">{stats.totalCamps}</div>
+          <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">All created broadcast runs</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 text-xs shrink-0 font-bold">
+              <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-white/[0.06] border border-purple-200/80 dark:border-white/10 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs shrink-0 font-bold">
                 👥
               </div>
-              <span className="text-xs font-bold text-slate-700">Total Audience</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Total Audience</span>
             </div>
           </div>
-          <div className="mt-2.5 text-2xl font-black text-slate-900">{stats.totalRecipients.toLocaleString()}</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Contacts mapped in lists</div>
+          <div className="mt-2.5 text-2xl font-black text-slate-900 dark:text-slate-100">{stats.totalRecipients.toLocaleString()}</div>
+          <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Contacts mapped in lists</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 text-xs shrink-0 font-bold">
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-white/[0.06] border border-emerald-200/80 dark:border-white/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs shrink-0 font-bold">
                 🚀
               </div>
-              <span className="text-xs font-bold text-slate-700">Messages Sent</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Messages Sent</span>
             </div>
           </div>
-          <div className="mt-2.5 text-2xl font-black text-emerald-600">{stats.totalSent.toLocaleString()}</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Dispatched to Meta Cloud</div>
+          <div className="mt-2.5 text-2xl font-black text-emerald-600 dark:text-emerald-400">{stats.totalSent.toLocaleString()}</div>
+          <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Dispatched to Meta Cloud</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600 text-xs shrink-0 font-bold">
+              <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-white/[0.06] border border-amber-200/80 dark:border-white/10 flex items-center justify-center text-amber-600 dark:text-amber-400 text-xs shrink-0 font-bold">
                 ⚡
               </div>
-              <span className="text-xs font-bold text-slate-700">Delivery Rate</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Delivery Rate</span>
             </div>
           </div>
-          <div className="mt-2.5 text-2xl font-black text-slate-900">{stats.successRate}%</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Average dispatch health</div>
+          <div className="mt-2.5 text-2xl font-black text-slate-900 dark:text-slate-100">{stats.successRate}%</div>
+          <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Average dispatch health</div>
         </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#0B101D]/80 p-4 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex-1 w-full relative">
           <input
             type="text"
             placeholder="Search campaigns by name, sender number, or template..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-white/10 rounded-xl text-sm bg-white dark:bg-white/[0.04] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
           />
           <span className="absolute left-3.5 top-2.5 text-slate-400 text-sm">🔍</span>
         </div>
@@ -904,7 +904,7 @@ export default function CampaignsPage() {
           <select
             value={filterService}
             onChange={(e) => setFilterService(e.target.value)}
-            className="px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 font-medium bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="px-3 py-2 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-700 dark:text-slate-200 font-medium bg-slate-50/50 dark:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
           >
             <option value="ALL">All Broadcast Types</option>
             <option value="MARKETING">📣 Marketing & Promo</option>
@@ -914,7 +914,7 @@ export default function CampaignsPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 font-medium bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="px-3 py-2 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-700 dark:text-slate-200 font-medium bg-slate-50/50 dark:bg-[#070b14] focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
           >
             <option value="ALL">All Statuses</option>
             <option value="RUNNING">🔵 Running</option>
@@ -929,19 +929,19 @@ export default function CampaignsPage() {
 
       {/* Campaigns List Table */}
       {loading ? (
-        <div className="bg-white rounded-3xl border border-slate-200/80 p-16 text-center shadow-xs">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl border border-slate-200/80 dark:border-white/[0.08] p-16 text-center shadow-xs">
           <Loader scale={0.95} color="#0f172a" />
-          <p className="mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <p className="mt-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Fetching campaigns and real-time delivery funnels...
           </p>
         </div>
       ) : filteredCampaigns.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-3xl p-16 text-center shadow-xs">
-          <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-3xl mb-4">
+        <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-3xl p-16 text-center shadow-xs">
+          <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-3xl mb-4">
             📣
           </div>
-          <h3 className="text-xl font-extrabold text-slate-900">No Broadcast Campaigns Found</h3>
-          <p className="text-sm text-slate-500 max-w-md mx-auto mt-2">
+          <h3 className="text-xl font-extrabold text-slate-900 dark:text-slate-100">No Broadcast Campaigns Found</h3>
+          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-2">
             You haven't created any campaigns matching your criteria yet. Upload an Excel list and launch targeted promotional broadcasts or order updates!
           </p>
           <div className="mt-6 flex items-center justify-center gap-3">
@@ -950,23 +950,23 @@ export default function CampaignsPage() {
                 resetWizard();
                 setShowWizard(true);
               }}
-              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition shadow-sm"
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition shadow-sm cursor-pointer"
             >
               + Create First Campaign
             </button>
             <button
               onClick={handleDownloadSampleExcel}
-              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl transition"
+              className="px-4 py-2.5 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 font-bold text-sm rounded-xl transition cursor-pointer"
             >
               📥 Download Sample Excel
             </button>
           </div>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden">
+        <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-3xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase tracking-wider">
+              <thead className="bg-slate-50 dark:bg-white/[0.03] text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-white/10 text-xs uppercase tracking-wider">
                 <tr>
                   <th className="py-4 px-6 font-bold">Campaign Details</th>
                   <th className="py-4 px-6 font-bold">Service & Sender</th>
@@ -976,17 +976,17 @@ export default function CampaignsPage() {
                   <th className="py-4 px-6 font-bold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {filteredCampaigns.map((camp) => {
                   const pct =
                     camp.totalRecipients > 0 ? Math.round((camp.sentCount / camp.totalRecipients) * 100) : 0;
 
                   return (
-                    <tr key={camp.id} className="hover:bg-slate-50/60 transition">
+                    <tr key={camp.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition">
                       {/* Name & Created */}
                       <td className="py-4 px-6">
-                        <div className="font-extrabold text-slate-900 text-base">{camp.name}</div>
-                        <div className="text-xs text-slate-400 mt-0.5">
+                        <div className="font-extrabold text-slate-900 dark:text-slate-100 text-base">{camp.name}</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                           Created {new Date(camp.createdAt).toLocaleDateString()}
                         </div>
                       </td>
@@ -996,25 +996,25 @@ export default function CampaignsPage() {
                         <span
                           className={`inline-block px-2.5 py-0.5 rounded-md text-xs font-extrabold uppercase mb-1.5 ${
                             camp.service === "MARKETING"
-                              ? "bg-purple-50 text-purple-700 border border-purple-200"
+                              ? "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30"
                               : camp.service === "UTILITY"
-                              ? "bg-blue-50 text-blue-700 border border-blue-200"
-                              : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30"
+                              : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30"
                           }`}
                         >
                           {camp.service}
                         </span>
-                        <div className="text-xs font-mono font-bold text-slate-700 flex items-center gap-1">
+                        <div className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
                           <span>📱</span> {camp.senderPhone || camp.phoneId}
                         </div>
                       </td>
 
                       {/* Template */}
                       <td className="py-4 px-6">
-                        <span className="font-mono text-xs font-bold bg-slate-100 px-2.5 py-1 rounded-md text-slate-800 border border-slate-200">
+                        <span className="font-mono text-xs font-bold bg-slate-100 dark:bg-white/10 px-2.5 py-1 rounded-md text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10">
                           {camp.templateName}
                         </span>
-                        <div className="text-[11px] text-slate-400 mt-1 uppercase font-semibold">
+                        <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 uppercase font-semibold">
                           Language: {camp.templateLanguage}
                         </div>
                       </td>
@@ -1022,12 +1022,12 @@ export default function CampaignsPage() {
                       {/* Progress Bar & Counts */}
                       <td className="py-4 px-6">
                         <div className="flex items-center justify-between text-xs font-semibold mb-1">
-                          <span className="text-slate-900">
+                          <span className="text-slate-900 dark:text-slate-100">
                             {camp.sentCount} / {camp.totalRecipients} sent
                           </span>
-                          <span className="text-slate-500 font-mono">{pct}%</span>
+                          <span className="text-slate-500 dark:text-slate-400 font-mono">{pct}%</span>
                         </div>
-                        <div className="w-36 h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                        <div className="w-36 h-2 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden border border-slate-200 dark:border-white/10">
                           <div
                             className={`h-full rounded-full transition-all duration-500 ${
                               camp.status === "COMPLETED"
@@ -1042,7 +1042,7 @@ export default function CampaignsPage() {
                           />
                         </div>
                         {camp.failedCount > 0 && (
-                          <div className="text-[10px] text-red-600 font-bold mt-1">
+                          <div className="text-[10px] text-red-600 dark:text-red-400 font-bold mt-1">
                             ⚠️ {camp.failedCount} failed
                           </div>
                         )}
@@ -1053,16 +1053,16 @@ export default function CampaignsPage() {
                         <span
                           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase border ${
                             camp.status === "COMPLETED"
-                              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                              ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30"
                               : camp.status === "RUNNING"
-                              ? "bg-blue-50 text-blue-800 border-blue-200"
+                              ? "bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-500/30"
                               : camp.status === "SCHEDULED"
-                              ? "bg-amber-50 text-amber-800 border-amber-200"
+                              ? "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-500/30"
                               : camp.status === "PAUSED"
-                              ? "bg-orange-50 text-orange-800 border-orange-200"
+                              ? "bg-orange-50 dark:bg-orange-950/40 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-500/30"
                               : camp.status === "FAILED"
-                              ? "bg-red-50 text-red-800 border-red-200"
-                              : "bg-slate-100 text-slate-700 border-slate-300"
+                              ? "bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300 border-red-200 dark:border-red-500/30"
+                              : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-white/10"
                           }`}
                         >
                           <span
@@ -1084,14 +1084,14 @@ export default function CampaignsPage() {
                           {camp.status === "DRAFT" || camp.status === "SCHEDULED" ? (
                             <button
                               onClick={() => handleLaunchCampaign(camp)}
-                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center gap-1"
+                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center gap-1 cursor-pointer"
                             >
                               <span>🚀</span> Launch
                             </button>
                           ) : camp.status === "RUNNING" ? (
                             <button
                               onClick={() => handlePauseCampaign(camp)}
-                              className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center gap-1"
+                              className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center gap-1 cursor-pointer"
                             >
                               <span>⏸️</span> Pause
                             </button>
@@ -1099,7 +1099,7 @@ export default function CampaignsPage() {
 
                           <button
                             onClick={() => handleViewDetails(camp)}
-                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold transition flex items-center gap-1"
+                            className="px-3 py-1.5 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer"
                             title="View Audience Delivery Log"
                           >
                             <span>📊</span> Logs
@@ -1107,7 +1107,7 @@ export default function CampaignsPage() {
 
                           <button
                             onClick={() => handleDeleteCampaign(camp)}
-                            className="px-2.5 py-1.5 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-lg text-xs font-bold transition border border-transparent hover:border-red-200"
+                            className="px-2.5 py-1.5 bg-slate-50 dark:bg-white/[0.04] hover:bg-red-50 dark:hover:bg-red-950/30 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 rounded-lg text-xs font-bold transition border border-transparent hover:border-red-200 dark:hover:border-red-500/30 cursor-pointer"
                             title="Delete Campaign"
                           >
                             🗑️
@@ -1128,14 +1128,14 @@ export default function CampaignsPage() {
          ======================================================== */}
       {showWizard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 transform scale-100 max-h-[90vh] overflow-y-auto relative">
+          <div className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 dark:border-white/10 transform scale-100 max-h-[90vh] overflow-y-auto relative">
             {/* Header & Steps Indicator */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-5 mb-6">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-5 mb-6">
               <div>
-                <span className="text-xs uppercase font-extrabold tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                <span className="text-xs uppercase font-extrabold tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-500/30">
                   Step {wizardStep} of 4
                 </span>
-                <h2 className="text-2xl font-black text-slate-900 mt-2">
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-2">
                   {wizardStep === 1 && "Campaign Basics & Sender Routing"}
                   {wizardStep === 2 && "Select Template & Live Preview"}
                   {wizardStep === 3 && "Audience Upload & Smart Column Mapping"}
@@ -1144,7 +1144,7 @@ export default function CampaignsPage() {
               </div>
               <button
                 onClick={() => setShowWizard(false)}
-                className="w-8 h-8 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center font-bold text-lg"
+                className="w-8 h-8 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 flex items-center justify-center font-bold text-lg cursor-pointer"
               >
                 ✕
               </button>
@@ -1156,8 +1156,8 @@ export default function CampaignsPage() {
                 onClick={() => setWizardStep(1)}
                 className={`py-2 px-1 rounded-xl cursor-pointer transition border ${
                   wizardStep === 1
-                    ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                    : "bg-slate-50 text-slate-500 border-slate-200"
+                    ? "bg-slate-900 dark:bg-emerald-600 text-white border-slate-900 dark:border-emerald-600 shadow-sm"
+                    : "bg-slate-50 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/[0.08]"
                 }`}
               >
                 1. Basics
@@ -1166,8 +1166,8 @@ export default function CampaignsPage() {
                 onClick={() => setWizardStep(2)}
                 className={`py-2 px-1 rounded-xl cursor-pointer transition border ${
                   wizardStep === 2
-                    ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                    : "bg-slate-50 text-slate-500 border-slate-200"
+                    ? "bg-slate-900 dark:bg-emerald-600 text-white border-slate-900 dark:border-emerald-600 shadow-sm"
+                    : "bg-slate-50 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/[0.08]"
                 }`}
               >
                 2. Template
@@ -1176,8 +1176,8 @@ export default function CampaignsPage() {
                 onClick={() => setWizardStep(3)}
                 className={`py-2 px-1 rounded-xl cursor-pointer transition border ${
                   wizardStep === 3
-                    ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                    : "bg-slate-50 text-slate-500 border-slate-200"
+                    ? "bg-slate-900 dark:bg-emerald-600 text-white border-slate-900 dark:border-emerald-600 shadow-sm"
+                    : "bg-slate-50 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/[0.08]"
                 }`}
               >
                 3. Audience & Mapping
@@ -1186,8 +1186,8 @@ export default function CampaignsPage() {
                 onClick={() => setWizardStep(4)}
                 className={`py-2 px-1 rounded-xl cursor-pointer transition border ${
                   wizardStep === 4
-                    ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                    : "bg-slate-50 text-slate-500 border-slate-200"
+                    ? "bg-slate-900 dark:bg-emerald-600 text-white border-slate-900 dark:border-emerald-600 shadow-sm"
+                    : "bg-slate-50 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/[0.08]"
                 }`}
               >
                 4. Review & Launch
@@ -1198,7 +1198,7 @@ export default function CampaignsPage() {
             {wizardStep === 1 && (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                     Campaign Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1206,13 +1206,13 @@ export default function CampaignsPage() {
                     placeholder="e.g. Diwali Festive Flash Sale 2026"
                     value={campaignName}
                     onChange={(e) => setCampaignName(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-base font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    className="w-full px-4 py-3 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 rounded-xl text-base font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                   />
-                  <p className="text-xs text-slate-400 mt-1.5">A clear internal name to identify your broadcast.</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">A clear internal name to identify your broadcast.</p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                     Service Category <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1220,18 +1220,18 @@ export default function CampaignsPage() {
                       onClick={() => setService("MARKETING")}
                       className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
                         service === "MARKETING"
-                          ? "border-purple-600 bg-purple-50/70 shadow-sm ring-1 ring-purple-600/30"
-                          : "border-slate-200 hover:border-slate-300 bg-white"
+                          ? "border-purple-600 bg-purple-50/70 dark:bg-purple-950/40 shadow-sm ring-1 ring-purple-600/30"
+                          : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 bg-white dark:bg-[#070b14]"
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-2xl">📣</span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-700/50">
                           ₹1.00 / msg
                         </span>
                       </div>
-                      <div className="font-extrabold text-slate-900 text-sm">Marketing & Promo Broadcast</div>
-                      <div className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      <div className="font-extrabold text-slate-900 dark:text-white text-sm">Marketing & Promo Broadcast</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                         Festive discounts, promotional offers, seasonal sales, and product launch announcements.
                       </div>
                     </div>
@@ -1240,48 +1240,48 @@ export default function CampaignsPage() {
                       onClick={() => setService("UTILITY")}
                       className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
                         service === "UTILITY"
-                          ? "border-blue-600 bg-blue-50/70 shadow-sm ring-1 ring-blue-600/30"
-                          : "border-slate-200 hover:border-slate-300 bg-white"
+                          ? "border-blue-600 bg-blue-50/70 dark:bg-blue-950/40 shadow-sm ring-1 ring-blue-600/30"
+                          : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 bg-white dark:bg-[#070b14]"
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-2xl">📋</span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50">
                           ₹0.50 / msg (50% Off)
                         </span>
                       </div>
-                      <div className="font-extrabold text-slate-900 text-sm">Operational & Utility Broadcast</div>
-                      <div className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      <div className="font-extrabold text-slate-900 dark:text-white text-sm">Operational & Utility Broadcast</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                         Invoices, fee due reminders, school/society notices, and service maintenance alerts.
                       </div>
                     </div>
                   </div>
-                  <div className="bg-slate-100/80 border border-slate-200/80 rounded-xl p-3 mt-3 flex items-start gap-2.5 text-[11px] text-slate-600">
+                  <div className="bg-slate-100/80 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 rounded-xl p-3 mt-3 flex items-start gap-2.5 text-[11px] text-slate-600 dark:text-slate-300">
                     <span className="text-base shrink-0 mt-0.5">💡</span>
                     <span>
-                      <b>Looking for OTP / Authentication?</b> OTP is a real-time, 1-to-1 security trigger and cannot be sent via bulk Excel campaigns. Dispatch OTPs programmatically using your secret keys under <a href="/dashboard/api-keys" className="font-bold text-slate-900 underline hover:text-emerald-700">API Keys & Gateway</a>.
+                      <b>Looking for OTP / Authentication?</b> OTP is a real-time, 1-to-1 security trigger and cannot be sent via bulk Excel campaigns. Dispatch OTPs programmatically using your secret keys under <a href="/dashboard/api-keys" className="font-bold text-slate-900 dark:text-emerald-400 underline hover:text-emerald-700">API Keys & Gateway</a>.
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                     Sender WhatsApp Phone Number <span className="text-red-500">*</span>
                   </label>
                   {phoneNumbers.length === 0 ? (
-                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-800">
+                    <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-500/30 rounded-2xl text-xs text-amber-800 dark:text-amber-200">
                       ⚠️ No phone numbers registered in your workspace yet. Please add a number under <b>Numbers & Routing</b> first.
                     </div>
                   ) : (
                     <select
                       value={selectedPhoneId}
                       onChange={(e) => setSelectedPhoneId(e.target.value)}
-                      className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-semibold bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      className="w-full px-4 py-3 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-semibold bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none cursor-pointer"
                     >
                       {phoneNumbers.map((num) => {
                         const hasService = num.service?.includes(service);
                         return (
-                          <option key={num.phoneId} value={num.phoneId}>
+                          <option key={num.phoneId} value={num.phoneId} className="bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100">
                             {num.displayPhone} {num.verifiedName ? `(${num.verifiedName})` : ""} - Services: [{num.service}]{" "}
                             {hasService ? "✓ Compatible" : "⚠️ Service Not Tagged"}
                           </option>
@@ -1289,7 +1289,7 @@ export default function CampaignsPage() {
                       })}
                     </select>
                   )}
-                  <p className="text-xs text-slate-400 mt-1.5">
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
                     Messages will be dispatched from this verified Meta WhatsApp Business number.
                   </p>
                 </div>
@@ -1307,7 +1307,7 @@ export default function CampaignsPage() {
                       }
                       setWizardStep(2);
                     }}
-                    className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition shadow-sm"
+                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-sm cursor-pointer"
                   >
                     Next: Choose Template →
                   </button>
@@ -1321,11 +1321,11 @@ export default function CampaignsPage() {
                 {/* Left Form: Select Template */}
                 <div className="lg:col-span-7 space-y-6">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                       Meta Approved Template ({service}) <span className="text-red-500">*</span>
                     </label>
                     {filteredTemplatesForService.length === 0 ? (
-                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900">
+                      <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-500/30 rounded-2xl text-xs text-amber-900 dark:text-amber-200">
                         ⚠️ No approved templates found for <b>{service}</b>. You can create and submit templates in the{" "}
                         <b>Template Studio</b> tab.
                       </div>
@@ -1337,49 +1337,49 @@ export default function CampaignsPage() {
                           const tpl = templates.find((t) => t.name === e.target.value);
                           if (tpl) setTemplateLanguage(tpl.language || "en_US");
                         }}
-                        className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-bold bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        className="w-full px-4 py-3 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none cursor-pointer"
                       >
                         {filteredTemplatesForService.map((tpl) => (
-                          <option key={tpl.id || tpl.name} value={tpl.name}>
+                          <option key={tpl.id || tpl.name} value={tpl.name} className="bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100">
                             {tpl.name} ({tpl.language}) • APPROVED
                           </option>
                         ))}
                       </select>
                     )}
-                    <p className="text-xs text-slate-400 mt-1.5">
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
                       Meta WhatsApp only allows broadcast campaigns using pre-approved templates.
                     </p>
                   </div>
 
                   {/* Detected Variables notice */}
                   {detectedVariables.length > 0 ? (
-                    <div className="p-4 bg-purple-50/80 border border-purple-200 rounded-2xl text-xs text-purple-900 space-y-2.5">
+                    <div className="p-4 bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-500/30 rounded-2xl text-xs text-purple-900 dark:text-purple-200 space-y-2.5">
                       <div className="flex items-center justify-between">
-                        <div className="font-extrabold flex items-center gap-1.5 text-purple-900">
+                        <div className="font-extrabold flex items-center gap-1.5 text-purple-900 dark:text-purple-200">
                           <span>💡</span> Detected {detectedVariables.length} Dynamic Variables in Template
                         </div>
-                        <span className="text-[10px] font-bold text-purple-700 bg-white px-2 py-0.5 rounded-full border border-purple-200">
+                        <span className="text-[10px] font-bold text-purple-700 dark:text-purple-300 bg-white dark:bg-purple-900/50 px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-700/50">
                           Auto-mapped to Excel
                         </span>
                       </div>
-                      <p className="text-slate-600">
+                      <p className="text-slate-600 dark:text-slate-300">
                         This template uses dynamic placeholders that will be extracted from your uploaded Excel sheet in the next step:
                       </p>
                       <div className="space-y-1.5">
                         {detectedVariables.map((v) => {
                           const info = getVariableInfo(v);
                           return (
-                            <div key={v} className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-purple-100 shadow-2xs">
+                            <div key={v} className="flex items-center justify-between bg-white dark:bg-[#070b14] px-3 py-2 rounded-xl border border-purple-100 dark:border-purple-500/20 shadow-2xs">
                               <div className="flex items-center gap-2">
-                                <span className="font-mono font-extrabold text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                                <span className="font-mono font-extrabold text-xs text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-500/30">
                                   {"{{" + v + "}}"}
                                 </span>
-                                <span className="font-bold text-slate-800 text-xs">
+                                <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">
                                   {info.label}
                                 </span>
                               </div>
-                              <span className="text-[11px] text-slate-500 font-mono">
-                                Sample: <b className="text-slate-700">"{info.sample}"</b>
+                              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                                Sample: <b className="text-slate-700 dark:text-slate-300">&quot;{info.sample}&quot;</b>
                               </span>
                             </div>
                           );
@@ -1387,15 +1387,15 @@ export default function CampaignsPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-600">
+                    <div className="p-4 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl text-xs text-slate-600 dark:text-slate-300">
                       ✓ This template has no dynamic variables. All recipients will receive the standard message.
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+                  <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/10">
                     <button
                       onClick={() => setWizardStep(1)}
-                      className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition"
+                      className="px-5 py-2.5 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-sm transition cursor-pointer"
                     >
                       ← Back
                     </button>
@@ -1407,16 +1407,16 @@ export default function CampaignsPage() {
                         }
                         setWizardStep(3);
                       }}
-                      className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition shadow-sm"
+                      className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-sm cursor-pointer"
                     >
-                      Next: Audience & Excel Mapping →
+                      Next: Audience &amp; Excel Mapping →
                     </button>
                   </div>
                 </div>
 
                 {/* Right Column: Realistic WhatsApp Phone Mockup */}
                 <div className="lg:col-span-5 flex flex-col items-center">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  <div className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
                     Live WhatsApp Preview
                   </div>
                   <div className="w-[280px] bg-slate-800 rounded-[36px] p-3 shadow-2xl border-4 border-slate-700 relative">
@@ -1424,11 +1424,11 @@ export default function CampaignsPage() {
                     <div className="w-24 h-4 bg-slate-900 rounded-b-xl mx-auto mb-2"></div>
 
                     {/* WhatsApp Chat Screen */}
-                    <div className="bg-[#E5DDD5] rounded-[24px] overflow-hidden min-h-[380px] flex flex-col justify-between p-3 border border-slate-300 relative text-xs">
+                    <div className="bg-[#E5DDD5] dark:bg-[#080d18] rounded-[24px] overflow-hidden min-h-[380px] flex flex-col justify-between p-3 border border-slate-300 dark:border-white/10 relative text-xs">
                       {/* Chat Header */}
-                      <div className="bg-[#075E54] text-white p-2.5 -mx-3 -mt-3 flex items-center justify-between mb-3 shadow-sm">
+                      <div className="bg-[#075E54] dark:bg-[#0a1b24] text-white p-2.5 -mx-3 -mt-3 flex items-center justify-between mb-3 shadow-sm border-b dark:border-white/5">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-emerald-400 flex items-center justify-center text-[10px] font-bold">
+                          <div className="w-6 h-6 rounded-full bg-emerald-400 flex items-center justify-center text-[10px] font-bold text-slate-900">
                             WA
                           </div>
                           <div>
@@ -1442,28 +1442,28 @@ export default function CampaignsPage() {
                       </div>
 
                       {/* Chat Bubble */}
-                      <div className="bg-white rounded-2xl rounded-tl-none p-3 shadow-sm border border-slate-100 space-y-2 max-w-[95%]">
+                      <div className="bg-white dark:bg-[#121c2e] rounded-2xl rounded-tl-none p-3 shadow-sm border border-slate-100 dark:border-white/10 space-y-2 max-w-[95%]">
                         {/* Header Component */}
                         {currentTemplate?.components?.find((c) => c.type === "HEADER") && (
-                          <div className="font-bold text-slate-900 pb-1 border-b border-slate-100 text-[11px]">
+                          <div className="font-bold text-slate-900 dark:text-white pb-1 border-b border-slate-100 dark:border-white/10 text-[11px]">
                             {currentTemplate.components.find((c) => c.type === "HEADER")?.text || "Announcement"}
                           </div>
                         )}
 
                         {/* Body Component */}
-                        <div className="text-slate-800 leading-relaxed text-[11px] whitespace-pre-wrap">
+                        <div className="text-slate-800 dark:text-slate-200 leading-relaxed text-[11px] whitespace-pre-wrap">
                           {renderedMessageText}
                         </div>
 
                         {/* Footer Component */}
                         {currentTemplate?.components?.find((c) => c.type === "FOOTER") && (
-                          <div className="text-[9px] text-slate-400 pt-1">
+                          <div className="text-[9px] text-slate-400 dark:text-slate-500 pt-1">
                             {currentTemplate.components.find((c) => c.type === "FOOTER")?.text}
                           </div>
                         )}
 
                         {/* Timestamp & Double check */}
-                        <div className="text-[9px] text-slate-400 text-right flex items-center justify-end gap-1">
+                        <div className="text-[9px] text-slate-400 dark:text-slate-500 text-right flex items-center justify-end gap-1">
                           <span>12:00 PM</span>
                           <span className="text-blue-500 font-bold">✓✓</span>
                         </div>
@@ -1477,7 +1477,7 @@ export default function CampaignsPage() {
                             ?.buttons?.map((btn, idx) => (
                               <div
                                 key={idx}
-                                className="bg-white text-blue-600 font-bold py-1.5 px-3 rounded-xl shadow-xs text-center border border-slate-200 text-[11px] flex items-center justify-center gap-1.5"
+                                className="bg-white dark:bg-[#1a263d] text-blue-600 dark:text-blue-400 font-bold py-1.5 px-3 rounded-xl shadow-xs text-center border border-slate-200 dark:border-white/10 text-[11px] flex items-center justify-center gap-1.5"
                               >
                                 {btn.type === "URL" && <span>🔗</span>}
                                 {btn.type === "OTP" && <span>📋</span>}
@@ -1496,12 +1496,12 @@ export default function CampaignsPage() {
             {wizardStep === 3 && (
               <div className="space-y-6">
                 {/* Upload Excel or CSV */}
-                <div className="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-3xl p-6 sm:p-8 text-center transition bg-slate-50/50">
-                  <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl mb-3">
+                <div className="border-2 border-dashed border-slate-300 dark:border-white/20 hover:border-emerald-500 rounded-3xl p-6 sm:p-8 text-center transition bg-slate-50/50 dark:bg-white/[0.02]">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-2xl mb-3">
                     📊
                   </div>
-                  <h3 className="text-base font-extrabold text-slate-900">Upload Excel Spreadsheet or CSV</h3>
-                  <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Upload Excel Spreadsheet or CSV</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
                     Supported formats: <b>.xlsx, .xls, .csv</b>. Include columns for phone numbers, customer names, and any template parameters.
                   </p>
 
@@ -1513,14 +1513,14 @@ export default function CampaignsPage() {
                     <button
                       type="button"
                       onClick={handleDownloadSampleExcel}
-                      className="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-sm rounded-xl transition"
+                      className="px-4 py-2.5 bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/20 font-bold text-sm rounded-xl transition cursor-pointer"
                     >
                       📥 Download Sample Template
                     </button>
                   </div>
 
                   {excelFileName && (
-                    <div className="mt-3 text-xs font-bold text-emerald-700 bg-emerald-50 inline-block px-3 py-1 rounded-full border border-emerald-200">
+                    <div className="mt-3 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 inline-block px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-500/30">
                       ✓ Selected: {excelFileName} ({parsedRows.length} rows detected)
                     </div>
                   )}
@@ -1528,13 +1528,13 @@ export default function CampaignsPage() {
 
                 {/* Column Mapping Section */}
                 {parsedRows.length > 0 && (
-                  <div className="bg-slate-50/70 border border-slate-200 rounded-3xl p-6 space-y-6">
-                    <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                  <div className="bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-3xl p-6 space-y-6">
+                    <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
                       <div>
-                        <h4 className="font-extrabold text-slate-900 text-sm">Smart Column Mapping</h4>
-                        <p className="text-xs text-slate-500">Map your Excel columns to the recipient fields and template variables.</p>
+                        <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">Smart Column Mapping</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Map your Excel columns to the recipient fields and template variables.</p>
                       </div>
-                      <span className="text-xs font-mono font-bold bg-white px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700">
+                      <span className="text-xs font-mono font-bold bg-white dark:bg-white/10 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300">
                         {parsedRows.length} Total Contacts
                       </span>
                     </div>
@@ -1542,52 +1542,52 @@ export default function CampaignsPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Recipient Phone Column */}
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                           Recipient Phone Number Column <span className="text-red-500">*</span>
                         </label>
                         <select
                           value={phoneColumn}
                           onChange={(e) => setPhoneColumn(e.target.value)}
-                          className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-emerald-500"
+                          className="w-full px-3 py-2.5 bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-xl text-sm font-bold focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                         >
                           {excelColumns.map((c) => (
-                            <option key={c} value={c}>
+                            <option key={c} value={c} className="bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100">
                               Column: {c}
                             </option>
                           ))}
                         </select>
-                        <p className="text-[11px] text-slate-400 mt-1">E.164 phone numbers with country code (e.g. 919876543210).</p>
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">E.164 phone numbers with country code (e.g. 919876543210).</p>
                       </div>
 
                       {/* Recipient Name Column */}
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                           Recipient Name Column (Optional)
                         </label>
                         <select
                           value={nameColumn}
                           onChange={(e) => setNameColumn(e.target.value)}
-                          className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500"
+                          className="w-full px-3 py-2.5 bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                         >
-                          <option value="">-- None / Do Not Map --</option>
+                          <option value="" className="bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100">-- None / Do Not Map --</option>
                           {excelColumns.map((c) => (
-                            <option key={c} value={c}>
+                            <option key={c} value={c} className="bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100">
                               Column: {c}
                             </option>
                           ))}
                         </select>
-                        <p className="text-[11px] text-slate-400 mt-1">Used for reporting and logs.</p>
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Used for reporting and logs.</p>
                       </div>
                     </div>
 
                     {/* Template Variable Mapping */}
                     {detectedVariables.length > 0 && (
-                      <div className="pt-4 border-t border-slate-200 space-y-3">
+                      <div className="pt-4 border-t border-slate-200 dark:border-white/10 space-y-3">
                         <div className="flex items-center justify-between">
-                          <div className="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                          <div className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
                             <span>✨</span> Map Template Variables to Excel Columns
                           </div>
-                          <span className="text-[11px] text-slate-500 font-medium">
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                             {detectedVariables.length} custom Excel field{detectedVariables.length !== 1 ? "s" : ""}
                           </span>
                         </div>
@@ -1601,34 +1601,34 @@ export default function CampaignsPage() {
                             return (
                               <div
                                 key={v}
-                                className={`bg-white p-4 rounded-2xl border transition shadow-xs space-y-3 ${
-                                  isMapped ? "border-emerald-300 ring-1 ring-emerald-100" : "border-slate-200"
+                                className={`bg-white dark:bg-[#070b14] p-4 rounded-2xl border transition shadow-xs space-y-3 ${
+                                  isMapped ? "border-emerald-300 dark:border-emerald-500/50 ring-1 ring-emerald-100 dark:ring-emerald-950/30" : "border-slate-200 dark:border-white/10"
                                 }`}
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2">
-                                    <span className="font-mono font-extrabold text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                                    <span className="font-mono font-extrabold text-xs text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-500/30">
                                       {"{{" + v + "}}"}
                                     </span>
-                                    <span className="font-extrabold text-slate-900 text-xs">
+                                    <span className="font-extrabold text-slate-900 dark:text-white text-xs">
                                       {info.label}
                                     </span>
                                   </div>
                                   {isMapped ? (
-                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                                    <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/30 flex items-center gap-1">
                                       <span>✓</span> Mapped
                                     </span>
                                   ) : (
-                                    <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 font-semibold">
+                                    <span className="text-[10px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-500/30 font-semibold">
                                       Needs Mapping
                                     </span>
                                   )}
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
+                                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase flex items-center justify-between">
                                     <span>Map to Excel Column:</span>
-                                    <span className="text-[9px] font-normal text-slate-400">Sample: "{info.sample}"</span>
+                                    <span className="text-[9px] font-normal text-slate-400 dark:text-slate-500">Sample: &quot;{info.sample}&quot;</span>
                                   </label>
                                   <select
                                     value={variableMappings[v] || ""}
@@ -1638,11 +1638,11 @@ export default function CampaignsPage() {
                                         [v]: e.target.value
                                       }))
                                     }
-                                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                    className="w-full px-3 py-2 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 bg-white dark:bg-[#0c1424] focus:ring-2 focus:ring-emerald-500 focus:outline-none cursor-pointer"
                                   >
-                                    <option value="">-- Choose Excel Column --</option>
+                                    <option value="" className="bg-white dark:bg-[#0c1424] text-slate-900 dark:text-slate-100">-- Choose Excel Column --</option>
                                     {excelColumns.map((c) => (
-                                      <option key={c} value={c}>
+                                      <option key={c} value={c} className="bg-white dark:bg-[#0c1424] text-slate-900 dark:text-slate-100">
                                         Column: {c}
                                       </option>
                                     ))}
@@ -1650,14 +1650,14 @@ export default function CampaignsPage() {
                                 </div>
 
                                 {sampleFromRow !== null && sampleFromRow !== undefined && (
-                                  <div className="bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 text-[11px] text-slate-600 flex items-center justify-between">
-                                    <span className="text-slate-400 text-[10px]">Row 1 Value:</span>
-                                    <span className="font-bold text-slate-900 truncate max-w-[150px]">{String(sampleFromRow)}</span>
+                                  <div className="bg-slate-50 dark:bg-white/[0.04] px-2.5 py-1.5 rounded-lg border border-slate-100 dark:border-white/10 text-[11px] text-slate-600 dark:text-slate-300 flex items-center justify-between">
+                                    <span className="text-slate-400 dark:text-slate-500 text-[10px]">Row 1 Value:</span>
+                                    <span className="font-bold text-slate-900 dark:text-slate-100 truncate max-w-[150px]">{String(sampleFromRow)}</span>
                                   </div>
                                 )}
 
                                 <div className="space-y-1">
-                                  <label className="text-[10px] font-bold text-slate-400 uppercase">
+                                  <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">
                                     Static Fallback (If cell is empty):
                                   </label>
                                   <input
@@ -1670,7 +1670,7 @@ export default function CampaignsPage() {
                                         [v]: e.target.value
                                       }))
                                     }
-                                    className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs"
+                                    className="w-full px-2.5 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1424] text-slate-900 dark:text-slate-100 rounded-lg text-xs"
                                   />
                                 </div>
                               </div>
@@ -1681,9 +1681,9 @@ export default function CampaignsPage() {
                     )}
 
                     {/* Live Row Swapper & Preview */}
-                    <div className="pt-4 border-t border-slate-200">
+                    <div className="pt-4 border-t border-slate-200 dark:border-white/10">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                           Audience Sample Preview ({previewRowIndex + 1} of {Math.min(5, parsedRows.length)})
                         </span>
                         <div className="flex items-center gap-2">
@@ -1691,7 +1691,7 @@ export default function CampaignsPage() {
                             type="button"
                             disabled={previewRowIndex <= 0}
                             onClick={() => setPreviewRowIndex((prev) => Math.max(0, prev - 1))}
-                            className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 disabled:opacity-40"
+                            className="px-2.5 py-1 bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 disabled:opacity-40 cursor-pointer"
                           >
                             ← Prev
                           </button>
@@ -1699,7 +1699,7 @@ export default function CampaignsPage() {
                             type="button"
                             disabled={previewRowIndex >= Math.min(4, parsedRows.length - 1)}
                             onClick={() => setPreviewRowIndex((prev) => Math.min(parsedRows.length - 1, prev + 1))}
-                            className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 disabled:opacity-40"
+                            className="px-2.5 py-1 bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 disabled:opacity-40 cursor-pointer"
                           >
                             Next →
                           </button>
@@ -1707,16 +1707,16 @@ export default function CampaignsPage() {
                       </div>
 
                       {/* Display Row Data */}
-                      <div className="bg-white rounded-2xl p-4 border border-slate-200 text-xs font-mono overflow-x-auto space-y-1">
-                        <div className="text-slate-500 font-bold mb-1">
-                          Phone: <span className="text-emerald-700 font-bold">{parsedRows[previewRowIndex]?.[phoneColumn] || "N/A"}</span>
+                      <div className="bg-white dark:bg-[#070b14] rounded-2xl p-4 border border-slate-200 dark:border-white/10 text-xs font-mono overflow-x-auto space-y-1">
+                        <div className="text-slate-500 dark:text-slate-400 font-bold mb-1">
+                          Phone: <span className="text-emerald-700 dark:text-emerald-400 font-bold">{parsedRows[previewRowIndex]?.[phoneColumn] || "N/A"}</span>
                         </div>
                         {detectedVariables.map((v) => {
                           const col = variableMappings[v];
                           const val = col ? parsedRows[previewRowIndex]?.[col] : staticFallbacks[v];
                           return (
-                            <div key={v} className="text-slate-600">
-                              {"{{" + v + "}}"}: <span className="text-purple-700 font-bold">{val || "EMPTY"}</span>
+                            <div key={v} className="text-slate-600 dark:text-slate-400">
+                              {"{{" + v + "}}"}: <span className="text-purple-700 dark:text-purple-400 font-bold">{val || "EMPTY"}</span>
                             </div>
                           );
                         })}
@@ -1725,10 +1725,10 @@ export default function CampaignsPage() {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+                <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/10">
                   <button
                     onClick={() => setWizardStep(2)}
-                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition"
+                    className="px-5 py-2.5 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-sm transition cursor-pointer"
                   >
                     ← Back
                   </button>
@@ -1744,9 +1744,9 @@ export default function CampaignsPage() {
                       }
                       setWizardStep(4);
                     }}
-                    className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition shadow-sm"
+                    className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-sm cursor-pointer"
                   >
-                    Next: Review & Launch →
+                    Next: Review &amp; Launch →
                   </button>
                 </div>
               </div>
@@ -1756,68 +1756,68 @@ export default function CampaignsPage() {
             {wizardStep === 4 && (
               <div className="space-y-6">
                 {/* Summary Card */}
-                <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 divide-y divide-slate-200 text-sm">
+                <div className="bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-3xl p-6 divide-y divide-slate-200 dark:divide-white/10 text-sm">
                   <div className="pb-3 flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-400 uppercase">Campaign Title</span>
-                    <span className="font-extrabold text-slate-900">{campaignName}</span>
+                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Campaign Title</span>
+                    <span className="font-extrabold text-slate-900 dark:text-white">{campaignName}</span>
                   </div>
 
                   <div className="py-3 flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-400 uppercase">Service Category</span>
-                    <span className="font-extrabold text-purple-700 uppercase bg-purple-50 px-2 py-0.5 rounded border border-purple-200 text-xs">
+                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Service Category</span>
+                    <span className="font-extrabold text-purple-700 dark:text-purple-300 uppercase bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-500/30 text-xs">
                       {service}
                     </span>
                   </div>
 
                   <div className="py-3 flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-400 uppercase">Sender Number</span>
-                    <span className="font-mono font-bold text-slate-800">
+                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Sender Number</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
                       {phoneNumbers.find((n) => n.phoneId === selectedPhoneId)?.displayPhone || selectedPhoneId}
                     </span>
                   </div>
 
                   <div className="py-3 flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-400 uppercase">Selected Template</span>
-                    <span className="font-mono font-bold text-slate-800">
+                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Selected Template</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
                       {selectedTemplateName} ({templateLanguage})
                     </span>
                   </div>
 
                   <div className="py-3 flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-400 uppercase">Audience Size</span>
-                    <span className="font-black text-emerald-600 text-base">{parsedRows.length.toLocaleString()} Contacts</span>
+                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Audience Size</span>
+                    <span className="font-black text-emerald-600 dark:text-emerald-400 text-base">{parsedRows.length.toLocaleString()} Contacts</span>
                   </div>
                 </div>
 
                 {/* Scheduling & Rate Limiting Settings */}
-                <div className="bg-white border border-slate-200 rounded-3xl p-6 space-y-4">
-                  <div className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                <div className="bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-3xl p-6 space-y-4">
+                  <div className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
                     Dispatch Configuration
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Rate Limiting */}
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">
+                      <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
                         Throttle Speed (Safety Rate-Limit)
                       </label>
                       <select
                         value={sendRate}
                         onChange={(e) => setSendRate(Number(e.target.value))}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-semibold"
+                        className="w-full px-3 py-2 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1424] text-slate-900 dark:text-slate-100 rounded-xl text-sm font-semibold cursor-pointer"
                       >
                         <option value={5}>5 messages / sec (Maximum Safety)</option>
                         <option value={10}>10 messages / sec (Recommended)</option>
                         <option value={20}>20 messages / sec (High Volume)</option>
                       </select>
-                      <p className="text-[10px] text-slate-400 mt-1">Prevents Meta Graph API rate-limiting.</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Prevents Meta Graph API rate-limiting.</p>
                     </div>
 
                     {/* Schedule Time */}
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Send Time</label>
+                      <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Send Time</label>
                       <div className="flex items-center gap-3 mb-2">
-                        <label className="text-xs flex items-center gap-1.5 cursor-pointer">
+                        <label className="text-xs flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-slate-300">
                           <input
                             type="radio"
                             name="sendMode"
@@ -1826,7 +1826,7 @@ export default function CampaignsPage() {
                           />
                           <span>Instant Launch</span>
                         </label>
-                        <label className="text-xs flex items-center gap-1.5 cursor-pointer">
+                        <label className="text-xs flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-slate-300">
                           <input
                             type="radio"
                             name="sendMode"
@@ -1842,7 +1842,7 @@ export default function CampaignsPage() {
                           type="datetime-local"
                           value={scheduledDateTime}
                           onChange={(e) => setScheduledDateTime(e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono"
+                          className="w-full px-3 py-2 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1424] text-slate-900 dark:text-slate-100 rounded-xl text-xs font-mono"
                         />
                       )}
                     </div>
@@ -1850,12 +1850,12 @@ export default function CampaignsPage() {
                 </div>
 
                 {/* Test Send Section */}
-                <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-500/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
                   <div>
-                    <div className="font-extrabold text-xs text-emerald-900 flex items-center gap-1.5">
+                    <div className="font-extrabold text-xs text-emerald-900 dark:text-emerald-300 flex items-center gap-1.5">
                       <span>🧪</span> Send a Real Test WhatsApp Message
                     </div>
-                    <div className="text-[11px] text-emerald-700">
+                    <div className="text-[11px] text-emerald-700 dark:text-emerald-400">
                       Verify template appearance on your personal phone before starting the full broadcast.
                     </div>
                   </div>
@@ -1866,31 +1866,31 @@ export default function CampaignsPage() {
                       placeholder="e.g. 919876543210"
                       value={testPhoneNumber}
                       onChange={(e) => setTestPhoneNumber(e.target.value)}
-                      className="px-3 py-2 border border-emerald-300 rounded-xl text-xs font-mono w-44"
+                      className="px-3 py-2 border border-emerald-300 dark:border-emerald-500/40 bg-white dark:bg-[#0c1424] text-slate-900 dark:text-slate-100 rounded-xl text-xs font-mono w-44"
                     />
                     <button
                       type="button"
                       disabled={isSendingTest}
                       onClick={handleSendTestMessage}
-                      className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs disabled:opacity-50"
+                      className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs disabled:opacity-50 cursor-pointer"
                     >
                       {isSendingTest ? "Sending..." : "Send Test"}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+                <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/10">
                   <button
                     onClick={() => setWizardStep(3)}
-                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition"
+                    className="px-5 py-2.5 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-sm transition cursor-pointer"
                   >
                     ← Back
                   </button>
                   <button
                     onClick={handleCreateCampaign}
-                    className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-sm transition shadow-md hover:shadow-lg flex items-center gap-2"
+                    className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-sm transition shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer"
                   >
-                    <span>🚀</span> Save & Create Campaign
+                    <span>🚀</span> Save &amp; Create Campaign
                   </button>
                 </div>
               </div>
@@ -1904,19 +1904,19 @@ export default function CampaignsPage() {
          ======================================================== */}
       {selectedCampaign && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 transform scale-100 max-h-[90vh] overflow-y-auto relative">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+          <div className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 dark:border-white/10 transform scale-100 max-h-[90vh] overflow-y-auto relative">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4 mb-5">
               <div>
-                <span className="text-xs uppercase font-extrabold tracking-wider text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded border border-purple-200">
+                <span className="text-xs uppercase font-extrabold tracking-wider text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-2.5 py-0.5 rounded border border-purple-200 dark:border-purple-500/30">
                   {selectedCampaign.service}
                 </span>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
                   {selectedCampaign.name} - Audience Delivery Funnel
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedCampaign(null)}
-                className="w-8 h-8 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center font-bold text-lg"
+                className="w-8 h-8 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 flex items-center justify-center font-bold text-lg cursor-pointer"
               >
                 ✕
               </button>
@@ -1924,34 +1924,34 @@ export default function CampaignsPage() {
 
             {/* Campaign Summary & Export */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-center">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Target Audience</span>
-                <p className="text-xl font-black text-slate-900 mt-0.5">{selectedCampaign.totalRecipients}</p>
+              <div className="bg-slate-50 dark:bg-white/[0.04] p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 text-center">
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Target Audience</span>
+                <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5">{selectedCampaign.totalRecipients}</p>
               </div>
 
-              <div className="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200 text-center">
-                <span className="text-[10px] font-bold text-emerald-600 uppercase">Sent Successfully</span>
-                <p className="text-xl font-black text-emerald-700 mt-0.5">{selectedCampaign.sentCount}</p>
+              <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-500/30 text-center">
+                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">Sent Successfully</span>
+                <p className="text-xl font-black text-emerald-700 dark:text-emerald-400 mt-0.5">{selectedCampaign.sentCount}</p>
               </div>
 
-              <div className="bg-red-50 p-3.5 rounded-2xl border border-red-200 text-center">
-                <span className="text-[10px] font-bold text-red-600 uppercase">Failed Dispatches</span>
-                <p className="text-xl font-black text-red-700 mt-0.5">{selectedCampaign.failedCount}</p>
+              <div className="bg-red-50 dark:bg-red-950/30 p-3.5 rounded-2xl border border-red-200 dark:border-red-500/30 text-center">
+                <span className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase">Failed Dispatches</span>
+                <p className="text-xl font-black text-red-700 dark:text-red-400 mt-0.5">{selectedCampaign.failedCount}</p>
               </div>
 
-              <div className="bg-blue-50 p-3.5 rounded-2xl border border-blue-200 text-center">
-                <span className="text-[10px] font-bold text-blue-600 uppercase">Status</span>
-                <p className="text-sm font-extrabold text-blue-800 mt-1">{selectedCampaign.status}</p>
+              <div className="bg-blue-50 dark:bg-blue-950/30 p-3.5 rounded-2xl border border-blue-200 dark:border-blue-500/30 text-center">
+                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase">Status</span>
+                <p className="text-sm font-extrabold text-blue-800 dark:text-blue-300 mt-1">{selectedCampaign.status}</p>
               </div>
             </div>
 
             <div className="flex items-center justify-between mb-3">
-              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 Audience Contact Logs (Displaying up to 500 records)
               </h4>
               <button
                 onClick={handleExportRecipientsCsv}
-                className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
+                className="px-3.5 py-1.5 bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
               >
                 <span>📥</span> Export to Excel
               </button>
@@ -1959,16 +1959,16 @@ export default function CampaignsPage() {
 
             {/* Recipients Table */}
             {loadingRecipients ? (
-              <div className="py-12 text-center text-slate-400 text-sm">
+              <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
                 <Loader scale={0.9} color="#0f172a" />
-                <p className="mt-3 text-xs font-bold text-slate-500">Loading recipient delivery records...</p>
+                <p className="mt-3 text-xs font-bold text-slate-500 dark:text-slate-400">Loading recipient delivery records...</p>
               </div>
             ) : recipientsList.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs">No recipient records logged yet.</div>
+              <div className="p-8 text-center text-slate-400 dark:text-slate-500 text-xs">No recipient records logged yet.</div>
             ) : (
-              <div className="border border-slate-200 rounded-2xl overflow-hidden max-h-96 overflow-y-auto">
+              <div className="border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden max-h-96 overflow-y-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 uppercase font-bold sticky top-0">
+                  <thead className="bg-slate-50 dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-white/10 uppercase font-bold sticky top-0">
                     <tr>
                       <th className="py-2.5 px-4">Recipient Phone</th>
                       <th className="py-2.5 px-4">Recipient Name</th>
@@ -1977,26 +1977,26 @@ export default function CampaignsPage() {
                       <th className="py-2.5 px-4">Error / Notes</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 font-mono">
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-mono">
                     {recipientsList.map((r) => (
-                      <tr key={r.id} className="hover:bg-slate-50/50">
-                        <td className="py-2.5 px-4 font-bold text-slate-800">+{r.phone}</td>
-                        <td className="py-2.5 px-4 font-sans text-slate-700">{r.name || "-"}</td>
+                      <tr key={r.id} className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02]">
+                        <td className="py-2.5 px-4 font-bold text-slate-800 dark:text-slate-200">+{r.phone}</td>
+                        <td className="py-2.5 px-4 font-sans text-slate-700 dark:text-slate-300">{r.name || "-"}</td>
                         <td className="py-2.5 px-4">
                           <span
                             className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                               r.status === "sent" || r.status === "delivered" || r.status === "read"
-                                ? "bg-emerald-100 text-emerald-800"
+                                ? "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700/50"
                                 : r.status === "failed"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-slate-100 text-slate-600"
+                                ? "bg-red-100 dark:bg-red-950/50 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700/50"
+                                : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10"
                             }`}
                           >
                             {r.status}
                           </span>
                         </td>
-                        <td className="py-2.5 px-4 text-slate-500 text-[11px]">{r.metaMessageId || "-"}</td>
-                        <td className="py-2.5 px-4 text-red-600 font-sans text-[11px]">{r.errorMessage || "-"}</td>
+                        <td className="py-2.5 px-4 text-slate-500 dark:text-slate-400 text-[11px]">{r.metaMessageId || "-"}</td>
+                        <td className="py-2.5 px-4 text-red-600 dark:text-red-400 font-sans text-[11px]">{r.errorMessage || "-"}</td>
                       </tr>
                     ))}
                   </tbody>

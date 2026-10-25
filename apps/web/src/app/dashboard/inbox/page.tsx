@@ -369,21 +369,21 @@ export default function LiveInboxPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-6rem)] -m-8 bg-slate-50 overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-6rem)] -m-8 bg-slate-50 dark:bg-[#070b14] overflow-hidden">
       {/* Top Banner / Bar with Phone Selector Dropdown */}
-      <div className="h-16 bg-white border-b border-slate-200/80 px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 shadow-2xs">
+      <div className="h-16 bg-white dark:bg-[#0B101D] border-b border-slate-200/80 dark:border-white/[0.08] px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 shadow-2xs backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 font-bold text-sm shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-sm shrink-0">
             💬
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm font-bold text-slate-900">
+              <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                 {filteredConversations.length} Active Conversation{filteredConversations.length !== 1 ? "s" : ""}
               </span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             </div>
-            <p className="text-[11px] text-slate-400 truncate max-w-xs sm:max-w-md">
+            <p className="text-[11px] text-slate-400 dark:text-slate-400 truncate max-w-xs sm:max-w-md">
               {selectedPhoneId === "ALL"
                 ? "Unified 2-way inbox across all connected WhatsApp numbers"
                 : `Filtered to ${phoneNumbers.find(p => p.phoneId === selectedPhoneId)?.displayPhone || "selected line"}`}
@@ -394,16 +394,16 @@ export default function LiveInboxPage() {
         {/* Number Selector Dropdown & Actions */}
         <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
           {/* WhatsApp Business Line Dropdown */}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200/90 rounded-xl px-2.5 py-1 shadow-2xs">
-            <span className="text-xs text-emerald-600">📱</span>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider hidden md:inline">
+          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/[0.08] rounded-xl px-2.5 py-1 shadow-2xs">
+            <span className="text-xs text-emerald-600 dark:text-emerald-400">📱</span>
+            <label className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider hidden md:inline">
               WhatsApp Line:
             </label>
             <div className="relative">
               <select
                 value={selectedPhoneId}
                 onChange={(e) => setSelectedPhoneId(e.target.value)}
-                className="appearance-none bg-white border border-slate-200/90 hover:border-emerald-500 text-slate-800 text-xs font-bold rounded-lg pl-2.5 pr-7 py-1.5 shadow-2xs focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer transition min-w-[210px] sm:min-w-[260px]"
+                className="appearance-none bg-white dark:bg-[#070b14] border border-slate-200/90 dark:border-white/10 hover:border-emerald-500 dark:hover:border-emerald-400 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-lg pl-2.5 pr-7 py-1.5 shadow-2xs focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer transition min-w-[210px] sm:min-w-[260px]"
               >
                 <option value="ALL">🌐 All Connected Numbers ({phoneNumbers.length})</option>
                 {phoneNumbers.map((p) => {
@@ -422,7 +422,7 @@ export default function LiveInboxPage() {
           {phoneNumbers.length === 0 && !loadingNumbers && (
             <Link
               href="/dashboard/numbers"
-              className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs font-bold rounded-xl flex items-center gap-1 transition shadow-2xs shrink-0"
+              className="px-3 py-1.5 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-xl flex items-center gap-1 transition shadow-2xs shrink-0"
             >
               <span>⚠️ Link Number</span>
               <span>→</span>
@@ -435,7 +435,7 @@ export default function LiveInboxPage() {
               loadPhoneNumbers();
               if (selectedConvId) fetchMessages(selectedConvId);
             }}
-            className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-2xs cursor-pointer shrink-0"
+            className="px-3 py-1.5 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-2xs cursor-pointer shrink-0"
             title="Refresh conversations and numbers"
           >
             🔄 <span className="hidden sm:inline">Refresh</span>
@@ -446,16 +446,16 @@ export default function LiveInboxPage() {
       {/* Main Inbox 3-Pane Body */}
       <div className="flex-1 flex overflow-hidden">
         {/* Pane 1: Conversations List */}
-        <div className="w-80 md:w-96 bg-white border-r border-slate-200 flex flex-col shrink-0">
+        <div className="w-80 md:w-96 bg-white dark:bg-[#0B101D] border-r border-slate-200 dark:border-white/[0.08] flex flex-col shrink-0">
           {/* Search & Filters */}
-          <div className="p-3 border-b border-slate-100 space-y-2.5">
+          <div className="p-3 border-b border-slate-100 dark:border-white/[0.06] space-y-2.5">
             <div className="relative">
               <input
                 type="text"
                 placeholder="Search chats or phone numbers..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white transition"
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white dark:focus:bg-[#070b14] transition"
               />
               <span className="absolute left-2.5 top-2 text-slate-400 text-xs">🔍</span>
             </div>
@@ -469,8 +469,8 @@ export default function LiveInboxPage() {
                     onClick={() => setStatusFilter(tab)}
                     className={`text-[11px] font-semibold px-2.5 py-1 rounded-md transition ${
                       statusFilter === tab
-                        ? "bg-slate-900 text-white"
-                        : "text-slate-600 hover:bg-slate-100"
+                        ? "bg-slate-900 dark:bg-emerald-600 text-white"
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06]"
                     }`}
                   >
                     {tab === "ALL" ? "All" : tab.charAt(0) + tab.slice(1).toLowerCase()}
@@ -481,7 +481,7 @@ export default function LiveInboxPage() {
               {selectedPhoneId !== "ALL" && (
                 <button
                   onClick={() => setSelectedPhoneId("ALL")}
-                  className="text-[10px] text-emerald-700 hover:text-emerald-800 font-semibold underline shrink-0"
+                  className="text-[10px] text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-semibold underline shrink-0"
                   title="Clear number filter"
                 >
                   Clear filter ✕
@@ -491,7 +491,7 @@ export default function LiveInboxPage() {
           </div>
 
           {/* Conversations Scroll Area */}
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+          <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-white/[0.04]">
             {loadingList ? (
               <div className="p-8 text-center text-slate-400 text-xs">
                 <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
@@ -500,12 +500,12 @@ export default function LiveInboxPage() {
             ) : filteredConversations.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-xs">
                 <p className="text-2xl mb-2">📭</p>
-                <p className="font-semibold text-slate-700">
+                <p className="font-semibold text-slate-700 dark:text-slate-300">
                   {selectedPhoneId !== "ALL"
                     ? `No chats found for ${phoneNumbers.find(p => p.phoneId === selectedPhoneId)?.displayPhone || "selected line"}`
                     : "No conversations found"}
                 </p>
-                <p className="text-[11px] text-slate-400 mt-1">
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
                   {selectedPhoneId !== "ALL"
                     ? "Inbound messages to this specific WhatsApp line will appear here."
                     : "Inbound WhatsApp messages will appear here automatically."}
@@ -513,7 +513,7 @@ export default function LiveInboxPage() {
                 {selectedPhoneId !== "ALL" && (
                   <button
                     onClick={() => setSelectedPhoneId("ALL")}
-                    className="mt-3 text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 px-3 py-1.5 rounded-lg transition"
+                    className="mt-3 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 px-3 py-1.5 rounded-lg transition"
                   >
                     Show All Numbers →
                   </button>
@@ -529,31 +529,31 @@ export default function LiveInboxPage() {
                   <div
                     key={conv.id}
                     onClick={() => setSelectedConvId(conv.id)}
-                    className={`p-3.5 cursor-pointer transition flex items-start gap-3 hover:bg-slate-50 ${
-                      isSelected ? "bg-emerald-50/60 border-l-4 border-emerald-600" : ""
+                    className={`p-3.5 cursor-pointer transition flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-white/[0.03] ${
+                      isSelected ? "bg-emerald-50/60 dark:bg-emerald-950/30 border-l-4 border-emerald-600 dark:border-emerald-500" : ""
                     }`}
                   >
                     <div className="relative shrink-0">
-                      <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">
+                      <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-white/[0.1] text-slate-700 dark:text-slate-200 font-bold flex items-center justify-center text-xs">
                         {initials}
                       </div>
-                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white"></span>
+                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0B101D]"></span>
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-0.5">
-                        <span className="text-xs font-bold text-slate-900 truncate">
+                        <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
                           {conv.customerName || conv.customerPhone}
                         </span>
-                        <span className="text-[10px] text-slate-400 shrink-0 ml-1">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 ml-1">
                           {formatTimestamp(conv.lastMessageAt)}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between text-xs">
-                        <p className="text-slate-500 text-[11px] truncate pr-2">
+                        <p className="text-slate-500 dark:text-slate-400 text-[11px] truncate pr-2">
                           {conv.lastMessageDirection === "OUTBOUND" && (
-                            <span className="text-emerald-600 font-medium mr-1">You:</span>
+                            <span className="text-emerald-600 dark:text-emerald-400 font-medium mr-1">You:</span>
                           )}
                           {conv.lastMessage || "No messages yet"}
                         </p>
@@ -568,10 +568,10 @@ export default function LiveInboxPage() {
                         <span
                           className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
                             conv.status === "OPEN"
-                              ? "bg-emerald-100 text-emerald-800"
+                              ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300"
                               : conv.status === "WAITING"
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-slate-100 text-slate-600"
+                              ? "bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300"
+                              : "bg-slate-100 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400"
                           }`}
                         >
                           {conv.status}
@@ -579,18 +579,18 @@ export default function LiveInboxPage() {
 
                         {/* WhatsApp business line badge */}
                         {matchedNumber ? (
-                          <span className="text-[9px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-1.5 py-0.5 rounded inline-flex items-center gap-1">
+                          <span className="text-[9px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-500/20 px-1.5 py-0.5 rounded inline-flex items-center gap-1">
                             <span>📱</span>
                             <span>{matchedNumber.displayPhone}</span>
                           </span>
                         ) : conv.phoneId && conv.phoneId !== "phone_default" ? (
-                          <span className="text-[9px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded truncate max-w-[100px]">
+                          <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.06] px-1.5 py-0.5 rounded truncate max-w-[100px]">
                             ID: {conv.phoneId.slice(-6)}
                           </span>
                         ) : null}
 
                         {conv.tags && conv.tags.length > 0 && (
-                          <span className="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded truncate max-w-[90px]">
+                          <span className="text-[9px] bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded truncate max-w-[90px]">
                             {conv.tags[0]}
                           </span>
                         )}
@@ -604,28 +604,28 @@ export default function LiveInboxPage() {
         </div>
 
         {/* Pane 2: Message Thread & Composer */}
-        <div className="flex-1 flex flex-col bg-[#efeae2]/40 relative overflow-hidden">
+        <div className="flex-1 flex flex-col bg-[#efeae2]/40 dark:bg-[#070b14] relative overflow-hidden">
           {activeConv ? (
             <>
               {/* Active Chat Header */}
-              <div className="h-16 bg-white border-b border-slate-200 px-5 flex items-center justify-between shrink-0 shadow-xs">
+              <div className="h-16 bg-white dark:bg-[#0B101D] border-b border-slate-200 dark:border-white/[0.08] px-5 flex items-center justify-between shrink-0 shadow-xs">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-sm shrink-0">
                     {(activeConv.customerName || activeConv.customerPhone).slice(0, 2).toUpperCase()}
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                      <h2 className="text-sm font-bold text-slate-900 truncate">
+                      <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
                         {activeConv.customerName || activeConv.customerPhone}
                       </h2>
-                      <span className="text-xs text-slate-500 font-mono">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                         +{activeConv.customerPhone.replace(/^\+/, "")}
                       </span>
                       {activeConvPhone && (
-                        <span className="text-[10px] font-bold bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                        <span className="text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
                           <span>📱 Line: {activeConvPhone.displayPhone}</span>
                           {activeConvPhone.verifiedName && (
-                            <span className="text-emerald-600 font-normal">({activeConvPhone.verifiedName})</span>
+                            <span className="text-emerald-600 dark:text-emerald-400 font-normal">({activeConvPhone.verifiedName})</span>
                           )}
                         </span>
                       )}
@@ -640,12 +640,12 @@ export default function LiveInboxPage() {
                       ></span>
                       <span
                         className={`font-semibold ${
-                          serviceWindowInfo.active ? "text-emerald-700" : "text-amber-700"
+                          serviceWindowInfo.active ? "text-emerald-700 dark:text-emerald-400" : "text-amber-700 dark:text-amber-400"
                         }`}
                       >
                         {serviceWindowInfo.label}
                       </span>
-                      <span className="text-slate-400 text-[10px] hidden md:inline">
+                      <span className="text-slate-400 dark:text-slate-500 text-[10px] hidden md:inline">
                         • Meta 24h Care Window
                       </span>
                     </div>
@@ -657,7 +657,7 @@ export default function LiveInboxPage() {
                   <select
                     value={activeConv.status}
                     onChange={e => handleUpdateStatus(e.target.value as any)}
-                    className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-[#070b14] text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   >
                     <option value="OPEN">🟢 Open</option>
                     <option value="WAITING">🟡 Waiting</option>
@@ -666,7 +666,7 @@ export default function LiveInboxPage() {
 
                   <button
                     onClick={() => setActiveTab(activeTab === "chat" ? "details" : "chat")}
-                    className="p-1.5 text-slate-500 hover:text-slate-800 border border-slate-200 rounded-lg hover:bg-slate-50 text-xs font-medium"
+                    className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-200 dark:border-white/10 rounded-lg hover:bg-slate-50 dark:hover:bg-white/[0.06] text-xs font-medium transition"
                     title="Toggle customer details"
                   >
                     ℹ️ Details
@@ -676,7 +676,7 @@ export default function LiveInboxPage() {
 
               {/* Service Window Notice Banner */}
               {!serviceWindowInfo.active && (
-                <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-900 flex items-center justify-between">
+                <div className="bg-amber-50 dark:bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/20 px-4 py-2 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-base">⚠️</span>
                     <span>
@@ -685,7 +685,7 @@ export default function LiveInboxPage() {
                   </div>
                   <Link
                     href="/dashboard/campaigns"
-                    className="text-amber-800 underline font-bold hover:text-amber-900 text-xs shrink-0 ml-3"
+                    className="text-amber-800 dark:text-amber-300 underline font-bold hover:text-amber-900 dark:hover:text-amber-200 text-xs shrink-0 ml-3"
                   >
                     Send Template →
                   </Link>
@@ -700,10 +700,10 @@ export default function LiveInboxPage() {
                     Loading chat history...
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="p-12 text-center text-slate-400 text-xs bg-white/60 rounded-xl max-w-md mx-auto my-6 border border-slate-200/80">
+                  <div className="p-12 text-center text-slate-400 text-xs bg-white/60 dark:bg-[#0B101D]/80 rounded-xl max-w-md mx-auto my-6 border border-slate-200/80 dark:border-white/[0.08] backdrop-blur-md">
                     <p className="text-2xl mb-1">💬</p>
-                    <p className="font-semibold text-slate-700">No messages in this conversation yet</p>
-                    <p className="text-[11px] text-slate-400 mt-1">
+                    <p className="font-semibold text-slate-700 dark:text-slate-200">No messages in this conversation yet</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
                       Type a response below to initiate chat from {effectiveSenderPhoneObj?.displayPhone || "your business line"}.
                     </p>
                   </div>
@@ -720,14 +720,14 @@ export default function LiveInboxPage() {
                         <div
                           className={`max-w-[75%] sm:max-w-[65%] rounded-2xl px-4 py-2.5 shadow-2xs text-xs relative ${
                             isOutbound
-                              ? "bg-[#d9fdd3] text-slate-900 rounded-tr-xs"
-                              : "bg-white text-slate-900 rounded-tl-xs border border-slate-200/60"
+                              ? "bg-[#d9fdd3] dark:bg-[#005c4b] text-slate-900 dark:text-white rounded-tr-xs"
+                              : "bg-white dark:bg-[#1f2c34] text-slate-900 dark:text-slate-100 rounded-tl-xs border border-slate-200/60 dark:border-white/[0.06]"
                           }`}
                         >
                           {isOutbound && matchedSender && (
-                            <div className="text-[9px] font-bold text-emerald-800 pb-0.5 flex items-center gap-1">
+                            <div className="text-[9px] font-bold text-emerald-800 dark:text-emerald-300 pb-0.5 flex items-center gap-1">
                               <span>📱 Sent via {matchedSender.displayPhone}</span>
-                              {matchedSender.verifiedName ? <span className="text-slate-400">({matchedSender.verifiedName})</span> : null}
+                              {matchedSender.verifiedName ? <span className="text-slate-400 dark:text-emerald-200">({matchedSender.verifiedName})</span> : null}
                             </div>
                           )}
 
@@ -737,7 +737,7 @@ export default function LiveInboxPage() {
 
                           <div
                             className={`flex items-center justify-end gap-1 text-[10px] mt-1 ${
-                              isOutbound ? "text-emerald-700" : "text-slate-400"
+                              isOutbound ? "text-emerald-700 dark:text-emerald-200" : "text-slate-400 dark:text-slate-400"
                             }`}
                           >
                             <span>{formatTimestamp(msg.createdAt)}</span>
@@ -756,8 +756,8 @@ export default function LiveInboxPage() {
               </div>
 
               {/* Quick Response Templates Selector */}
-              <div className="bg-slate-50/90 border-t border-slate-200 px-4 py-1.5 flex items-center gap-1.5 overflow-x-auto text-xs">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
+              <div className="bg-slate-50/90 dark:bg-[#0B101D]/90 border-t border-slate-200 dark:border-white/[0.08] px-4 py-1.5 flex items-center gap-1.5 overflow-x-auto text-xs backdrop-blur-md">
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0">
                   ⚡ Quick:
                 </span>
                 {QUICK_RESPONSES.map((qr, idx) => (
@@ -765,7 +765,7 @@ export default function LiveInboxPage() {
                     key={idx}
                     type="button"
                     onClick={() => setReplyText(qr)}
-                    className="shrink-0 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1 rounded-full text-[11px] font-medium transition max-w-[200px] truncate"
+                    className="shrink-0 bg-white dark:bg-[#070b14] hover:bg-slate-100 dark:hover:bg-white/[0.08] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 px-2.5 py-1 rounded-full text-[11px] font-medium transition max-w-[200px] truncate"
                     title={qr}
                   >
                     {qr}
@@ -774,9 +774,9 @@ export default function LiveInboxPage() {
               </div>
 
               {/* Outbound Sender Line Selector */}
-              <div className="bg-slate-50 border-t border-slate-200 px-4 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+              <div className="bg-slate-50 dark:bg-[#0B101D] border-t border-slate-200 dark:border-white/[0.08] px-4 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 shrink-0">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     Replying From:
                   </span>
@@ -785,7 +785,7 @@ export default function LiveInboxPage() {
                       <select
                         value={effectiveSenderPhoneId}
                         onChange={(e) => setReplySenderPhoneId(e.target.value)}
-                        className="appearance-none bg-white border border-emerald-300 text-emerald-900 font-bold text-xs rounded-lg pl-2.5 pr-7 py-1 shadow-2xs hover:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                        className="appearance-none bg-white dark:bg-[#070b14] border border-emerald-300 dark:border-emerald-500/40 text-emerald-900 dark:text-emerald-300 font-bold text-xs rounded-lg pl-2.5 pr-7 py-1 shadow-2xs hover:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
                       >
                         {phoneNumbers.map((p) => {
                           const isThreadLine = p.phoneId === activeConv?.phoneId;
@@ -796,16 +796,16 @@ export default function LiveInboxPage() {
                           );
                         })}
                       </select>
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-emerald-700 pointer-events-none text-[10px]">▼</span>
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-emerald-700 dark:text-emerald-400 pointer-events-none text-[10px]">▼</span>
                     </div>
                   ) : (
-                    <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.06] px-2 py-0.5 rounded">
                       Default Project WhatsApp Line
                     </span>
                   )}
                 </div>
 
-                <div className="text-[11px] text-slate-400 flex items-center gap-1.5 shrink-0">
+                <div className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-1.5 shrink-0">
                   <span>Customer receives reply from this verified business line</span>
                 </div>
               </div>
@@ -813,7 +813,7 @@ export default function LiveInboxPage() {
               {/* Message Composer Input */}
               <form
                 onSubmit={handleSendMessage}
-                className="bg-white border-t border-slate-200 p-3 flex items-center gap-2"
+                className="bg-white dark:bg-[#0B101D] border-t border-slate-200 dark:border-white/[0.08] p-3 flex items-center gap-2"
               >
                 <textarea
                   value={replyText}
@@ -830,7 +830,7 @@ export default function LiveInboxPage() {
                       ? "Type a reply... (Press Enter to send)"
                       : "Type a reply or initiate via Meta Template..."
                   }
-                  className="flex-1 resize-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                  className="flex-1 resize-none bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-[#070b14] transition"
                 />
 
                 <button
@@ -843,10 +843,10 @@ export default function LiveInboxPage() {
               </form>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-8 text-center">
               <span className="text-5xl mb-3">💬</span>
-              <h3 className="text-base font-bold text-slate-700">Select a conversation</h3>
-              <p className="text-xs text-slate-500 mt-1 max-w-sm">
+              <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">Select a conversation</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
                 {selectedPhoneId !== "ALL"
                   ? `Choose a chat on ${phoneNumbers.find(p => p.phoneId === selectedPhoneId)?.displayPhone || "this line"} from the left pane to view messages and reply in real time.`
                   : "Choose a customer thread from the left pane to view messages, reply in real time, or manage customer attributes."}
@@ -857,41 +857,41 @@ export default function LiveInboxPage() {
 
         {/* Pane 3: Customer Details & Contact Attributes (Collapsible / Side Pane) */}
         {activeConv && activeTab === "details" && (
-          <div className="w-72 bg-white border-l border-slate-200 p-5 overflow-y-auto space-y-5 shrink-0">
-            <div className="text-center pb-4 border-b border-slate-100">
+          <div className="w-72 bg-white dark:bg-[#0B101D] border-l border-slate-200 dark:border-white/[0.08] p-5 overflow-y-auto space-y-5 shrink-0">
+            <div className="text-center pb-4 border-b border-slate-100 dark:border-white/[0.06]">
               <div className="w-16 h-16 rounded-full bg-emerald-600 text-white font-bold text-xl flex items-center justify-center mx-auto mb-2 shadow-xs">
                 {(activeConv.customerName || activeConv.customerPhone).slice(0, 2).toUpperCase()}
               </div>
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {activeConv.customerName || "Customer"}
               </h3>
-              <p className="text-xs text-slate-500 font-mono mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
                 +{activeConv.customerPhone.replace(/^\+/, "")}
               </p>
             </div>
 
             {/* Business Line Information */}
             <div className="space-y-1.5">
-              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <h4 className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Connected WhatsApp Line
               </h4>
-              <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 text-xs space-y-1">
+              <div className="p-3 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-[#070b14] text-xs space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Number:</span>
-                  <span className="font-bold text-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400">Number:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">
                     {activeConvPhone?.displayPhone || activeConv.phoneId || "Default Line"}
                   </span>
                 </div>
                 {activeConvPhone?.verifiedName && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Verified Name:</span>
-                    <span className="font-semibold text-emerald-700">{activeConvPhone.verifiedName}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Verified Name:</span>
+                    <span className="font-semibold text-emerald-700 dark:text-emerald-400">{activeConvPhone.verifiedName}</span>
                   </div>
                 )}
                 {activeConvPhone?.quality && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Quality:</span>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">
+                    <span className="text-slate-500 dark:text-slate-400">Quality:</span>
+                    <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/20 px-1.5 py-0.2 rounded">
                       {activeConvPhone.quality}
                     </span>
                   </div>
@@ -901,14 +901,14 @@ export default function LiveInboxPage() {
 
             {/* Service Window Information */}
             <div className="space-y-1.5">
-              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <h4 className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Meta 24h Service Window
               </h4>
               <div
                 className={`p-3 rounded-lg border text-xs ${
                   serviceWindowInfo.active
-                    ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                    : "bg-amber-50 border-amber-200 text-amber-800"
+                    ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300"
+                    : "bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-300"
                 }`}
               >
                 <div className="font-bold flex items-center gap-1.5">
@@ -925,29 +925,29 @@ export default function LiveInboxPage() {
 
             {/* Conversation Attributes */}
             <div className="space-y-3">
-              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <h4 className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Conversation Details
               </h4>
 
-              <div className="bg-slate-50 rounded-lg p-3 space-y-2 text-xs">
+              <div className="bg-slate-50 dark:bg-[#070b14] rounded-lg p-3 space-y-2 text-xs border border-slate-100 dark:border-white/[0.06]">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Status:</span>
-                  <span className="font-bold text-slate-800">{activeConv.status}</span>
+                  <span className="text-slate-500 dark:text-slate-400">Status:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{activeConv.status}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">First Contact:</span>
-                  <span className="font-medium text-slate-700">{formatDateHeader(activeConv.createdAt)}</span>
+                  <span className="text-slate-500 dark:text-slate-400">First Contact:</span>
+                  <span className="font-medium text-slate-700 dark:text-slate-300">{formatDateHeader(activeConv.createdAt)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Total In Thread:</span>
-                  <span className="font-medium text-slate-700">{messages.length} messages</span>
+                  <span className="text-slate-500 dark:text-slate-400">Total In Thread:</span>
+                  <span className="font-medium text-slate-700 dark:text-slate-300">{messages.length} messages</span>
                 </div>
               </div>
             </div>
 
             {/* Tags */}
             <div className="space-y-2">
-              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <h4 className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Tags & Segments
               </h4>
               <div className="flex flex-wrap gap-1.5">
@@ -957,7 +957,7 @@ export default function LiveInboxPage() {
                 ).map((tag, i) => (
                   <span
                     key={i}
-                    className="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-md font-medium"
+                    className="bg-slate-100 dark:bg-white/[0.08] text-slate-700 dark:text-slate-300 text-xs px-2.5 py-1 rounded-md font-medium"
                   >
                     🏷️ {tag}
                   </span>
@@ -966,7 +966,7 @@ export default function LiveInboxPage() {
             </div>
 
             {/* Meta Official Cloud API disclaimer */}
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-[11px] text-slate-500 leading-relaxed">
+            <div className="p-3 bg-slate-50 dark:bg-[#070b14] rounded-lg border border-slate-200 dark:border-white/[0.08] text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
               🔒 Powered by Meta Official WhatsApp Cloud API. Messages are encrypted and delivered directly to the user device.
             </div>
           </div>

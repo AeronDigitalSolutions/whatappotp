@@ -86,9 +86,9 @@ export default function SettingsPage() {
       </div>
 
       {/* 1. Meta WhatsApp Cloud API Credentials */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-6 space-y-5">
+      <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xs p-6 space-y-5 backdrop-blur-xl">
         <div className="border-b border-slate-100 pb-3">
-          <h2 className="text-sm font-bold text-slate-900">Cloud API Connection Telemetry</h2>
+          <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Cloud API Connection Telemetry</h2>
           <p className="text-[11px] text-slate-400">Live token validity, Meta WABA ID, and primary WhatsApp sender phone ID</p>
         </div>
 
@@ -114,7 +114,7 @@ export default function SettingsPage() {
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
               WhatsApp Business Account (WABA)
             </span>
-            <p className="text-sm font-mono font-bold text-slate-900 truncate">
+            <p className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 truncate">
               {project?.metaWabaId || "2107898293422238"}
             </p>
             <p className="text-[11px] text-slate-500 mt-1">Primary Meta Business Account</p>
@@ -124,7 +124,7 @@ export default function SettingsPage() {
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
               Default Phone Number ID
             </span>
-            <p className="text-sm font-mono font-bold text-slate-900 truncate">
+            <p className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 truncate">
               {project?.metaPhoneId || "1406142089245094"}
             </p>
             <p className="text-[11px] text-slate-500 mt-1">Meta registered phone ID</p>
@@ -143,9 +143,9 @@ export default function SettingsPage() {
       </div>
 
       {/* 2. OTP Delivery Rules */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-8 space-y-6">
+      <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl border border-slate-200 dark:border-white/[0.08] shadow-xs p-8 space-y-6 backdrop-blur-xl">
         <div className="border-b border-slate-100 pb-5">
-          <h2 className="text-lg font-bold text-slate-900">OTP Rules & Parameters</h2>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">OTP Rules & Parameters</h2>
           <p className="text-xs text-slate-500">Default security parameters for generated OTP codes</p>
         </div>
 
@@ -157,7 +157,7 @@ export default function SettingsPage() {
             <select
               value={otpLength}
               onChange={(e) => setOtpLength(Number(e.target.value))}
-              className="w-full rounded-xl border border-slate-300 p-3 bg-white text-sm text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+              className="w-full rounded-xl border border-slate-300 dark:border-white/10 p-3 bg-white dark:bg-[#070b14] text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             >
               <option value={4}>4 digits (Fastest)</option>
               <option value={6}>6 digits (Standard Enterprise)</option>
@@ -173,7 +173,7 @@ export default function SettingsPage() {
               type="number"
               value={expiry}
               onChange={(e) => setExpiry(Number(e.target.value))}
-              className="w-full rounded-xl border border-slate-300 p-3 bg-white text-sm text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+              className="w-full rounded-xl border border-slate-300 dark:border-white/10 p-3 bg-white dark:bg-[#070b14] text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
             <p className="mt-1.5 text-[11px] text-slate-500">Default 300 seconds (5 minutes).</p>
           </div>
@@ -186,7 +186,7 @@ export default function SettingsPage() {
               type="number"
               value={maxAttempts}
               onChange={(e) => setMaxAttempts(Number(e.target.value))}
-              className="w-full rounded-xl border border-slate-300 p-3 bg-white text-sm text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+              className="w-full rounded-xl border border-slate-300 dark:border-white/10 p-3 bg-white dark:bg-[#070b14] text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
             <p className="mt-1.5 text-[11px] text-slate-500">Lock code after failed tries.</p>
           </div>

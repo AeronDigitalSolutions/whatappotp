@@ -265,7 +265,7 @@ export default function NumbersPage() {
             <button
               onClick={loadNumbers}
               disabled={loading}
-              className="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-3.5 py-2 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.1] transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <span className={loading ? "animate-spin" : ""}>🔄</span>
               <span>Sync with Meta</span>
@@ -291,7 +291,7 @@ export default function NumbersPage() {
       {/* Services Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
         {/* Authentication Card */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition flex flex-col justify-between backdrop-blur-xl">
           <div>
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600 text-xs shrink-0 font-bold">
@@ -327,7 +327,7 @@ export default function NumbersPage() {
         </div>
 
         {/* Marketing Card */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition flex flex-col justify-between backdrop-blur-xl">
           <div>
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 text-xs shrink-0 font-bold">
@@ -359,7 +359,7 @@ export default function NumbersPage() {
         </div>
 
         {/* Utility Card */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition flex flex-col justify-between backdrop-blur-xl">
           <div>
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 text-xs shrink-0 font-bold">
@@ -392,13 +392,13 @@ export default function NumbersPage() {
       </div>
 
       {/* Connected WhatsApp Numbers Table */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-sm overflow-hidden backdrop-blur-xl">
         <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
           <div>
             <h2 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Connected WhatsApp Numbers</h2>
             <p className="text-xs text-slate-500 mt-0.5">Check or uncheck services to route traffic across your numbers.</p>
           </div>
-          <span className="text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-md">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 px-2.5 py-1 rounded-md">
             {numbers.length} registered {numbers.length === 1 ? "number" : "numbers"}
           </span>
         </div>
@@ -437,7 +437,7 @@ export default function NumbersPage() {
                     <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
                       {/* Phone Info */}
                       <td className="px-6 py-4">
-                        <div className="font-bold text-slate-900 font-mono text-sm">{item.displayPhone}</div>
+                        <div className="font-bold text-slate-900 dark:text-slate-100 font-mono text-sm">{item.displayPhone}</div>
                         <div className="text-xs text-slate-500">{item.verifiedName || "WhatsApp Business"}</div>
                         <div className="text-[10px] text-slate-400 font-mono mt-0.5">ID: {item.phoneId}</div>
                       </td>
@@ -579,7 +579,7 @@ export default function NumbersPage() {
       {/* Modal: Link Number Manually */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4">
+          <div className="bg-white dark:bg-[#0B101D] rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4 border border-slate-200 dark:border-white/10">
             <div className="flex justify-between items-center border-b pb-3">
               <h3 className="font-bold text-lg text-slate-900">Link WhatsApp Phone Number</h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
@@ -699,7 +699,7 @@ export default function NumbersPage() {
       {/* Modal: Test Message */}
       {testModal.open && testModal.phone && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+          <div className="bg-white dark:bg-[#0B101D] rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4 border border-slate-200 dark:border-white/10">
             <div className="flex justify-between items-center border-b pb-3">
               <div>
                 <h3 className="font-bold text-lg text-slate-900">Send Test WhatsApp Message</h3>

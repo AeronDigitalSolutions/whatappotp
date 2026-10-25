@@ -189,7 +189,7 @@ export default function LogsPage() {
 
         {/* Right: Live Sync + Refresh */}
         <div className="flex items-center gap-2 shrink-0">
-            <label className="flex items-center gap-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 px-3 py-2 rounded-xl cursor-pointer hover:bg-slate-50 transition shadow-2xs">
+            <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 px-3 py-2 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-white/[0.1] transition shadow-2xs">
               <input
                 type="checkbox"
                 checked={autoRefresh}
@@ -203,7 +203,7 @@ export default function LogsPage() {
             <button
               onClick={() => loadLogs()}
               disabled={loading}
-              className="px-3.5 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-3.5 py-2 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.1] transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <svg className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -215,7 +215,7 @@ export default function LogsPage() {
 
       {/* Elevated KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 text-xs shrink-0 font-bold">
               📨
@@ -226,7 +226,7 @@ export default function LogsPage() {
           <div className="text-[11px] text-slate-400 mt-0.5">Dispatched all-time</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 text-xs shrink-0 font-bold">
               ✓
@@ -237,7 +237,7 @@ export default function LogsPage() {
           <div className="text-[11px] text-slate-400 mt-0.5">{verifiedCount.toLocaleString()} successfully verified</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600 text-xs shrink-0 font-bold">
               ✕
@@ -248,7 +248,7 @@ export default function LogsPage() {
           <div className="text-[11px] text-slate-400 mt-0.5">Automatically refunded</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition">
+        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 text-xs shrink-0 font-bold">
               💳
@@ -261,7 +261,7 @@ export default function LogsPage() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-[#0B101D]/80 p-3 rounded-xl border border-slate-200 dark:border-white/[0.08] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 backdrop-blur-xl">
         {/* Status Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
           {(["ALL", "VERIFIED", "SENT", "FAILED", "EXPIRED"] as const).map((status) => (
@@ -295,7 +295,7 @@ export default function LogsPage() {
       </div>
 
       {/* Logs Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] shadow-sm overflow-hidden backdrop-blur-xl">
         {loading ? (
           <div className="p-16 text-center text-slate-500">
             <Loader scale={0.95} color="#0f172a" />
@@ -308,7 +308,7 @@ export default function LogsPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h3 className="text-sm font-semibold text-slate-900">No Delivery Logs Found</h3>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">No Delivery Logs Found</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
               {searchQuery ? "No logs matching your search term." : "Send your first message or OTP through the Live Gateway or API to view real-time logs here."}
             </p>
@@ -335,7 +335,7 @@ export default function LogsPage() {
                       {getStatusBadge(log.status)}
                     </td>
                     <td className="px-5 py-3.5">
-                      <span className="font-mono text-xs font-semibold text-slate-900">{log.phone}</span>
+                      <span className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100">{log.phone}</span>
                     </td>
                     <td className="px-5 py-3.5 text-xs text-slate-600">
                       <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-medium">
@@ -382,10 +382,10 @@ export default function LogsPage() {
       {/* Inspect Modal */}
       {selectedLog && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5">
+          <div className="bg-white dark:bg-[#0B101D] rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-white/10 space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">OTP Audit Details</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">OTP Audit Details</h3>
                 <p className="text-xs text-slate-500">Request ID: <span className="font-mono text-slate-800">{selectedLog.id}</span></p>
               </div>
               <button
@@ -399,7 +399,7 @@ export default function LogsPage() {
             <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200">
               <div>
                 <span className="text-slate-500 block">Recipient Phone</span>
-                <span className="font-mono font-bold text-slate-900 text-sm">{selectedLog.phone}</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-slate-100 text-sm">{selectedLog.phone}</span>
               </div>
               <div>
                 <span className="text-slate-500 block">Status</span>
@@ -415,11 +415,11 @@ export default function LogsPage() {
               </div>
               <div>
                 <span className="text-slate-500 block">Cost Deducted</span>
-                <span className="font-bold text-slate-900">₹{selectedLog.cost.toFixed(2)}</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100">₹{selectedLog.cost.toFixed(2)}</span>
               </div>
               <div>
                 <span className="text-slate-500 block">Attempts Made</span>
-                <span className="font-bold text-slate-900">{selectedLog.attempts} of {selectedLog.maxAttempts}</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100">{selectedLog.attempts} of {selectedLog.maxAttempts}</span>
               </div>
             </div>
 
