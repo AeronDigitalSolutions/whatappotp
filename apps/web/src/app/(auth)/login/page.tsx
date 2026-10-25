@@ -42,6 +42,10 @@ export default function LoginPage() {
       localStorage.setItem("projectId", data.projectId);
       localStorage.setItem("organizationId", data.organizationId);
 
+      if (data.user?.isSuperAdmin) {
+        localStorage.setItem("db_preview_role", "SUPER_ADMIN");
+      }
+
       if (selectedPlan) {
         localStorage.setItem("pendingPlan", selectedPlan);
         router.push("/dashboard?activate=true");

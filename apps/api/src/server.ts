@@ -107,7 +107,7 @@ fastify.post("/v1/auth/login", async (request: any, reply) => {
 
     if (!membership) return reply.status(500).send({ error: "Account corrupted (no organization)" });
 
-    return reply.send({ success: true, user: { id: user.id, email: user.email, name: user.name }, projectId: membership.organization.projects[0]?.id, organizationId: membership.organizationId });
+    return reply.send({ success: true, user: { id: user.id, email: user.email, name: user.name, isSuperAdmin: Boolean(user.isSuperAdmin) }, projectId: membership.organization.projects[0]?.id, organizationId: membership.organizationId });
   } catch (err: any) {
     return reply.status(500).send({ error: "Login failed: " + err.message });
   }
