@@ -52,6 +52,7 @@ export default function EcommerceTriggersPage() {
   const [saving, setSaving] = useState<boolean>(false);
   const [copiedUrl, setCopiedUrl] = useState<string>("");
   const [copiedSecret, setCopiedSecret] = useState<boolean>(false);
+  const [guideTab, setGuideTab] = useState<"SHOPIFY" | "WOOCOMMERCE" | "CUSTOM">("SHOPIFY");
 
   // Store Configuration state with safe defaults
   const [config, setConfig] = useState<EcommerceConfig>({
@@ -61,14 +62,14 @@ export default function EcommerceTriggersPage() {
     storeType: "SHOPIFY",
     storeUrl: "",
     webhookSecret: "whsec_default",
-    abandonedCartEnabled: true,
+    abandonedCartEnabled: false,
     abandonedCartTemplate: "cart_recovery_discount",
     abandonedCartDelayMinutes: 30,
-    orderConfirmationEnabled: true,
+    orderConfirmationEnabled: false,
     orderConfirmationTemplate: "order_confirmation_v2",
-    codVerificationEnabled: true,
+    codVerificationEnabled: false,
     codVerificationTemplate: "cod_verification_interactive",
-    shippingUpdatesEnabled: true,
+    shippingUpdatesEnabled: false,
     shippingUpdatesTemplate: "shipping_transit_update"
   });
 
@@ -90,6 +91,8 @@ export default function EcommerceTriggersPage() {
     eventType: string;
     customerPhone: string;
     errorMessage?: string;
+    recipeField?: keyof EcommerceConfig;
+    templateField?: keyof EcommerceConfig;
   } | null>(null);
 
   const getSimTemplateName = (eventType: string) => {
@@ -148,6 +151,7 @@ export default function EcommerceTriggersPage() {
         if (cfgData.success && cfgData.config) {
           const rawConf = cfgData.config;
           const normalizedPlatform = (rawConf.platform || rawConf.storeType || "SHOPIFY").toUpperCase() as any;
+          setGuideTab(normalizedPlatform);
           setConfig({
             ...rawConf,
             platform: normalizedPlatform,
@@ -210,8 +214,13 @@ export default function EcommerceTriggersPage() {
     }
   };
 
-  // Toggle Recipe helper
-  const toggleRecipe = (field: keyof EcommerceConfig) => {
+  // Toggle Recipe helper with strict Meta template approval gating
+  const toggleRecipe = (
+    field: keyof EcommerceConfig,
+    templateField: keyof EcommerceConfig,
+    defaultTpl: string,
+    recipeTitle: string
+  ) => {
     if (isDemo) {
       triggerPaywall(
         "To Continue, Please Take a Subscription",
@@ -219,13 +228,62 @@ export default function EcommerceTriggersPage() {
       );
       return;
     }
+
     const currentVal = Boolean(config[field]);
+    const currentTpl = (config[templateField] as string) || defaultTpl;
+    const isApproved = getTemplateMeta(currentTpl)?.status === "APPROVED";
+
+    // Strict Gating: Prevent turning ON if the template is not approved
+    if (!currentVal && !isApproved) {
+      setUnapprovedModal({
+        isOpen: true,
+        templateName: currentTpl,
+        templateStatus: getTemplateMeta(currentTpl)?.status || "NOT APPROVED",
+        eventType: recipeTitle,
+        customerPhone: simPhone.trim() || "+91 (Your Mobile)",
+        errorMessage: `Cannot activate "${recipeTitle}". Template "${currentTpl}" is not approved by Meta yet. You can either select an already approved template from the dropdown (like 'hello_world') or submit "${currentTpl}" in Template Studio.`,
+        recipeField: field,
+        templateField: templateField
+      });
+      return;
+    }
+
     const updated: EcommerceConfig = {
       ...config,
       [field]: !currentVal
     };
     setConfig(updated);
     handleSaveConfig(updated);
+  };
+
+  // Change mapped template helper
+  const handleSelectTemplate = (
+    templateField: keyof EcommerceConfig,
+    toggleField: keyof EcommerceConfig,
+    newTemplateName: string
+  ) => {
+    const isApproved = getTemplateMeta(newTemplateName)?.status === "APPROVED";
+    const updated: EcommerceConfig = {
+      ...config,
+      [templateField]: newTemplateName,
+      // If switching to an unapproved template, safely pause/disable the recipe toggle
+      [toggleField]: isApproved ? config[toggleField] : false
+    };
+    setConfig(updated);
+    handleSaveConfig(updated);
+  };
+
+  // Modal Quick Fix: Switch recipe to pre-approved hello_world and turn ON
+  const handleSwitchToApprovedStarter = async () => {
+    if (!unapprovedModal?.recipeField || !unapprovedModal?.templateField) return;
+    const updated: EcommerceConfig = {
+      ...config,
+      [unapprovedModal.templateField]: "hello_world",
+      [unapprovedModal.recipeField]: true
+    };
+    setConfig(updated);
+    setUnapprovedModal(null);
+    await handleSaveConfig(updated);
   };
 
   // Run Simulator with live Meta verification
@@ -306,6 +364,13 @@ export default function EcommerceTriggersPage() {
 
   const currentPlatformUpper = (config?.platform || config?.storeType || "SHOPIFY").toUpperCase();
 
+  const approvedTemplates = [
+    ...(metaTemplates.some((t: any) => t.name?.toLowerCase() === "hello_world")
+      ? []
+      : [{ name: "hello_world", status: "APPROVED", category: "UTILITY" }]),
+    ...metaTemplates.filter((t: any) => t.status === "APPROVED")
+  ];
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16">
       {/* Top Control Bar with Mode Toggle & Platform Selectors */}
@@ -322,6 +387,7 @@ export default function EcommerceTriggersPage() {
                 onClick={() => {
                   const updated: EcommerceConfig = { ...config, platform: plat, storeType: plat };
                   setConfig(updated);
+                  setGuideTab(plat);
                   handleSaveConfig(updated);
                 }}
                 className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition cursor-pointer shadow-2xs ${
@@ -338,30 +404,122 @@ export default function EcommerceTriggersPage() {
 
         {/* Right: Webhook status & Refresh */}
         <div className="flex items-center gap-2 shrink-0">
-            <span className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold rounded-xl border border-emerald-200/80 dark:border-emerald-500/20 flex items-center gap-1.5 shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Webhooks Ready
-            </span>
-            <button
-              onClick={() => fetchData()}
-              disabled={loading}
-              className="px-3.5 py-2 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.1] transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-            >
-              <span className={loading ? "animate-spin" : ""}>🔄</span>
-              <span>Refresh</span>
-            </button>
+          <span className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold rounded-xl border border-emerald-200/80 dark:border-emerald-500/20 flex items-center gap-1.5 shadow-2xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Webhooks Ready
+          </span>
+          <button
+            onClick={() => fetchData()}
+            disabled={loading}
+            className="px-3.5 py-2 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.1] transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+          >
+            <span className={loading ? "animate-spin" : ""}>🔄</span>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Store Connection & Webhook URLs Panel with Setup Guide & Isolation Guarantee */}
+      <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] p-5 sm:p-6 space-y-5 shadow-2xs backdrop-blur-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-white/[0.08] gap-2">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <span>🔗</span> Dedicated Store Webhook Endpoints
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Copy these URLs directly into your store settings. Each store and tenant is isolated by your unique Project ID.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Quick Guide:</span>
+            {(["SHOPIFY", "WOOCOMMERCE", "CUSTOM"] as const).map(tab => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setGuideTab(tab)}
+                className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border transition cursor-pointer ${
+                  guideTab === tab
+                    ? "bg-[#064e3b] text-white border-[#064e3b]"
+                    : "bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/[0.1]"
+                }`}
+              >
+                {tab === "SHOPIFY" ? "Shopify" : tab === "WOOCOMMERCE" ? "WooCommerce" : "Custom API"}
+              </button>
+            ))}
           </div>
         </div>
 
-      {/* Store Connection & Webhook URLs Panel */}
-      <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] p-5 sm:p-6 space-y-4 shadow-2xs backdrop-blur-xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
-          <div>
-            <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">Dedicated Store Webhook Endpoints</h2>
-            <p className="text-[11px] text-slate-400">
-              Copy these URLs directly into your {currentPlatformUpper === "SHOPIFY" ? "Shopify Admin > Notifications > Webhooks" : currentPlatformUpper === "WOOCOMMERCE" ? "WooCommerce Settings > Advanced > Webhooks" : "Custom Backend Application"}.
+        {/* Multi-Store & Tenant Isolation Banner */}
+        <div className="bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-500/20 rounded-xl p-3.5 flex items-start gap-3 text-xs">
+          <span className="text-base shrink-0">🛡️</span>
+          <div className="space-y-0.5">
+            <p className="font-bold text-emerald-900 dark:text-emerald-300">
+              Per-Store Isolation &amp; Security Guaranteed
+            </p>
+            <p className="text-emerald-800 dark:text-emerald-400 leading-relaxed text-[11px]">
+              Every merchant/store has a dedicated webhook URL containing your unique Project ID (<code className="font-mono font-bold bg-white dark:bg-emerald-950/40 px-1 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/30">{projectId || "default"}</code>) and cryptographic webhook secret. Webhooks from different client stores never mix, and all WhatsApp dispatches run through your own connected Meta Business Account.
             </p>
           </div>
+        </div>
+
+        {/* Step-by-Step Instructions based on active guide tab */}
+        <div className="bg-slate-50 dark:bg-[#070b14] rounded-xl border border-slate-200/80 dark:border-white/[0.08] p-4 text-xs space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <span>📖</span>
+              {guideTab === "SHOPIFY" && "Shopify Step-by-Step Webhook Setup"}
+              {guideTab === "WOOCOMMERCE" && "WooCommerce Step-by-Step Webhook Setup"}
+              {guideTab === "CUSTOM" && "Custom Backend / API Integration Guide"}
+            </span>
+            <span className="text-[10px] text-slate-400 uppercase font-mono">Format: JSON</span>
+          </div>
+
+          {guideTab === "SHOPIFY" && (
+            <ol className="list-decimal list-inside space-y-1.5 text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
+              <li>In your Shopify Admin, click <strong>Settings</strong> (bottom-left gear icon) &gt; <strong>Notifications</strong>.</li>
+              <li>Scroll down to the <strong>Webhooks</strong> section and click <strong>Create webhook</strong>.</li>
+              <li>
+                For each automation, create a webhook with <strong>Format: JSON</strong> and <strong>Event</strong>:
+                <ul className="list-disc list-inside ml-4 mt-1 text-slate-600 dark:text-slate-400 space-y-0.5 font-mono text-[10px]">
+                  <li>Abandoned Cart: Event = <span className="text-slate-800 dark:text-slate-200 font-bold">&quot;Checkout creation&quot;</span> or <span className="text-slate-800 dark:text-slate-200 font-bold">&quot;Cart creation&quot;</span></li>
+                  <li>Order Confirmation: Event = <span className="text-slate-800 dark:text-slate-200 font-bold">&quot;Order creation&quot;</span></li>
+                  <li>COD Verification: Event = <span className="text-slate-800 dark:text-slate-200 font-bold">&quot;Order creation&quot;</span></li>
+                  <li>Shipping Alert: Event = <span className="text-slate-800 dark:text-slate-200 font-bold">&quot;Fulfillment creation&quot;</span></li>
+                </ul>
+              </li>
+              <li>In <strong>URL</strong>, copy and paste the corresponding endpoint from the list below, then click <strong>Save</strong>.</li>
+            </ol>
+          )}
+
+          {guideTab === "WOOCOMMERCE" && (
+            <ol className="list-decimal list-inside space-y-1.5 text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
+              <li>In WordPress Admin, go to <strong>WooCommerce</strong> &gt; <strong>Settings</strong> &gt; <strong>Advanced</strong> &gt; <strong>Webhooks</strong>.</li>
+              <li>Click <strong>Add webhook</strong>.</li>
+              <li>Name your webhook (e.g., <em>Digital Beings Order Confirmation</em>) and set Status to <strong>Active</strong>.</li>
+              <li>Select the Topic: <strong>Order created</strong> (or <strong>Order updated</strong> for shipping).</li>
+              <li>In <strong>Delivery URL</strong>, paste the matching webhook URL from below.</li>
+              <li>In <strong>Secret</strong>, paste your unique Webhook Secret shown below (<code className="font-mono font-bold text-slate-800 dark:text-slate-200">{config?.webhookSecret || "whsec_default"}</code>).</li>
+              <li>Click <strong>Save webhook</strong>. WooCommerce will start sending events immediately.</li>
+            </ol>
+          )}
+
+          {guideTab === "CUSTOM" && (
+            <div className="space-y-1.5 text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
+              <p>Send standard HTTP <code className="font-mono bg-white dark:bg-white/10 px-1 py-0.5 rounded border border-slate-200 dark:border-white/10 font-bold">POST</code> requests with JSON body to the corresponding endpoint below:</p>
+              <pre className="p-2.5 bg-slate-900 text-slate-100 rounded-lg font-mono text-[10px] overflow-x-auto">
+{`curl -X POST "${getWebhookUrl("order_created")}" \\
+  -H "Content-Type: application/json" \\
+  -H "x-webhook-secret: ${config?.webhookSecret || "whsec_default"}" \\
+  -d '{
+    "customerPhone": "+919876543210",
+    "customerName": "Rahul Sharma",
+    "orderId": "#10928",
+    "orderTotal": 1499.00
+  }'`}
+              </pre>
+            </div>
+          )}
         </div>
 
         {/* Webhook URLs Grid */}
@@ -390,7 +548,7 @@ export default function EcommerceTriggersPage() {
                   />
                   <button
                     onClick={() => copyToClipboard(url, item.event)}
-                    className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold transition shrink-0"
+                    className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold transition shrink-0 cursor-pointer"
                   >
                     {isCopied ? "✓ Copied" : "Copy"}
                   </button>
@@ -401,21 +559,21 @@ export default function EcommerceTriggersPage() {
         </div>
 
         {/* Webhook Secret */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-2 text-xs gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-2 text-xs gap-2 border-t border-slate-100 dark:border-white/[0.08]">
           <div className="flex items-center gap-2 text-slate-500">
-            <span>🔒 Webhook Secret:</span>
+            <span>🔒 Unique Store Secret:</span>
             <span className="font-mono bg-slate-100 dark:bg-[#070b14] border border-slate-200/60 dark:border-white/10 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300 font-bold">
               {config?.webhookSecret || "whsec_default"}
             </span>
             <button
               onClick={copySecret}
-              className="text-emerald-600 hover:text-emerald-700 font-semibold text-[11px]"
+              className="text-emerald-600 hover:text-emerald-700 font-semibold text-[11px] cursor-pointer"
             >
               {copiedSecret ? "✓ Copied" : "Copy Secret"}
             </button>
           </div>
           <span className="text-[11px] text-slate-400">
-            Paste these URLs into Shopify Admin &gt; Settings &gt; Notifications &gt; Webhooks
+            HMAC signature authentication ensures only your store can trigger events.
           </span>
         </div>
       </div>
@@ -425,259 +583,547 @@ export default function EcommerceTriggersPage() {
         <div>
           <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Pre-Built High-Converting Recipes</h2>
           <p className="text-xs text-slate-500">
-            Turnkey workflows designed to recover lost revenue and reduce shipping returns on WhatsApp.
+            Turnkey workflows designed to recover lost revenue and reduce shipping returns on WhatsApp. Toggles are strictly gated to require an approved Meta template before activating.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Recipe 1: Abandoned Cart */}
-          <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center text-lg font-bold">
-                  🛒
+          {(() => {
+            const tpl = config.abandonedCartTemplate || "cart_recovery_discount";
+            const meta = getTemplateMeta(tpl);
+            const isApproved = meta?.status === "APPROVED";
+            const isActive = Boolean(config.abandonedCartEnabled) && isApproved;
+
+            return (
+              <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center text-lg font-bold shrink-0">
+                      🛒
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Abandoned Cart Recovery</h3>
+                      <span className="text-[10px] font-semibold text-emerald-600 block">
+                        📈 Recovers up to 28% abandoned checkouts
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isActive}
+                        onChange={() => toggleRecipe("abandonedCartEnabled", "abandonedCartTemplate", "cart_recovery_discount", "Abandoned Cart Recovery")}
+                        className="sr-only peer"
+                      />
+                      <div className={`w-9 h-5 rounded-full peer peer-focus:outline-none after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${
+                        !isApproved
+                          ? "bg-slate-200 dark:bg-slate-700 opacity-60 after:border-slate-300"
+                          : "bg-slate-200 dark:bg-slate-700 peer-checked:bg-emerald-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:border-slate-300"
+                      }`}></div>
+                    </label>
+                    <span className={`text-[9px] font-bold uppercase tracking-wider ${
+                      isActive
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : !isApproved
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-slate-400"
+                    }`}>
+                      {isActive ? "● Active" : !isApproved ? "⚠️ Needs Approval" : "○ Disabled"}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Abandoned Cart Recovery</h3>
-                  <span className="text-[10px] font-semibold text-emerald-600">
-                    📈 Recovers up to 28% abandoned checkouts
-                  </span>
+
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Sends an automated reminder message with item names, product photo, and an exclusive checkout link 45 minutes after customer leaves without purchasing.
+                </p>
+
+                <div className="bg-slate-50 dark:bg-[#070b14] p-3 rounded-lg border border-slate-100 dark:border-white/[0.08] text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">Preview Message:</p>
+                  <p className="italic text-slate-600 dark:text-slate-400">
+                    &quot;Hey Rahul, you left something behind! Complete your order within the next 2 hours and enjoy 10% OFF with code SAVE10.&quot;
+                  </p>
+                  <div className="pt-1.5 flex gap-2">
+                    <span className="text-[10px] bg-white dark:bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/20 px-2 py-0.5 rounded text-emerald-700 dark:text-emerald-400 font-semibold">
+                      [Complete Checkout]
+                    </span>
+                  </div>
+                </div>
+
+                {/* Template Selector & Approval Verification */}
+                <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-white/[0.08]">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-700 dark:text-slate-300 text-[11px]">
+                      Mapped WhatsApp Template:
+                    </span>
+                    {isApproved ? (
+                      <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        Approved on Meta
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setUnapprovedModal({
+                          isOpen: true,
+                          templateName: tpl,
+                          templateStatus: meta?.status || "NOT APPROVED",
+                          eventType: "Abandoned Cart Recovery",
+                          customerPhone: simPhone.trim() || "+91 (Your Mobile)",
+                          errorMessage: `Template "${tpl}" is not approved by Meta yet.`,
+                          recipeField: "abandonedCartEnabled",
+                          templateField: "abandonedCartTemplate"
+                        })}
+                        className="text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 transition cursor-pointer"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        ⚠️ Not Approved · Details
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Dropdown selector */}
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={tpl}
+                      onChange={(e) => handleSelectTemplate("abandonedCartTemplate", "abandonedCartEnabled", e.target.value)}
+                      className="flex-1 text-xs px-2.5 py-1.5 bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 rounded-lg text-slate-900 dark:text-slate-100 font-mono focus:ring-2 focus:ring-emerald-500"
+                    >
+                      <optgroup label="Approved Meta Templates (Live Ready)">
+                        {approvedTemplates.map((t: any) => (
+                          <option key={t.name} value={t.name}>
+                            {t.name} (✓ Approved)
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="Default System Templates">
+                        <option value="cart_recovery_discount">
+                          cart_recovery_discount {getTemplateMeta("cart_recovery_discount")?.status === "APPROVED" ? "(✓ Approved)" : "(⚠️ Unapproved)"}
+                        </option>
+                      </optgroup>
+                    </select>
+
+                    <a
+                      href="/dashboard/templates"
+                      className="px-2.5 py-1.5 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold whitespace-nowrap transition border border-slate-200 dark:border-white/10"
+                      title="Open Template Studio"
+                    >
+                      + Studio
+                    </a>
+                  </div>
+
+                  {!isApproved && (
+                    <p className="text-[11px] text-amber-800 dark:text-amber-300 bg-amber-50/70 dark:bg-amber-950/20 p-2 rounded-lg border border-amber-200/60 dark:border-amber-500/20 leading-relaxed">
+                      ⚠️ This recipe is paused because <code className="font-mono font-bold">{tpl}</code> is not approved on Meta. Pick an approved template above (like <code className="font-mono font-bold">hello_world</code>) to activate immediately, or <a href="/dashboard/templates" className="underline font-bold">submit it in Studio</a>.
+                    </p>
+                  )}
                 </div>
               </div>
-
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={Boolean(config.abandonedCartEnabled)}
-                  onChange={() => toggleRecipe("abandonedCartEnabled")}
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
-              </label>
-            </div>
-
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Sends an automated reminder message with item names, product photo, and an exclusive checkout link 45 minutes after customer leaves without purchasing.
-            </p>
-
-            <div className="bg-slate-50 dark:bg-[#070b14] p-3 rounded-lg border border-slate-100 dark:border-white/[0.08] text-xs text-slate-700 dark:text-slate-300 space-y-1">
-              <p className="font-semibold text-slate-800 dark:text-slate-200">Preview Message:</p>
-              <p className="italic text-slate-600 dark:text-slate-400">
-                &quot;Hey Rahul, you left something behind! Complete your order within the next 2 hours and enjoy 10% OFF with code SAVE10.&quot;
-              </p>
-              <div className="pt-1.5 flex gap-2">
-                <span className="text-[10px] bg-white dark:bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/20 px-2 py-0.5 rounded text-emerald-700 dark:text-emerald-400 font-semibold">
-                  [Complete Checkout]
-                </span>
-              </div>
-            </div>
-
-            {/* Meta Template Verification Strip */}
-            <div className="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100 dark:border-white/[0.08]">
-              <span className="text-slate-500 dark:text-slate-400">
-                Template: <code className="font-mono font-bold text-slate-800 dark:text-slate-200">{config.abandonedCartTemplate || "cart_recovery_discount"}</code>
-              </span>
-              {getTemplateMeta(config.abandonedCartTemplate || "cart_recovery_discount")?.status === "APPROVED" ? (
-                <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  Approved on Meta
-                </span>
-              ) : (
-                <a
-                  href="/dashboard/templates"
-                  className="text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 transition"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  Not Approved · Submit in Studio →
-                </a>
-              )}
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Recipe 2: Order Confirmation */}
-          <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 flex items-center justify-center text-lg font-bold">
-                  📦
+          {(() => {
+            const tpl = config.orderConfirmationTemplate || "order_confirmation_v2";
+            const meta = getTemplateMeta(tpl);
+            const isApproved = meta?.status === "APPROVED";
+            const isActive = Boolean(config.orderConfirmationEnabled) && isApproved;
+
+            return (
+              <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 flex items-center justify-center text-lg font-bold shrink-0">
+                      📦
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Instant Order Confirmation</h3>
+                      <span className="text-[10px] font-semibold text-blue-600 block">
+                        ⚡ 98% Open Rate within 3 minutes
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isActive}
+                        onChange={() => toggleRecipe("orderConfirmationEnabled", "orderConfirmationTemplate", "order_confirmation_v2", "Instant Order Confirmation")}
+                        className="sr-only peer"
+                      />
+                      <div className={`w-9 h-5 rounded-full peer peer-focus:outline-none after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${
+                        !isApproved
+                          ? "bg-slate-200 dark:bg-slate-700 opacity-60 after:border-slate-300"
+                          : "bg-slate-200 dark:bg-slate-700 peer-checked:bg-emerald-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:border-slate-300"
+                      }`}></div>
+                    </label>
+                    <span className={`text-[9px] font-bold uppercase tracking-wider ${
+                      isActive
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : !isApproved
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-slate-400"
+                    }`}>
+                      {isActive ? "● Active" : !isApproved ? "⚠️ Needs Approval" : "○ Disabled"}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Instant Order Confirmation</h3>
-                  <span className="text-[10px] font-semibold text-blue-600">
-                    ⚡ 98% Open Rate within 3 minutes
-                  </span>
+
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Immediately alerts customer that payment was received, order is being packed, and includes complete item summary and expected delivery date.
+                </p>
+
+                <div className="bg-slate-50 dark:bg-[#070b14] p-3 rounded-lg border border-slate-100 dark:border-white/[0.08] text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">Preview Message:</p>
+                  <p className="italic text-slate-600 dark:text-slate-400">
+                    &quot;Thank you for your order #89214! We have received your payment of ₹1,899. Your package is scheduled to dispatch tomorrow.&quot;
+                  </p>
+                </div>
+
+                {/* Template Selector & Approval Verification */}
+                <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-white/[0.08]">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-700 dark:text-slate-300 text-[11px]">
+                      Mapped WhatsApp Template:
+                    </span>
+                    {isApproved ? (
+                      <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        Approved on Meta
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setUnapprovedModal({
+                          isOpen: true,
+                          templateName: tpl,
+                          templateStatus: meta?.status || "NOT APPROVED",
+                          eventType: "Instant Order Confirmation",
+                          customerPhone: simPhone.trim() || "+91 (Your Mobile)",
+                          errorMessage: `Template "${tpl}" is not approved by Meta yet.`,
+                          recipeField: "orderConfirmationEnabled",
+                          templateField: "orderConfirmationTemplate"
+                        })}
+                        className="text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 transition cursor-pointer"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        ⚠️ Not Approved · Details
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Dropdown selector */}
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={tpl}
+                      onChange={(e) => handleSelectTemplate("orderConfirmationTemplate", "orderConfirmationEnabled", e.target.value)}
+                      className="flex-1 text-xs px-2.5 py-1.5 bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 rounded-lg text-slate-900 dark:text-slate-100 font-mono focus:ring-2 focus:ring-emerald-500"
+                    >
+                      <optgroup label="Approved Meta Templates (Live Ready)">
+                        {approvedTemplates.map((t: any) => (
+                          <option key={t.name} value={t.name}>
+                            {t.name} (✓ Approved)
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="Default System Templates">
+                        <option value="order_confirmation_v2">
+                          order_confirmation_v2 {getTemplateMeta("order_confirmation_v2")?.status === "APPROVED" ? "(✓ Approved)" : "(⚠️ Unapproved)"}
+                        </option>
+                      </optgroup>
+                    </select>
+
+                    <a
+                      href="/dashboard/templates"
+                      className="px-2.5 py-1.5 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold whitespace-nowrap transition border border-slate-200 dark:border-white/10"
+                      title="Open Template Studio"
+                    >
+                      + Studio
+                    </a>
+                  </div>
+
+                  {!isApproved && (
+                    <p className="text-[11px] text-amber-800 dark:text-amber-300 bg-amber-50/70 dark:bg-amber-950/20 p-2 rounded-lg border border-amber-200/60 dark:border-amber-500/20 leading-relaxed">
+                      ⚠️ This recipe is paused because <code className="font-mono font-bold">{tpl}</code> is not approved on Meta. Pick an approved template above (like <code className="font-mono font-bold">hello_world</code>) to activate immediately, or <a href="/dashboard/templates" className="underline font-bold">submit it in Studio</a>.
+                    </p>
+                  )}
                 </div>
               </div>
-
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={Boolean(config.orderConfirmationEnabled)}
-                  onChange={() => toggleRecipe("orderConfirmationEnabled")}
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
-              </label>
-            </div>
-
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Immediately alerts customer that payment was received, order is being packed, and includes complete item summary and expected delivery date.
-            </p>
-
-            <div className="bg-slate-50 dark:bg-[#070b14] p-3 rounded-lg border border-slate-100 dark:border-white/[0.08] text-xs text-slate-700 dark:text-slate-300 space-y-1">
-              <p className="font-semibold text-slate-800 dark:text-slate-200">Preview Message:</p>
-              <p className="italic text-slate-600 dark:text-slate-400">
-                &quot;Thank you for your order #89214! We have received your payment of ₹1,899. Your package is scheduled to dispatch tomorrow.&quot;
-              </p>
-            </div>
-
-            {/* Meta Template Verification Strip */}
-            <div className="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100 dark:border-white/[0.08]">
-              <span className="text-slate-500 dark:text-slate-400">
-                Template: <code className="font-mono font-bold text-slate-800 dark:text-slate-200">{config.orderConfirmationTemplate || "order_confirmation_v2"}</code>
-              </span>
-              {getTemplateMeta(config.orderConfirmationTemplate || "order_confirmation_v2")?.status === "APPROVED" ? (
-                <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  Approved on Meta
-                </span>
-              ) : (
-                <a
-                  href="/dashboard/templates"
-                  className="text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 transition"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  Not Approved · Submit in Studio →
-                </a>
-              )}
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Recipe 3: COD Verification */}
-          <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-lg font-bold">
-                  💰
+          {(() => {
+            const tpl = config.codVerificationTemplate || "cod_verification_interactive";
+            const meta = getTemplateMeta(tpl);
+            const isApproved = meta?.status === "APPROVED";
+            const isActive = Boolean(config.codVerificationEnabled) && isApproved;
+
+            return (
+              <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-lg font-bold shrink-0">
+                      💰
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Cash on Delivery (COD) Verification</h3>
+                      <span className="text-[10px] font-semibold text-emerald-600 block">
+                        🛡️ Cuts RTO & fake orders by 45%
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isActive}
+                        onChange={() => toggleRecipe("codVerificationEnabled", "codVerificationTemplate", "cod_verification_interactive", "COD Verification")}
+                        className="sr-only peer"
+                      />
+                      <div className={`w-9 h-5 rounded-full peer peer-focus:outline-none after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${
+                        !isApproved
+                          ? "bg-slate-200 dark:bg-slate-700 opacity-60 after:border-slate-300"
+                          : "bg-slate-200 dark:bg-slate-700 peer-checked:bg-emerald-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:border-slate-300"
+                      }`}></div>
+                    </label>
+                    <span className={`text-[9px] font-bold uppercase tracking-wider ${
+                      isActive
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : !isApproved
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-slate-400"
+                    }`}>
+                      {isActive ? "● Active" : !isApproved ? "⚠️ Needs Approval" : "○ Disabled"}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Cash on Delivery (COD) Verification</h3>
-                  <span className="text-[10px] font-semibold text-emerald-600">
-                    🛡️ Cuts RTO & fake orders by 45%
-                  </span>
+
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Prompts customer with 2 interactive WhatsApp buttons: [✅ Confirm Order] or [❌ Cancel]. Unconfirmed orders can be put on hold before shipping.
+                </p>
+
+                <div className="bg-slate-50 dark:bg-[#070b14] p-3 rounded-lg border border-slate-100 dark:border-white/[0.08] text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">Preview Message:</p>
+                  <p className="italic text-slate-600 dark:text-slate-400">
+                    &quot;Hi Priya, please confirm your COD order #99214 of ₹1,450 to proceed with express courier shipping.&quot;
+                  </p>
+                  <div className="pt-1.5 flex gap-2">
+                    <span className="text-[10px] bg-white dark:bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/20 px-2 py-0.5 rounded text-emerald-700 dark:text-emerald-400 font-semibold">
+                      [✅ Confirm Order]
+                    </span>
+                    <span className="text-[10px] bg-white dark:bg-red-500/10 border border-slate-200 dark:border-red-500/20 px-2 py-0.5 rounded text-red-600 dark:text-red-400 font-semibold">
+                      [❌ Cancel Order]
+                    </span>
+                  </div>
+                </div>
+
+                {/* Template Selector & Approval Verification */}
+                <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-white/[0.08]">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-700 dark:text-slate-300 text-[11px]">
+                      Mapped WhatsApp Template:
+                    </span>
+                    {isApproved ? (
+                      <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        Approved on Meta
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setUnapprovedModal({
+                          isOpen: true,
+                          templateName: tpl,
+                          templateStatus: meta?.status || "NOT APPROVED",
+                          eventType: "COD Verification",
+                          customerPhone: simPhone.trim() || "+91 (Your Mobile)",
+                          errorMessage: `Template "${tpl}" is not approved by Meta yet.`,
+                          recipeField: "codVerificationEnabled",
+                          templateField: "codVerificationTemplate"
+                        })}
+                        className="text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 transition cursor-pointer"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        ⚠️ Not Approved · Details
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Dropdown selector */}
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={tpl}
+                      onChange={(e) => handleSelectTemplate("codVerificationTemplate", "codVerificationEnabled", e.target.value)}
+                      className="flex-1 text-xs px-2.5 py-1.5 bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 rounded-lg text-slate-900 dark:text-slate-100 font-mono focus:ring-2 focus:ring-emerald-500"
+                    >
+                      <optgroup label="Approved Meta Templates (Live Ready)">
+                        {approvedTemplates.map((t: any) => (
+                          <option key={t.name} value={t.name}>
+                            {t.name} (✓ Approved)
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="Default System Templates">
+                        <option value="cod_verification_interactive">
+                          cod_verification_interactive {getTemplateMeta("cod_verification_interactive")?.status === "APPROVED" ? "(✓ Approved)" : "(⚠️ Unapproved)"}
+                        </option>
+                      </optgroup>
+                    </select>
+
+                    <a
+                      href="/dashboard/templates"
+                      className="px-2.5 py-1.5 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold whitespace-nowrap transition border border-slate-200 dark:border-white/10"
+                      title="Open Template Studio"
+                    >
+                      + Studio
+                    </a>
+                  </div>
+
+                  {!isApproved && (
+                    <p className="text-[11px] text-amber-800 dark:text-amber-300 bg-amber-50/70 dark:bg-amber-950/20 p-2 rounded-lg border border-amber-200/60 dark:border-amber-500/20 leading-relaxed">
+                      ⚠️ This recipe is paused because <code className="font-mono font-bold">{tpl}</code> is not approved on Meta. Pick an approved template above (like <code className="font-mono font-bold">hello_world</code>) to activate immediately, or <a href="/dashboard/templates" className="underline font-bold">submit it in Studio</a>.
+                    </p>
+                  )}
                 </div>
               </div>
-
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={Boolean(config.codVerificationEnabled)}
-                  onChange={() => toggleRecipe("codVerificationEnabled")}
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
-              </label>
-            </div>
-
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Prompts customer with 2 interactive WhatsApp buttons: [✅ Confirm Order] or [❌ Cancel]. Unconfirmed orders can be put on hold before shipping.
-            </p>
-
-            <div className="bg-slate-50 dark:bg-[#070b14] p-3 rounded-lg border border-slate-100 dark:border-white/[0.08] text-xs text-slate-700 dark:text-slate-300 space-y-1">
-              <p className="font-semibold text-slate-800 dark:text-slate-200">Preview Message:</p>
-              <p className="italic text-slate-600 dark:text-slate-400">
-                &quot;Hi Priya, please confirm your COD order #99214 of ₹1,450 to proceed with express courier shipping.&quot;
-              </p>
-              <div className="pt-1.5 flex gap-2">
-                <span className="text-[10px] bg-white dark:bg-emerald-500/10 border border-slate-200 dark:border-emerald-500/20 px-2 py-0.5 rounded text-emerald-700 dark:text-emerald-400 font-semibold">
-                  [✅ Confirm Order]
-                </span>
-                <span className="text-[10px] bg-white dark:bg-red-500/10 border border-slate-200 dark:border-red-500/20 px-2 py-0.5 rounded text-red-600 dark:text-red-400 font-semibold">
-                  [❌ Cancel Order]
-                </span>
-              </div>
-            </div>
-
-            {/* Meta Template Verification Strip */}
-            <div className="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100 dark:border-white/[0.08]">
-              <span className="text-slate-500 dark:text-slate-400">
-                Template: <code className="font-mono font-bold text-slate-800 dark:text-slate-200">{config.codVerificationTemplate || "cod_verification_interactive"}</code>
-              </span>
-              {getTemplateMeta(config.codVerificationTemplate || "cod_verification_interactive")?.status === "APPROVED" ? (
-                <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  Approved on Meta
-                </span>
-              ) : (
-                <a
-                  href="/dashboard/templates"
-                  className="text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 transition"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  Not Approved · Submit in Studio →
-                </a>
-              )}
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Recipe 4: Shipping Transit Alerts */}
-          <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 flex items-center justify-center text-lg font-bold">
-                  🚚
+          {(() => {
+            const tpl = config.shippingUpdatesTemplate || "shipping_transit_update";
+            const meta = getTemplateMeta(tpl);
+            const isApproved = meta?.status === "APPROVED";
+            const isActive = Boolean(config.shippingUpdatesEnabled) && isApproved;
+
+            return (
+              <div className="bg-white dark:bg-[#0B101D]/80 rounded-xl border border-slate-200 dark:border-white/[0.08] p-5 space-y-4 shadow-xs backdrop-blur-xl">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 flex items-center justify-center text-lg font-bold shrink-0">
+                      🚚
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Shipping & Delivery Alerts</h3>
+                      <span className="text-[10px] font-semibold text-purple-600 block">
+                        🔔 Eliminates &quot;Where is my order&quot; support tickets
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isActive}
+                        onChange={() => toggleRecipe("shippingUpdatesEnabled", "shippingUpdatesTemplate", "shipping_transit_update", "Shipping Alerts")}
+                        className="sr-only peer"
+                      />
+                      <div className={`w-9 h-5 rounded-full peer peer-focus:outline-none after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${
+                        !isApproved
+                          ? "bg-slate-200 dark:bg-slate-700 opacity-60 after:border-slate-300"
+                          : "bg-slate-200 dark:bg-slate-700 peer-checked:bg-emerald-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:border-slate-300"
+                      }`}></div>
+                    </label>
+                    <span className={`text-[9px] font-bold uppercase tracking-wider ${
+                      isActive
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : !isApproved
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-slate-400"
+                    }`}>
+                      {isActive ? "● Active" : !isApproved ? "⚠️ Needs Approval" : "○ Disabled"}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Shipping & Delivery Alerts</h3>
-                  <span className="text-[10px] font-semibold text-purple-600">
-                    🔔 Eliminates &quot;Where is my order&quot; support tickets
-                  </span>
+
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Sends automated dispatch, in-transit, and out-for-delivery notifications with direct courier tracking links.
+                </p>
+
+                <div className="bg-slate-50 dark:bg-[#070b14] p-3 rounded-lg border border-slate-100 dark:border-white/[0.08] text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">Preview Message:</p>
+                  <p className="italic text-slate-600 dark:text-slate-400">
+                    &quot;Great news! Your package has been dispatched via BlueDart (AWB #8271928). Expected delivery tomorrow by 6 PM.&quot;
+                  </p>
+                </div>
+
+                {/* Template Selector & Approval Verification */}
+                <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-white/[0.08]">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-700 dark:text-slate-300 text-[11px]">
+                      Mapped WhatsApp Template:
+                    </span>
+                    {isApproved ? (
+                      <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        Approved on Meta
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setUnapprovedModal({
+                          isOpen: true,
+                          templateName: tpl,
+                          templateStatus: meta?.status || "NOT APPROVED",
+                          eventType: "Shipping Alerts",
+                          customerPhone: simPhone.trim() || "+91 (Your Mobile)",
+                          errorMessage: `Template "${tpl}" is not approved by Meta yet.`,
+                          recipeField: "shippingUpdatesEnabled",
+                          templateField: "shippingUpdatesTemplate"
+                        })}
+                        className="text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 transition cursor-pointer"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        ⚠️ Not Approved · Details
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Dropdown selector */}
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={tpl}
+                      onChange={(e) => handleSelectTemplate("shippingUpdatesTemplate", "shippingUpdatesEnabled", e.target.value)}
+                      className="flex-1 text-xs px-2.5 py-1.5 bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 rounded-lg text-slate-900 dark:text-slate-100 font-mono focus:ring-2 focus:ring-emerald-500"
+                    >
+                      <optgroup label="Approved Meta Templates (Live Ready)">
+                        {approvedTemplates.map((t: any) => (
+                          <option key={t.name} value={t.name}>
+                            {t.name} (✓ Approved)
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="Default System Templates">
+                        <option value="shipping_transit_update">
+                          shipping_transit_update {getTemplateMeta("shipping_transit_update")?.status === "APPROVED" ? "(✓ Approved)" : "(⚠️ Unapproved)"}
+                        </option>
+                      </optgroup>
+                    </select>
+
+                    <a
+                      href="/dashboard/templates"
+                      className="px-2.5 py-1.5 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold whitespace-nowrap transition border border-slate-200 dark:border-white/10"
+                      title="Open Template Studio"
+                    >
+                      + Studio
+                    </a>
+                  </div>
+
+                  {!isApproved && (
+                    <p className="text-[11px] text-amber-800 dark:text-amber-300 bg-amber-50/70 dark:bg-amber-950/20 p-2 rounded-lg border border-amber-200/60 dark:border-amber-500/20 leading-relaxed">
+                      ⚠️ This recipe is paused because <code className="font-mono font-bold">{tpl}</code> is not approved on Meta. Pick an approved template above (like <code className="font-mono font-bold">hello_world</code>) to activate immediately, or <a href="/dashboard/templates" className="underline font-bold">submit it in Studio</a>.
+                    </p>
+                  )}
                 </div>
               </div>
-
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={Boolean(config.shippingUpdatesEnabled)}
-                  onChange={() => toggleRecipe("shippingUpdatesEnabled")}
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
-              </label>
-            </div>
-
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Sends automated dispatch, in-transit, and out-for-delivery notifications with direct courier tracking links.
-            </p>
-
-            <div className="bg-slate-50 dark:bg-[#070b14] p-3 rounded-lg border border-slate-100 dark:border-white/[0.08] text-xs text-slate-700 dark:text-slate-300 space-y-1">
-              <p className="font-semibold text-slate-800 dark:text-slate-200">Preview Message:</p>
-              <p className="italic text-slate-600 dark:text-slate-400">
-                &quot;Great news! Your package has been dispatched via BlueDart (AWB #8271928). Expected delivery tomorrow by 6 PM.&quot;
-              </p>
-            </div>
-
-            {/* Meta Template Verification Strip */}
-            <div className="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100 dark:border-white/[0.08]">
-              <span className="text-slate-500 dark:text-slate-400">
-                Template: <code className="font-mono font-bold text-slate-800 dark:text-slate-200">{config.shippingUpdatesTemplate || "shipping_transit_update"}</code>
-              </span>
-              {getTemplateMeta(config.shippingUpdatesTemplate || "shipping_transit_update")?.status === "APPROVED" ? (
-                <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  Approved on Meta
-                </span>
-              ) : (
-                <a
-                  href="/dashboard/templates"
-                  className="text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 bg-amber-50 dark:bg-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/30 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 transition"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  Not Approved · Submit in Studio →
-                </a>
-              )}
-            </div>
-          </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -1027,6 +1473,27 @@ export default function EcommerceTriggersPage() {
                   </p>
                 </div>
               </div>
+
+              {/* Quick Fix Option to switch recipe to approved hello_world and turn ON */}
+              {unapprovedModal.recipeField && unapprovedModal.templateField && (
+                <div className="bg-blue-50/70 dark:bg-blue-950/25 border border-blue-200 dark:border-blue-500/30 rounded-xl p-3.5 text-xs space-y-2">
+                  <div className="flex items-center gap-2 text-blue-950 dark:text-blue-200 font-bold">
+                    <span>⚡</span>
+                    <span>Quick Activation with Approved &apos;hello_world&apos;</span>
+                  </div>
+                  <p className="text-blue-800 dark:text-blue-300 text-[11px] leading-relaxed">
+                    Automatically map this recipe to Meta&apos;s pre-approved <code className="font-mono font-bold bg-white dark:bg-blue-900/40 px-1 py-0.5 rounded border border-blue-300 dark:border-blue-500/40">hello_world</code> template and turn the automation ON right now.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleSwitchToApprovedStarter}
+                    disabled={saving}
+                    className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-50"
+                  >
+                    <span>✓ Map to &apos;hello_world&apos; &amp; Activate Recipe</span>
+                  </button>
+                </div>
+              )}
 
               {/* One-Click Proof Option with Approved hello_world */}
               <div className="bg-emerald-50/70 dark:bg-emerald-950/25 border border-emerald-200 dark:border-emerald-500/30 rounded-xl p-3.5 text-xs space-y-2">
