@@ -604,15 +604,15 @@ export default function WalletPage() {
               <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] p-6 rounded-3xl shadow-2xs flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">In-Flight Reserved Funds</span>
-                    <span className="bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold">15-min TTL</span>
+                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-800 dark:text-slate-400">In-Flight Reserved Funds</span>
+                    <span className="bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold">15-min TTL</span>
                   </div>
                   <div className="text-3xl font-extrabold text-amber-600 dark:text-amber-400">₹{reservedBalance.toFixed(2)}</div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                  <p className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-2">
                     Held atomically during Meta dispatch. Auto-released if message fails.
                   </p>
                 </div>
-                <div className="pt-4 mt-4 border-t border-slate-100 dark:border-white/10 text-[11px] text-slate-400 dark:text-slate-500">
+                <div className="pt-4 mt-4 border-t border-slate-100 dark:border-white/10 text-[11px] text-slate-700 dark:text-slate-400 font-medium">
                   Prevents negative balance &amp; race conditions
                 </div>
               </div>
@@ -621,7 +621,7 @@ export default function WalletPage() {
               <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] p-6 rounded-3xl shadow-2xs flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">GST Registration</span>
+                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-800 dark:text-slate-400">GST Registration</span>
                     <button 
                       onClick={() => setShowProfileModal(true)} 
                       className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
@@ -629,17 +629,17 @@ export default function WalletPage() {
                       Edit
                     </button>
                   </div>
-                  <div className="text-base font-bold text-slate-900 dark:text-slate-100 truncate">
+                  <div className="text-base font-bold text-slate-950 dark:text-slate-100 truncate">
                     {billingProfile.legalBusinessName || "Personal / Unregistered"}
                   </div>
-                  <p className="text-xs font-mono text-slate-600 dark:text-slate-400 mt-1">
+                  <p className="text-xs font-mono text-slate-800 dark:text-slate-300 font-semibold mt-1">
                     GSTIN: {billingProfile.gstin || "Not provided (Consumer)"}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1">
                     Place of Supply: State Code {billingProfile.stateCode || "27"} ({billingProfile.state || "Maharashtra"})
                   </p>
                 </div>
-                <div className="pt-4 mt-4 border-t border-slate-100 dark:border-white/10 text-[11px] text-slate-400 dark:text-slate-500">
+                <div className="pt-4 mt-4 border-t border-slate-100 dark:border-white/10 text-[11px] text-slate-700 dark:text-slate-400 font-medium">
                   Tax Treatment: {isOutOfState ? "Inter-state IGST (18%)" : "Intra-state CGST (9%) + SGST (9%)"}
                 </div>
               </div>

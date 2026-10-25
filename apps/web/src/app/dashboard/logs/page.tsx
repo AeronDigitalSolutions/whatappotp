@@ -220,10 +220,10 @@ export default function LogsPage() {
             <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs shrink-0 font-bold">
               📨
             </div>
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Total Requests</span>
+            <span className="text-xs font-bold text-slate-900 dark:text-slate-200">Total Requests</span>
           </div>
-          <div className="mt-2.5 text-2xl font-black text-slate-900 dark:text-white">{totalDispatches.toLocaleString()}</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Dispatched all-time</div>
+          <div className="mt-2.5 text-2xl font-black text-slate-950 dark:text-white">{totalDispatches.toLocaleString()}</div>
+          <div className="text-[11px] text-slate-700 dark:text-slate-400 font-medium mt-0.5">Dispatched all-time</div>
         </div>
 
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
@@ -231,10 +231,10 @@ export default function LogsPage() {
             <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs shrink-0 font-bold">
               ✓
             </div>
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Verification Rate</span>
+            <span className="text-xs font-bold text-slate-900 dark:text-slate-200">Verification Rate</span>
           </div>
-          <div className="mt-2.5 text-2xl font-black text-slate-900 dark:text-white">{successRate}%</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">{verifiedCount.toLocaleString()} successfully verified</div>
+          <div className="mt-2.5 text-2xl font-black text-slate-950 dark:text-white">{successRate}%</div>
+          <div className="text-[11px] text-slate-700 dark:text-slate-400 font-medium mt-0.5">{verifiedCount.toLocaleString()} successfully verified</div>
         </div>
 
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
@@ -242,10 +242,10 @@ export default function LogsPage() {
             <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200/80 dark:border-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 text-xs shrink-0 font-bold">
               ✕
             </div>
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Failed Dispatches</span>
+            <span className="text-xs font-bold text-slate-900 dark:text-slate-200">Failed Dispatches</span>
           </div>
           <div className="mt-2.5 text-2xl font-black text-rose-600">{failedCount.toLocaleString()}</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Automatically refunded</div>
+          <div className="text-[11px] text-slate-700 dark:text-slate-400 font-medium mt-0.5">Automatically refunded</div>
         </div>
 
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition backdrop-blur-xl">
@@ -253,10 +253,10 @@ export default function LogsPage() {
             <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-200/80 dark:border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs shrink-0 font-bold">
               💳
             </div>
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Total Deducted</span>
+            <span className="text-xs font-bold text-slate-900 dark:text-slate-200">Total Deducted</span>
           </div>
-          <div className="mt-2.5 text-2xl font-black text-slate-900 dark:text-white">₹{totalCost.toFixed(2)}</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">₹0.25 per sent OTP (India)</div>
+          <div className="mt-2.5 text-2xl font-black text-slate-950 dark:text-white">₹{totalCost.toFixed(2)}</div>
+          <div className="text-[11px] text-slate-700 dark:text-slate-400 font-medium mt-0.5">₹0.25 per sent OTP (India)</div>
         </div>
       </div>
 

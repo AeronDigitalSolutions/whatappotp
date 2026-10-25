@@ -251,12 +251,12 @@ export default function NumbersPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              <span className="text-xs font-bold text-slate-900 dark:text-slate-200">
                 {numbers.length} Registered WhatsApp Number{numbers.length !== 1 ? "s" : ""}
               </span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             </div>
-            <p className="text-[11px] text-slate-400">Meta Cloud API multi-service routing & fallback configuration</p>
+            <p className="text-[11px] text-slate-700 dark:text-slate-400 font-medium">Meta Cloud API multi-service routing &amp; fallback configuration</p>
           </div>
         </div>
 
@@ -298,8 +298,8 @@ export default function NumbersPage() {
                 🔑
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Authentication / OTP</span>
-                <p className="text-[10px] text-slate-400">High-priority 2FA & login codes</p>
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-200">Authentication / OTP</span>
+                <p className="text-[10px] text-slate-700 dark:text-slate-400 font-medium">High-priority 2FA &amp; login codes</p>
               </div>
             </div>
           </div>
@@ -321,7 +321,7 @@ export default function NumbersPage() {
                 ))}
               </div>
             ) : (
-              <span className="text-xs font-medium text-slate-400 italic">No number assigned</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 italic">No number assigned</span>
             )}
           </div>
         </div>
@@ -334,26 +334,26 @@ export default function NumbersPage() {
                 📢
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Marketing & Promo</span>
-                <p className="text-[10px] text-slate-400">Campaigns, offers & announcements</p>
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-200">Marketing &amp; Promo</span>
+                <p className="text-[10px] text-slate-700 dark:text-slate-400 font-medium">Campaigns, offers &amp; announcements</p>
               </div>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100">
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.06]">
             {marketingNumbers.length > 0 ? (
               <div className="space-y-1.5">
                 {marketingNumbers.map((n) => (
                   <div key={n.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                      <span className="font-bold text-xs text-slate-900 font-mono">{n.displayPhone}</span>
+                      <span className="font-bold text-xs text-slate-900 dark:text-slate-100 font-mono">{n.displayPhone}</span>
                     </div>
                     <span className="text-[10px] bg-purple-50 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 px-1.5 py-0.5 rounded font-bold">Active</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <span className="text-xs font-medium text-slate-400 italic">No number assigned</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 italic">No number assigned</span>
             )}
           </div>
         </div>
@@ -366,26 +366,26 @@ export default function NumbersPage() {
                 📦
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Order Updates & Utility</span>
-                <p className="text-[10px] text-slate-400">Order alerts, invoices & tracking</p>
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-200">Order Updates &amp; Utility</span>
+                <p className="text-[10px] text-slate-700 dark:text-slate-400 font-medium">Order alerts, invoices &amp; tracking</p>
               </div>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100">
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.06]">
             {utilityNumbers.length > 0 ? (
               <div className="space-y-1.5">
                 {utilityNumbers.map((n) => (
                   <div key={n.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                      <span className="font-bold text-xs text-slate-900 font-mono">{n.displayPhone}</span>
+                      <span className="font-bold text-xs text-slate-900 dark:text-slate-100 font-mono">{n.displayPhone}</span>
                     </div>
                     <span className="text-[10px] bg-blue-50 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 px-1.5 py-0.5 rounded font-bold">Active</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <span className="text-xs font-medium text-slate-400 italic">No number assigned</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 italic">No number assigned</span>
             )}
           </div>
         </div>

@@ -40,7 +40,7 @@ body {
 
 /* Apple Heading Gradients */
 .apple-text-gradient {
-  background: linear-gradient(180deg, #0F172A 0%, #334155 55%, #64748B 100%);
+  background: linear-gradient(180deg, #000000 0%, #0a0e17 60%, #111827 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -62,7 +62,7 @@ body {
 }
 
 .apple-shimmer-text {
-  background: linear-gradient(90deg, #64748b 0%, #0f172a 50%, #64748b 100%);
+  background: linear-gradient(90deg, #111827 0%, #000000 50%, #111827 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -74,6 +74,111 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmerSlide 5s linear infinite;
+}
+
+/* ========================================================
+   STUDIO LIGHT MODE: HIGH-CONTRAST PITCH BLACK TYPOGRAPHY
+   ======================================================== */
+html:not(.dark) body {
+  color: #000000;
+}
+
+/* Headings in Light Mode: True Pitch Black */
+html:not(.dark) h1,
+html:not(.dark) h2,
+html:not(.dark) h3,
+html:not(.dark) h4,
+html:not(.dark) h5,
+html:not(.dark) h6 {
+  color: #000000;
+}
+
+/* Elevate Faint Grays to Deep Solid Black & High-Contrast Tones in Light Mode */
+html:not(.dark) .text-slate-950,
+html:not(.dark) .text-slate-900,
+html:not(.dark) .text-slate-800,
+html:not(.dark) .text-gray-950,
+html:not(.dark) .text-gray-900,
+html:not(.dark) .text-gray-800 {
+  color: #000000 !important;
+}
+
+html:not(.dark) .text-slate-700,
+html:not(.dark) .text-gray-700 {
+  color: #0a0e17 !important;
+}
+
+html:not(.dark) .text-slate-600,
+html:not(.dark) .text-gray-600 {
+  color: #111827 !important;
+}
+
+html:not(.dark) .text-slate-500,
+html:not(.dark) .text-gray-500,
+html:not(.dark) .text-muted-foreground {
+  color: #1f2937 !important;
+}
+
+html:not(.dark) .text-slate-400,
+html:not(.dark) .text-gray-400 {
+  color: #374151 !important;
+}
+
+/* Light mode table headers and data */
+html:not(.dark) table thead th {
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+html:not(.dark) table tbody td {
+  color: #0f172a;
+}
+
+/* Light mode form controls */
+html:not(.dark) input:not([type="checkbox"]):not([type="radio"]),
+html:not(.dark) textarea,
+html:not(.dark) select {
+  color: #000000 !important;
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #475569 !important;
+}
+
+/* Crisp Card Borders in Light Mode */
+html:not(.dark) .apple-glass {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+}
+
+html:not(.dark) .apple-glass-card {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+}
+
+/* Protect light text inside dark cards/containers in light mode */
+html:not(.dark) [class*="bg-slate-900"] .text-slate-300,
+html:not(.dark) [class*="bg-slate-900"] .text-slate-400,
+html:not(.dark) [class*="bg-slate-950"] .text-slate-300,
+html:not(.dark) [class*="bg-slate-950"] .text-slate-400,
+html:not(.dark) [class*="bg-black"] .text-slate-300,
+html:not(.dark) [class*="bg-black"] .text-slate-400,
+html:not(.dark) [class*="bg-[#154336]"] .text-slate-300,
+html:not(.dark) [class*="bg-[#154336]"] .text-slate-400,
+html:not(.dark) [class*="bg-emerald-900"] .text-slate-300,
+html:not(.dark) [class*="bg-emerald-900"] .text-slate-400,
+html:not(.dark) [class*="bg-slate-900"] .text-white,
+html:not(.dark) [class*="bg-slate-950"] .text-white,
+html:not(.dark) [class*="bg-[#154336]"] .text-white,
+html:not(.dark) [class*="bg-[#064e3b]"] .text-white,
+html:not(.dark) .bg-slate-900 .text-slate-300,
+html:not(.dark) .bg-slate-900 .text-slate-400,
+html:not(.dark) .bg-slate-950 .text-slate-300,
+html:not(.dark) .bg-slate-950 .text-slate-400 {
+  color: #e2e8f0 !important;
 }
 
 /* Apple Frosted Glass */
