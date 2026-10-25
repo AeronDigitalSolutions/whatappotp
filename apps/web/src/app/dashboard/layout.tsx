@@ -49,7 +49,7 @@ const MODULE_TITLES: Record<string, string> = {
 
 const MODULE_SUBTITLES: Record<string, string> = {
   "/dashboard/templates": "Create, manage and send WhatsApp message templates for your business.",
-  "/dashboard": "Real-time metrics, live delivery rates and engagement tracking.",
+  "/dashboard": "",
   "/dashboard/campaigns": "Create, schedule, and analyze bulk WhatsApp broadcast marketing campaigns.",
   "/dashboard/inbox": "Unified omnichannel 2-way live chat with customers across registered numbers.",
   "/dashboard/automations": "Intelligent automated workflows and keyword response rules.",
@@ -423,59 +423,37 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center space-x-2.5 sm:space-x-3.5">
             {/* Meta Live Status Capsule */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-white/[0.03] border border-slate-300/80 dark:border-white/[0.08] text-[11px] font-bold text-slate-900 dark:text-slate-300">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-white/[0.03] border border-slate-300/80 dark:border-white/[0.08] text-[11px] font-bold text-slate-900 dark:text-slate-300 whitespace-nowrap shrink-0">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse shrink-0"></span>
               <span>Meta Cloud API Live • 99.99%</span>
             </div>
 
-            {/* Apple-Style Theme Toggle */}
-            <ThemeToggle />
-
-            {/* Apple-Style Prepaid Balance Pill */}
-            <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/[0.05] border border-slate-300/80 dark:border-white/[0.1] hover:border-emerald-500/60 pl-3 pr-1.5 py-1 rounded-full text-xs font-bold text-slate-900 dark:text-slate-200 shadow-xs dark:shadow-inner backdrop-blur-md transition-all">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="font-black text-slate-950 dark:text-white">₹{walletBalance}</span>
-                <span className="text-slate-700 dark:text-slate-400 hidden md:inline">Balance</span>
+            {/* Apple-Style Prepaid Balance Pill (Guaranteed Single Line Always) */}
+            <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/[0.05] border border-slate-300/80 dark:border-white/[0.1] hover:border-emerald-500/60 pl-3 pr-1.5 py-1 rounded-full text-xs font-bold text-slate-900 dark:text-slate-200 shadow-xs dark:shadow-inner backdrop-blur-md transition-all whitespace-nowrap shrink-0">
+              <span className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                <span className="font-black text-slate-950 dark:text-white whitespace-nowrap">₹{walletBalance}</span>
+                <span className="text-slate-700 dark:text-slate-400 whitespace-nowrap">Balance</span>
               </span>
               <Link
                 href="/dashboard/wallet"
-                className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-[11px] font-black rounded-full transition shadow-[0_0_12px_rgba(16,185,129,0.3)] cursor-pointer"
+                className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-[11px] font-black rounded-full transition shadow-[0_0_12px_rgba(16,185,129,0.3)] cursor-pointer whitespace-nowrap shrink-0"
               >
                 Top-up
               </Link>
             </div>
 
-            {/* Notification Bell */}
-            <Link
-              href="/dashboard/logs"
-              className="w-9 h-9 rounded-full bg-slate-100 dark:bg-white/[0.05] border border-slate-300/80 dark:border-white/[0.1] hover:border-slate-400 dark:hover:border-white/[0.2] hover:bg-slate-200 dark:hover:bg-white/[0.1] flex items-center justify-center text-slate-800 dark:text-slate-300 hover:text-black dark:hover:text-white transition shadow-xs dark:shadow-inner cursor-pointer relative"
-              title="Audit Logs & Activity"
-            >
-              <BellIcon className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]"></span>
-            </Link>
-
-            {/* Settings Icon */}
-            <Link
-              href="/dashboard/settings"
-              className="w-9 h-9 rounded-full bg-slate-100 dark:bg-white/[0.05] border border-slate-300/80 dark:border-white/[0.1] hover:border-slate-400 dark:hover:border-white/[0.2] hover:bg-slate-200 dark:hover:bg-white/[0.1] flex items-center justify-center text-slate-800 dark:text-slate-300 hover:text-black dark:hover:text-white transition shadow-xs dark:shadow-inner cursor-pointer"
-              title="Workspace Settings"
-            >
-              <SettingsIcon className="w-4 h-4" />
-            </Link>
-
             {/* User Avatar Circle */}
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-300/80 dark:border-white/[0.1]">
+            <div className="flex items-center gap-2 pl-2 border-l border-slate-300/80 dark:border-white/[0.1] whitespace-nowrap shrink-0">
               <div
-                className="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-[0_0_14px_rgba(16,185,129,0.3)] select-none border border-white/20"
+                className="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-[0_0_14px_rgba(16,185,129,0.3)] select-none border border-white/20 shrink-0"
                 title={userName}
               >
                 {userName.slice(0, 2).toUpperCase() || "WP"}
               </div>
               <button
                 onClick={handleLogout}
-                className="text-slate-700 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 text-xs font-bold transition hidden sm:inline cursor-pointer"
+                className="text-slate-700 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 text-xs font-bold transition hidden sm:inline cursor-pointer whitespace-nowrap shrink-0"
                 title="Logout"
               >
                 Logout
@@ -533,6 +511,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             children
           )}
         </main>
+      </div>
+
+      {/* Universal Fixed Theme Toggle: Fixed bottom-right for global access anytime */}
+      <div className="fixed bottom-6 right-6 z-50 shadow-2xl rounded-full">
+        <ThemeToggle />
       </div>
     </div>
   );

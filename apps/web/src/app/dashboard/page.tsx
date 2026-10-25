@@ -80,10 +80,9 @@ export default function DashboardOverview() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Active Channel Tab
-  const [activeChannel, setActiveChannel] = useState<"whatsapp" | "instagram">("whatsapp");
-  const [showAllQuickActions, setShowAllQuickActions] = useState(false);
-  const [showAllObjectives, setShowAllObjectives] = useState(false);
+  // Connected Number & Meta Account state
+  const [hasNumber, setHasNumber] = useState<boolean | null>(null);
+  const [connectedPhone, setConnectedPhone] = useState<string | null>(null);
 
   // Analytics data
   const [metrics, setMetrics] = useState<OverviewMetrics>({
@@ -145,6 +144,28 @@ export default function DashboardOverview() {
         if (data.recentActivity) setRecentActivity(data.recentActivity);
         if (data.asset) setAsset(data.asset);
       }
+
+      // Check registered phone numbers
+      try {
+        const numRes = await fetch(`${getApiUrl()}/v1/meta/numbers/${pid}`);
+        const numData = await numRes.json();
+        if (numData.success && Array.isArray(numData.numbers) && numData.numbers.length > 0) {
+          setHasNumber(true);
+          setConnectedPhone(numData.numbers[0].displayPhone || numData.numbers[0].phoneNumber || null);
+        } else if (data?.asset?.displayPhone) {
+          setHasNumber(true);
+          setConnectedPhone(data.asset.displayPhone);
+        } else {
+          setHasNumber(false);
+        }
+      } catch {
+        if (data?.asset?.displayPhone) {
+          setHasNumber(true);
+          setConnectedPhone(data.asset.displayPhone);
+        } else {
+          setHasNumber(false);
+        }
+      }
     } catch (e) {
       console.error("Failed to load analytics overview:", e);
     } finally {
@@ -196,480 +217,159 @@ export default function DashboardOverview() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-      {/* 1. Apple-Style Greeting with Metallic Text Gradient */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] flex items-center gap-2">
-            <span>Welcome to Digital Beings,</span>
-            <span className="apple-text-gradient">{userName}</span>
-            <span>!</span>
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
-            Meta WhatsApp Cloud API Gateway • Real-time Telemetry &amp; 2-Way Engagement
-          </p>
-        </div>
-
-        {/* Live System Beacon */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] text-xs font-semibold text-slate-600 dark:text-slate-300 shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></span>
-          <span>WebSocket Pipeline Active</span>
-        </div>
+      {/* 1. Header Greeting (Clean & Direct) */}
+      <div className="flex items-center justify-between pb-1">
+        <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-950 dark:text-slate-100 flex items-center gap-2">
+          <span>Welcome to Digital Beings,</span>
+          <span className="apple-text-gradient">{userName}</span>
+          <span>!</span>
+        </h1>
       </div>
 
-      {/* 2. Top Channel Switcher & Gateway Banner Row */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        {/* Left: Channel Selector Pills */}
-        <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-[#0B101D]/80 border border-slate-200/80 dark:border-white/[0.08] p-1.5 rounded-2xl backdrop-blur-xl shadow-sm dark:shadow-inner">
-          <button
-            onClick={() => setActiveChannel("whatsapp")}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition cursor-pointer ${
-              activeChannel === "whatsapp"
-                ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 font-black shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.05]"
-            }`}
-          >
-            <WhatsAppIcon className="w-4 h-4" />
-            <span>WhatsApp</span>
-          </button>
-          <button
-            onClick={() => setActiveChannel("instagram")}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition cursor-pointer ${
-              activeChannel === "instagram"
-                ? "bg-slate-900 text-white dark:bg-gradient-to-r dark:from-slate-200 dark:to-white dark:text-slate-950 font-black shadow-[0_0_15px_rgba(255,255,255,0.2)]"
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.05]"
-            }`}
-          >
-            <span>📷</span>
-            <span>Instagram</span>
-          </button>
-        </div>
-
-        {/* Right: Live Gateway Banner */}
-        <div className="bg-white/80 dark:bg-[#0B101D]/80 border border-slate-200/80 dark:border-white/[0.08] backdrop-blur-xl rounded-2xl p-2 pl-4 flex items-center justify-between sm:justify-end gap-3 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
-          <div className="flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></span>
+      {/* 2. Number Status & Connection Gate / Live Instant Test */}
+      {hasNumber === false ? (
+        <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <WhatsAppIcon className="w-5 h-5" />
+            </div>
             <div>
-              <span className="font-bold text-xs text-slate-900 dark:text-slate-100 block leading-tight">WhatsApp Cloud Gateway</span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">Live Meta API • 99.9% Uptime SLA</span>
+              <div className="flex items-center gap-2">
+                <h2 className="font-bold text-sm sm:text-base text-slate-950 dark:text-white">
+                  Link Your WhatsApp Number &amp; Meta Account
+                </h2>
+                <span className="text-[10px] font-bold bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                  Action Required
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                Connect your Meta Business Portfolio or Facebook account to register, fetch, and route your WhatsApp Business number.
+              </p>
             </div>
           </div>
-          <button
-            onClick={() => {
-              setTestResult(null);
-              setShowTestModal(true);
-            }}
-            className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-xs font-black rounded-xl transition shadow-[0_0_14px_rgba(16,185,129,0.3)] flex items-center gap-1.5 cursor-pointer"
-          >
-            <span>Send Message</span>
-            <span>→</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 2b. Instant "Aha!" Sandbox Test & Quickstart (Apple Pro Specular Console) */}
-      <div className="relative rounded-3xl p-6 sm:p-7 text-slate-900 dark:text-white shadow-sm dark:shadow-[0_12px_40px_rgba(16,185,129,0.12)] border border-emerald-500/20 dark:border-emerald-500/30 bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/30 dark:from-[#0c1424] dark:via-[#080d18] dark:to-[#04070e] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6 overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-emerald-400/50 before:to-transparent">
-        {/* Subtle Ambient Radial Glow */}
-        <div className="absolute -top-24 -left-24 w-72 h-72 bg-emerald-500/[0.12] rounded-full blur-3xl pointer-events-none" />
-        <div className="space-y-2.5 max-w-xl relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-800 dark:text-emerald-300 text-[11px] font-black uppercase tracking-wider shadow-[0_0_12px_rgba(16,185,129,0.2)]">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-[0_0_8px_#34d399] animate-ping"></span>
-            <span>⚡ Instant Aha! Gateway Test</span>
-          </div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] leading-tight">
-            Send a Live WhatsApp OTP to Your Phone Right Now
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-            Experience our sub-second delivery engine firsthand. Enter your mobile number below to receive an authentic Meta WhatsApp OTP message immediately.
-          </p>
-          <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-600 dark:text-slate-300">
-            <span className="inline-flex items-center gap-1 font-bold">
-              ✓ Pre-loaded Fuel: <span className="text-emerald-600 dark:text-emerald-400 font-mono">₹{metrics.walletBalance}</span>
-            </span>
-            <span>•</span>
-            <span className="inline-flex items-center gap-1">
-              ⚡ Latency: <span className="text-emerald-600 dark:text-emerald-400 font-mono">{metrics.avgDeliveryLatency || "1.2s"}</span>
-            </span>
-            <span>•</span>
-            <span className="inline-flex items-center gap-1">
-              🛡️ 99.98% Delivery Rate
-            </span>
+          <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+            <Link
+              href="/dashboard/setup"
+              className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-xs font-black rounded-lg transition shadow-xs text-center cursor-pointer"
+            >
+              Connect Meta Account ➔
+            </Link>
+            <Link
+              href="/dashboard/numbers"
+              className="w-full sm:w-auto px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-slate-800 dark:text-white text-xs font-bold rounded-lg transition border border-slate-200 dark:border-white/10 text-center"
+            >
+              Manage Numbers
+            </Link>
           </div>
         </div>
-
-        {/* Interactive Quick Dispatch Input */}
-        <div className="bg-white/90 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/10 p-4 sm:p-5 rounded-2xl w-full lg:max-w-md shrink-0 space-y-3 relative z-10 shadow-sm dark:shadow-inner">
-          <form onSubmit={handleSendTest} className="space-y-2.5">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
-              Your WhatsApp Mobile Number:
-            </label>
-            <div className="flex gap-2">
+      ) : (
+        <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                Instant Gateway Test
+              </span>
+              {connectedPhone && (
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                  ({connectedPhone})
+                </span>
+              )}
+            </div>
+            <h2 className="text-base font-bold text-slate-950 dark:text-white">
+              Send a Live WhatsApp OTP to Your Phone
+            </h2>
+            <p className="text-xs text-slate-600 dark:text-slate-400">
+              Dispatch a test verification code directly through your linked WhatsApp number.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:max-w-md shrink-0">
+            <form onSubmit={handleSendTest} className="flex items-center gap-2 flex-1">
               <input
                 type="text"
                 required
                 value={testPhone}
                 onChange={(e) => setTestPhone(e.target.value)}
                 placeholder="+919876543210"
-                className="flex-1 bg-slate-50 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-mono text-xs rounded-xl px-3.5 py-2.5 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-bold"
+                className="flex-1 bg-slate-50 dark:bg-white/[0.05] border border-slate-300 dark:border-white/10 text-slate-950 dark:text-white font-mono text-xs rounded-lg px-3 py-2 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-bold"
               />
               <button
                 type="submit"
                 disabled={testSending || !testPhone}
-                className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-emerald-400 dark:to-emerald-500 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-xs rounded-xl transition shadow-[0_0_15px_rgba(52,211,153,0.35)] whitespace-nowrap cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-xs rounded-lg transition whitespace-nowrap cursor-pointer disabled:opacity-50"
               >
-                {testSending ? "Sending..." : "Test My Phone ➔"}
+                {testSending ? "Sending..." : "Send Test ➔"}
               </button>
-            </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-              Include country code (e.g. +91). Zero configuration required to test.
-            </p>
-          </form>
-
-          {testResult && (
-            <div className="p-3 bg-emerald-500/15 border border-emerald-400/30 rounded-xl text-xs text-emerald-800 dark:text-emerald-200 font-mono space-y-1">
-              <div className="flex items-center justify-between font-bold text-slate-900 dark:text-white">
-                <span>✓ Delivered in 1.2s!</span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400">HTTP 200</span>
-              </div>
-              <p className="text-[11px] truncate">Req ID: {testResult.requestId || "req_ok"}</p>
-            </div>
-          )}
-
-          <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex items-center justify-between text-[11px]">
-            <Link
-              href="/dashboard/api-keys"
-              className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 underline font-bold transition"
-            >
-              Get Ready-to-Use Code Snippets (cURL/Node/PHP) ➔
-            </Link>
+            </form>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* 3. Featured Hero Banner: Build Your AI Agent */}
-      <div className="bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white dark:from-emerald-950/30 dark:via-[#0B132B]/50 dark:to-[#0A0E1A]/70 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-5 sm:p-6 backdrop-blur-xl shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 transition hover:border-emerald-400/40">
-        <div className="flex items-start sm:items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 flex items-center justify-center shrink-0 shadow-[0_0_18px_rgba(16,185,129,0.3)]">
-            <BotIcon className="w-6 h-6" />
-          </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-              Build Your AI Agent
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium mt-0.5 leading-relaxed max-w-2xl">
-              Create an AI agent to handle conversations, answer questions, qualify leads, and assist customers automatically.
-            </p>
-          </div>
+      {/* Test Result Toast Banner if sent */}
+      {testResult && (
+        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 font-mono flex items-center justify-between">
+          <span className="font-bold">✓ Live OTP Dispatched in 1.2s!</span>
+          <span className="text-[11px]">Req ID: {testResult.requestId || "req_ok"}</span>
         </div>
-        <Link
-          href="/dashboard/automations"
-          className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl transition shadow-[0_0_15px_rgba(16,185,129,0.3)] whitespace-nowrap cursor-pointer self-stretch sm:self-auto text-center"
-        >
-          Create Agent
-        </Link>
-      </div>
+      )}
 
-      {/* 4. Quick Actions / Workflow Cards (Apple Bento 3-Column Grid) */}
-      <div className="space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Card 1: Connect Number */}
-          <div className="bg-white/80 dark:bg-[#0B101D]/80 hover:bg-slate-50 dark:hover:bg-[#0E1526]/95 border border-slate-200/80 dark:border-white/[0.08] hover:border-emerald-500/40 rounded-2xl p-4 sm:p-5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] flex items-center justify-between gap-3 transition-all duration-300 hover:-translate-y-1">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(16,185,129,0.2)]">
-                <WhatsAppIcon className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">Connect Number</h3>
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.08] px-2 py-0.5 rounded-md mt-1">
-                  <span>ⓘ</span>
-                  <span>{asset?.displayPhone ? "Meta Cloud Live" : "Not Verified"}</span>
-                </span>
-              </div>
+      {/* 3. Core Quick Actions (Compact Bento Grid: AI Agent, Campaigns, Templates) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        {/* Card 1: Build Your AI Agent */}
+        <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-xs flex items-center justify-between gap-3 hover:border-emerald-500/40 transition">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <BotIcon className="w-5 h-5" />
             </div>
-            <div className="flex flex-col items-end gap-1 shrink-0">
-              <span className="text-[10px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-                <span>🪙</span> Rs. 0.50
-              </span>
-              <Link
-                href="/dashboard/numbers"
-                className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-xs font-black rounded-xl transition shadow-[0_0_12px_rgba(16,185,129,0.3)]"
-              >
-                {asset?.displayPhone ? "Manage" : "Connect"}
-              </Link>
+            <div className="min-w-0">
+              <h3 className="font-bold text-sm text-slate-950 dark:text-white truncate">Build Your AI Agent</h3>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate">Automate conversations &amp; lead qualification</p>
             </div>
           </div>
-
-          {/* Card 2: Greeting Flow */}
-          <div className="bg-white/80 dark:bg-[#0B101D]/80 hover:bg-slate-50 dark:hover:bg-[#0E1526]/95 border border-slate-200/80 dark:border-white/[0.08] hover:border-emerald-500/40 rounded-2xl p-4 sm:p-5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] flex items-center justify-between gap-3 transition-all duration-300 hover:-translate-y-1">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-500 dark:text-rose-400 flex items-center justify-center shrink-0">
-                <span className="text-base">💬</span>
-              </div>
-              <div className="min-w-0">
-                <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">Greeting Flow</h3>
-                <div className="flex flex-wrap items-center gap-1 mt-1">
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">
-                    ✓ Activated
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-700 dark:text-teal-300 bg-teal-500/15 border border-teal-500/30 px-1.5 py-0.5 rounded">
-                    ✦ AI-generated
-                  </span>
-                </div>
-              </div>
-            </div>
-            <Link
-              href="/dashboard/automations"
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-slate-700 dark:text-white text-xs font-bold rounded-xl transition border border-slate-200 dark:border-white/10 shrink-0"
-            >
-              Edit Flow
-            </Link>
-          </div>
-
-          {/* Card 3: FAQ Auto-replies */}
-          <div className="bg-white/80 dark:bg-[#0B101D]/80 hover:bg-slate-50 dark:hover:bg-[#0E1526]/95 border border-slate-200/80 dark:border-white/[0.08] hover:border-emerald-500/40 rounded-2xl p-4 sm:p-5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] flex items-center justify-between gap-3 transition-all duration-300 hover:-translate-y-1">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                <span className="text-base">📋</span>
-              </div>
-              <div className="min-w-0">
-                <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">FAQ Auto-replies</h3>
-                <div className="flex flex-wrap items-center gap-1 mt-1">
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">
-                    ✓ Activated
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-700 dark:text-teal-300 bg-teal-500/15 border border-teal-500/30 px-1.5 py-0.5 rounded">
-                    ✦ AI-generated
-                  </span>
-                </div>
-              </div>
-            </div>
-            <Link
-              href="/dashboard/automations"
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-slate-700 dark:text-white text-xs font-bold rounded-xl transition border border-slate-200 dark:border-white/10 shrink-0"
-            >
-              Edit
-            </Link>
-          </div>
-        </div>
-
-        {/* View All Expandable Section */}
-        {showAllQuickActions && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1 animate-in fade-in duration-200">
-            <div className="bg-white/80 dark:bg-[#0B101D]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-4 sm:p-5 shadow-sm dark:shadow-inner flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                  <CampaignIcon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Broadcast Studio</h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Bulk audience CSV dispatches</p>
-                </div>
-              </div>
-              <Link href="/dashboard/campaigns" className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 text-xs font-black rounded-xl">
-                Launch
-              </Link>
-            </div>
-
-            <div className="bg-white/80 dark:bg-[#0B101D]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-4 sm:p-5 shadow-sm dark:shadow-inner flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-                  <TemplateIcon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Template Studio</h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Submit Meta approved templates</p>
-                </div>
-              </div>
-              <Link href="/dashboard/templates" className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 text-xs font-black rounded-xl">
-                Manage
-              </Link>
-            </div>
-
-            <div className="bg-white/80 dark:bg-[#0B101D]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-4 sm:p-5 shadow-sm dark:shadow-inner flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <ShieldCheckIcon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Green Tick (OBA)</h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Official verification portal</p>
-                </div>
-              </div>
-              <Link href="/dashboard/green-tick" className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 text-xs font-black rounded-xl">
-                Check
-              </Link>
-            </div>
-          </div>
-        )}
-
-        <div className="text-center pt-1">
-          <button
-            onClick={() => setShowAllQuickActions(!showAllQuickActions)}
-            className="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white inline-flex items-center gap-1.5 transition cursor-pointer"
+          <Link
+            href="/dashboard/automations"
+            className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-xs font-black rounded-lg transition whitespace-nowrap shrink-0 shadow-xs"
           >
-            <span>{showAllQuickActions ? "View Less" : "View All"}</span>
-            <span className={`transform transition-transform ${showAllQuickActions ? "rotate-180" : ""}`}>⌄</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 5. OBJECTIVES Section (Apple Bento Style) */}
-      <div className="bg-slate-50/60 dark:bg-[#080D1A]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-3xl p-6 backdrop-blur-2xl shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] space-y-4">
-        <span className="text-xs font-bold tracking-widest text-slate-500 dark:text-slate-400 uppercase block">
-          STRATEGIC OBJECTIVES
-        </span>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Objective Card 1: Generate High-intent Leads */}
-          <div className="bg-white/90 dark:bg-[#0B101D]/90 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-5 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] flex flex-col justify-between space-y-4 hover:border-emerald-500/30 hover:-translate-y-1 transition-all duration-300">
-            <div>
-              <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">Generate High-intent Leads</h3>
-              <Link href="/dashboard/campaigns" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline block mt-0.5">
-                Via Click to WhatsApp Ads
-              </Link>
-            </div>
-
-            {/* Illustration Graphic (Ad mockup preview) */}
-            <div className="h-36 bg-slate-100/70 dark:bg-white/[0.02] rounded-xl border border-slate-200/80 dark:border-white/[0.06] p-3 flex items-center justify-between gap-3 overflow-hidden">
-              <div className="space-y-1.5 flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] font-bold">f</div>
-                  <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate">Digital Ads</span>
-                </div>
-                <div className="w-full bg-slate-200 dark:bg-white/10 h-2 rounded-full"></div>
-                <div className="w-3/4 bg-slate-200 dark:bg-white/10 h-2 rounded-full"></div>
-                <div className="inline-flex items-center gap-1 bg-[#25D366] text-slate-950 text-[9px] font-black px-2 py-0.5 rounded mt-1 shadow-sm">
-                  <WhatsAppIcon className="w-2.5 h-2.5" />
-                  <span>WhatsApp</span>
-                </div>
-              </div>
-              <div className="w-24 h-28 bg-white dark:bg-white/[0.04] rounded-lg border border-slate-200 dark:border-white/10 p-1.5 flex flex-col justify-between shrink-0 shadow-sm dark:shadow-inner">
-                <div className="w-full h-12 bg-slate-100 dark:bg-white/[0.06] rounded flex items-center justify-center text-[10px] text-slate-500 dark:text-slate-400">Ad Creative</div>
-                <div className="space-y-1">
-                  <div className="w-full bg-slate-200 dark:bg-white/10 h-1.5 rounded"></div>
-                  <div className="w-2/3 bg-slate-200 dark:bg-white/10 h-1.5 rounded"></div>
-                </div>
-              </div>
-            </div>
-
-            <Link
-              href="/dashboard/campaigns"
-              className="w-full py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-xs font-black rounded-xl text-center transition shadow-[0_0_12px_rgba(16,185,129,0.3)] cursor-pointer block"
-            >
-              Setup
-            </Link>
-          </div>
-
-          {/* Objective Card 2: Qualify Ad Leads */}
-          <div className="bg-white/90 dark:bg-[#0B101D]/90 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-5 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] flex flex-col justify-between space-y-4 hover:border-emerald-500/30 hover:-translate-y-1 transition-all duration-300">
-            <div>
-              <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">Qualify Ad Leads</h3>
-              <Link href="/dashboard/api-keys" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline block mt-0.5">
-                Via WhatsApp Forms &amp; OTPs
-              </Link>
-            </div>
-
-            {/* Illustration Graphic (Mobile phone form mockup) */}
-            <div className="h-36 bg-slate-100/70 dark:bg-white/[0.02] rounded-xl border border-slate-200/80 dark:border-white/[0.06] p-3 flex items-center justify-center overflow-hidden">
-              <div className="w-32 h-32 bg-white dark:bg-white/[0.04] rounded-xl border border-slate-200 dark:border-white/10 p-2 flex flex-col justify-between shadow-sm dark:shadow-inner">
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-1">
-                  <span className="text-[9px] font-bold text-slate-700 dark:text-slate-300">Verification</span>
-                  <span className="text-[8px] text-emerald-600 dark:text-emerald-400 font-bold">✓ Live</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[8px] text-slate-500 dark:text-slate-400 block">Your Details</span>
-                  <div className="w-full bg-slate-100 dark:bg-white/[0.06] h-3 rounded px-1 flex items-center text-[8px] text-slate-700 dark:text-slate-300 font-mono">
-                    +91 ••••• ••••
-                  </div>
-                  <div className="w-full bg-emerald-500/10 border border-emerald-500/20 h-3 rounded px-1 flex items-center text-[8px] text-emerald-700 dark:text-emerald-300 font-mono">
-                    Code: 849201
-                  </div>
-                </div>
-                <div className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 text-[8px] font-black py-0.5 rounded text-center">
-                  Submit
-                </div>
-              </div>
-            </div>
-
-            <Link
-              href="/dashboard/api-keys"
-              className="w-full py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-xs font-black rounded-xl text-center transition shadow-[0_0_12px_rgba(16,185,129,0.3)] cursor-pointer block"
-            >
-              Setup
-            </Link>
-          </div>
-
-          {/* Objective Card 3: Integrate with WhatsApp Pay */}
-          <div className="bg-white/90 dark:bg-[#0B101D]/90 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-5 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] flex flex-col justify-between space-y-4 hover:border-emerald-500/30 hover:-translate-y-1 transition-all duration-300">
-            <div>
-              <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">Integrate with WhatsApp Pay</h3>
-              <Link href="/dashboard/ecommerce" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline block mt-0.5">
-                Shopify &amp; WooCommerce Recipes
-              </Link>
-            </div>
-
-            {/* Illustration Graphic (Shopping bag + Link + WhatsApp icon) */}
-            <div className="h-36 bg-slate-100/70 dark:bg-white/[0.02] rounded-xl border border-slate-200/80 dark:border-white/[0.06] p-4 flex items-center justify-center gap-3 overflow-hidden">
-              <div className="w-12 h-12 rounded-2xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-600 dark:text-teal-300 shadow-sm dark:shadow-inner">
-                <ShoppingBagIcon className="w-6 h-6" />
-              </div>
-              <div className="text-slate-400 dark:text-slate-500 font-bold text-lg">🔗</div>
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-300 shadow-sm dark:shadow-inner">
-                <WhatsAppIcon className="w-6 h-6" />
-              </div>
-            </div>
-
-            <Link
-              href="/dashboard/ecommerce"
-              className="w-full py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-xs font-black rounded-xl text-center transition shadow-[0_0_12px_rgba(16,185,129,0.3)] cursor-pointer block"
-            >
-              Setup
-            </Link>
-          </div>
+            Create Agent
+          </Link>
         </div>
 
-        {/* View All Objectives Expandable */}
-        {showAllObjectives && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2 animate-in fade-in duration-200">
-            <div className="bg-white/90 dark:bg-[#0B101D]/90 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-4 flex items-center justify-between shadow-sm">
-              <div>
-                <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">COD Confirmation</h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Reduce return-to-origin fraud by 40%</p>
-              </div>
-              <Link href="/dashboard/ecommerce" className="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 text-xs font-black rounded-xl">
-                Configure
-              </Link>
+        {/* Card 2: Broadcast Campaigns */}
+        <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-xs flex items-center justify-between gap-3 hover:border-emerald-500/40 transition">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+              <CampaignIcon className="w-5 h-5" />
             </div>
-
-            <div className="bg-white/90 dark:bg-[#0B101D]/90 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-4 flex items-center justify-between shadow-sm">
-              <div>
-                <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">Abandoned Cart Nudge</h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Automatic discount recovery triggers</p>
-              </div>
-              <Link href="/dashboard/ecommerce" className="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 text-xs font-black rounded-xl">
-                Configure
-              </Link>
-            </div>
-
-            <div className="bg-white/90 dark:bg-[#0B101D]/90 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-4 flex items-center justify-between shadow-sm">
-              <div>
-                <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">Granular Team Roles</h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Assign custom agent permissions</p>
-              </div>
-              <Link href="/dashboard/team" className="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 text-xs font-black rounded-xl">
-                Configure
-              </Link>
+            <div className="min-w-0">
+              <h3 className="font-bold text-sm text-slate-950 dark:text-white truncate">Broadcast Campaigns</h3>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate">Bulk promotional &amp; utility broadcasts</p>
             </div>
           </div>
-        )}
-
-        <div className="text-center pt-1">
-          <button
-            onClick={() => setShowAllObjectives(!showAllObjectives)}
-            className="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white inline-flex items-center gap-1.5 transition cursor-pointer"
+          <Link
+            href="/dashboard/campaigns"
+            className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white text-xs font-bold rounded-lg transition whitespace-nowrap shrink-0 border border-slate-200 dark:border-white/10"
           >
-            <span>{showAllObjectives ? "View Less" : "View All"}</span>
-            <span className={`transform transition-transform ${showAllObjectives ? "rotate-180" : ""}`}>⌄</span>
-          </button>
+            Launch
+          </Link>
+        </div>
+
+        {/* Card 3: Template Studio */}
+        <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-xs flex items-center justify-between gap-3 hover:border-emerald-500/40 transition">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+              <TemplateIcon className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-bold text-sm text-slate-950 dark:text-white truncate">Template Studio</h3>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate">Create &amp; sync Meta-approved templates</p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard/templates"
+            className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white text-xs font-bold rounded-lg transition whitespace-nowrap shrink-0 border border-slate-200 dark:border-white/10"
+          >
+            Manage
+          </Link>
         </div>
       </div>
 
