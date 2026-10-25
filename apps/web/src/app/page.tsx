@@ -22,22 +22,22 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans antialiased selection:bg-emerald-500 selection:text-white overflow-x-hidden w-full">
+    <div className="min-h-screen bg-[#04060c] text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-black overflow-x-hidden w-full relative">
       {/* 1. TOP ANNOUNCEMENT BANNER */}
       {showOfferBar && (
-        <div className="bg-[#00c853] text-white text-xs sm:text-sm font-semibold py-2 px-4 shadow-xs flex items-center justify-between relative z-50 w-full overflow-hidden">
+        <div className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white text-xs sm:text-sm font-semibold py-2 px-4 shadow-[0_4px_20px_rgba(16,185,129,0.25)] flex items-center justify-between relative z-50 w-full overflow-hidden border-b border-emerald-400/30">
           <div className="flex-1 flex items-center justify-center gap-2 sm:gap-3 flex-wrap text-center max-w-7xl mx-auto">
-            <span>Start your 30-Day WhatsApp Platform Trial for just ₹500 + GST 🎉</span>
+            <span className="font-medium">Start your 30-Day WhatsApp Platform Trial for just <strong className="font-black text-white underline decoration-emerald-200">₹500 + GST</strong> 🎉</span>
             <button
               onClick={() => openPlanModal("TRIAL_VS_BASIC")}
-              className="bg-white text-slate-900 hover:bg-slate-100 font-bold px-3 py-1 rounded-full text-xs shadow-xs transition whitespace-nowrap cursor-pointer"
+              className="bg-slate-950 text-white hover:bg-black font-extrabold px-3.5 py-1 rounded-full text-xs shadow-md transition whitespace-nowrap cursor-pointer border border-white/20"
             >
               Start 30-Day Trial (₹500 + GST) ➔
             </button>
           </div>
           <button
             onClick={() => setShowOfferBar(false)}
-            className="text-white/80 hover:text-white text-sm ml-2 shrink-0 p-1"
+            className="text-white/80 hover:text-white text-sm ml-2 shrink-0 p-1 cursor-pointer"
             aria-label="Dismiss banner"
           >
             ✕
@@ -46,18 +46,21 @@ export default function HomePage() {
       )}
 
       {/* 2. NAVIGATION BAR */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-2xs transition-all w-full">
+      <header className="sticky top-0 z-40 bg-[#070b14]/85 backdrop-blur-2xl border-b border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-all w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <img
-              src="/icon.png"
-              alt="Digital Beings"
-              className="w-10 h-10 rounded-xl object-contain shadow-md group-hover:scale-105 transition shrink-0"
-            />
+            <div className="relative">
+              <img
+                src="/icon.png"
+                alt="Digital Beings"
+                className="w-10 h-10 rounded-xl object-contain shadow-md group-hover:scale-105 transition shrink-0"
+              />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#070b14] shadow-[0_0_8px_#34d399]" />
+            </div>
             <div className="flex flex-col">
-              <span className="font-black text-xl sm:text-2xl tracking-tight text-slate-900 leading-none">
-                Digital<span className="text-emerald-600">Beings</span>
+              <span className="font-black text-xl sm:text-2xl tracking-tight text-white leading-none">
+                Digital<span className="apple-emerald-gradient">Beings</span>
               </span>
               <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 tracking-wider sm:tracking-widest uppercase">
                 Secure • Connect • Grow
@@ -66,17 +69,17 @@ export default function HomePage() {
           </Link>
 
           {/* Desktop Nav Links - Clean service definitions */}
-          <nav className="hidden md:flex items-center gap-6 xl:gap-8 text-sm font-semibold text-slate-600">
-            <Link href="#features" className="hover:text-emerald-600 transition whitespace-nowrap">
+          <nav className="hidden md:flex items-center gap-6 xl:gap-8 text-sm font-semibold text-slate-300">
+            <Link href="#features" className="hover:text-emerald-400 transition whitespace-nowrap">
               Services
             </Link>
-            <Link href="#developer" className="hover:text-emerald-600 transition whitespace-nowrap">
+            <Link href="#developer" className="hover:text-emerald-400 transition whitespace-nowrap">
               WhatsApp OTP
             </Link>
-            <Link href="#broadcast" className="hover:text-emerald-600 transition whitespace-nowrap">
+            <Link href="#broadcast" className="hover:text-emerald-400 transition whitespace-nowrap">
               Broadcasts
             </Link>
-            <Link href="#pricing" className="hover:text-emerald-600 transition whitespace-nowrap">
+            <Link href="#pricing" className="hover:text-emerald-400 transition whitespace-nowrap">
               Pricing
             </Link>
           </nav>
@@ -85,13 +88,13 @@ export default function HomePage() {
           <div className="hidden sm:flex items-center gap-3 xl:gap-4 shrink-0">
             <Link
               href="/login"
-              className="text-sm font-bold text-slate-700 hover:text-emerald-600 px-2 py-1 transition whitespace-nowrap"
+              className="text-sm font-bold text-slate-300 hover:text-white px-3 py-1.5 transition whitespace-nowrap"
             >
               Login
             </Link>
             <button
               onClick={() => openPlanModal("TRIAL_VS_BASIC")}
-              className="px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-bold text-white bg-[#00c853] hover:bg-[#00b248] rounded-xl shadow-xs hover:shadow transition flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+              className="px-5 py-2.5 text-xs sm:text-sm font-black text-slate-950 bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 rounded-xl shadow-[0_0_20px_rgba(52,211,153,0.35)] transition flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
               <span>Start 30-Day Trial (₹500 + GST)</span>
               <span>➔</span>
@@ -101,7 +104,7 @@ export default function HomePage() {
           {/* Mobile hamburger button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100"
+            className="md:hidden p-2 rounded-xl text-slate-300 hover:bg-white/10"
             aria-label="Toggle menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,30 +120,30 @@ export default function HomePage() {
 
         {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-b border-slate-200 bg-white px-6 py-4 space-y-3">
-            <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700 hover:text-emerald-600">
+          <div className="md:hidden border-b border-white/10 bg-[#070b14]/95 backdrop-blur-2xl px-6 py-4 space-y-3">
+            <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-300 hover:text-emerald-400">
               Services &amp; Features
             </Link>
-            <Link href="#developer" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700 hover:text-emerald-600">
+            <Link href="#developer" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-300 hover:text-emerald-400">
               WhatsApp OTP &amp; APIs
             </Link>
-            <Link href="#broadcast" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700 hover:text-emerald-600">
+            <Link href="#broadcast" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-300 hover:text-emerald-400">
               Broadcast Campaigns
             </Link>
-            <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-700 hover:text-emerald-600">
+            <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-300 hover:text-emerald-400">
               Pricing Plans
             </Link>
-            <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+            <div className="pt-3 border-t border-white/10 flex flex-col gap-2">
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   openPlanModal("TRIAL_VS_BASIC");
                 }}
-                className="w-full text-center py-2.5 font-bold bg-[#00c853] text-white rounded-xl shadow-xs cursor-pointer"
+                className="w-full text-center py-2.5 font-black bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-950 rounded-xl shadow-md cursor-pointer"
               >
                 Start 30-Day Trial (₹500 + GST) ➔
               </button>
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 font-bold border border-slate-300 rounded-xl text-slate-800">
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 font-bold border border-white/20 rounded-xl text-slate-200">
                 Login
               </Link>
             </div>
@@ -148,40 +151,42 @@ export default function HomePage() {
         )}
       </header>
 
-      {/* 3. HERO SECTION (IMAGE 1 & 2 STYLE) */}
-      <section className="relative overflow-hidden pt-12 pb-24 md:pt-20 md:pb-32 bg-gradient-to-b from-emerald-50/40 via-white to-white">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-tr from-emerald-300/20 to-purple-300/15 rounded-full blur-3xl pointer-events-none -z-10" />
+      {/* 3. HERO SECTION */}
+      <section className="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-36 bg-[#04060c] text-white">
+        {/* Ambient Apple Radial Spotlights */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[450px] bg-gradient-to-tr from-emerald-500/[0.14] via-teal-500/[0.08] to-purple-500/[0.06] rounded-full blur-[140px] pointer-events-none -z-0" />
+        <div className="absolute top-0 right-1/4 w-[400px] h-[300px] bg-emerald-400/[0.08] rounded-full blur-[120px] pointer-events-none -z-0" />
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           {/* Top Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs sm:text-sm font-bold shadow-2xs mb-8">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-emerald-300 text-xs sm:text-sm font-bold shadow-[0_0_20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/20 mb-8 backdrop-blur-xl">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></span>
             <span>All-in-One WhatsApp Cloud Suite: Live Team Inbox · AI Chatbots · Shopify Automations</span>
           </div>
 
           {/* Hero Main Headline */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-slate-900 tracking-tight leading-[1.1] mb-6">
-            <span className="text-[#00c853] block">5X Your Revenue</span>
-            with the Power of WhatsApp
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-[1.08] mb-6">
+            <span className="apple-emerald-gradient block mb-2">5X Your Revenue</span>
+            <span className="apple-text-gradient">with the Power of WhatsApp</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="max-w-3xl mx-auto text-lg sm:text-xl text-slate-600 leading-relaxed font-normal mb-10">
-            Collaborate on a unified 2-Way Live Team Inbox, deploy 24/7 AI auto-reply bots, recover abandoned carts on Shopify, and broadcast official Meta campaigns — flat plans from ₹1,000 + GST/mo or start a <strong>30-Day Trial for ₹500 + GST</strong> ⚡
+          <p className="max-w-3xl mx-auto text-lg sm:text-xl text-slate-300 leading-relaxed font-normal mb-10">
+            Collaborate on a unified 2-Way Live Team Inbox, deploy 24/7 AI auto-reply bots, recover abandoned carts on Shopify, and broadcast official Meta campaigns — flat plans from ₹1,000 + GST/mo or start a <strong className="font-black text-white underline decoration-emerald-400">30-Day Trial for ₹500 + GST</strong> ⚡
           </p>
 
           {/* Hero CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <button
               onClick={() => openPlanModal("TRIAL_VS_BASIC")}
-              className="w-full sm:w-auto px-8 py-4 text-base font-extrabold text-white bg-[#00c853] hover:bg-[#00b248] rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-8 py-4 text-base font-black text-slate-950 bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 rounded-xl shadow-[0_0_30px_rgba(52,211,153,0.4)] hover:-translate-y-0.5 transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Start 30-Day Trial (₹500 + GST)</span>
               <span>➔</span>
             </button>
             <Link
               href="/dashboard"
-              className="w-full sm:w-auto px-8 py-4 text-base font-extrabold text-slate-900 bg-white hover:bg-slate-50 border-2 border-slate-900 rounded-xl shadow-xs hover:-translate-y-0.5 transition flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-4 text-base font-bold text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/20 rounded-xl shadow-inner backdrop-blur-md hover:-translate-y-0.5 transition flex items-center justify-center gap-2"
             >
               <span>Join Live Demo</span>
               <span>➔</span>
@@ -189,79 +194,79 @@ export default function HomePage() {
           </div>
 
           {/* Micro trust indicators */}
-          <div className="flex items-center justify-center gap-6 text-xs sm:text-sm font-semibold text-slate-500 flex-wrap mb-16">
-            <span className="flex items-center gap-1.5 text-emerald-700">
-              <span className="text-emerald-500">✓</span> 30-Day Full Platform Access (₹500 + GST)
+          <div className="flex items-center justify-center gap-6 text-xs sm:text-sm font-semibold text-slate-400 flex-wrap mb-16">
+            <span className="flex items-center gap-1.5 text-emerald-300">
+              <span className="text-emerald-400">✓</span> 30-Day Full Platform Access (₹500 + GST)
             </span>
-            <span className="flex items-center gap-1.5 text-emerald-700">
-              <span className="text-emerald-500">✓</span> Official Meta Tech Partner
+            <span className="flex items-center gap-1.5 text-emerald-300">
+              <span className="text-emerald-400">✓</span> Official Meta Tech Partner
             </span>
-            <span className="flex items-center gap-1.5 text-emerald-700">
-              <span className="text-emerald-500">✓</span> Instant 2-Minute Setup
+            <span className="flex items-center gap-1.5 text-emerald-300">
+              <span className="text-emerald-400">✓</span> Instant 2-Minute Setup
             </span>
           </div>
 
-          {/* 4. HERO VISUAL SHOWCASE STAGE (IMAGE 1 & 2 MOCKUPS) */}
+          {/* 4. HERO VISUAL SHOWCASE STAGE */}
           <div className="relative max-w-5xl mx-auto pt-6">
             {/* Floating Metric Badges */}
-            <div className="absolute -top-4 left-4 sm:left-12 z-20 bg-white rounded-2xl p-3.5 shadow-xl border border-slate-100 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-black">
+            <div className="absolute -top-4 left-4 sm:left-12 z-20 bg-[#0B101D]/90 backdrop-blur-xl rounded-2xl p-3.5 shadow-2xl border border-white/10 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center justify-center text-xl font-black">
                 🛒
               </div>
               <div className="text-left">
                 <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Shopify Recovery</span>
-                <span className="text-lg font-black text-slate-900 leading-none">+28% Checkouts</span>
+                <span className="text-lg font-black text-white leading-none">+28% Checkouts</span>
               </div>
             </div>
 
-            <div className="absolute top-8 right-4 sm:right-16 z-20 bg-white rounded-2xl p-3.5 shadow-xl border border-slate-100 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+            <div className="absolute top-8 right-4 sm:right-16 z-20 bg-[#0B101D]/90 backdrop-blur-xl rounded-2xl p-3.5 shadow-2xl border border-white/10 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-xl font-bold">
                 💬
               </div>
               <div className="text-left">
                 <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Live 2-Way Inbox</span>
-                <span className="text-lg font-black text-slate-900 leading-none">Meta 24h Care Window</span>
+                <span className="text-lg font-black text-white leading-none">Meta 24h Care Window</span>
               </div>
             </div>
 
-            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 z-20 bg-white rounded-full px-6 py-3 shadow-2xl border border-slate-100 flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">
+            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 z-20 bg-[#0B101D]/90 backdrop-blur-xl rounded-full px-6 py-3 shadow-2xl border border-white/10 flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-full bg-emerald-400 text-slate-950 flex items-center justify-center text-xs font-black shadow-[0_0_8px_#34d399]">
                 ⚡
               </div>
-              <span className="font-extrabold text-slate-900 text-sm tracking-wide">24/7 AI Chatbot: &lt;1s Auto-Replies · ₹0 Bot Rent</span>
+              <span className="font-extrabold text-white text-sm tracking-wide">24/7 AI Chatbot: &lt;1s Auto-Replies · ₹0 Bot Rent</span>
             </div>
 
             {/* Main Mockup Graphic Wrapper */}
-            <div className="relative rounded-3xl bg-gradient-to-b from-slate-50/80 to-slate-100/60 p-4 sm:p-8 border border-slate-200/80 shadow-2xl overflow-hidden">
+            <div className="relative rounded-3xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] backdrop-blur-2xl p-4 sm:p-8 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                 {/* Left Card: Click to WhatsApp Ad Card */}
-                <div className="bg-white rounded-2xl p-5 shadow-lg border border-slate-100 text-left space-y-4">
+                <div className="bg-[#0B101D]/90 rounded-2xl p-5 shadow-xl border border-white/10 text-left space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-pink-100 border-2 border-pink-300 flex items-center justify-center text-lg">
+                    <div className="w-10 h-10 rounded-full bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-lg">
                       🌸
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-slate-900 text-sm">flora.luxe</span>
-                        <span className="text-blue-500 text-xs font-bold">●</span>
+                        <span className="font-bold text-white text-sm">flora.luxe</span>
+                        <span className="text-blue-400 text-xs font-bold">●</span>
                       </div>
                       <span className="text-[11px] text-slate-400">Sponsored · Instagram &amp; Facebook</span>
                     </div>
                   </div>
 
-                  <div className="rounded-xl overflow-hidden bg-gradient-to-tr from-pink-100 via-rose-50 to-amber-50 h-44 flex items-center justify-center relative p-4">
+                  <div className="rounded-xl overflow-hidden bg-gradient-to-tr from-pink-950/40 via-purple-950/20 to-amber-950/20 border border-white/10 h-44 flex items-center justify-center relative p-4">
                     <div className="text-center space-y-1">
                       <span className="text-3xl block">✨ 🧴</span>
-                      <span className="font-black text-slate-800 text-base block">Luxe Summer Eau De Parfum</span>
-                      <span className="text-xs text-rose-600 font-extrabold uppercase bg-white/80 px-3 py-1 rounded-full inline-block">
+                      <span className="font-black text-white text-base block">Luxe Summer Eau De Parfum</span>
+                      <span className="text-xs text-rose-300 font-extrabold uppercase bg-rose-500/20 border border-rose-500/30 px-3 py-1 rounded-full inline-block">
                         Flat 20% OFF · Code: LUXE20
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-2">
-                    <span className="text-xs text-slate-500 font-medium">Click to chat on WhatsApp</span>
-                    <button className="px-4 py-2 bg-[#25D366] text-white rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 hover:bg-emerald-600 transition">
+                    <span className="text-xs text-slate-400 font-medium">Click to chat on WhatsApp</span>
+                    <button className="px-4 py-2 bg-[#25D366] text-slate-950 rounded-xl font-black text-xs shadow-[0_0_12px_rgba(37,211,102,0.3)] flex items-center gap-1.5 hover:bg-emerald-400 transition">
                       <span>Send Message</span>
                       <span>💬</span>
                     </button>
@@ -269,8 +274,8 @@ export default function HomePage() {
                 </div>
 
                 {/* Right Card: Real WhatsApp Chat Mockup */}
-                <div className="bg-[#efeae2] rounded-2xl p-4 shadow-lg border border-slate-300/80 text-left space-y-3 relative overflow-hidden">
-                  <div className="bg-[#075e54] text-white -m-4 p-3.5 mb-3 flex items-center gap-3">
+                <div className="bg-[#0c1412] rounded-2xl p-4 shadow-xl border border-white/10 text-left space-y-3 relative overflow-hidden">
+                  <div className="bg-[#075e54] text-white -m-4 p-3.5 mb-3 flex items-center gap-3 shadow-sm">
                     <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold">
                       FL
                     </div>
@@ -280,27 +285,27 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  <div className="max-w-[85%] ml-auto bg-[#dcf8c6] rounded-xl rounded-tr-xs p-3 text-xs text-slate-800 shadow-2xs space-y-1">
-                    <div className="text-[10px] text-slate-500 border-l-2 border-emerald-500 pl-2 mb-1 bg-white/40 p-1 rounded">
+                  <div className="max-w-[85%] ml-auto bg-[#005c4b] rounded-xl rounded-tr-xs p-3 text-xs text-emerald-50 shadow-sm space-y-1">
+                    <div className="text-[10px] text-emerald-200 border-l-2 border-emerald-300 pl-2 mb-1 bg-black/20 p-1 rounded">
                       Ad · Enjoy 20% OFF. Use LUXE20
                     </div>
                     <p>Is this available?</p>
-                    <span className="text-[9px] text-slate-400 block text-right">1:14 PM ✓✓</span>
+                    <span className="text-[9px] text-emerald-300/70 block text-right">1:14 PM ✓✓</span>
                   </div>
 
-                  <div className="max-w-[88%] mr-auto bg-white rounded-xl rounded-tl-xs p-3 text-xs text-slate-800 shadow-2xs space-y-2">
+                  <div className="max-w-[88%] mr-auto bg-[#1f2c34] rounded-xl rounded-tl-xs p-3 text-xs text-slate-200 shadow-sm space-y-2 border border-white/5">
                     <p>
                       Hey Nisha! 🌸 The summer drop is live till midnight. Here is your personalized promo link:
                     </p>
-                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 flex items-center justify-between">
-                      <span className="font-mono font-bold text-slate-900">₹1,425 <span className="line-through text-slate-400 font-normal text-[10px]">₹3,050</span></span>
-                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Save 53%</span>
+                    <div className="bg-black/30 p-2 rounded-lg border border-white/5 flex items-center justify-between">
+                      <span className="font-mono font-bold text-white">₹1,425 <span className="line-through text-slate-500 font-normal text-[10px]">₹3,050</span></span>
+                      <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Save 53%</span>
                     </div>
                     <div className="pt-1 flex flex-col gap-1.5">
-                      <button className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] shadow-xs transition">
+                      <button className="w-full py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 rounded-lg font-black text-[11px] shadow-sm transition">
                         ⚡ Claim Offer &amp; Checkout
                       </button>
-                      <button className="w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold text-[10px] transition">
+                      <button className="w-full py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 rounded-lg font-semibold text-[10px] transition border border-white/10">
                         💬 Speak to Live Agent
                       </button>
                     </div>
@@ -313,34 +318,34 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. SOCIAL PROOF / CLIENT TRUST BANNER (IMAGE 2) */}
-      <section className="py-16 border-y border-slate-100 bg-slate-50/50">
+      {/* 5. SOCIAL PROOF / CLIENT TRUST BANNER */}
+      <section className="py-16 border-y border-white/[0.08] bg-[#070b14]/70">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Founders &amp; Marketers Love us
           </h3>
-          <p className="text-slate-500 text-sm max-w-xl mx-auto">
+          <p className="text-slate-400 text-sm max-w-xl mx-auto">
             Trusted by 210,000+ Businesses across 68+ Countries
           </p>
 
           {/* Client Logos Grid */}
-          <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-6 items-center justify-center opacity-75 grayscale hover:grayscale-0 transition-all">
-            <div className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs font-black text-slate-700 tracking-wider text-sm flex items-center justify-center">
-              clove:) <span className="text-[10px] text-amber-600 ml-1">dental</span>
+          <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-6 items-center justify-center opacity-85 hover:opacity-100 transition-all">
+            <div className="p-3 bg-white/[0.04] rounded-xl border border-white/10 shadow-inner font-black text-slate-200 tracking-wider text-sm flex items-center justify-center">
+              clove:) <span className="text-[10px] text-amber-400 ml-1">dental</span>
             </div>
-            <div className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs font-extrabold text-blue-600 tracking-tight text-base flex items-center justify-center">
+            <div className="p-3 bg-white/[0.04] rounded-xl border border-white/10 shadow-inner font-extrabold text-blue-400 tracking-tight text-base flex items-center justify-center">
               digio
             </div>
-            <div className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs font-bold text-emerald-700 tracking-wide text-sm flex items-center justify-center">
+            <div className="p-3 bg-white/[0.04] rounded-xl border border-white/10 shadow-inner font-bold text-emerald-400 tracking-wide text-sm flex items-center justify-center">
               turtlemint🌱
             </div>
-            <div className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs font-black text-sky-800 tracking-wider text-sm flex items-center justify-center">
+            <div className="p-3 bg-white/[0.04] rounded-xl border border-white/10 shadow-inner font-black text-sky-400 tracking-wider text-sm flex items-center justify-center">
               HARMAN
             </div>
-            <div className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs font-extrabold text-purple-600 tracking-tight text-sm flex items-center justify-center">
+            <div className="p-3 bg-white/[0.04] rounded-xl border border-white/10 shadow-inner font-extrabold text-purple-400 tracking-tight text-sm flex items-center justify-center">
               EATFIT 🥗
             </div>
-            <div className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs font-bold text-slate-900 tracking-wider text-xs flex items-center justify-center">
+            <div className="p-3 bg-white/[0.04] rounded-xl border border-white/10 shadow-inner font-bold text-slate-200 tracking-wider text-xs flex items-center justify-center">
               BRIGADE 🏢
             </div>
           </div>
@@ -1481,41 +1486,44 @@ print(res.json())`}
         </div>
       </section>
 
-      {/* 12. PRICING SECTION */}
-      <section id="pricing" className="py-24 bg-slate-50 border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12">
+      {/* 12. PRICING SECTION (Apple Pro Obsidian Glass) */}
+      <section id="pricing" className="py-24 bg-[#070B14] border-t border-white/[0.08] relative overflow-hidden">
+        {/* Ambient Spotlights */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald-500/[0.08] rounded-full blur-[140px] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12 relative z-10">
           <div className="space-y-4 max-w-3xl mx-auto">
-            <span className="text-xs font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200">
+            <span className="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3.5 py-1.5 rounded-full border border-emerald-500/25 shadow-inner">
               Honest Platform Plans &amp; Usage Fuel
             </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-              Predictable Flat Plans. Wholesale Per-Message Rates.
+            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+              Predictable Flat Plans. <span className="apple-text-gradient">Wholesale Per-Message Rates.</span>
             </h2>
-            <p className="text-slate-600 text-sm sm:text-base">
+            <p className="text-slate-300 text-sm sm:text-base">
               No hidden telecom markups, no lock-ins. Flat monthly dashboard subscription + transparent prepaid message wallet.
             </p>
           </div>
 
           {/* PER-MESSAGE TRANSPARENT FUEL BAR */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs max-w-4xl mx-auto">
-            <div className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3 text-center">
+          <div className="bg-[#0B101D]/90 rounded-2xl border border-white/[0.08] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl max-w-4xl mx-auto">
+            <div className="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-3 text-center">
               Direct Meta Message Fuel Rates (Prepaid Wallet · Instant GST Tax Invoice)
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center divide-y sm:divide-y-0 sm:divide-x divide-slate-150">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center divide-y sm:divide-y-0 sm:divide-x divide-white/[0.08]">
               <div className="pt-2 sm:pt-0 sm:px-4 space-y-1">
-                <span className="text-xs font-bold text-slate-600 uppercase tracking-wide block">Authentication (OTP)</span>
-                <div className="text-2xl font-black text-emerald-600">₹0.20 <sub className="text-[11px] font-bold text-emerald-800 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-500">/ delivered</span></div>
-                <p className="text-[11px] text-slate-500">One-time login passwords, zero-delay Meta priority</p>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block">Authentication (OTP)</span>
+                <div className="text-2xl font-black text-emerald-400">₹0.20 <sub className="text-[11px] font-bold text-emerald-300 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-400">/ delivered</span></div>
+                <p className="text-[11px] text-slate-400">One-time login passwords, zero-delay Meta priority</p>
               </div>
               <div className="pt-2 sm:pt-0 sm:px-4 space-y-1">
-                <span className="text-xs font-bold text-slate-600 uppercase tracking-wide block">Utility Messages</span>
-                <div className="text-2xl font-black text-blue-600">₹0.18 <sub className="text-[11px] font-bold text-blue-800 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-500">/ delivered</span></div>
-                <p className="text-[11px] text-slate-500">Order confirmations, payment receipts &amp; shipping alerts</p>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block">Utility Messages</span>
+                <div className="text-2xl font-black text-sky-400">₹0.18 <sub className="text-[11px] font-bold text-sky-300 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-400">/ delivered</span></div>
+                <p className="text-[11px] text-slate-400">Order confirmations, payment receipts &amp; shipping alerts</p>
               </div>
               <div className="pt-2 sm:pt-0 sm:px-4 space-y-1">
-                <span className="text-xs font-bold text-slate-600 uppercase tracking-wide block">Marketing Broadcasts</span>
-                <div className="text-2xl font-black text-slate-900">₹1.15 <sub className="text-[11px] font-bold text-slate-600 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-500">/ delivered</span></div>
-                <p className="text-[11px] text-slate-500">Promotional campaigns, product launches &amp; re-engagement</p>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block">Marketing Broadcasts</span>
+                <div className="text-2xl font-black text-white">₹1.15 <sub className="text-[11px] font-bold text-slate-300 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-400">/ delivered</span></div>
+                <p className="text-[11px] text-slate-400">Promotional campaigns, product launches &amp; re-engagement</p>
               </div>
             </div>
           </div>
@@ -1523,88 +1531,88 @@ print(res.json())`}
           {/* 4 PRICING TIERS */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch">
             {/* Tier 1: Starter Trial */}
-            <div className="bg-white rounded-3xl p-7 border border-slate-200 shadow-sm space-y-6 flex flex-col justify-between hover:border-slate-300 transition">
+            <div className="bg-[#0B101D]/90 rounded-3xl p-7 border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl space-y-6 flex flex-col justify-between hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-300">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">Starter Trial</span>
-                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200">One-Time Only</span>
+                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Starter Trial</span>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">One-Time Only</span>
                 </div>
                 <div className="flex items-baseline gap-1.5 flex-wrap">
-                  <span className="text-4xl font-black text-slate-900">₹500</span>
-                  <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
-                  <span className="text-xs text-slate-500">/ 30-day trial</span>
+                  <span className="text-4xl font-black text-white">₹500</span>
+                  <sub className="text-xs font-black text-slate-400 bottom-0 uppercase tracking-tight">+ GST</sub>
+                  <span className="text-xs text-slate-400">/ 30-day trial</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-800 text-[11px] font-black border border-slate-200">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-white/[0.05] text-slate-200 text-[11px] font-black border border-white/10">
                   ⚡ 30 Days Full Platform Access
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-400 leading-relaxed">
                   1 Owner account for 30 days. Perfect for developers &amp; testing OTP API integration.
                 </p>
-                <div className="pt-2 border-t border-slate-100">
-                  <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider block mb-2">Included Features:</span>
-                  <ul className="space-y-2 text-xs text-slate-600 font-medium">
-                    <li className="flex items-center gap-2 font-bold text-slate-900"><span className="text-emerald-600 font-bold">✓</span> 1 User (Owner profile only)</li>
-                    <li className="flex items-center gap-2 text-slate-600"><span className="text-emerald-600 font-bold">✓</span> Pay-as-you-go message fuel (Recharge anytime)</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Full WhatsApp OTP API Setup</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Utility &amp; Order Messages</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Basic Campaign Studio &amp; Templates</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> REST API &amp; Webhooks</li>
-                    <li className="flex items-center gap-2 text-slate-400"><span className="text-slate-400">·</span> Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
+                <div className="pt-2 border-t border-white/10">
+                  <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider block mb-2">Included Features:</span>
+                  <ul className="space-y-2 text-xs text-slate-300 font-medium">
+                    <li className="flex items-center gap-2 font-bold text-white"><span className="text-emerald-400 font-bold">✓</span> 1 User (Owner profile only)</li>
+                    <li className="flex items-center gap-2 text-slate-300"><span className="text-emerald-400 font-bold">✓</span> Pay-as-you-go message fuel (Recharge anytime)</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Full WhatsApp OTP API Setup</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Utility &amp; Order Messages</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Basic Campaign Studio &amp; Templates</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> REST API &amp; Webhooks</li>
+                    <li className="flex items-center gap-2 text-slate-500"><span className="text-slate-500">·</span> Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
                   </ul>
                 </div>
               </div>
               <button
                 onClick={() => openPlanModal("TRIAL_VS_BASIC")}
-                className="w-full text-center py-3 rounded-xl border-2 border-slate-900 font-bold text-xs text-slate-900 hover:bg-slate-900 hover:text-white transition block cursor-pointer"
+                className="w-full text-center py-3 rounded-xl border border-white/20 font-bold text-xs text-white hover:bg-white/10 transition block cursor-pointer"
               >
                 Start 30-Day Trial (₹500 + GST)
               </button>
             </div>
 
             {/* Tier 2: Basic Business */}
-            <div className="bg-white rounded-3xl p-7 border-2 border-slate-200 shadow-sm space-y-6 flex flex-col justify-between hover:border-slate-300 transition">
+            <div className="bg-[#0B101D]/90 rounded-3xl p-7 border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl space-y-6 flex flex-col justify-between hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-300">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">Basic Plan</span>
-                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">Growth</span>
+                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Basic Plan</span>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Growth</span>
                 </div>
                 <div className="flex items-baseline gap-1.5 flex-wrap">
-                  <span className="text-4xl font-black text-slate-900">₹1,000</span>
-                  <sub className="text-xs font-black text-slate-500 bottom-0 uppercase tracking-tight">+ GST</sub>
-                  <span className="text-xs text-slate-500">/ month</span>
+                  <span className="text-4xl font-black text-white">₹1,000</span>
+                  <sub className="text-xs font-black text-slate-400 bottom-0 uppercase tracking-tight">+ GST</sub>
+                  <span className="text-xs text-slate-400">/ month</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 text-[11px] font-black border border-emerald-300">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 text-[11px] font-black border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]">
                   🎁 Includes ₹50 Free Wallet Balance (~250 OTPs)
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-400 leading-relaxed">
                   For growing businesses needing WhatsApp OTP, utility receipts, and team inbox collaboration.
                 </p>
-                <div className="pt-2 border-t border-slate-100">
-                  <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider block mb-2">Included Features:</span>
-                  <ul className="space-y-2 text-xs text-slate-600 font-medium">
-                    <li className="flex items-center gap-2 font-bold text-slate-800"><span className="text-emerald-600">✓</span> 1 Owner + 3 Support Seats (4 total)</li>
-                    <li className="flex items-center gap-2 font-bold text-emerald-800"><span className="text-emerald-600 font-black">✓</span> ₹50 Starter Wallet Balance Included (~250 OTPs)</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> WhatsApp OTP API Integration</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Order &amp; Payment Utility Messages</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Basic Campaign Broadcast Setup</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Template Approval Dashboard</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Live Chat Team Inbox &amp; Routing</li>
-                    <li className="flex items-center gap-2 text-slate-400"><span className="text-slate-400">·</span> Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
+                <div className="pt-2 border-t border-white/10">
+                  <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider block mb-2">Included Features:</span>
+                  <ul className="space-y-2 text-xs text-slate-300 font-medium">
+                    <li className="flex items-center gap-2 font-bold text-white"><span className="text-emerald-400">✓</span> 1 Owner + 3 Support Seats (4 total)</li>
+                    <li className="flex items-center gap-2 font-bold text-emerald-300"><span className="text-emerald-400 font-black">✓</span> ₹50 Starter Wallet Balance Included (~250 OTPs)</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> WhatsApp OTP API Integration</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Order &amp; Payment Utility Messages</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Basic Campaign Broadcast Setup</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Template Approval Dashboard</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Live Chat Team Inbox &amp; Routing</li>
+                    <li className="flex items-center gap-2 text-slate-500"><span className="text-slate-500">·</span> Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
                   </ul>
                 </div>
               </div>
               <button
                 onClick={() => openPlanModal("BASIC_VS_PRO")}
-                className="w-full text-center py-3 rounded-xl border border-slate-300 font-bold text-xs text-slate-800 hover:bg-slate-50 transition block cursor-pointer"
+                className="w-full text-center py-3 rounded-xl border border-white/20 font-bold text-xs text-white hover:bg-white/10 transition block cursor-pointer"
               >
                 Get Basic Plan (₹1,000 + GST) ➔
               </button>
             </div>
 
-            {/* Tier 3: Professional Scale (Featured) */}
-            <div className="bg-[#154336] rounded-3xl p-7 text-white shadow-xl space-y-6 flex flex-col justify-between relative border-2 border-emerald-400">
-              <div className="absolute -top-3.5 right-6 bg-gradient-to-r from-emerald-400 to-[#25D366] text-slate-900 font-black text-[10px] tracking-wider uppercase px-3.5 py-1 rounded-full shadow-xs">
+            {/* Tier 3: Professional Scale (Featured Apple Glass) */}
+            <div className="relative bg-gradient-to-b from-[#0F1E1B] to-[#0A1513] rounded-3xl p-7 text-white shadow-[0_12px_45px_rgba(16,185,129,0.25)] space-y-6 flex flex-col justify-between border-2 border-emerald-400 ring-1 ring-emerald-400/50 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-emerald-300 before:to-transparent hover:-translate-y-1 transition-all duration-300">
+              <div className="absolute -top-3.5 right-6 bg-gradient-to-r from-emerald-400 to-[#25D366] text-slate-950 font-black text-[10px] tracking-wider uppercase px-3.5 py-1 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.5)]">
                 MOST POPULAR
               </div>
               <div className="space-y-4">
@@ -1617,7 +1625,7 @@ print(res.json())`}
                   <sub className="text-xs font-black text-emerald-300 bottom-0 uppercase tracking-tight">+ GST</sub>
                   <span className="text-xs text-emerald-200">/ month</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-400 text-slate-950 text-[11px] font-black">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-400 text-slate-950 text-[11px] font-black shadow-[0_0_12px_rgba(52,211,153,0.3)]">
                   🎁 Includes ₹100 Free Wallet Balance + OBA Filing Support
                 </div>
                 <p className="text-xs text-emerald-100 leading-relaxed">
@@ -1639,40 +1647,40 @@ print(res.json())`}
               </div>
               <button
                 onClick={() => openPlanModal("PRO_VS_CUSTOM")}
-                className="w-full text-center py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs shadow-md transition block cursor-pointer"
+                className="w-full text-center py-3.5 rounded-xl bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(52,211,153,0.4)] transition block cursor-pointer"
               >
                 Upgrade to Professional (₹2,500 + GST) ➔
               </button>
             </div>
 
             {/* Tier 4: Enterprise Custom */}
-            <div className="bg-white rounded-3xl p-7 border border-slate-200 shadow-sm space-y-6 flex flex-col justify-between hover:border-slate-300 transition">
+            <div className="bg-[#0B101D]/90 rounded-3xl p-7 border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl space-y-6 flex flex-col justify-between hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-300">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">Enterprise Level</span>
-                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700">Custom</span>
+                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Enterprise Level</span>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-white/10 text-slate-300 border border-white/15">Custom</span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-slate-900">Custom</span>
+                  <span className="text-4xl font-black text-white">Custom</span>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-400 leading-relaxed">
                   For high-throughput enterprises, banking, large e-commerce &amp; omnichannel contact centers.
                 </p>
-                <div className="pt-2 border-t border-slate-100">
-                  <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider block mb-2">Enterprise Features:</span>
-                  <ul className="space-y-2 text-xs text-slate-600 font-medium">
-                    <li className="flex items-center gap-2 font-bold text-slate-800"><span className="text-emerald-600">✓</span> Unlimited Seats &amp; Custom Roles</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Dedicated Meta WABA Tier Acceleration</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> 50+ Messages / Sec Throttle Speed</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> Custom CRM &amp; ERP Direct Integrations</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> 99.99% Uptime SLA Guarantee</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-600 font-bold">✓</span> 24/7 Dedicated Account Manager</li>
+                <div className="pt-2 border-t border-white/10">
+                  <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider block mb-2">Enterprise Features:</span>
+                  <ul className="space-y-2 text-xs text-slate-300 font-medium">
+                    <li className="flex items-center gap-2 font-bold text-slate-100"><span className="text-emerald-400">✓</span> Unlimited Seats &amp; Custom Roles</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Dedicated Meta WABA Tier Acceleration</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 50+ Messages / Sec Throttle Speed</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Custom CRM &amp; ERP Direct Integrations</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 99.99% Uptime SLA Guarantee</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 24/7 Dedicated Account Manager</li>
                   </ul>
                 </div>
               </div>
               <button
                 onClick={() => openPlanModal("ENTERPRISE")}
-                className="w-full text-center py-3 rounded-xl border border-slate-300 font-bold text-xs text-slate-800 hover:bg-slate-50 transition block cursor-pointer"
+                className="w-full text-center py-3 rounded-xl border border-white/20 font-bold text-xs text-white hover:bg-white/10 transition block cursor-pointer"
               >
                 Enquire Now ➔
               </button>
@@ -1684,10 +1692,10 @@ print(res.json())`}
       {/* 13. FAQ SECTION */}
       <section className="py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="text-center space-y-3">
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
             Frequently Asked Questions
           </h2>
-          <p className="text-slate-500 text-sm">Everything you need to know about our WhatsApp Cloud Platform</p>
+          <p className="text-slate-400 text-sm">Everything you need to know about our WhatsApp Cloud Platform</p>
         </div>
 
         <div className="space-y-4">
@@ -1717,16 +1725,16 @@ print(res.json())`}
               a: "For just ₹500 + GST, you get complete 30-day platform access for 1 user (owner account). This includes official WhatsApp OTP API setup, order & utility updates, template approval dashboard, and campaign broadcast studio. After 30 days, you can choose to continue with our Basic (₹1,000 + GST/mo) or Professional (₹2,500 + GST/mo) plan."
             }
           ].map((faq, idx) => (
-            <div key={idx} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs">
+            <div key={idx} className="bg-[#0B101D]/80 rounded-2xl border border-white/10 overflow-hidden shadow-inner backdrop-blur-xl">
               <button
                 onClick={() => toggleFaq(idx)}
-                className="w-full p-5 text-left font-bold text-slate-900 text-sm flex items-center justify-between hover:bg-slate-50 transition"
+                className="w-full p-5 text-left font-bold text-white text-sm flex items-center justify-between hover:bg-white/[0.04] transition"
               >
                 <span>{faq.q}</span>
                 <span className="text-slate-400 font-normal text-lg">{openFaq === idx ? "−" : "+"}</span>
               </button>
               {openFaq === idx && (
-                <div className="px-5 pb-5 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+                <div className="px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-white/10 pt-3">
                   {faq.a}
                 </div>
               )}
@@ -1736,10 +1744,10 @@ print(res.json())`}
       </section>
 
       {/* 14. PRE-FOOTER CTA BANNER */}
-      <section className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
+      <section className="bg-gradient-to-r from-[#0C1525] via-[#09101C] to-[#040810] border-y border-white/10 text-white py-20 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
         <div className="max-w-4xl mx-auto space-y-6 relative z-10">
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-            Ready to <span className="text-emerald-400">5X Your Revenue</span> with WhatsApp?
+            Ready to <span className="apple-emerald-gradient">5X Your Revenue</span> with WhatsApp?
           </h2>
           <p className="text-slate-300 text-base max-w-2xl mx-auto">
             Join 210,000+ businesses automating broadcasts, OTPs, and customer support with official Meta Cloud APIs.
@@ -1747,14 +1755,14 @@ print(res.json())`}
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => openPlanModal("TRIAL_VS_BASIC")}
-              className="w-full sm:w-auto px-8 py-4 bg-[#00c853] hover:bg-[#00b248] text-white font-extrabold text-sm rounded-xl shadow-lg shadow-emerald-500/30 transition flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-slate-950 font-black text-sm rounded-xl shadow-[0_0_25px_rgba(52,211,153,0.35)] transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Start 30-Day Trial (₹500 + GST)</span>
               <span>➔</span>
             </button>
             <Link
               href="/login"
-              className="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-sm rounded-xl border border-white/20 transition"
+              className="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/15 text-white font-bold text-sm rounded-xl border border-white/20 transition"
             >
               Sign In to Dashboard
             </Link>
@@ -1763,72 +1771,75 @@ print(res.json())`}
       </section>
 
       {/* 15. GLOBAL FOOTER */}
-      <footer className="bg-white border-t border-slate-200 py-16 text-slate-500 text-xs">
+      <footer className="bg-[#03050A] border-t border-white/[0.08] py-16 text-slate-400 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-3">
-              <img
-                src="/icon.png"
-                alt="Digital Beings"
-                className="w-9 h-9 rounded-xl object-contain shadow-xs shrink-0"
-              />
+              <div className="relative">
+                <img
+                  src="/icon.png"
+                  alt="Digital Beings"
+                  className="w-9 h-9 rounded-xl object-contain shadow-xs shrink-0"
+                />
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#03050A] shadow-[0_0_8px_#34d399]" />
+              </div>
               <div className="flex flex-col">
-                <span className="font-black text-xl tracking-tight text-slate-900 leading-none">
-                  Digital<span className="text-emerald-600">Beings</span>
+                <span className="font-black text-xl tracking-tight text-white leading-none">
+                  Digital<span className="apple-emerald-gradient">Beings</span>
                 </span>
                 <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase">
                   Secure • Connect • Grow
                 </span>
               </div>
             </Link>
-            <p className="text-slate-500 max-w-sm leading-relaxed">
+            <p className="text-slate-400 max-w-sm leading-relaxed">
               Official Meta Tech Partner powering broadcast marketing, customer support, and instant OTP authentication over WhatsApp Cloud API.
             </p>
-            <div className="pt-2 flex items-center gap-2 text-emerald-700 font-bold text-[11px]">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="pt-2 flex items-center gap-2 text-emerald-400 font-bold text-[11px]">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
               Meta Cloud API Systems Operational (99.98% Uptime)
             </div>
           </div>
 
           <div>
-            <h5 className="font-extrabold text-slate-900 uppercase tracking-wider mb-3">Product</h5>
+            <h5 className="font-extrabold text-white uppercase tracking-wider mb-3">Product</h5>
             <ul className="space-y-2">
-              <li><Link href="#broadcast" className="hover:text-slate-900">Broadcast Campaigns</Link></li>
-              <li><Link href="#developer" className="hover:text-slate-900">WhatsApp OTP API</Link></li>
-              <li><Link href="#features" className="hover:text-slate-900">Click to WhatsApp Ads</Link></li>
-              <li><Link href="#features" className="hover:text-slate-900">WhatsApp Forms</Link></li>
-              <li><Link href="#features" className="hover:text-slate-900">WhatsApp Payments</Link></li>
+              <li><Link href="#broadcast" className="text-slate-400 hover:text-white transition">Broadcast Campaigns</Link></li>
+              <li><Link href="#developer" className="text-slate-400 hover:text-white transition">WhatsApp OTP API</Link></li>
+              <li><Link href="#features" className="text-slate-400 hover:text-white transition">Click to WhatsApp Ads</Link></li>
+              <li><Link href="#features" className="text-slate-400 hover:text-white transition">WhatsApp Forms</Link></li>
+              <li><Link href="#features" className="text-slate-400 hover:text-white transition">WhatsApp Payments</Link></li>
             </ul>
           </div>
 
           <div>
-            <h5 className="font-extrabold text-slate-900 uppercase tracking-wider mb-3">Resources</h5>
+            <h5 className="font-extrabold text-white uppercase tracking-wider mb-3">Resources</h5>
             <ul className="space-y-2">
-              <li><Link href="/dashboard/setup" className="hover:text-slate-900">Meta Setup Guide</Link></li>
-              <li><Link href="/dashboard/templates" className="hover:text-slate-900">Template Studio</Link></li>
-              <li><Link href="/dashboard/campaigns" className="hover:text-slate-900">Campaign Manager</Link></li>
-              <li><Link href="/dashboard/numbers" className="hover:text-slate-900">Numbers &amp; Routing</Link></li>
-              <li><Link href="/dashboard/wallet" className="hover:text-slate-900">Pricing &amp; Wallet</Link></li>
+              <li><Link href="/dashboard/setup" className="text-slate-400 hover:text-white transition">Meta Setup Guide</Link></li>
+              <li><Link href="/dashboard/templates" className="text-slate-400 hover:text-white transition">Template Studio</Link></li>
+              <li><Link href="/dashboard/campaigns" className="text-slate-400 hover:text-white transition">Campaign Manager</Link></li>
+              <li><Link href="/dashboard/numbers" className="text-slate-400 hover:text-white transition">Numbers &amp; Routing</Link></li>
+              <li><Link href="/dashboard/wallet" className="text-slate-400 hover:text-white transition">Pricing &amp; Wallet</Link></li>
             </ul>
           </div>
 
           <div>
-            <h5 className="font-extrabold text-slate-900 uppercase tracking-wider mb-3">Legal &amp; Trust</h5>
+            <h5 className="font-extrabold text-white uppercase tracking-wider mb-3">Legal &amp; Trust</h5>
             <ul className="space-y-2">
-              <li><Link href="/privacy" className="hover:text-slate-900">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-slate-900">Terms of Service</Link></li>
-              <li><span className="text-slate-400">SOC-2 Type II Certified</span></li>
-              <li><span className="text-slate-400">GDPR Compliant</span></li>
+              <li><Link href="/privacy" className="text-slate-400 hover:text-white transition">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="text-slate-400 hover:text-white transition">Terms of Service</Link></li>
+              <li><span className="text-slate-500">SOC-2 Type II Certified</span></li>
+              <li><span className="text-slate-500">GDPR Compliant</span></li>
             </ul>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 mt-12 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 mt-12 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500">
           <p>© 2026 Digital Beings (Aeron Digital Solutions). All rights reserved. Meta and WhatsApp are registered trademarks of Meta Platforms, Inc.</p>
           <div className="flex gap-4">
-            <Link href="/privacy" className="hover:underline">Privacy</Link>
-            <Link href="/terms" className="hover:underline">Terms</Link>
-            <Link href="/login" className="hover:underline">Portal Login</Link>
+            <Link href="/privacy" className="hover:text-slate-300 transition">Privacy</Link>
+            <Link href="/terms" className="hover:text-slate-300 transition">Terms</Link>
+            <Link href="/login" className="hover:text-slate-300 transition">Portal Login</Link>
           </div>
         </div>
       </footer>

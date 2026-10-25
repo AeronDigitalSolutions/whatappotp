@@ -155,9 +155,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const navLinkClass = (path: string) => {
     const isActive = pathname === path;
     if (isActive) {
-      return "flex items-center justify-between px-3.5 py-2.5 bg-[#f0fdf4] text-[#154336] font-bold border border-[#bbf7d0] rounded-xl text-[13.5px] shadow-2xs border-l-4 border-l-[#154336] transition-all duration-150";
+      return "relative flex items-center justify-between px-3.5 py-2.5 bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent text-white font-bold border border-emerald-500/30 rounded-xl text-[13.5px] shadow-[0_0_20px_rgba(16,185,129,0.18)] ring-1 ring-emerald-500/20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]";
     }
-    return "flex items-center justify-between px-3.5 py-2.5 text-slate-700 hover:bg-slate-100/80 hover:text-slate-900 rounded-xl text-[13.5px] font-semibold transition-all duration-150 group";
+    return "relative flex items-center justify-between px-3.5 py-2.5 text-slate-400 hover:text-slate-100 hover:bg-white/[0.05] hover:border-white/[0.08] border border-transparent rounded-xl text-[13.5px] font-medium transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group";
   };
 
   const isCurrentPathAllowed = canAccessPath(pathname);
@@ -186,19 +186,22 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     hasAccess("super_admin");
 
   return (
-    <div className="min-h-screen bg-slate-100 flex">
-      {/* Sidebar with Interakt-Grade Navigation */}
-      <aside className="w-[272px] bg-white border-r border-slate-200/90 hidden md:flex flex-col shrink-0 h-screen sticky top-0 shadow-2xs z-20">
-        <div className="h-16 flex items-center px-5 border-b border-slate-200/90 shrink-0">
+    <div className="min-h-screen bg-[#04060c] flex text-slate-100">
+      {/* Sidebar with Apple VisionOS/macOS-Grade Frosted Glass Navigation */}
+      <aside className="w-[276px] bg-[#070b14]/95 backdrop-blur-2xl border-r border-white/[0.08] hidden md:flex flex-col shrink-0 h-screen sticky top-0 shadow-[4px_0_30px_rgba(0,0,0,0.6)] z-20 text-slate-200">
+        <div className="h-16 flex items-center px-5 border-b border-white/[0.08] shrink-0">
           <Link href="/dashboard" className="flex items-center gap-3 group">
-            <img
-              src="/icon.png"
-              alt="Digital Beings"
-              className="w-8 h-8 rounded-xl object-contain shadow-2xs shrink-0 group-hover:scale-105 transition"
-            />
+            <div className="relative">
+              <img
+                src="/icon.png"
+                alt="Digital Beings"
+                className="w-8 h-8 rounded-xl object-contain shadow-md shrink-0 group-hover:scale-105 transition duration-300"
+              />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#070b14] shadow-[0_0_8px_#34d399]" />
+            </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-black text-base tracking-tight text-slate-900 leading-tight">
-                Digital<span className="text-[#154336]">Beings</span>
+              <span className="font-black text-base tracking-tight text-white leading-tight flex items-center gap-1">
+                Digital<span className="apple-emerald-gradient">Beings</span>
               </span>
               <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">
                 Secure • Connect • Grow
@@ -212,55 +215,58 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* Section 1: Core Messaging */}
           {showConversationsSection && (
             <div className="space-y-1">
-              <p className="px-3 text-[11px] font-black text-slate-400 uppercase tracking-wider pb-1">
-                Conversations &amp; Engagement
+              <p className="px-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+                <span>Conversations &amp; Engagement</span>
               </p>
               <Link href="/dashboard" className={navLinkClass("/dashboard")}>
                 <div className="flex items-center gap-3 min-w-0">
-                  <DashboardIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                  <DashboardIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                   <span className="truncate">Overview</span>
                 </div>
+                {pathname === "/dashboard" && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+                )}
               </Link>
               {hasAccess("inbox") && (
                 <Link href="/dashboard/inbox" className={navLinkClass("/dashboard/inbox")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <InboxIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/inbox" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <InboxIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/inbox" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">Live Chat Inbox</span>
                   </div>
-                  <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200/80 px-2 py-0.5 rounded-full font-bold">2-Way</span>
+                  <span className="text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold shadow-[0_0_10px_rgba(16,185,129,0.2)]">2-Way</span>
                 </Link>
               )}
               {hasAccess("automations") && (
                 <Link href="/dashboard/automations" className={navLinkClass("/dashboard/automations")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <BotIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/automations" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <BotIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/automations" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">Chatbot Automations</span>
                   </div>
-                  <span className="text-[10px] bg-[#7c3aed] text-white px-2 py-0.5 rounded-full font-extrabold shadow-2xs">New</span>
+                  <span className="text-[10px] bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-2 py-0.5 rounded-full font-extrabold shadow-[0_0_10px_rgba(168,85,247,0.4)]">New</span>
                 </Link>
               )}
               {hasAccess("ecommerce") && (
                 <Link href="/dashboard/ecommerce" className={navLinkClass("/dashboard/ecommerce")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <ShoppingBagIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/ecommerce" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <ShoppingBagIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/ecommerce" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">E-Commerce Recipes</span>
                   </div>
-                  <span className="text-[10px] bg-amber-100 text-amber-800 border border-amber-200/80 px-2 py-0.5 rounded-full font-bold">Shopify</span>
+                  <span className="text-[10px] bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold shadow-[0_0_10px_rgba(245,158,11,0.2)]">Shopify</span>
                 </Link>
               )}
               {hasAccess("campaigns") && (
                 <Link href="/dashboard/campaigns" className={navLinkClass("/dashboard/campaigns")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <CampaignIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/campaigns" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <CampaignIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/campaigns" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">Broadcast Campaigns</span>
                   </div>
-                  <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">Bulk</span>
+                  <span className="text-[10px] bg-white/10 text-slate-300 border border-white/10 px-2 py-0.5 rounded-full font-bold">Bulk</span>
                 </Link>
               )}
               {hasAccess("templates") && (
                 <Link href="/dashboard/templates" className={navLinkClass("/dashboard/templates")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <TemplateIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/templates" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <TemplateIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/templates" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">Template Studio</span>
                   </div>
                 </Link>
@@ -271,13 +277,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* Section 2: Numbers & Compliance */}
           {showVerificationSection && (
             <div className="space-y-1">
-              <p className="px-3 text-[11px] font-black text-slate-400 uppercase tracking-wider pb-1">
-                WhatsApp &amp; Verification
+              <p className="px-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+                <span>WhatsApp &amp; Verification</span>
               </p>
               {hasAccess("numbers") && (
                 <Link href="/dashboard/numbers" className={navLinkClass("/dashboard/numbers")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <PhoneRoutingIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/numbers" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <PhoneRoutingIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/numbers" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">Numbers &amp; Routing</span>
                   </div>
                 </Link>
@@ -285,7 +291,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               {hasAccess("green-tick") && (
                 <Link href="/dashboard/green-tick" className={navLinkClass("/dashboard/green-tick")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <ShieldCheckIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/green-tick" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <ShieldCheckIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/green-tick" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">WhatsApp Verification</span>
                   </div>
                 </Link>
@@ -293,7 +299,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               {hasAccess("logs") && (
                 <Link href="/dashboard/logs" className={navLinkClass("/dashboard/logs")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <AuditLogsIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/logs" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <AuditLogsIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/logs" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">Logs &amp; Audits</span>
                   </div>
                 </Link>
@@ -304,13 +310,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* Section 3: Wallet & Billing */}
           {showBillingSection && (
             <div className="space-y-1">
-              <p className="px-3 text-[11px] font-black text-slate-400 uppercase tracking-wider pb-1">
-                Wallet &amp; Developers
+              <p className="px-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+                <span>Wallet &amp; Developers</span>
               </p>
               {hasAccess("wallet") && (
                 <Link href="/dashboard/wallet" className={navLinkClass("/dashboard/wallet")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <WalletIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/wallet" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <WalletIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/wallet" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">Wallet &amp; Billing</span>
                   </div>
                 </Link>
@@ -318,7 +324,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               {hasAccess("pricing_admin") && (
                 <Link href="/dashboard/pricing-admin" className={navLinkClass("/dashboard/pricing-admin")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <PricingAdminIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/pricing-admin" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <PricingAdminIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/pricing-admin" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">Pricing &amp; Safety Admin</span>
                   </div>
                 </Link>
@@ -326,7 +332,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               {hasAccess("api_keys") && (
                 <Link href="/dashboard/api-keys" className={navLinkClass("/dashboard/api-keys")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <KeyIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/api-keys" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <KeyIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/api-keys" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">API Keys</span>
                   </div>
                 </Link>
@@ -334,7 +340,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               {hasAccess("settings") && (
                 <Link href="/dashboard/settings" className={navLinkClass("/dashboard/settings")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <SettingsIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/settings" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <SettingsIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/settings" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">Settings</span>
                   </div>
                 </Link>
@@ -344,26 +350,26 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
           {/* Section 4: Administration & Team Roles */}
           {showAdminSection && (
-            <div className="space-y-1 pt-2 border-t border-slate-100">
-              <p className="px-3 text-[11px] font-black text-slate-400 uppercase tracking-wider pb-1">
-                Team &amp; Governance
+            <div className="space-y-1 pt-2 border-t border-white/[0.08]">
+              <p className="px-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+                <span>Team &amp; Governance</span>
               </p>
               {hasAccess("team") && (
                 <Link href="/dashboard/team" className={navLinkClass("/dashboard/team")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <TeamIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/team" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <TeamIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/team" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">Team &amp; Custom Roles</span>
                   </div>
-                  <span className="text-[10px] bg-purple-100 text-purple-800 border border-purple-200/80 px-2 py-0.5 rounded-full font-bold">RBAC</span>
+                  <span className="text-[10px] bg-purple-500/15 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full font-bold">RBAC</span>
                 </Link>
               )}
               {hasAccess("super_admin") && (
                 <Link href="/dashboard/super-admin" className={navLinkClass("/dashboard/super-admin")}>
                   <div className="flex items-center gap-3 min-w-0">
-                    <SuperAdminIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/super-admin" ? "text-[#154336]" : "text-slate-400 group-hover:text-slate-700"}`} />
+                    <SuperAdminIcon className={`w-4 h-4 shrink-0 ${pathname === "/dashboard/super-admin" ? "text-emerald-400" : "text-slate-400 group-hover:text-slate-200"}`} />
                     <span className="truncate">Platform Super Admin</span>
                   </div>
-                  <span className="text-[10px] bg-[#154336] text-white px-2 py-0.5 rounded-full font-bold">Master</span>
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2 py-0.5 rounded-full font-bold shadow-[0_0_10px_rgba(52,211,153,0.3)]">Master</span>
                 </Link>
               )}
             </div>
@@ -371,45 +377,55 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Current Active Role Footer Tag */}
-        <div className="p-3.5 bg-slate-50 border-t border-slate-200/90 shrink-0">
+        <div className="p-3.5 bg-white/[0.02] border-t border-white/[0.08] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-white border border-slate-200/90 flex items-center justify-center text-slate-700 shrink-0 shadow-2xs">
-              <ShieldCheckIcon className="w-4 h-4 text-[#154336]" />
+            <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/[0.1] flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+              <ShieldCheckIcon className="w-4 h-4 text-emerald-400" />
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider">Active Workspace Role</span>
-              <span className="text-xs font-bold text-slate-900 truncate">{activeRoleDef.badge}</span>
+              <span className="text-xs font-bold text-white truncate">{activeRoleDef.badge}</span>
             </div>
           </div>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#f4f6f8]">
-        {/* Interakt-Inspired Header */}
-        <header className="bg-white border-b border-slate-200/90 flex items-center px-4 sm:px-8 py-3.5 justify-between shrink-0 shadow-2xs z-30 min-h-[4.5rem]">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#04060c] text-slate-100 relative">
+        {/* Ambient Spotlights */}
+        <div className="absolute top-0 left-1/4 w-[600px] h-[300px] bg-emerald-500/[0.04] rounded-full blur-[120px] pointer-events-none -z-0" />
+        <div className="absolute top-1/3 right-10 w-[500px] h-[300px] bg-blue-500/[0.03] rounded-full blur-[140px] pointer-events-none -z-0" />
+
+        {/* Apple Frosted Glass Header */}
+        <header className="bg-[#070b14]/80 backdrop-blur-2xl border-b border-white/[0.08] flex items-center px-4 sm:px-8 py-3.5 justify-between shrink-0 shadow-[0_4px_30px_rgba(0,0,0,0.3)] z-30 min-h-[4.5rem]">
           <div className="flex flex-col justify-center">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
-              {currentModuleTitle}
+            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight flex items-center gap-2">
+              <span>{currentModuleTitle}</span>
             </h1>
             {currentModuleSubtitle && (
-              <p className="text-[12.5px] text-slate-500 font-medium mt-0.5 hidden sm:block">
+              <p className="text-[12.5px] text-slate-400 font-medium mt-0.5 hidden sm:block">
                 {currentModuleSubtitle}
               </p>
             )}
           </div>
 
           <div className="flex items-center space-x-3 sm:space-x-4">
-            {/* Interakt-Style Plan / Wallet Status Pill */}
-            <div className="flex items-center gap-2 bg-emerald-50/70 border border-emerald-200/80 pl-3 pr-1.5 py-1 rounded-full text-xs font-semibold text-emerald-950 shadow-2xs">
+            {/* Meta Live Status Capsule */}
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] text-[11px] font-semibold text-slate-300">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></span>
+              <span>Meta Cloud API Live • 99.99%</span>
+            </div>
+
+            {/* Apple-Style Prepaid Balance Pill */}
+            <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.1] hover:border-emerald-500/40 pl-3 pr-1.5 py-1 rounded-full text-xs font-semibold text-slate-200 shadow-inner backdrop-blur-md transition-all">
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="font-extrabold text-slate-900">₹{walletBalance}</span>
-                <span className="text-slate-500 hidden md:inline">Prepaid Balance</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="font-extrabold text-white">₹{walletBalance}</span>
+                <span className="text-slate-400 hidden md:inline">Balance</span>
               </span>
               <Link
                 href="/dashboard/wallet"
-                className="px-3 py-1 bg-[#154336] hover:bg-[#0e3026] text-white text-[11px] font-bold rounded-full transition shadow-xs cursor-pointer"
+                className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-[11px] font-black rounded-full transition shadow-[0_0_12px_rgba(16,185,129,0.3)] cursor-pointer"
               >
                 Top-up
               </Link>
@@ -418,33 +434,33 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             {/* Notification Bell */}
             <Link
               href="/dashboard/logs"
-              className="w-9 h-9 rounded-full bg-white border border-slate-200 hover:border-slate-300 flex items-center justify-center text-slate-600 hover:text-slate-900 transition shadow-2xs cursor-pointer relative"
+              className="w-9 h-9 rounded-full bg-white/[0.05] border border-white/[0.1] hover:border-white/[0.2] hover:bg-white/[0.1] flex items-center justify-center text-slate-300 hover:text-white transition shadow-inner cursor-pointer relative"
               title="Audit Logs & Activity"
             >
               <BellIcon className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
             </Link>
 
             {/* Settings Icon */}
             <Link
               href="/dashboard/settings"
-              className="w-9 h-9 rounded-full bg-white border border-slate-200 hover:border-slate-300 flex items-center justify-center text-slate-600 hover:text-slate-900 transition shadow-2xs cursor-pointer"
+              className="w-9 h-9 rounded-full bg-white/[0.05] border border-white/[0.1] hover:border-white/[0.2] hover:bg-white/[0.1] flex items-center justify-center text-slate-300 hover:text-white transition shadow-inner cursor-pointer"
               title="Workspace Settings"
             >
               <SettingsIcon className="w-4 h-4" />
             </Link>
 
-            {/* Interakt-Style User Avatar Circle */}
-            <div className="flex items-center gap-2 pl-1 border-l border-slate-200">
+            {/* User Avatar Circle */}
+            <div className="flex items-center gap-2 pl-2 border-l border-white/[0.1]">
               <div
-                className="w-9 h-9 rounded-full bg-[#154336] text-white font-black text-xs flex items-center justify-center shadow-xs select-none"
+                className="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-[0_0_14px_rgba(16,185,129,0.3)] select-none border border-white/20"
                 title={userName}
               >
                 {userName.slice(0, 2).toUpperCase() || "WP"}
               </div>
               <button
                 onClick={handleLogout}
-                className="text-slate-500 hover:text-rose-600 text-xs font-bold transition hidden sm:inline cursor-pointer"
+                className="text-slate-400 hover:text-rose-400 text-xs font-bold transition hidden sm:inline cursor-pointer"
                 title="Logout"
               >
                 Logout
@@ -453,21 +469,21 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {/* Persistent Demo Mode Banner */}
+        {/* Apple-grade Frosted Demo Mode Banner */}
         {isDemo && (
-          <div className="bg-amber-500/15 border-b border-amber-500/30 px-5 py-2.5 text-xs text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/8 to-transparent border-b border-amber-500/30 backdrop-blur-xl px-5 py-2.5 text-xs text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-[0_4px_20px_rgba(245,158,11,0.1)] shrink-0 z-20">
             <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] animate-pulse shrink-0" />
               <div>
-                <span className="font-extrabold text-amber-900 mr-1.5">🔒 Demo Preview Mode:</span>
-                <span className="text-amber-800">
+                <span className="font-extrabold text-amber-300 mr-1.5">🔒 Demo Preview Mode:</span>
+                <span className="text-amber-100/90">
                   You are exploring the dashboard in demo mode. Activate the 30-Day Starter Trial (₹500 + GST) or Basic Plan (₹1,000 + GST) to enable live WhatsApp messaging and APIs.
                 </span>
               </div>
             </div>
             <button
               onClick={() => triggerPaywall()}
-              className="px-3.5 py-1.5 bg-[#154336] hover:bg-[#0f3127] text-white font-extrabold rounded-lg text-xs shadow-xs transition shrink-0 cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-lg text-xs shadow-[0_0_14px_rgba(245,158,11,0.3)] transition shrink-0 cursor-pointer flex items-center gap-1.5"
             >
               <span>⚡</span>
               <span>Activate Workspace (From ₹500 + GST) ➔</span>
@@ -476,23 +492,23 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Dynamic Route Protection Gate */}
-        <main className="flex-1 p-4 sm:p-8 overflow-auto">
+        <main className="flex-1 p-4 sm:p-8 overflow-auto relative z-10">
           {!isCurrentPathAllowed ? (
-            <div className="max-w-xl mx-auto mt-12 bg-white rounded-3xl border border-rose-200 p-8 shadow-sm text-center space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-3xl mx-auto border border-rose-100">
+            <div className="max-w-xl mx-auto mt-12 bg-[#0a0f1d]/90 backdrop-blur-xl rounded-3xl border border-rose-500/30 p-8 shadow-[0_8px_32px_rgba(244,63,94,0.15)] text-center space-y-4">
+              <div className="w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-3xl mx-auto border border-rose-500/20">
                 🛡️
               </div>
-              <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-xl font-extrabold text-white tracking-tight">
                 Access Restricted by Role Policy
               </h2>
-              <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
+              <p className="text-xs text-slate-400 leading-relaxed max-w-md mx-auto">
                 Your assigned role (<strong>{activeRoleDef.badge}</strong>) does not have permission to view or manage this module. Please contact your workspace administrator to request access.
               </p>
 
               <div className="pt-2 flex items-center justify-center">
                 <Link
                   href="/dashboard"
-                  className="px-6 py-2.5 bg-[#154336] hover:bg-[#0e3026] text-white rounded-xl text-xs font-bold transition shadow-xs"
+                  className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black rounded-xl text-xs transition shadow-[0_0_15px_rgba(16,185,129,0.3)]"
                 >
                   Return to Overview
                 </Link>

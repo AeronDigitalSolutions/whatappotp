@@ -12,6 +12,87 @@ body {
   @apply bg-slate-50 text-slate-900 antialiased;
 }
 
+/* ========================================================
+   APPLE PRO DESIGN SYSTEM: GLASS, LIGHTING & SHADOWS
+   ======================================================== */
+
+/* Sleek Minimalist Apple Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Apple Pro Heading Gradients */
+.apple-text-gradient {
+  background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 55%, #94A3B8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.apple-emerald-gradient {
+  background: linear-gradient(135deg, #6ee7b7 0%, #34d399 40%, #10b981 80%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.apple-shimmer-text {
+  background: linear-gradient(90deg, #94a3b8 0%, #ffffff 50%, #94a3b8 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmerSlide 5s linear infinite;
+}
+
+/* Apple Pro Obsidian Frosted Glass */
+.apple-glass {
+  background: rgba(13, 21, 34, 0.75);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.12), 0 20px 48px -12px rgba(0, 0, 0, 0.7);
+}
+
+.apple-glass-card {
+  background: linear-gradient(145deg, rgba(20, 32, 50, 0.7) 0%, rgba(10, 16, 26, 0.85) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 14px 34px -10px rgba(0, 0, 0, 0.6);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-glass-card:hover {
+  transform: translateY(-4px) scale(1.008);
+  border-color: rgba(52, 211, 153, 0.45);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.22), 0 28px 65px -12px rgba(0, 0, 0, 0.85), 0 0 40px -5px rgba(16, 185, 129, 0.25);
+}
+
+.apple-laser-border {
+  position: relative;
+}
+.apple-laser-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.5), rgba(255, 255, 255, 0.05), rgba(16, 185, 129, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
 /* Custom Animated Bubble Pill Loader */
 @keyframes dropAndShift {
   0% {
