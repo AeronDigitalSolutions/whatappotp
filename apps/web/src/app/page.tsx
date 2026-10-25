@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import PlanAdvisorModal, { PlanModalStage } from "@/components/PlanAdvisorModal";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function HomePage() {
   const [showOfferBar, setShowOfferBar] = useState(true);
@@ -22,7 +23,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#04060c] text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-black overflow-x-hidden w-full relative">
+    <div className="min-h-screen bg-[#fbfbfd] dark:bg-[#04060c] text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-black overflow-x-hidden w-full relative transition-colors duration-300">
       {/* 1. TOP ANNOUNCEMENT BANNER */}
       {showOfferBar && (
         <div className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white text-xs sm:text-sm font-semibold py-2 px-4 shadow-[0_4px_20px_rgba(16,185,129,0.25)] flex items-center justify-between relative z-50 w-full overflow-hidden border-b border-emerald-400/30">
@@ -46,7 +47,7 @@ export default function HomePage() {
       )}
 
       {/* 2. NAVIGATION BAR */}
-      <header className="sticky top-0 z-40 bg-[#070b14]/85 backdrop-blur-2xl border-b border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-all w-full">
+      <header className="sticky top-0 z-40 bg-white/85 dark:bg-[#070b14]/85 backdrop-blur-2xl border-b border-slate-200/80 dark:border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-colors duration-300 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
@@ -56,39 +57,40 @@ export default function HomePage() {
                 alt="Digital Beings"
                 className="w-10 h-10 rounded-xl object-contain shadow-md group-hover:scale-105 transition shrink-0"
               />
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#070b14] shadow-[0_0_8px_#34d399]" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#070b14] shadow-[0_0_8px_#10b981]" />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-xl sm:text-2xl tracking-tight text-white leading-none">
+              <span className="font-black text-xl sm:text-2xl tracking-tight text-slate-900 dark:text-white leading-none">
                 Digital<span className="apple-emerald-gradient">Beings</span>
               </span>
-              <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 tracking-wider sm:tracking-widest uppercase">
+              <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-wider sm:tracking-widest uppercase">
                 Secure • Connect • Grow
               </span>
             </div>
           </Link>
 
           {/* Desktop Nav Links - Clean service definitions */}
-          <nav className="hidden md:flex items-center gap-6 xl:gap-8 text-sm font-semibold text-slate-300">
-            <Link href="#features" className="hover:text-emerald-400 transition whitespace-nowrap">
+          <nav className="hidden md:flex items-center gap-6 xl:gap-8 text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <Link href="#features" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition whitespace-nowrap">
               Services
             </Link>
-            <Link href="#developer" className="hover:text-emerald-400 transition whitespace-nowrap">
+            <Link href="#developer" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition whitespace-nowrap">
               WhatsApp OTP
             </Link>
-            <Link href="#broadcast" className="hover:text-emerald-400 transition whitespace-nowrap">
+            <Link href="#broadcast" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition whitespace-nowrap">
               Broadcasts
             </Link>
-            <Link href="#pricing" className="hover:text-emerald-400 transition whitespace-nowrap">
+            <Link href="#pricing" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition whitespace-nowrap">
               Pricing
             </Link>
           </nav>
 
           {/* Right Action CTAs */}
           <div className="hidden sm:flex items-center gap-3 xl:gap-4 shrink-0">
+            <ThemeToggle />
             <Link
               href="/login"
-              className="text-sm font-bold text-slate-300 hover:text-white px-3 py-1.5 transition whitespace-nowrap"
+              className="text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 transition whitespace-nowrap"
             >
               Login
             </Link>
@@ -102,38 +104,41 @@ export default function HomePage() {
           </div>
 
           {/* Mobile hamburger button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl text-slate-300 hover:bg-white/10"
-            aria-label="Toggle menu"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-              />
-            </svg>
-          </button>
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10"
+              aria-label="Toggle menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-b border-white/10 bg-[#070b14]/95 backdrop-blur-2xl px-6 py-4 space-y-3">
-            <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-300 hover:text-emerald-400">
+          <div className="md:hidden border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#070b14]/95 backdrop-blur-2xl px-6 py-4 space-y-3">
+            <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-800 dark:text-slate-300 hover:text-emerald-500">
               Services &amp; Features
             </Link>
-            <Link href="#developer" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-300 hover:text-emerald-400">
+            <Link href="#developer" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-800 dark:text-slate-300 hover:text-emerald-500">
               WhatsApp OTP &amp; APIs
             </Link>
-            <Link href="#broadcast" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-300 hover:text-emerald-400">
+            <Link href="#broadcast" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-800 dark:text-slate-300 hover:text-emerald-500">
               Broadcast Campaigns
             </Link>
-            <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-300 hover:text-emerald-400">
+            <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-bold text-slate-800 dark:text-slate-300 hover:text-emerald-500">
               Pricing Plans
             </Link>
-            <div className="pt-3 border-t border-white/10 flex flex-col gap-2">
+            <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex flex-col gap-2">
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
@@ -143,7 +148,7 @@ export default function HomePage() {
               >
                 Start 30-Day Trial (₹500 + GST) ➔
               </button>
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 font-bold border border-white/20 rounded-xl text-slate-200">
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 font-bold border border-slate-300 dark:border-white/20 rounded-xl text-slate-800 dark:text-slate-200">
                 Login
               </Link>
             </div>
@@ -152,27 +157,27 @@ export default function HomePage() {
       </header>
 
       {/* 3. HERO SECTION */}
-      <section className="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-36 bg-[#04060c] text-white">
+      <section className="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-36 bg-[#fbfbfd] dark:bg-[#04060c] text-slate-900 dark:text-white transition-colors duration-300">
         {/* Ambient Apple Radial Spotlights */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[450px] bg-gradient-to-tr from-emerald-500/[0.14] via-teal-500/[0.08] to-purple-500/[0.06] rounded-full blur-[140px] pointer-events-none -z-0" />
-        <div className="absolute top-0 right-1/4 w-[400px] h-[300px] bg-emerald-400/[0.08] rounded-full blur-[120px] pointer-events-none -z-0" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[450px] bg-gradient-to-tr from-emerald-500/[0.14] via-teal-500/[0.08] to-purple-500/[0.06] rounded-full blur-[140px] pointer-events-none -z-0 opacity-60 dark:opacity-100" />
+        <div className="absolute top-0 right-1/4 w-[400px] h-[300px] bg-emerald-400/[0.08] rounded-full blur-[120px] pointer-events-none -z-0 opacity-50 dark:opacity-100" />
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           {/* Top Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-emerald-300 text-xs sm:text-sm font-bold shadow-[0_0_20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/20 mb-8 backdrop-blur-xl">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100/90 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-bold shadow-xs dark:shadow-[0_0_20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/20 mb-8 backdrop-blur-xl">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
             <span>All-in-One WhatsApp Cloud Suite: Live Team Inbox · AI Chatbots · Shopify Automations</span>
           </div>
 
           {/* Hero Main Headline */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-[1.08] mb-6">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.08] mb-6">
             <span className="apple-emerald-gradient block mb-2">5X Your Revenue</span>
             <span className="apple-text-gradient">with the Power of WhatsApp</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="max-w-3xl mx-auto text-lg sm:text-xl text-slate-300 leading-relaxed font-normal mb-10">
-            Collaborate on a unified 2-Way Live Team Inbox, deploy 24/7 AI auto-reply bots, recover abandoned carts on Shopify, and broadcast official Meta campaigns — flat plans from ₹1,000 + GST/mo or start a <strong className="font-black text-white underline decoration-emerald-400">30-Day Trial for ₹500 + GST</strong> ⚡
+          <p className="max-w-3xl mx-auto text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed font-normal mb-10">
+            Collaborate on a unified 2-Way Live Team Inbox, deploy 24/7 AI auto-reply bots, recover abandoned carts on Shopify, and broadcast official Meta campaigns — flat plans from ₹1,000 + GST/mo or start a <strong className="font-black text-slate-900 dark:text-white underline decoration-emerald-500">30-Day Trial for ₹500 + GST</strong> ⚡
           </p>
 
           {/* Hero CTAs */}
@@ -186,7 +191,7 @@ export default function HomePage() {
             </button>
             <Link
               href="/dashboard"
-              className="w-full sm:w-auto px-8 py-4 text-base font-bold text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/20 rounded-xl shadow-inner backdrop-blur-md hover:-translate-y-0.5 transition flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-4 text-base font-bold text-slate-800 dark:text-white bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] border border-slate-300/80 dark:border-white/20 rounded-xl shadow-xs dark:shadow-inner backdrop-blur-md hover:-translate-y-0.5 transition flex items-center justify-center gap-2"
             >
               <span>Join Live Demo</span>
               <span>➔</span>
@@ -194,53 +199,53 @@ export default function HomePage() {
           </div>
 
           {/* Micro trust indicators */}
-          <div className="flex items-center justify-center gap-6 text-xs sm:text-sm font-semibold text-slate-400 flex-wrap mb-16">
-            <span className="flex items-center gap-1.5 text-emerald-300">
-              <span className="text-emerald-400">✓</span> 30-Day Full Platform Access (₹500 + GST)
+          <div className="flex items-center justify-center gap-6 text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 flex-wrap mb-16">
+            <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300">
+              <span className="text-emerald-500 font-bold">✓</span> 30-Day Full Platform Access (₹500 + GST)
             </span>
-            <span className="flex items-center gap-1.5 text-emerald-300">
-              <span className="text-emerald-400">✓</span> Official Meta Tech Partner
+            <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300">
+              <span className="text-emerald-500 font-bold">✓</span> Official Meta Tech Partner
             </span>
-            <span className="flex items-center gap-1.5 text-emerald-300">
-              <span className="text-emerald-400">✓</span> Instant 2-Minute Setup
+            <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300">
+              <span className="text-emerald-500 font-bold">✓</span> Instant 2-Minute Setup
             </span>
           </div>
 
           {/* 4. HERO VISUAL SHOWCASE STAGE */}
           <div className="relative max-w-5xl mx-auto pt-6">
             {/* Floating Metric Badges */}
-            <div className="absolute -top-4 left-4 sm:left-12 z-20 bg-[#0B101D]/90 backdrop-blur-xl rounded-2xl p-3.5 shadow-2xl border border-white/10 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center justify-center text-xl font-black">
+            <div className="absolute -top-4 left-4 sm:left-12 z-20 bg-white/90 dark:bg-[#0B101D]/90 backdrop-blur-xl rounded-2xl p-3.5 shadow-xl dark:shadow-2xl border border-slate-200/80 dark:border-white/10 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/30 flex items-center justify-center text-xl font-black">
                 🛒
               </div>
               <div className="text-left">
-                <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Shopify Recovery</span>
-                <span className="text-lg font-black text-white leading-none">+28% Checkouts</span>
+                <span className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Shopify Recovery</span>
+                <span className="text-lg font-black text-slate-900 dark:text-white leading-none">+28% Checkouts</span>
               </div>
             </div>
 
-            <div className="absolute top-8 right-4 sm:right-16 z-20 bg-[#0B101D]/90 backdrop-blur-xl rounded-2xl p-3.5 shadow-2xl border border-white/10 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-xl font-bold">
+            <div className="absolute top-8 right-4 sm:right-16 z-20 bg-white/90 dark:bg-[#0B101D]/90 backdrop-blur-xl rounded-2xl p-3.5 shadow-xl dark:shadow-2xl border border-slate-200/80 dark:border-white/10 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-xl font-bold">
                 💬
               </div>
               <div className="text-left">
-                <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Live 2-Way Inbox</span>
-                <span className="text-lg font-black text-white leading-none">Meta 24h Care Window</span>
+                <span className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Live 2-Way Inbox</span>
+                <span className="text-lg font-black text-slate-900 dark:text-white leading-none">Meta 24h Care Window</span>
               </div>
             </div>
 
-            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 z-20 bg-[#0B101D]/90 backdrop-blur-xl rounded-full px-6 py-3 shadow-2xl border border-white/10 flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-full bg-emerald-400 text-slate-950 flex items-center justify-center text-xs font-black shadow-[0_0_8px_#34d399]">
+            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 z-20 bg-white/95 dark:bg-[#0B101D]/90 backdrop-blur-xl rounded-full px-6 py-3 shadow-xl dark:shadow-2xl border border-slate-200/80 dark:border-white/10 flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white dark:text-slate-950 flex items-center justify-center text-xs font-black shadow-[0_0_8px_#10b981]">
                 ⚡
               </div>
-              <span className="font-extrabold text-white text-sm tracking-wide">24/7 AI Chatbot: &lt;1s Auto-Replies · ₹0 Bot Rent</span>
+              <span className="font-extrabold text-slate-900 dark:text-white text-sm tracking-wide">24/7 AI Chatbot: &lt;1s Auto-Replies · ₹0 Bot Rent</span>
             </div>
 
             {/* Main Mockup Graphic Wrapper */}
-            <div className="relative rounded-3xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] backdrop-blur-2xl p-4 sm:p-8 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden">
+            <div className="relative rounded-3xl bg-slate-100/60 dark:bg-gradient-to-b dark:from-white/[0.04] dark:to-white/[0.01] backdrop-blur-2xl p-4 sm:p-8 border border-slate-200/80 dark:border-white/10 shadow-xl dark:shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                 {/* Left Card: Click to WhatsApp Ad Card */}
-                <div className="bg-[#0B101D]/90 rounded-2xl p-5 shadow-xl border border-white/10 text-left space-y-4">
+                <div className="bg-white dark:bg-[#0B101D]/90 rounded-2xl p-5 shadow-lg dark:shadow-xl border border-slate-200/80 dark:border-white/10 text-left space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-lg">
                       🌸
@@ -352,50 +357,50 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. FEATURE SPOTLIGHT 1: BROADCAST MARKETING (IMAGE 3) */}
+      {/* 6. FEATURE SPOTLIGHT 1: BROADCAST MARKETING */}
       <section id="broadcast" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Left Text */}
           <div className="space-y-6">
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
               Broadcast Marketing Messages on WhatsApp (Officially)
             </h2>
-            <p className="text-lg text-slate-600">
+            <p className="text-lg text-slate-600 dark:text-slate-300">
               Enjoy a Limitless Broadcasting experience on WhatsApp
             </p>
 
             <div className="space-y-5 pt-3">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0 border border-rose-100">
+                <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xl shrink-0 border border-rose-200/80 dark:border-rose-500/30 shadow-xs">
                   📢
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-base text-slate-900">8+ Powerful Messaging Categories</h4>
-                  <p className="text-sm text-slate-500 mt-1">
+                  <h4 className="font-extrabold text-base text-slate-900 dark:text-white">8+ Powerful Messaging Categories</h4>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                     Send Promotions, Offers, Coupon codes, Carousels and More- Risk-Free!
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center text-xl shrink-0 border border-pink-100">
+                <div className="w-12 h-12 rounded-2xl bg-pink-50 dark:bg-pink-500/15 text-pink-600 dark:text-pink-400 flex items-center justify-center text-xl shrink-0 border border-pink-200/80 dark:border-pink-500/30 shadow-xs">
                   💌
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-base text-slate-900">Add CTAs. Drive 3x Conversions</h4>
-                  <p className="text-sm text-slate-500 mt-1">
+                  <h4 className="font-extrabold text-base text-slate-900 dark:text-white">Add CTAs. Drive 3x Conversions</h4>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                     Turn conversations into conversions with eye-catching CTA and Quick Reply buttons
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0 border border-blue-100">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl shrink-0 border border-blue-200/80 dark:border-blue-500/30 shadow-xs">
                   💬
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-base text-slate-900">Schedule your WhatsApp messages</h4>
-                  <p className="text-sm text-slate-500 mt-1">
+                  <h4 className="font-extrabold text-base text-slate-900 dark:text-white">Schedule your WhatsApp messages</h4>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                     Streamline your work, Schedule Broadcasts 2 months ahead of time
                   </p>
                 </div>
@@ -405,7 +410,7 @@ export default function HomePage() {
             <div className="pt-4">
               <button
                 onClick={() => openPlanModal("TRIAL_VS_BASIC")}
-                className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#00c853] hover:bg-[#00b248] text-white font-extrabold text-sm rounded-xl shadow-md shadow-emerald-500/25 transition cursor-pointer"
+                className="inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.3)] transition cursor-pointer"
               >
                 <span>Start 30-Day Trial (₹500 + GST)</span>
                 <span>➔</span>
@@ -413,15 +418,15 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right Phone Visual Mockup (Image 3 Style) */}
+          {/* Right Phone Visual Mockup */}
           <div className="relative flex justify-center">
-            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-100 to-teal-50 rounded-3xl transform rotate-2 -z-10" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-100 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/10 rounded-3xl transform rotate-2 -z-10" />
 
             <div className="w-full max-w-sm bg-slate-900 rounded-[45px] p-4 shadow-2xl border-4 border-slate-800">
               <div className="w-28 h-5 bg-black rounded-full mx-auto mb-4" />
 
               <div className="bg-[#efeae2] rounded-[32px] p-4 space-y-4 min-h-[460px] flex flex-col justify-between">
-                <div className="bg-[#075e54] text-white -m-4 p-4 rounded-t-[32px] flex items-center gap-3">
+                <div className="bg-[#075e54] text-white -m-4 p-4 rounded-t-[32px] flex items-center gap-3 shadow-xs">
                   <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold text-sm">
                     🎧
                   </div>
@@ -448,7 +453,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="bg-white/80 backdrop-blur-xs p-2.5 rounded-2xl border border-slate-200 text-center text-[11px] font-bold text-emerald-800">
+                <div className="bg-white/90 backdrop-blur-xs p-2.5 rounded-2xl border border-slate-200 text-center text-[11px] font-bold text-emerald-800 shadow-xs">
                   ⚡ 99.8% Official Delivery
                 </div>
               </div>
@@ -457,34 +462,34 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. FEATURES GRID (IMAGES 4 & 5 STYLE) */}
-      <section id="features" className="py-24 bg-slate-50/60 border-t border-slate-100">
+      {/* 7. FEATURES GRID */}
+      <section id="features" className="py-24 bg-slate-100/50 dark:bg-white/[0.02] border-t border-slate-200/80 dark:border-white/[0.08] transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
           <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               Packed with Powerful WhatsApp Marketing Features
             </h2>
-            <p className="text-slate-600 text-base sm:text-lg">
+            <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg">
               Launches latest WhatsApp API and AI Features at Blazing fast speed ⚡
             </p>
           </div>
 
-          {/* FEATURE 1: RUN AI POWERED ADS (IMAGE 4) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-white p-8 sm:p-12 rounded-3xl border border-slate-200/80 shadow-sm">
+          {/* FEATURE 1: RUN AI POWERED ADS */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-white dark:bg-[#0B101D]/80 p-8 sm:p-12 rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl">
             <div className="space-y-5">
-              <h3 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+              <h3 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
                 Run AI powered Ads that Click to WhatsApp
               </h3>
-              <p className="text-slate-600 text-base leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
                 Run Ads on Facebook &amp; Instagram that land on WhatsApp. 5X Your lead generations &amp; 2-3X Conversions Instantly!
               </p>
-              <p className="text-slate-500 text-sm leading-relaxed">
+              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
                 Run Ads from our platform, get quality leads with AI &amp; conversions API, smartly segregate your leads and build Chatbot Flows to automate everything!
               </p>
               <div className="pt-2">
                 <Link
                   href="/signup"
-                  className="inline-flex items-center gap-1.5 px-6 py-3 bg-[#00c853] hover:bg-[#00b248] text-white font-bold text-sm rounded-xl shadow-xs transition"
+                  className="inline-flex items-center gap-1.5 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.25)] transition"
                 >
                   <span>Explore</span>
                   <span>➔</span>
@@ -492,22 +497,22 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 flex flex-col gap-4">
-              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+            <div className="bg-slate-50 dark:bg-white/[0.04] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 flex flex-col gap-4">
+              <div className="bg-white dark:bg-[#0F172A] p-4 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
                   🎓
                 </div>
                 <div className="flex-1">
-                  <span className="font-bold text-slate-900 text-sm block">Hind University ✓</span>
-                  <span className="text-[11px] text-slate-400">Sponsored Ad · MBA, MS, MTech Programs</span>
+                  <span className="font-bold text-slate-900 dark:text-white text-sm block">Hind University ✓</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Sponsored Ad · MBA, MS, MTech Programs</span>
                 </div>
-                <span className="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full">
+                <span className="text-xs bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-500/30">
                   Send Message
                 </span>
               </div>
 
               <div className="bg-[#efeae2] p-4 rounded-xl border border-slate-200 text-xs space-y-2">
-                <div className="bg-white p-3 rounded-lg shadow-2xs space-y-2">
+                <div className="bg-white p-3 rounded-lg shadow-2xs space-y-2 text-slate-800">
                   <p>Hi Diksha 👋 Fill this form to proceed</p>
                   <button className="w-full py-2 bg-emerald-600 text-white font-bold rounded-lg text-xs">
                     Fill Details
@@ -517,49 +522,49 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* FEATURE 2: BUILD WHATSAPP FORMS (IMAGE 5) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-white p-8 sm:p-12 rounded-3xl border border-slate-200/80 shadow-sm">
-            <div className="order-2 lg:order-1 bg-slate-50 rounded-2xl p-6 border border-slate-200 flex justify-center">
-              <div className="w-full max-w-xs bg-white rounded-2xl p-5 shadow-md border border-slate-200 space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <span className="font-bold text-slate-900 text-xs">Get early access to our Black Friday deals</span>
-                  <span className="text-[10px] text-emerald-600 bg-emerald-50 font-bold px-2 py-0.5 rounded">Form</span>
+          {/* FEATURE 2: BUILD WHATSAPP FORMS */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-white dark:bg-[#0B101D]/80 p-8 sm:p-12 rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+            <div className="order-2 lg:order-1 bg-slate-50 dark:bg-white/[0.04] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 flex justify-center">
+              <div className="w-full max-w-xs bg-white dark:bg-[#0F172A] rounded-2xl p-5 shadow-md border border-slate-200/80 dark:border-white/10 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+                  <span className="font-bold text-slate-900 dark:text-white text-xs">Get early access to our Black Friday deals</span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/20 font-bold px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/30">Form</span>
                 </div>
                 <div className="space-y-2 text-xs">
-                  <span className="font-bold text-slate-700 block">Let us know which category you're interested in?</span>
-                  <label className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg text-slate-700">
+                  <span className="font-bold text-slate-700 dark:text-slate-300 block">Let us know which category you're interested in?</span>
+                  <label className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-white/[0.05] rounded-lg text-slate-700 dark:text-slate-200">
                     <input type="checkbox" defaultChecked className="accent-emerald-600" />
                     <span>Mobile phones</span>
                   </label>
-                  <label className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg text-slate-700">
+                  <label className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-white/[0.05] rounded-lg text-slate-700 dark:text-slate-200">
                     <input type="checkbox" defaultChecked className="accent-emerald-600" />
                     <span>Televisions</span>
                   </label>
-                  <label className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg text-slate-700">
+                  <label className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-white/[0.05] rounded-lg text-slate-700 dark:text-slate-200">
                     <input type="checkbox" className="accent-emerald-600" />
                     <span>Home audio</span>
                   </label>
                 </div>
-                <button className="w-full py-2.5 bg-[#00c853] text-white font-bold text-xs rounded-xl shadow-xs">
+                <button className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 font-black text-xs rounded-xl shadow-xs">
                   Continue ➔
                 </button>
               </div>
             </div>
 
             <div className="order-1 lg:order-2 space-y-5">
-              <h3 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+              <h3 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
                 Build WhatsApp Forms
               </h3>
-              <p className="text-slate-600 text-base leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
                 Capture Leads &amp; collect useful information <strong>Directly in WhatsApp Chats</strong> with WhatsApp Forms.
               </p>
-              <p className="text-slate-500 text-sm leading-relaxed">
+              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
                 From feedback to gathering user insights, collect it all on WhatsApp.
               </p>
               <div className="pt-2">
                 <Link
                   href="/signup"
-                  className="inline-flex items-center gap-1.5 px-6 py-3 bg-[#00c853] hover:bg-[#00b248] text-white font-bold text-sm rounded-xl shadow-xs transition"
+                  className="inline-flex items-center gap-1.5 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.25)] transition"
                 >
                   <span>Explore</span>
                   <span>➔</span>
@@ -568,19 +573,19 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* FEATURE 3: COLLECT PAYMENTS ON WHATSAPP (IMAGE 5) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-white p-8 sm:p-12 rounded-3xl border border-slate-200/80 shadow-sm">
+          {/* FEATURE 3: COLLECT PAYMENTS ON WHATSAPP */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-white dark:bg-[#0B101D]/80 p-8 sm:p-12 rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl">
             <div className="space-y-5">
-              <h3 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+              <h3 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
                 Collect Payments on WhatsApp
               </h3>
-              <p className="text-slate-600 text-base leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
                 Collect Payments now on WhatsApp seamlessly with WhatsApp Pay and other modes of payment (Razorpay, Payu etc) and grow your revenue.
               </p>
               <div className="pt-2">
                 <Link
                   href="/signup"
-                  className="inline-flex items-center gap-1.5 px-6 py-3 bg-[#00c853] hover:bg-[#00b248] text-white font-bold text-sm rounded-xl shadow-xs transition"
+                  className="inline-flex items-center gap-1.5 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.25)] transition"
                 >
                   <span>Explore</span>
                   <span>➔</span>
@@ -588,8 +593,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 space-y-4">
-              <div className="bg-[#efeae2] p-4 rounded-2xl border border-slate-200 space-y-3">
+            <div className="bg-slate-50 dark:bg-white/[0.04] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 space-y-4">
+              <div className="bg-[#efeae2] p-4 rounded-2xl border border-slate-200 text-slate-800 space-y-3">
                 <div className="bg-white p-4 rounded-xl shadow-sm space-y-3">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                     <span className="font-bold text-xs text-slate-700">Sounds great! Let me create an order</span>
@@ -627,17 +632,17 @@ export default function HomePage() {
       {/* ========================================================================= */}
 
       {/* MODULE 1: SHARED TEAM LIVE CHAT INBOX */}
-      <section id="inbox" className="py-24 bg-gradient-to-b from-white via-slate-50/50 to-white border-t border-slate-150">
+      <section id="inbox" className="py-24 bg-slate-50/50 dark:bg-transparent border-t border-slate-200/80 dark:border-white/[0.08] transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           <div className="max-w-3xl mx-auto text-center space-y-4">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold uppercase tracking-wider shadow-2xs">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>2-Way Real-Time Messaging Engine</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
               One Unified Team Inbox. Infinite 2-Way Conversations.
             </h2>
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
               Empower your sales, support, and operations teams to collaborate on a single official WhatsApp Business number. Features built-in Meta 24-hour customer care window intelligence and automated agent routing.
             </p>
           </div>
@@ -645,38 +650,38 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left: Feature Bullet Grid (5 cols) */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="p-5 bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:border-emerald-300 transition">
+              <div className="p-5 bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:border-emerald-500/40 transition">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-base">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold text-base">
                     👥
                   </div>
-                  <h4 className="font-extrabold text-slate-900 text-base">Multi-Agent Team Collaboration</h4>
+                  <h4 className="font-extrabold text-slate-900 dark:text-white text-base">Multi-Agent Team Collaboration</h4>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   Multiple agents can log in simultaneously from any browser, assign tickets, and resolve customer chats collaboratively without handing over physical SIM cards.
                 </p>
               </div>
 
-              <div className="p-5 bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:border-emerald-300 transition">
+              <div className="p-5 bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:border-emerald-500/40 transition">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-base">
+                  <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 flex items-center justify-center font-bold text-base">
                     ⏳
                   </div>
-                  <h4 className="font-extrabold text-slate-900 text-base">Meta 24h Care Window Intelligence</h4>
+                  <h4 className="font-extrabold text-slate-900 dark:text-white text-base">Meta 24h Care Window Intelligence</h4>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   Real-time visual countdown shows exactly how much time remains in the freeform service window, ensuring complete Meta compliance and eliminating unexpected template rejections.
                 </p>
               </div>
 
-              <div className="p-5 bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:border-emerald-300 transition">
+              <div className="p-5 bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:border-emerald-500/40 transition">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-base">
+                  <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold text-base">
                     ⚡
                   </div>
-                  <h4 className="font-extrabold text-slate-900 text-base">1-Click Canned Snippets &amp; Statuses</h4>
+                  <h4 className="font-extrabold text-slate-900 dark:text-white text-base">1-Click Canned Snippets &amp; Statuses</h4>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   Speed up support with pre-saved quick reply snippets for order tracking, payment verification, and escalations. Categorize threads effortlessly into Open, Waiting, or Resolved.
                 </p>
               </div>
@@ -684,7 +689,7 @@ export default function HomePage() {
               <div className="pt-2">
                 <Link
                   href="/dashboard/inbox"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 font-bold text-xs rounded-xl shadow-xs transition"
                 >
                   <span>Explore Live Inbox Demo</span>
                   <span>➔</span>
@@ -693,87 +698,87 @@ export default function HomePage() {
             </div>
 
             {/* Right: Modern 3-Pane WhatsApp Inbox Mockup (7 cols) */}
-            <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200 shadow-2xl p-4 sm:p-6 overflow-hidden relative">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <div className="lg:col-span-7 bg-white dark:bg-[#0B101D]/90 rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-2xl p-4 sm:p-6 overflow-hidden relative">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3 mb-4">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-red-400"></span>
                   <span className="w-3 h-3 rounded-full bg-amber-400"></span>
                   <span className="w-3 h-3 rounded-full bg-emerald-400"></span>
-                  <span className="text-xs font-bold text-slate-600 ml-2">Digital Beings • Shared Team Inbox</span>
+                  <span className="text-xs font-bold text-slate-600 dark:text-slate-300 ml-2">Digital Beings • Shared Team Inbox</span>
                 </div>
-                <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-full">
+                <span className="text-[10px] bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-bold px-2 py-0.5 rounded-full">
                   ● 3 Agents Active
                 </span>
               </div>
 
               {/* Mockup Body: Split Left List & Right Chat Thread */}
-              <div className="grid grid-cols-12 gap-3 bg-slate-50/70 rounded-2xl p-3 border border-slate-200/80">
-                {/* Mini Chat List (4 cols) */}
-                <div className="col-span-5 bg-white rounded-xl border border-slate-200 p-2.5 space-y-2">
-                  <div className="text-[11px] font-bold text-slate-700 pb-1 border-b border-slate-100 flex items-center justify-between">
+              <div className="grid grid-cols-12 gap-3 bg-slate-50/70 dark:bg-slate-900/40 rounded-2xl p-3 border border-slate-200/80 dark:border-white/10">
+                {/* Mini Chat List (5 cols) */}
+                <div className="col-span-5 bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200/80 dark:border-white/10 p-2.5 space-y-2">
+                  <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 pb-1 border-b border-slate-100 dark:border-white/10 flex items-center justify-between">
                     <span>Conversations</span>
-                    <span className="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">14 Active</span>
+                    <span className="text-[9px] bg-slate-100 dark:bg-white/[0.08] px-1.5 py-0.5 rounded text-slate-500 dark:text-slate-400">14 Active</span>
                   </div>
 
                   {/* Active Card */}
-                  <div className="p-2 bg-emerald-50/80 rounded-lg border-l-4 border-emerald-600 text-left cursor-pointer">
+                  <div className="p-2 bg-emerald-50/80 dark:bg-emerald-500/15 rounded-lg border-l-4 border-emerald-600 text-left cursor-pointer">
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-[11px] text-slate-900 truncate">Rohan Mehta</span>
+                      <span className="font-extrabold text-[11px] text-slate-900 dark:text-white truncate">Rohan Mehta</span>
                       <span className="text-[9px] text-slate-400">1:18 PM</span>
                     </div>
-                    <p className="text-[10px] text-slate-600 truncate mt-0.5">Where is order #8921?</p>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-300 truncate mt-0.5">Where is order #8921?</p>
                     <div className="flex items-center gap-1 mt-1">
-                      <span className="text-[8px] bg-emerald-100 text-emerald-800 font-bold px-1 rounded">OPEN</span>
-                      <span className="text-[8px] bg-purple-100 text-purple-800 px-1 rounded">VIP Lead</span>
+                      <span className="text-[8px] bg-emerald-100 dark:bg-emerald-500/30 text-emerald-800 dark:text-emerald-200 font-bold px-1 rounded">OPEN</span>
+                      <span className="text-[8px] bg-purple-100 dark:bg-purple-500/30 text-purple-800 dark:text-purple-200 px-1 rounded">VIP Lead</span>
                     </div>
                   </div>
 
                   {/* Other Chat Cards */}
-                  <div className="p-2 bg-slate-50 rounded-lg text-left opacity-80">
+                  <div className="p-2 bg-slate-50 dark:bg-white/[0.03] rounded-lg text-left opacity-80">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[11px] text-slate-800 truncate">Ananya Gupta</span>
+                      <span className="font-bold text-[11px] text-slate-800 dark:text-slate-200 truncate">Ananya Gupta</span>
                       <span className="text-[9px] text-slate-400">12:45 PM</span>
                     </div>
-                    <p className="text-[10px] text-slate-500 truncate mt-0.5">Need size exchange</p>
-                    <span className="text-[8px] bg-amber-100 text-amber-800 font-bold px-1 rounded">WAITING</span>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">Need size exchange</p>
+                    <span className="text-[8px] bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold px-1 rounded">WAITING</span>
                   </div>
 
-                  <div className="p-2 bg-slate-50 rounded-lg text-left opacity-60">
+                  <div className="p-2 bg-slate-50 dark:bg-white/[0.03] rounded-lg text-left opacity-60">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[11px] text-slate-800 truncate">Vikas Bansal</span>
+                      <span className="font-bold text-[11px] text-slate-800 dark:text-slate-200 truncate">Vikas Bansal</span>
                       <span className="text-[9px] text-slate-400">11:10 AM</span>
                     </div>
-                    <p className="text-[10px] text-slate-500 truncate mt-0.5">COD verified ✓</p>
-                    <span className="text-[8px] bg-slate-200 text-slate-600 font-bold px-1 rounded">RESOLVED</span>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">COD verified ✓</p>
+                    <span className="text-[8px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold px-1 rounded">RESOLVED</span>
                   </div>
                 </div>
 
                 {/* Mini Chat View (7 cols) */}
-                <div className="col-span-7 bg-[#efeae2]/50 rounded-xl border border-slate-200 p-3 flex flex-col justify-between min-h-[300px]">
+                <div className="col-span-7 bg-[#efeae2]/60 dark:bg-[#0c1412] rounded-xl border border-slate-200/80 dark:border-white/10 p-3 flex flex-col justify-between min-h-[300px]">
                   {/* Chat Header */}
-                  <div className="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between shadow-2xs">
+                  <div className="bg-white dark:bg-[#1a2322] p-2 rounded-lg border border-slate-200/80 dark:border-white/10 flex items-center justify-between shadow-2xs">
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-xs text-slate-900">Rohan Mehta</span>
-                        <span className="text-[10px] text-slate-400 font-mono">+91 98201 54321</span>
+                        <span className="font-bold text-xs text-slate-900 dark:text-white">Rohan Mehta</span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">+91 98201 54321</span>
                       </div>
-                      <div className="flex items-center gap-1 text-[10px] text-emerald-700 font-bold mt-0.5">
+                      <div className="flex items-center gap-1 text-[10px] text-emerald-700 dark:text-emerald-400 font-bold mt-0.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                         <span>Meta 24h Window: 18h remaining</span>
                       </div>
                     </div>
-                    <span className="text-[10px] bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded">Assigned: You</span>
+                    <span className="text-[10px] bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold px-2 py-0.5 rounded">Assigned: You</span>
                   </div>
 
                   {/* Messages Bubble */}
                   <div className="space-y-2 py-3">
-                    <div className="max-w-[85%] bg-white p-2.5 rounded-xl rounded-tl-xs shadow-2xs text-[11px] text-slate-800">
-                      <span className="block text-[9px] font-bold text-emerald-700">Rohan Mehta</span>
+                    <div className="max-w-[85%] bg-white dark:bg-[#1f2c34] p-2.5 rounded-xl rounded-tl-xs shadow-2xs text-[11px] text-slate-800 dark:text-slate-200 border border-transparent dark:border-white/5">
+                      <span className="block text-[9px] font-bold text-emerald-700 dark:text-emerald-400">Rohan Mehta</span>
                       Hi team, could you please check when order #ORD-8921 will arrive?
                       <span className="text-[8px] text-slate-400 block text-right mt-0.5">1:18 PM</span>
                     </div>
 
-                    <div className="max-w-[85%] ml-auto bg-emerald-600 text-white p-2.5 rounded-xl rounded-tr-xs shadow-2xs text-[11px]">
+                    <div className="max-w-[85%] ml-auto bg-emerald-600 dark:bg-[#005c4b] text-white p-2.5 rounded-xl rounded-tr-xs shadow-2xs text-[11px]">
                       Hello Rohan! Your parcel is in transit via BlueDart (AWB: 8827192). Delivery is expected tomorrow by 4 PM.
                       <span className="text-[8px] text-emerald-100 flex items-center justify-end gap-1 mt-0.5">
                         <span>1:19 PM</span>
@@ -785,21 +790,21 @@ export default function HomePage() {
                   {/* Composer & Quick Snippets */}
                   <div className="space-y-1.5">
                     <div className="flex gap-1 overflow-x-auto text-[9px]">
-                      <span className="bg-white border border-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-medium shrink-0">
+                      <span className="bg-white dark:bg-[#1f2c34] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full font-medium shrink-0">
                         ⚡ Track Order Link
                       </span>
-                      <span className="bg-white border border-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-medium shrink-0">
+                      <span className="bg-white dark:bg-[#1f2c34] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full font-medium shrink-0">
                         ⚡ Return Policy
                       </span>
                     </div>
-                    <div className="bg-white rounded-lg border border-slate-200 p-1.5 flex items-center gap-1.5">
+                    <div className="bg-white dark:bg-[#1f2c34] rounded-lg border border-slate-200 dark:border-white/10 p-1.5 flex items-center gap-1.5">
                       <input
                         type="text"
                         readOnly
                         value="Type a reply or choose snippet..."
-                        className="flex-1 text-[11px] text-slate-400 bg-transparent outline-none px-1"
+                        className="flex-1 text-[11px] text-slate-500 dark:text-slate-400 bg-transparent outline-none px-1"
                       />
-                      <button className="px-3 py-1 bg-emerald-600 text-white font-bold text-[10px] rounded-md">
+                      <button className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 font-black text-[10px] rounded-md">
                         Send ➤
                       </button>
                     </div>
@@ -812,53 +817,53 @@ export default function HomePage() {
       </section>
 
       {/* MODULE 2: NO-CODE AI CHATBOT & AUTO-REPLIES */}
-      <section id="chatbots" className="py-24 bg-white border-t border-slate-150">
+      <section id="chatbots" className="py-24 bg-white dark:bg-transparent border-t border-slate-200/80 dark:border-white/[0.08] transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           <div className="max-w-3xl mx-auto text-center space-y-4">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold uppercase tracking-wider shadow-2xs">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 text-blue-800 dark:text-blue-300 text-xs font-bold uppercase tracking-wider shadow-2xs">
               <span>🤖</span>
               <span>24/7 AI Conversational Automations</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
               Deploy AI Chatbots in 60 Seconds. Built-in Intelligence.
             </h2>
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
               Never let an inbound lead wait. Deploy smart keyword-triggered auto-reply bots and interactive Meta Quick-Reply button flows that resolve customer questions in under 1 second.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left: Chatbot Card & Mobile Preview (7 cols) */}
-            <div className="lg:col-span-7 bg-slate-50/80 rounded-3xl border border-slate-200 p-6 shadow-xl space-y-5">
+            <div className="lg:col-span-7 bg-slate-50/80 dark:bg-[#0B101D]/80 rounded-3xl border border-slate-200/80 dark:border-white/10 p-6 shadow-xl space-y-5">
               {/* Bot Config Card Mockup */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <div className="bg-white dark:bg-[#0F172A] p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-lg">
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-lg">
                       🤖
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-slate-900">Instant Welcome &amp; Lead Bot</h4>
+                      <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">Instant Welcome &amp; Lead Bot</h4>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] text-emerald-600 font-bold">● Active 24/7</span>
-                        <span className="text-slate-300">•</span>
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">● Active 24/7</span>
+                        <span className="text-slate-300 dark:text-slate-600">•</span>
                         <span className="text-[10px] text-slate-400">⚡ 1,842 Auto-Replies Sent</span>
                       </div>
                     </div>
                   </div>
 
-                  <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">
+                  <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-bold rounded-full border border-emerald-200 dark:border-emerald-500/30">
                     Enabled
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
                     Trigger Keywords
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {["hi", "hello", "start", "track", "price", "catalog"].map((kw, idx) => (
-                      <span key={idx} className="bg-slate-100 text-slate-700 text-[11px] font-mono px-2 py-0.5 rounded border border-slate-200">
+                      <span key={idx} className="bg-slate-100 dark:bg-white/[0.05] text-slate-700 dark:text-slate-300 text-[11px] font-mono px-2 py-0.5 rounded border border-slate-200/80 dark:border-white/10">
                         &quot;{kw}&quot;
                       </span>
                     ))}
@@ -866,18 +871,18 @@ export default function HomePage() {
                 </div>
 
                 {/* WhatsApp Message Bubble with Buttons */}
-                <div className="bg-[#efeae2]/70 p-4 rounded-xl border border-amber-900/10 space-y-3">
-                  <p className="text-xs text-slate-800 leading-relaxed">
+                <div className="bg-[#efeae2]/70 dark:bg-[#1f2c34] p-4 rounded-xl border border-amber-900/10 dark:border-white/5 space-y-3">
+                  <p className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed">
                     👋 Welcome to Digital Beings! How can we assist you today? Please choose an option below:
                   </p>
                   <div className="space-y-1.5">
-                    <div className="bg-white border border-slate-200 text-center py-1.5 rounded-lg text-emerald-700 font-bold text-xs shadow-2xs">
+                    <div className="bg-white dark:bg-[#2a3942] border border-slate-200 dark:border-white/10 text-center py-1.5 rounded-lg text-emerald-700 dark:text-emerald-300 font-bold text-xs shadow-2xs">
                       📦 Track My Order
                     </div>
-                    <div className="bg-white border border-slate-200 text-center py-1.5 rounded-lg text-emerald-700 font-bold text-xs shadow-2xs">
+                    <div className="bg-white dark:bg-[#2a3942] border border-slate-200 dark:border-white/10 text-center py-1.5 rounded-lg text-emerald-700 dark:text-emerald-300 font-bold text-xs shadow-2xs">
                       🏷️ Claim 10% Discount Code
                     </div>
-                    <div className="bg-white border border-slate-200 text-center py-1.5 rounded-lg text-emerald-700 font-bold text-xs shadow-2xs">
+                    <div className="bg-white dark:bg-[#2a3942] border border-slate-200 dark:border-white/10 text-center py-1.5 rounded-lg text-emerald-700 dark:text-emerald-300 font-bold text-xs shadow-2xs">
                       👨‍💼 Talk to Live Agent
                     </div>
                   </div>
@@ -886,16 +891,16 @@ export default function HomePage() {
 
               {/* Bot Performance Stats */}
               <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-                  <span className="text-xl font-black text-slate-900 block">&lt; 1s</span>
+                <div className="bg-white dark:bg-[#0F172A] p-3 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs">
+                  <span className="text-xl font-black text-slate-900 dark:text-white block">&lt; 1s</span>
                   <span className="text-[10px] font-semibold text-slate-400">Trigger Speed</span>
                 </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-                  <span className="text-xl font-black text-emerald-600 block">4 Turnkey</span>
+                <div className="bg-white dark:bg-[#0F172A] p-3 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs">
+                  <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 block">4 Turnkey</span>
                   <span className="text-[10px] font-semibold text-slate-400">Pre-built Bots</span>
                 </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-                  <span className="text-xl font-black text-purple-600 block">Included</span>
+                <div className="bg-white dark:bg-[#0F172A] p-3 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs">
+                  <span className="text-xl font-black text-purple-600 dark:text-purple-400 block">Included</span>
                   <span className="text-[10px] font-semibold text-slate-400">In Flat Plans</span>
                 </div>
               </div>
@@ -903,38 +908,38 @@ export default function HomePage() {
 
             {/* Right: Key Bot Features (5 cols) */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200/90 shadow-sm hover:border-blue-300 transition">
+              <div className="p-5 bg-slate-50 dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-sm hover:border-blue-400 transition">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-base">
+                  <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold text-base">
                     ⚡
                   </div>
-                  <h4 className="font-extrabold text-slate-900 text-base">Instant Keyword Recognition</h4>
+                  <h4 className="font-extrabold text-slate-900 dark:text-white text-base">Instant Keyword Recognition</h4>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   Support both exact phrase matches and partial keyword contains. Incoming customer messages evaluate in milliseconds to trigger the ideal auto-reply.
                 </p>
               </div>
 
-              <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200/90 shadow-sm hover:border-blue-300 transition">
+              <div className="p-5 bg-slate-50 dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-sm hover:border-blue-400 transition">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-base">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold text-base">
                     🔘
                   </div>
-                  <h4 className="font-extrabold text-slate-900 text-base">Interactive Meta Quick-Reply Buttons</h4>
+                  <h4 className="font-extrabold text-slate-900 dark:text-white text-base">Interactive Meta Quick-Reply Buttons</h4>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   Eliminate typos and friction. Let customers navigate through options by tapping native WhatsApp buttons directly inside the chat.
                 </p>
               </div>
 
-              <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200/90 shadow-sm hover:border-blue-300 transition">
+              <div className="p-5 bg-slate-50 dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-sm hover:border-blue-400 transition">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-base">
+                  <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-base">
                     💰
                   </div>
-                  <h4 className="font-extrabold text-slate-900 text-base">Transparent Flat Pricing</h4>
+                  <h4 className="font-extrabold text-slate-900 dark:text-white text-base">Transparent Flat Pricing</h4>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   While competitors lock chatbots behind $149 to $2,500/quarter recurring SaaS plans, Digital Beings gives you predictable plans starting at ₹1,000 + GST/mo, or get started with a 30-day trial for just ₹500 + GST.
                 </p>
               </div>
@@ -942,7 +947,7 @@ export default function HomePage() {
               <div className="pt-2">
                 <Link
                   href="/dashboard/automations"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#00c853] hover:bg-[#00b248] text-white font-bold text-xs rounded-xl shadow-xs transition"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow-xs transition"
                 >
                   <span>Build Your First Bot</span>
                   <span>➔</span>
@@ -953,18 +958,18 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* MODULE 3: TURNKEY E-COMMERCE RECIPES (SHOPIFY & WOOCOMMERCE) */}
-      <section id="ecommerce" className="py-24 bg-gradient-to-b from-slate-50/60 to-white border-t border-slate-150">
+      {/* MODULE 3: TURNKEY E-COMMERCE RECIPES */}
+      <section id="ecommerce" className="py-24 bg-slate-50/50 dark:bg-transparent border-t border-slate-200/80 dark:border-white/[0.08] transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           <div className="max-w-3xl mx-auto text-center space-y-4">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-wider shadow-2xs">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs font-bold uppercase tracking-wider shadow-2xs">
               <span>🛍️</span>
               <span>Shopify &amp; WooCommerce WhatsApp Recipes</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
               Recover Abandoned Carts &amp; Eliminate Fake COD Orders.
             </h2>
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
               Plug your Shopify, WooCommerce, or custom store into dedicated webhook endpoints. Recover up to 28% of abandoned checkouts and cut costly Return-to-Origin (RTO) courier fees by 45%.
             </p>
           </div>
@@ -972,88 +977,88 @@ export default function HomePage() {
           {/* 4 Turnkey Recipe Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Recipe 1 */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition space-y-4 flex flex-col justify-between">
+            <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:border-emerald-500/40 transition space-y-4 flex flex-col justify-between">
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-xl font-bold">
+                <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 flex items-center justify-center text-xl font-bold">
                   🛒
                 </div>
-                <h4 className="font-extrabold text-base text-slate-900">Abandoned Cart Recovery</h4>
-                <span className="text-[11px] font-bold text-emerald-600 block">
+                <h4 className="font-extrabold text-base text-slate-900 dark:text-white">Abandoned Cart Recovery</h4>
+                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 block">
                   📈 +28% Checkout Recovery
                 </span>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   Sends automated photo, item breakdown, and a 1-click personalized checkout discount link 45 minutes after cart abandonment.
                 </p>
               </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-[10px] text-slate-600">
-                <span className="font-bold text-slate-800 block">WhatsApp Trigger:</span>
+              <div className="p-3 bg-slate-50 dark:bg-white/[0.04] rounded-xl border border-slate-100 dark:border-white/10 text-[10px] text-slate-600 dark:text-slate-300">
+                <span className="font-bold text-slate-800 dark:text-slate-200 block">WhatsApp Trigger:</span>
                 &quot;Rahul, your cart is waiting! Enjoy 10% OFF with code SAVE10.&quot;
               </div>
             </div>
 
             {/* Recipe 2 */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition space-y-4 flex flex-col justify-between">
+            <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:border-emerald-500/40 transition space-y-4 flex flex-col justify-between">
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center text-xl font-bold">
+                <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 flex items-center justify-center text-xl font-bold">
                   📦
                 </div>
-                <h4 className="font-extrabold text-base text-slate-900">Instant Order Confirmation</h4>
-                <span className="text-[11px] font-bold text-blue-600 block">
+                <h4 className="font-extrabold text-base text-slate-900 dark:text-white">Instant Order Confirmation</h4>
+                <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 block">
                   ⚡ 98% Open Rate in 3 Mins
                 </span>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   Sends complete order summary, items purchased, and estimated dispatch date right after successful online checkout.
                 </p>
               </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-[10px] text-slate-600">
-                <span className="font-bold text-slate-800 block">WhatsApp Trigger:</span>
+              <div className="p-3 bg-slate-50 dark:bg-white/[0.04] rounded-xl border border-slate-100 dark:border-white/10 text-[10px] text-slate-600 dark:text-slate-300">
+                <span className="font-bold text-slate-800 dark:text-slate-200 block">WhatsApp Trigger:</span>
                 &quot;Thanks for your order #89214! Payment received: ₹1,899.&quot;
               </div>
             </div>
 
             {/* Recipe 3 */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition space-y-4 flex flex-col justify-between">
+            <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:border-emerald-500/40 transition space-y-4 flex flex-col justify-between">
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-bold">
+                <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-xl font-bold">
                   💰
                 </div>
-                <h4 className="font-extrabold text-base text-slate-900">Cash on Delivery Verification</h4>
-                <span className="text-[11px] font-bold text-emerald-600 block">
+                <h4 className="font-extrabold text-base text-slate-900 dark:text-white">Cash on Delivery Verification</h4>
+                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 block">
                   🛡️ Cuts RTO Returns by 45%
                 </span>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   Prompts customer with interactive [✅ Confirm Order] and [❌ Cancel] buttons before shipping, eliminating fake COD bookings.
                 </p>
               </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-[10px] text-slate-600">
-                <span className="font-bold text-slate-800 block">Interactive Buttons:</span>
+              <div className="p-3 bg-slate-50 dark:bg-white/[0.04] rounded-xl border border-slate-100 dark:border-white/10 text-[10px] text-slate-600 dark:text-slate-300">
+                <span className="font-bold text-slate-800 dark:text-slate-200 block">Interactive Buttons:</span>
                 [✅ Confirm Order] [❌ Cancel]
               </div>
             </div>
 
             {/* Recipe 4 */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition space-y-4 flex flex-col justify-between">
+            <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:border-emerald-500/40 transition space-y-4 flex flex-col justify-between">
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center text-xl font-bold">
+                <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 flex items-center justify-center text-xl font-bold">
                   🚚
                 </div>
-                <h4 className="font-extrabold text-base text-slate-900">Live Shipping Tracking</h4>
-                <span className="text-[11px] font-bold text-purple-600 block">
+                <h4 className="font-extrabold text-base text-slate-900 dark:text-white">Live Shipping Tracking</h4>
+                <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400 block">
                   🔔 Zero "Where is My Order" calls
                 </span>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   Automated dispatch, courier in-transit, and out-for-delivery alerts via BlueDart, Delhivery, FedEx, and Shiprocket.
                 </p>
               </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-[10px] text-slate-600">
-                <span className="font-bold text-slate-800 block">WhatsApp Trigger:</span>
+              <div className="p-3 bg-slate-50 dark:bg-white/[0.04] rounded-xl border border-slate-100 dark:border-white/10 text-[10px] text-slate-600 dark:text-slate-300">
+                <span className="font-bold text-slate-800 dark:text-slate-200 block">WhatsApp Trigger:</span>
                 &quot;Package out for delivery via BlueDart (AWB: 8827192).&quot;
               </div>
             </div>
           </div>
 
           {/* Webhook Store Connection Banner */}
-          <div className="bg-slate-900 rounded-3xl p-8 sm:p-10 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="bg-gradient-to-r from-slate-900 via-[#0B132B] to-slate-900 border border-slate-700/80 dark:border-white/10 rounded-3xl p-8 sm:p-10 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">60-Second Integration</span>
@@ -1071,7 +1076,7 @@ export default function HomePage() {
             <div className="flex items-center gap-3 shrink-0">
               <Link
                 href="/dashboard/ecommerce"
-                className="px-6 py-3 bg-[#00c853] hover:bg-[#00b248] text-white font-extrabold text-xs rounded-xl shadow-md transition whitespace-nowrap"
+                className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow-md transition whitespace-nowrap"
               >
                 Configure E-Commerce ➔
               </Link>
@@ -1081,33 +1086,33 @@ export default function HomePage() {
       </section>
 
       {/* HONEST FLAT SUBSCRIPTION + WHOLESALE FUEL VS LEGACY LOCK-INS */}
-      <section className="py-20 bg-white border-t border-slate-150">
+      <section className="py-20 bg-white dark:bg-transparent border-t border-slate-200/80 dark:border-white/[0.08] transition-colors duration-300">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3">
-            <span className="text-xs font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+            <span className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/15 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-500/30">
               Honest Platform Architecture
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               Why Smart Businesses Choose Digital Beings Over Legacy SaaS
             </h2>
-            <p className="text-sm text-slate-600 max-w-2xl mx-auto">
+            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
               Compare our transparent flat subscription and wholesale fuel rates against legacy WhatsApp tools that lock you into high recurring contracts.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* The Old Legacy Way */}
-            <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200 space-y-5">
+            <div className="bg-slate-50 dark:bg-white/[0.02] rounded-3xl p-8 border border-slate-200/80 dark:border-white/10 space-y-5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-extrabold uppercase tracking-wider text-red-600 bg-red-50 px-2.5 py-1 rounded">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-red-600 bg-red-50 dark:bg-red-500/20 px-2.5 py-1 rounded">
                   ✕ Legacy WhatsApp SaaS
                 </span>
-                <span className="text-xs text-slate-400">Wati / AiSensy / Gallabox</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">Wati / AiSensy / Gallabox</span>
               </div>
-              <div className="text-2xl font-black text-slate-800">
+              <div className="text-2xl font-black text-slate-800 dark:text-slate-200">
                 ₹15,000 - ₹50,000+ <span className="text-xs text-slate-500 font-normal">/ quarter lock-in</span>
               </div>
-              <ul className="space-y-3 text-xs text-slate-600">
+              <ul className="space-y-3 text-xs text-slate-600 dark:text-slate-400">
                 <li className="flex items-center gap-2">
                   <span className="text-red-500 font-bold">✕</span> Expensive quarterly/annual locked contracts with zero refund flexibility
                 </li>
@@ -1124,31 +1129,31 @@ export default function HomePage() {
             </div>
 
             {/* The Digital Beings Way */}
-            <div className="bg-gradient-to-b from-emerald-50/50 to-white rounded-3xl p-8 border-2 border-emerald-500 shadow-xl space-y-5 relative">
+            <div className="bg-gradient-to-b from-emerald-50/60 to-white dark:from-[#0B1D16] dark:via-[#091512] dark:to-[#040807] rounded-3xl p-8 border-2 border-emerald-500 shadow-xl space-y-5 relative">
               <div className="absolute -top-3 right-6 bg-emerald-600 text-white font-extrabold text-[10px] tracking-wider uppercase px-3 py-1 rounded-full shadow-xs">
                 DIGITAL BEINGS TRANSPARENCY
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-800 dark:text-emerald-200 bg-emerald-100 dark:bg-emerald-500/30 px-2.5 py-1 rounded">
                   ✓ Digital Beings
                 </span>
-                <span className="text-xs text-emerald-700 font-bold">Official Meta Cloud API</span>
+                <span className="text-xs text-emerald-700 dark:text-emerald-300 font-bold">Official Meta Cloud API</span>
               </div>
-              <div className="text-2xl font-black text-slate-900">
-                Flat ₹1,000 + GST/mo <span className="text-xs text-slate-500 font-normal">· Or 30-Day Trial for ₹500 + GST</span>
+              <div className="text-2xl font-black text-slate-900 dark:text-white">
+                Flat ₹1,000 + GST/mo <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">· Or 30-Day Trial for ₹500 + GST</span>
               </div>
-              <ul className="space-y-3 text-xs text-slate-700 font-medium">
-                <li className="flex items-center gap-2 text-emerald-900 font-bold">
-                  <span className="text-emerald-600 font-black">✓</span> Honest flat subscription with no lock-in — cancel or change anytime
+              <ul className="space-y-3 text-xs text-slate-700 dark:text-slate-300 font-medium">
+                <li className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200 font-bold">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-black">✓</span> Honest flat subscription with no lock-in — cancel or change anytime
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-emerald-600 font-bold">✓</span> Up to 6 team seats included free (extra seats only ₹500 + GST/month)
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span> Up to 6 team seats included free (extra seats only ₹500 + GST/month)
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-emerald-600 font-bold">✓</span> Transparent wholesale fuel (+ GST): OTP ₹0.20, Utility ₹0.18, Marketing ₹1.15
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span> Transparent wholesale fuel (+ GST): OTP ₹0.20, Utility ₹0.18, Marketing ₹1.15
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-emerald-600 font-bold">✓</span> Meta Official Green Tick (OBA) filing &amp; compliance support included on Professional Plan
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span> Meta Official Green Tick (OBA) filing &amp; compliance support included on Professional Plan
                 </li>
               </ul>
             </div>
@@ -1156,19 +1161,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 9. NEW: #1 WHATSAPP MARKETING PLATFORM (USER UPLOADED IMAGE 3) */}
-      <section id="testimonials" className="py-24 bg-gradient-to-b from-slate-50 to-white border-t border-slate-150">
+      {/* 9. #1 WHATSAPP MARKETING PLATFORM */}
+      <section id="testimonials" className="py-24 bg-slate-50/50 dark:bg-transparent border-t border-slate-200/80 dark:border-white/[0.08] transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           <div className="text-center space-y-4 max-w-4xl mx-auto">
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
               #1 WhatsApp Marketing &amp; Engagement Platform for startups &amp; growing businesses
             </h2>
-            <p className="text-slate-500 text-sm sm:text-base">
+            <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
               Recognized and loved by over 210,000+ businesses worldwide
             </p>
           </div>
 
-          {/* G2 Badges Ribbon / Carousel Representation (Image 3) */}
+          {/* G2 Badges Ribbon */}
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 opacity-90">
             {[
               "User Love Us",
@@ -1181,70 +1186,70 @@ export default function HomePage() {
             ].map((badge, bIdx) => (
               <div
                 key={bIdx}
-                className="bg-white border-2 border-red-500/20 rounded-xl px-3 py-2 text-center shadow-xs flex flex-col items-center justify-center min-w-[110px]"
+                className="bg-white dark:bg-[#0B101D]/80 border-2 border-red-500/20 rounded-xl px-3 py-2 text-center shadow-xs flex flex-col items-center justify-center min-w-[110px]"
               >
                 <span className="text-[9px] font-black text-red-600 uppercase tracking-widest block">SPRING 2026</span>
-                <span className="text-xs font-black text-slate-900 block mt-0.5 leading-tight">{badge}</span>
+                <span className="text-xs font-black text-slate-900 dark:text-white block mt-0.5 leading-tight">{badge}</span>
                 <span className="text-[10px] text-amber-500 font-bold">★★★★★</span>
               </div>
             ))}
           </div>
 
-          {/* 3 Real Testimonial Cards (Image 3) */}
+          {/* 3 Real Testimonial Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
             {/* Card 1: Priyal Ostwal */}
-            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6 flex flex-col justify-between hover:-translate-y-1 transition">
+            <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl p-8 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] space-y-6 flex flex-col justify-between hover:-translate-y-1 transition">
               <div className="space-y-4 text-center">
-                <div className="w-24 h-24 rounded-full bg-emerald-100 border-4 border-emerald-300 mx-auto flex items-center justify-center text-3xl font-bold text-emerald-800 shadow-sm">
+                <div className="w-24 h-24 rounded-full bg-emerald-100 dark:bg-emerald-500/20 border-4 border-emerald-300 dark:border-emerald-500/40 mx-auto flex items-center justify-center text-3xl font-bold text-emerald-800 dark:text-emerald-300 shadow-sm">
                   👩‍💼
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-lg text-slate-900">Priyal Ostwal</h4>
-                  <p className="text-xs text-slate-500 font-semibold">Marketing Manager, PhysicsWallah</p>
+                  <h4 className="font-extrabold text-lg text-slate-900 dark:text-white">Priyal Ostwal</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Marketing Manager, PhysicsWallah</p>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed italic">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed italic">
                   "Our team has experienced exceptional professionalism, reliability and a true commitment to customer satisfaction. Delivery rates on campaigns have consistently exceeded 97%."
                 </p>
               </div>
-              <div className="pt-3 border-t border-slate-100 text-center text-[11px] font-bold text-emerald-600">
+              <div className="pt-3 border-t border-slate-100 dark:border-white/10 text-center text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
                 ✓ Verified Customer Review
               </div>
             </div>
 
             {/* Card 2: Akash Jain */}
-            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6 flex flex-col justify-between hover:-translate-y-1 transition">
+            <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl p-8 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] space-y-6 flex flex-col justify-between hover:-translate-y-1 transition">
               <div className="space-y-4 text-center">
-                <div className="w-24 h-24 rounded-full bg-orange-100 border-4 border-orange-300 mx-auto flex items-center justify-center text-3xl font-bold text-orange-800 shadow-sm">
+                <div className="w-24 h-24 rounded-full bg-orange-100 dark:bg-orange-500/20 border-4 border-orange-300 dark:border-orange-500/40 mx-auto flex items-center justify-center text-3xl font-bold text-orange-800 dark:text-orange-300 shadow-sm">
                   👨‍💼
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-lg text-slate-900">Akash Jain</h4>
-                  <p className="text-xs text-slate-500 font-semibold">Business Executive, Cosco</p>
+                  <h4 className="font-extrabold text-lg text-slate-900 dark:text-white">Akash Jain</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Business Executive, Cosco</p>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed italic">
-                  "Helped us increase our customer engagement significantly. Our customer engagement increased from <strong className="text-emerald-600">35% to 90%</strong> with the Smart Retargeting feature."
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed italic">
+                  "Helped us increase our customer engagement significantly. Our customer engagement increased from <strong className="text-emerald-600 dark:text-emerald-400">35% to 90%</strong> with the Smart Retargeting feature."
                 </p>
               </div>
-              <div className="pt-3 border-t border-slate-100 text-center text-[11px] font-bold text-orange-600">
+              <div className="pt-3 border-t border-slate-100 dark:border-white/10 text-center text-[11px] font-bold text-orange-600 dark:text-orange-400">
                 ✓ Verified Customer Review
               </div>
             </div>
 
             {/* Card 3: Achina Mayya */}
-            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6 flex flex-col justify-between hover:-translate-y-1 transition">
+            <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl p-8 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] space-y-6 flex flex-col justify-between hover:-translate-y-1 transition">
               <div className="space-y-4 text-center">
-                <div className="w-24 h-24 rounded-full bg-purple-100 border-4 border-purple-300 mx-auto flex items-center justify-center text-3xl font-bold text-purple-800 shadow-sm">
+                <div className="w-24 h-24 rounded-full bg-purple-100 dark:bg-purple-500/20 border-4 border-purple-300 dark:border-purple-500/40 mx-auto flex items-center justify-center text-3xl font-bold text-purple-800 dark:text-purple-300 shadow-sm">
                   👩‍💻
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-lg text-slate-900">Achina Mayya</h4>
-                  <p className="text-xs text-slate-500 font-semibold">Founder &amp; CEO, AevyTV</p>
+                  <h4 className="font-extrabold text-lg text-slate-900 dark:text-white">Achina Mayya</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Founder &amp; CEO, AevyTV</p>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed italic">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed italic">
                   "Has been pivotal for us. The personalised interactions and instant responses greatly improved our engagement rates, and more importantly our sales!"
                 </p>
               </div>
-              <div className="pt-3 border-t border-slate-100 text-center text-[11px] font-bold text-purple-600">
+              <div className="pt-3 border-t border-slate-100 dark:border-white/10 text-center text-[11px] font-bold text-purple-600 dark:text-purple-400">
                 ✓ Verified Customer Review
               </div>
             </div>
@@ -1252,51 +1257,51 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 10. NEW: START WHATSAPP MARKETING IN 10 MINUTES (USER UPLOADED IMAGE 4) */}
+      {/* 10. START WHATSAPP MARKETING IN 10 MINUTES */}
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-br from-white via-emerald-50/20 to-teal-50/40 rounded-[36px] border border-slate-200/90 shadow-xl p-8 sm:p-14 overflow-hidden relative">
+        <div className="bg-gradient-to-br from-emerald-50/60 via-white to-teal-50/40 dark:from-[#0B101D] dark:via-[#0E1726] dark:to-[#07131D] rounded-[36px] border border-slate-200/80 dark:border-white/10 shadow-xl p-8 sm:p-14 overflow-hidden relative">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div className="space-y-6">
-              <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+              <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
                 Start WhatsApp Marketing in 10 Minutes
               </h2>
-              <p className="text-slate-600 text-base leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
                 Our Platform is powered by Official Whatsapp Business APIs and is in alignment with all Whatsapp Rules.
               </p>
 
               <div className="space-y-5 pt-2">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-lg shrink-0">
                     🛡️
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-base text-slate-900">Official Green Tick Verification</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <h4 className="font-extrabold text-base text-slate-900 dark:text-white">Official Green Tick Verification</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                       Get Verified Green Tick on your Whatsapp. Broadcast Unlimited Notifications everyday.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 flex items-center justify-center text-lg shrink-0">
                     💬
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-base text-slate-900">Dedicated Live Chat Support</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <h4 className="font-extrabold text-base text-slate-900 dark:text-white">Dedicated Live Chat Support</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                       Priority Chat Support by our team over WhatsApp, Phone, Live Chat &amp; Email.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center text-lg shrink-0">
                     ⚡
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-base text-slate-900">Blazing Fast Feature launches</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <h4 className="font-extrabold text-base text-slate-900 dark:text-white">Blazing Fast Feature launches</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                       We're constantly adding new WhatsApp features, so you can always offer the best experience to your customers.
                     </p>
                   </div>
@@ -1304,44 +1309,44 @@ export default function HomePage() {
               </div>
 
               <div className="pt-4">
-              <button
-                onClick={() => openPlanModal("TRIAL_VS_BASIC")}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-[#00c853] hover:bg-[#00b248] text-white font-extrabold text-sm rounded-xl shadow-lg shadow-emerald-500/25 transition cursor-pointer"
-              >
-                <span>Start 30-Day Trial (₹500 + GST)</span>
-                <span>➔</span>
-              </button>
+                <button
+                  onClick={() => openPlanModal("TRIAL_VS_BASIC")}
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-500/25 transition cursor-pointer"
+                >
+                  <span>Start 30-Day Trial (₹500 + GST)</span>
+                  <span>➔</span>
+                </button>
               </div>
             </div>
 
-            {/* Right Layered Isometric Dashboard Collage (Image 4) */}
+            {/* Right Layered Isometric Dashboard Collage */}
             <div className="relative flex justify-center">
-              <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <span className="font-extrabold text-xs text-slate-900">✨ AI Ads Manager Dashboard</span>
-                  <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded">
+              <div className="w-full max-w-md bg-white dark:bg-[#0B101D]/90 rounded-3xl p-6 shadow-2xl border border-slate-200/80 dark:border-white/10 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+                  <span className="font-extrabold text-xs text-slate-900 dark:text-white">✨ AI Ads Manager Dashboard</span>
+                  <span className="text-[10px] bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/30">
                     Meta Verified
                   </span>
                 </div>
 
                 {/* Metrics Bar */}
                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
-                    <span className="text-[10px] text-slate-400 block font-semibold">ROAS</span>
-                    <span className="font-black text-slate-900 text-sm">7.5X</span>
+                  <div className="p-2 bg-slate-50 dark:bg-white/[0.04] rounded-xl border border-slate-100 dark:border-white/10">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">ROAS</span>
+                    <span className="font-black text-slate-900 dark:text-white text-sm">7.5X</span>
                   </div>
-                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
-                    <span className="text-[10px] text-slate-400 block font-semibold">Leads</span>
-                    <span className="font-black text-slate-900 text-sm">3,900</span>
+                  <div className="p-2 bg-slate-50 dark:bg-white/[0.04] rounded-xl border border-slate-100 dark:border-white/10">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">Leads</span>
+                    <span className="font-black text-slate-900 dark:text-white text-sm">3,900</span>
                   </div>
-                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
-                    <span className="text-[10px] text-slate-400 block font-semibold">Revenue</span>
-                    <span className="font-black text-emerald-600 text-sm">₹15.2L</span>
+                  <div className="p-2 bg-slate-50 dark:bg-white/[0.04] rounded-xl border border-slate-100 dark:border-white/10">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">Revenue</span>
+                    <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm">₹15.2L</span>
                   </div>
                 </div>
 
                 {/* Floating chat snippet */}
-                <div className="bg-[#efeae2] p-3 rounded-2xl border border-slate-200 text-xs space-y-2">
+                <div className="bg-[#efeae2] p-3 rounded-2xl border border-slate-200 text-xs space-y-2 text-slate-800">
                   <div className="bg-white p-3 rounded-xl shadow-2xs space-y-1.5">
                     <div className="flex items-center gap-1.5">
                       <span className="font-bold text-slate-900 text-[11px]">ZoomBus Assistant ✓</span>
@@ -1367,40 +1372,40 @@ export default function HomePage() {
       </section>
 
       {/* 11. DEVELOPER API SECTION */}
-      <section id="developer" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-100">
+      <section id="developer" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-200/80 dark:border-white/[0.08]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 text-xs font-bold uppercase tracking-wider">
               ⚡ Ultra-Low Latency OTP API
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
               Developer-First WhatsApp OTP &amp; Notification Engine
             </h2>
-            <p className="text-slate-600 text-base leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
               Drop-in authentication using the official Meta WhatsApp Cloud API. Guaranteed 99.9% deliverability with sub-3-second latencies and zero telecom DLT headaches.
             </p>
 
             <div className="grid grid-cols-2 gap-4 pt-2">
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                <span className="text-2xl font-black text-slate-900 block">&lt; 2.4s</span>
-                <span className="text-xs text-slate-500 font-semibold">Average Delivery Time</span>
+              <div className="p-4 bg-slate-100/80 dark:bg-white/[0.04] rounded-2xl border border-slate-200/80 dark:border-white/10">
+                <span className="text-2xl font-black text-slate-900 dark:text-white block">&lt; 2.4s</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Average Delivery Time</span>
               </div>
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                <span className="text-2xl font-black text-emerald-600 block">60% Less</span>
-                <span className="text-xs text-slate-500 font-semibold">Cost vs Telecom SMS</span>
+              <div className="p-4 bg-slate-100/80 dark:bg-white/[0.04] rounded-2xl border border-slate-200/80 dark:border-white/10">
+                <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 block">60% Less</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Cost vs Telecom SMS</span>
               </div>
             </div>
 
             <div className="pt-2 flex items-center gap-4">
               <Link
                 href="/dashboard/setup"
-                className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl shadow-xs transition"
+                className="px-6 py-3 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 font-bold text-sm rounded-xl shadow-xs transition"
               >
                 View Setup Guide ➔
               </Link>
               <Link
                 href="/signup"
-                className="px-6 py-3 border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-sm rounded-xl transition"
+                className="px-6 py-3 border border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-bold text-sm rounded-xl transition"
               >
                 Get API Keys
               </Link>
@@ -1408,8 +1413,8 @@ export default function HomePage() {
           </div>
 
           {/* Interactive Code Box */}
-          <div className="bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-800 text-white font-mono text-xs overflow-hidden">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+          <div className="bg-[#0B101D] rounded-3xl p-6 shadow-2xl border border-white/10 text-white font-mono text-xs overflow-hidden">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-red-500 inline-block" />
                 <span className="w-3 h-3 rounded-full bg-amber-500 inline-block" />
@@ -1478,7 +1483,7 @@ print(res.json())`}
               </pre>
             )}
 
-            <div className="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+            <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
               <span>Status: 200 OK</span>
               <span className="text-emerald-400">⚡ Delivered in 1.48s</span>
             </div>
@@ -1486,44 +1491,44 @@ print(res.json())`}
         </div>
       </section>
 
-      {/* 12. PRICING SECTION (Apple Pro Obsidian Glass) */}
-      <section id="pricing" className="py-24 bg-[#070B14] border-t border-white/[0.08] relative overflow-hidden">
+      {/* 12. PRICING SECTION */}
+      <section id="pricing" className="py-24 bg-slate-100/50 dark:bg-[#070B14] border-t border-slate-200/80 dark:border-white/[0.08] relative overflow-hidden transition-colors duration-300">
         {/* Ambient Spotlights */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald-500/[0.08] rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald-500/[0.08] rounded-full blur-[140px] pointer-events-none opacity-50 dark:opacity-100" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12 relative z-10">
           <div className="space-y-4 max-w-3xl mx-auto">
-            <span className="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3.5 py-1.5 rounded-full border border-emerald-500/25 shadow-inner">
+            <span className="text-xs font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-3.5 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-500/25 shadow-inner">
               Honest Platform Plans &amp; Usage Fuel
             </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
               Predictable Flat Plans. <span className="apple-text-gradient">Wholesale Per-Message Rates.</span>
             </h2>
-            <p className="text-slate-300 text-sm sm:text-base">
+            <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">
               No hidden telecom markups, no lock-ins. Flat monthly dashboard subscription + transparent prepaid message wallet.
             </p>
           </div>
 
           {/* PER-MESSAGE TRANSPARENT FUEL BAR */}
-          <div className="bg-[#0B101D]/90 rounded-2xl border border-white/[0.08] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl max-w-4xl mx-auto">
-            <div className="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-3 text-center">
+          <div className="bg-white dark:bg-[#0B101D]/90 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] p-5 shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl max-w-4xl mx-auto">
+            <div className="text-xs font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-3 text-center">
               Direct Meta Message Fuel Rates (Prepaid Wallet · Instant GST Tax Invoice)
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center divide-y sm:divide-y-0 sm:divide-x divide-white/[0.08]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-white/[0.08]">
               <div className="pt-2 sm:pt-0 sm:px-4 space-y-1">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block">Authentication (OTP)</span>
-                <div className="text-2xl font-black text-emerald-400">₹0.20 <sub className="text-[11px] font-bold text-emerald-300 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-400">/ delivered</span></div>
-                <p className="text-[11px] text-slate-400">One-time login passwords, zero-delay Meta priority</p>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide block">Authentication (OTP)</span>
+                <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">₹0.20 <sub className="text-[11px] font-bold text-emerald-500 dark:text-emerald-300 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-400">/ delivered</span></div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">One-time login passwords, zero-delay Meta priority</p>
               </div>
               <div className="pt-2 sm:pt-0 sm:px-4 space-y-1">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block">Utility Messages</span>
-                <div className="text-2xl font-black text-sky-400">₹0.18 <sub className="text-[11px] font-bold text-sky-300 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-400">/ delivered</span></div>
-                <p className="text-[11px] text-slate-400">Order confirmations, payment receipts &amp; shipping alerts</p>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide block">Utility Messages</span>
+                <div className="text-2xl font-black text-sky-600 dark:text-sky-400">₹0.18 <sub className="text-[11px] font-bold text-sky-500 dark:text-sky-300 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-400">/ delivered</span></div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">Order confirmations, payment receipts &amp; shipping alerts</p>
               </div>
               <div className="pt-2 sm:pt-0 sm:px-4 space-y-1">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block">Marketing Broadcasts</span>
-                <div className="text-2xl font-black text-white">₹1.15 <sub className="text-[11px] font-bold text-slate-300 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-400">/ delivered</span></div>
-                <p className="text-[11px] text-slate-400">Promotional campaigns, product launches &amp; re-engagement</p>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide block">Marketing Broadcasts</span>
+                <div className="text-2xl font-black text-slate-900 dark:text-white">₹1.15 <sub className="text-[11px] font-bold text-slate-600 dark:text-slate-300 bottom-0 uppercase tracking-tight">+ GST</sub> <span className="text-xs font-semibold text-slate-400">/ delivered</span></div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">Promotional campaigns, product launches &amp; re-engagement</p>
               </div>
             </div>
           </div>
@@ -1531,156 +1536,156 @@ print(res.json())`}
           {/* 4 PRICING TIERS */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch">
             {/* Tier 1: Starter Trial */}
-            <div className="bg-[#0B101D]/90 rounded-3xl p-7 border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl space-y-6 flex flex-col justify-between hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-300">
+            <div className="bg-white dark:bg-[#0B101D]/90 rounded-3xl p-7 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl space-y-6 flex flex-col justify-between hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-300">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Starter Trial</span>
-                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">One-Time Only</span>
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider block">Starter Trial</span>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">One-Time Only</span>
                 </div>
                 <div className="flex items-baseline gap-1.5 flex-wrap">
-                  <span className="text-4xl font-black text-white">₹500</span>
-                  <sub className="text-xs font-black text-slate-400 bottom-0 uppercase tracking-tight">+ GST</sub>
-                  <span className="text-xs text-slate-400">/ 30-day trial</span>
+                  <span className="text-4xl font-black text-slate-900 dark:text-white">₹500</span>
+                  <sub className="text-xs font-black text-slate-500 dark:text-slate-400 bottom-0 uppercase tracking-tight">+ GST</sub>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">/ 30-day trial</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-white/[0.05] text-slate-200 text-[11px] font-black border border-white/10">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.05] text-slate-800 dark:text-slate-200 text-[11px] font-black border border-slate-200 dark:border-white/10">
                   ⚡ 30 Days Full Platform Access
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   1 Owner account for 30 days. Perfect for developers &amp; testing OTP API integration.
                 </p>
-                <div className="pt-2 border-t border-white/10">
-                  <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider block mb-2">Included Features:</span>
-                  <ul className="space-y-2 text-xs text-slate-300 font-medium">
-                    <li className="flex items-center gap-2 font-bold text-white"><span className="text-emerald-400 font-bold">✓</span> 1 User (Owner profile only)</li>
-                    <li className="flex items-center gap-2 text-slate-300"><span className="text-emerald-400 font-bold">✓</span> Pay-as-you-go message fuel (Recharge anytime)</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Full WhatsApp OTP API Setup</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Utility &amp; Order Messages</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Basic Campaign Studio &amp; Templates</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> REST API &amp; Webhooks</li>
-                    <li className="flex items-center gap-2 text-slate-500"><span className="text-slate-500">·</span> Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
+                <div className="pt-2 border-t border-slate-100 dark:border-white/10">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider block mb-2">Included Features:</span>
+                  <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300 font-medium">
+                    <li className="flex items-center gap-2 font-bold text-slate-900 dark:text-white"><span className="text-emerald-500 font-bold">✓</span> 1 User (Owner profile only)</li>
+                    <li className="flex items-center gap-2 text-slate-600 dark:text-slate-300"><span className="text-emerald-500 font-bold">✓</span> Pay-as-you-go message fuel (Recharge anytime)</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> Full WhatsApp OTP API Setup</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> Utility &amp; Order Messages</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> Basic Campaign Studio &amp; Templates</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> REST API &amp; Webhooks</li>
+                    <li className="flex items-center gap-2 text-slate-400 dark:text-slate-500"><span className="text-slate-400 dark:text-slate-500">·</span> Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
                   </ul>
                 </div>
               </div>
               <button
                 onClick={() => openPlanModal("TRIAL_VS_BASIC")}
-                className="w-full text-center py-3 rounded-xl border border-white/20 font-bold text-xs text-white hover:bg-white/10 transition block cursor-pointer"
+                className="w-full text-center py-3 rounded-xl border border-slate-300 dark:border-white/20 font-bold text-xs text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition block cursor-pointer"
               >
                 Start 30-Day Trial (₹500 + GST)
               </button>
             </div>
 
             {/* Tier 2: Basic Business */}
-            <div className="bg-[#0B101D]/90 rounded-3xl p-7 border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl space-y-6 flex flex-col justify-between hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-300">
+            <div className="bg-white dark:bg-[#0B101D]/90 rounded-3xl p-7 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl space-y-6 flex flex-col justify-between hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-300">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Basic Plan</span>
-                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Growth</span>
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider block">Basic Plan</span>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">Growth</span>
                 </div>
                 <div className="flex items-baseline gap-1.5 flex-wrap">
-                  <span className="text-4xl font-black text-white">₹1,000</span>
-                  <sub className="text-xs font-black text-slate-400 bottom-0 uppercase tracking-tight">+ GST</sub>
-                  <span className="text-xs text-slate-400">/ month</span>
+                  <span className="text-4xl font-black text-slate-900 dark:text-white">₹1,000</span>
+                  <sub className="text-xs font-black text-slate-500 dark:text-slate-400 bottom-0 uppercase tracking-tight">+ GST</sub>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">/ month</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 text-[11px] font-black border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 text-[11px] font-black border border-emerald-200 dark:border-emerald-500/30 shadow-xs dark:shadow-[0_0_10px_rgba(16,185,129,0.15)]">
                   🎁 Includes ₹50 Free Wallet Balance (~250 OTPs)
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   For growing businesses needing WhatsApp OTP, utility receipts, and team inbox collaboration.
                 </p>
-                <div className="pt-2 border-t border-white/10">
-                  <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider block mb-2">Included Features:</span>
-                  <ul className="space-y-2 text-xs text-slate-300 font-medium">
-                    <li className="flex items-center gap-2 font-bold text-white"><span className="text-emerald-400">✓</span> 1 Owner + 3 Support Seats (4 total)</li>
-                    <li className="flex items-center gap-2 font-bold text-emerald-300"><span className="text-emerald-400 font-black">✓</span> ₹50 Starter Wallet Balance Included (~250 OTPs)</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> WhatsApp OTP API Integration</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Order &amp; Payment Utility Messages</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Basic Campaign Broadcast Setup</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Template Approval Dashboard</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Live Chat Team Inbox &amp; Routing</li>
-                    <li className="flex items-center gap-2 text-slate-500"><span className="text-slate-500">·</span> Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
+                <div className="pt-2 border-t border-slate-100 dark:border-white/10">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider block mb-2">Included Features:</span>
+                  <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300 font-medium">
+                    <li className="flex items-center gap-2 font-bold text-slate-900 dark:text-white"><span className="text-emerald-500">✓</span> 1 Owner + 3 Support Seats (4 total)</li>
+                    <li className="flex items-center gap-2 font-bold text-emerald-700 dark:text-emerald-300"><span className="text-emerald-500 font-black">✓</span> ₹50 Starter Wallet Balance Included (~250 OTPs)</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> WhatsApp OTP API Integration</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> Order &amp; Payment Utility Messages</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> Basic Campaign Broadcast Setup</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> Template Approval Dashboard</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> Live Chat Team Inbox &amp; Routing</li>
+                    <li className="flex items-center gap-2 text-slate-400 dark:text-slate-500"><span className="text-slate-400 dark:text-slate-500">·</span> Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
                   </ul>
                 </div>
               </div>
               <button
                 onClick={() => openPlanModal("BASIC_VS_PRO")}
-                className="w-full text-center py-3 rounded-xl border border-white/20 font-bold text-xs text-white hover:bg-white/10 transition block cursor-pointer"
+                className="w-full text-center py-3 rounded-xl border border-slate-300 dark:border-white/20 font-bold text-xs text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition block cursor-pointer"
               >
                 Get Basic Plan (₹1,000 + GST) ➔
               </button>
             </div>
 
-            {/* Tier 3: Professional Scale (Featured Apple Glass) */}
-            <div className="relative bg-gradient-to-b from-[#0F1E1B] to-[#0A1513] rounded-3xl p-7 text-white shadow-[0_12px_45px_rgba(16,185,129,0.25)] space-y-6 flex flex-col justify-between border-2 border-emerald-400 ring-1 ring-emerald-400/50 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-emerald-300 before:to-transparent hover:-translate-y-1 transition-all duration-300">
-              <div className="absolute -top-3.5 right-6 bg-gradient-to-r from-emerald-400 to-[#25D366] text-slate-950 font-black text-[10px] tracking-wider uppercase px-3.5 py-1 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.5)]">
+            {/* Tier 3: Professional Scale */}
+            <div className="relative bg-gradient-to-b from-white to-emerald-50/40 dark:from-[#0F1E1B] dark:to-[#0A1513] rounded-3xl p-7 text-slate-900 dark:text-white shadow-lg dark:shadow-[0_12px_45px_rgba(16,185,129,0.25)] space-y-6 flex flex-col justify-between border-2 border-emerald-500 dark:border-emerald-400 ring-1 ring-emerald-400/50 hover:-translate-y-1 transition-all duration-300">
+              <div className="absolute -top-3.5 right-6 bg-gradient-to-r from-emerald-500 to-[#25D366] text-slate-950 font-black text-[10px] tracking-wider uppercase px-3.5 py-1 rounded-full shadow-md">
                 MOST POPULAR
               </div>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider block">Professional Plan</span>
-                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-200 border border-emerald-700">Scaling</span>
+                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider block">Professional Plan</span>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700">Scaling</span>
                 </div>
                 <div className="flex items-baseline gap-1.5 flex-wrap">
-                  <span className="text-4xl font-black text-white">₹2,500</span>
-                  <sub className="text-xs font-black text-emerald-300 bottom-0 uppercase tracking-tight">+ GST</sub>
-                  <span className="text-xs text-emerald-200">/ month</span>
+                  <span className="text-4xl font-black text-slate-900 dark:text-white">₹2,500</span>
+                  <sub className="text-xs font-black text-emerald-700 dark:text-emerald-300 bottom-0 uppercase tracking-tight">+ GST</sub>
+                  <span className="text-xs text-emerald-800 dark:text-emerald-200">/ month</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-400 text-slate-950 text-[11px] font-black shadow-[0_0_12px_rgba(52,211,153,0.3)]">
-                  🎁 Includes ₹100 Free Wallet Balance + OBA Filing Support
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-500 text-slate-950 text-[11px] font-black shadow-sm">
+                  🎁 Includes ₹100 Free Wallet Balance + OBA Support
                 </div>
-                <p className="text-xs text-emerald-100 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-emerald-100 leading-relaxed">
                   For brands scaling e-commerce automations, AI support assistants, and intelligent funnel logic.
                 </p>
-                <div className="pt-2 border-t border-emerald-800/80">
-                  <span className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider block mb-2">Everything in Basic, plus:</span>
-                  <ul className="space-y-2 text-xs text-emerald-50 font-medium">
-                    <li className="flex items-center gap-2 font-bold text-white"><span className="text-emerald-400">✓</span> 1 Owner + 5 Support Seats (6 total)</li>
-                    <li className="flex items-center gap-2 font-bold text-emerald-300"><span className="text-emerald-400 font-black">✓</span> ₹100 Starter Wallet Balance Included (~500 OTPs)</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> E-Commerce API (Shopify/Woo/Custom)</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> AI Assistant &amp; Smart Auto-Replies</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Complex Logic Campaigns (Read-Not-Replied)</li>
-                    <li className="flex items-center gap-2 font-bold text-emerald-300"><span className="text-emerald-400 font-bold">✓</span> Meta Official Green Tick (OBA) Filing Support Included (Subject to Meta approval)</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Priority Meta API Throughput Queuing</li>
+                <div className="pt-2 border-t border-emerald-200 dark:border-emerald-800/80">
+                  <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider block mb-2">Everything in Basic, plus:</span>
+                  <ul className="space-y-2 text-xs text-slate-700 dark:text-emerald-50 font-medium">
+                    <li className="flex items-center gap-2 font-bold text-slate-900 dark:text-white"><span className="text-emerald-500 dark:text-emerald-400">✓</span> 1 Owner + 5 Support Seats (6 total)</li>
+                    <li className="flex items-center gap-2 font-bold text-emerald-700 dark:text-emerald-300"><span className="text-emerald-500 dark:text-emerald-400 font-black">✓</span> ₹100 Starter Wallet Balance Included (~500 OTPs)</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 dark:text-emerald-400 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 dark:text-emerald-400 font-bold">✓</span> E-Commerce API (Shopify/Woo/Custom)</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 dark:text-emerald-400 font-bold">✓</span> AI Assistant &amp; Smart Auto-Replies</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 dark:text-emerald-400 font-bold">✓</span> Complex Logic Campaigns (Read-Not-Replied)</li>
+                    <li className="flex items-center gap-2 font-bold text-emerald-700 dark:text-emerald-300"><span className="text-emerald-500 dark:text-emerald-400 font-bold">✓</span> Meta Official Green Tick (OBA) Filing Support Included (Subject to Meta approval)</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 dark:text-emerald-400 font-bold">✓</span> Priority Meta API Throughput Queuing</li>
                   </ul>
                 </div>
               </div>
               <button
                 onClick={() => openPlanModal("PRO_VS_CUSTOM")}
-                className="w-full text-center py-3.5 rounded-xl bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(52,211,153,0.4)] transition block cursor-pointer"
+                className="w-full text-center py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-xs shadow-md transition block cursor-pointer"
               >
                 Upgrade to Professional (₹2,500 + GST) ➔
               </button>
             </div>
 
             {/* Tier 4: Enterprise Custom */}
-            <div className="bg-[#0B101D]/90 rounded-3xl p-7 border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl space-y-6 flex flex-col justify-between hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-300">
+            <div className="bg-white dark:bg-[#0B101D]/90 rounded-3xl p-7 border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl space-y-6 flex flex-col justify-between hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-300">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Enterprise Level</span>
-                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-white/10 text-slate-300 border border-white/15">Custom</span>
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider block">Enterprise Level</span>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/15">Custom</span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-white">Custom</span>
+                  <span className="text-4xl font-black text-slate-900 dark:text-white">Custom</span>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   For high-throughput enterprises, banking, large e-commerce &amp; omnichannel contact centers.
                 </p>
-                <div className="pt-2 border-t border-white/10">
-                  <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider block mb-2">Enterprise Features:</span>
-                  <ul className="space-y-2 text-xs text-slate-300 font-medium">
-                    <li className="flex items-center gap-2 font-bold text-slate-100"><span className="text-emerald-400">✓</span> Unlimited Seats &amp; Custom Roles</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Dedicated Meta WABA Tier Acceleration</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 50+ Messages / Sec Throttle Speed</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Custom CRM &amp; ERP Direct Integrations</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 99.99% Uptime SLA Guarantee</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 24/7 Dedicated Account Manager</li>
+                <div className="pt-2 border-t border-slate-100 dark:border-white/10">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider block mb-2">Enterprise Features:</span>
+                  <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300 font-medium">
+                    <li className="flex items-center gap-2 font-bold text-slate-900 dark:text-slate-100"><span className="text-emerald-500">✓</span> Unlimited Seats &amp; Custom Roles</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> Dedicated Meta WABA Tier Acceleration</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> 50+ Messages / Sec Throttle Speed</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> Custom CRM &amp; ERP Direct Integrations</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> 99.99% Uptime SLA Guarantee</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> 24/7 Dedicated Account Manager</li>
                   </ul>
                 </div>
               </div>
               <button
                 onClick={() => openPlanModal("ENTERPRISE")}
-                className="w-full text-center py-3 rounded-xl border border-white/20 font-bold text-xs text-white hover:bg-white/10 transition block cursor-pointer"
+                className="w-full text-center py-3 rounded-xl border border-slate-300 dark:border-white/20 font-bold text-xs text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition block cursor-pointer"
               >
                 Enquire Now ➔
               </button>
@@ -1692,10 +1697,10 @@ print(res.json())`}
       {/* 13. FAQ SECTION */}
       <section className="py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="text-center space-y-3">
-          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
             Frequently Asked Questions
           </h2>
-          <p className="text-slate-400 text-sm">Everything you need to know about our WhatsApp Cloud Platform</p>
+          <p className="text-slate-600 dark:text-slate-400 text-sm">Everything you need to know about our WhatsApp Cloud Platform</p>
         </div>
 
         <div className="space-y-4">
@@ -1725,16 +1730,16 @@ print(res.json())`}
               a: "For just ₹500 + GST, you get complete 30-day platform access for 1 user (owner account). This includes official WhatsApp OTP API setup, order & utility updates, template approval dashboard, and campaign broadcast studio. After 30 days, you can choose to continue with our Basic (₹1,000 + GST/mo) or Professional (₹2,500 + GST/mo) plan."
             }
           ].map((faq, idx) => (
-            <div key={idx} className="bg-[#0B101D]/80 rounded-2xl border border-white/10 overflow-hidden shadow-inner backdrop-blur-xl">
+            <div key={idx} className="bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs dark:shadow-inner backdrop-blur-xl">
               <button
                 onClick={() => toggleFaq(idx)}
-                className="w-full p-5 text-left font-bold text-white text-sm flex items-center justify-between hover:bg-white/[0.04] transition"
+                className="w-full p-5 text-left font-bold text-slate-900 dark:text-white text-sm flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/[0.04] transition"
               >
                 <span>{faq.q}</span>
-                <span className="text-slate-400 font-normal text-lg">{openFaq === idx ? "−" : "+"}</span>
+                <span className="text-slate-500 dark:text-slate-400 font-normal text-lg">{openFaq === idx ? "−" : "+"}</span>
               </button>
               {openFaq === idx && (
-                <div className="px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-white/10 pt-3">
+                <div className="px-5 pb-5 text-xs text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-white/10 pt-3">
                   {faq.a}
                 </div>
               )}

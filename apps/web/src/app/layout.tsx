@@ -1,6 +1,7 @@
 import "./globals.css";
 import React from "react";
 import { ModalProvider } from "@/context/ModalContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export const metadata = {
   metadataBase: new URL("https://digitalbeings.in"),
@@ -23,11 +24,33 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var storedTheme = localStorage.getItem('db_theme');
+                if (storedTheme === 'light') {
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.setAttribute('data-theme', 'light');
+                  document.documentElement.style.colorScheme = 'light';
+                } else {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.setAttribute('data-theme', 'dark');
+                  document.documentElement.style.colorScheme = 'dark';
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body>
-        <ModalProvider>
-          {children}
-        </ModalProvider>
+        <ThemeProvider>
+          <ModalProvider>
+            {children}
+          </ModalProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -26,6 +26,7 @@ import {
   SuperAdminIcon,
   BellIcon
 } from "@/components/Icons";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const MODULE_TITLES: Record<string, string> = {
   "/dashboard": "Overview",
@@ -155,9 +156,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const navLinkClass = (path: string) => {
     const isActive = pathname === path;
     if (isActive) {
-      return "relative flex items-center justify-between px-3.5 py-2.5 bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent text-white font-bold border border-emerald-500/30 rounded-xl text-[13.5px] shadow-[0_0_20px_rgba(16,185,129,0.18)] ring-1 ring-emerald-500/20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]";
+      return "relative flex items-center justify-between px-3.5 py-2.5 bg-emerald-500/15 dark:bg-gradient-to-r dark:from-emerald-500/20 dark:via-emerald-500/10 dark:to-transparent text-emerald-900 dark:text-slate-100 font-bold border border-emerald-500/30 rounded-xl text-[13.5px] shadow-[0_0_20px_rgba(16,185,129,0.14)] ring-1 ring-emerald-500/20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]";
     }
-    return "relative flex items-center justify-between px-3.5 py-2.5 text-slate-400 hover:text-slate-100 hover:bg-white/[0.05] hover:border-white/[0.08] border border-transparent rounded-xl text-[13.5px] font-medium transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group";
+    return "relative flex items-center justify-between px-3.5 py-2.5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100/80 dark:hover:bg-white/[0.05] hover:border-slate-200/80 dark:hover:border-white/[0.08] border border-transparent rounded-xl text-[13.5px] font-medium transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group";
   };
 
   const isCurrentPathAllowed = canAccessPath(pathname);
@@ -186,10 +187,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     hasAccess("super_admin");
 
   return (
-    <div className="min-h-screen bg-[#04060c] flex text-slate-100">
+    <div className="min-h-screen bg-[#fbfbfd] dark:bg-[#04060c] flex text-slate-900 dark:text-slate-100 transition-colors duration-300">
       {/* Sidebar with Apple VisionOS/macOS-Grade Frosted Glass Navigation */}
-      <aside className="w-[276px] bg-[#070b14]/95 backdrop-blur-2xl border-r border-white/[0.08] hidden md:flex flex-col shrink-0 h-screen sticky top-0 shadow-[4px_0_30px_rgba(0,0,0,0.6)] z-20 text-slate-200">
-        <div className="h-16 flex items-center px-5 border-b border-white/[0.08] shrink-0">
+      <aside className="w-[276px] bg-white/90 dark:bg-[#070b14]/95 backdrop-blur-2xl border-r border-slate-200/80 dark:border-white/[0.08] hidden md:flex flex-col shrink-0 h-screen sticky top-0 shadow-[4px_0_24px_rgba(0,0,0,0.03)] dark:shadow-[4px_0_30px_rgba(0,0,0,0.6)] z-20 text-slate-700 dark:text-slate-200 transition-colors duration-300">
+        <div className="h-16 flex items-center px-5 border-b border-slate-200/80 dark:border-white/[0.08] shrink-0">
           <Link href="/dashboard" className="flex items-center gap-3 group">
             <div className="relative">
               <img
@@ -197,13 +198,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 alt="Digital Beings"
                 className="w-8 h-8 rounded-xl object-contain shadow-md shrink-0 group-hover:scale-105 transition duration-300"
               />
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#070b14] shadow-[0_0_8px_#34d399]" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#070b14] shadow-[0_0_8px_#10b981]" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-black text-base tracking-tight text-white leading-tight flex items-center gap-1">
+              <span className="font-bold text-base tracking-tight text-slate-900 dark:text-slate-100 leading-tight flex items-center gap-1">
                 Digital<span className="apple-emerald-gradient">Beings</span>
               </span>
-              <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">
                 Secure • Connect • Grow
               </span>
             </div>
@@ -215,7 +216,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* Section 1: Core Messaging */}
           {showConversationsSection && (
             <div className="space-y-1">
-              <p className="px-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+              <p className="px-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pb-1 flex items-center gap-2">
                 <span>Conversations &amp; Engagement</span>
               </p>
               <Link href="/dashboard" className={navLinkClass("/dashboard")}>
@@ -377,51 +378,54 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Current Active Role Footer Tag */}
-        <div className="p-3.5 bg-white/[0.02] border-t border-white/[0.08] shrink-0">
+        <div className="p-3.5 bg-slate-50/80 dark:bg-white/[0.02] border-t border-slate-200/80 dark:border-white/[0.08] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/[0.1] flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
-              <ShieldCheckIcon className="w-4 h-4 text-emerald-400" />
+            <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.1] flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-inner">
+              <ShieldCheckIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider">Active Workspace Role</span>
-              <span className="text-xs font-bold text-white truncate">{activeRoleDef.badge}</span>
+              <span className="text-[10px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-wider">Active Workspace Role</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white truncate">{activeRoleDef.badge}</span>
             </div>
           </div>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#04060c] text-slate-100 relative">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#fbfbfd] dark:bg-[#04060c] text-slate-900 dark:text-slate-100 relative transition-colors duration-300">
         {/* Ambient Spotlights */}
-        <div className="absolute top-0 left-1/4 w-[600px] h-[300px] bg-emerald-500/[0.04] rounded-full blur-[120px] pointer-events-none -z-0" />
-        <div className="absolute top-1/3 right-10 w-[500px] h-[300px] bg-blue-500/[0.03] rounded-full blur-[140px] pointer-events-none -z-0" />
+        <div className="absolute top-0 left-1/4 w-[600px] h-[300px] bg-emerald-500/[0.05] dark:bg-emerald-500/[0.04] rounded-full blur-[120px] pointer-events-none -z-0" />
+        <div className="absolute top-1/3 right-10 w-[500px] h-[300px] bg-blue-500/[0.04] dark:bg-blue-500/[0.03] rounded-full blur-[140px] pointer-events-none -z-0" />
 
         {/* Apple Frosted Glass Header */}
-        <header className="bg-[#070b14]/80 backdrop-blur-2xl border-b border-white/[0.08] flex items-center px-4 sm:px-8 py-3.5 justify-between shrink-0 shadow-[0_4px_30px_rgba(0,0,0,0.3)] z-30 min-h-[4.5rem]">
+        <header className="bg-white/80 dark:bg-[#070b14]/85 backdrop-blur-2xl border-b border-slate-200/80 dark:border-white/[0.08] flex items-center px-4 sm:px-8 py-3.5 justify-between shrink-0 shadow-[0_2px_15px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.3)] z-30 min-h-[4.5rem] transition-colors duration-300">
           <div className="flex flex-col justify-center">
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] flex items-center gap-2 transition-colors">
               <span>{currentModuleTitle}</span>
             </h1>
             {currentModuleSubtitle && (
-              <p className="text-[12.5px] text-slate-400 font-medium mt-0.5 hidden sm:block">
+              <p className="text-[12.5px] text-slate-500 dark:text-slate-400/90 font-medium mt-0.5 hidden sm:block">
                 {currentModuleSubtitle}
               </p>
             )}
           </div>
 
-          <div className="flex items-center space-x-3 sm:space-x-4">
+          <div className="flex items-center space-x-2.5 sm:space-x-3.5">
             {/* Meta Live Status Capsule */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] text-[11px] font-semibold text-slate-300">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></span>
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.08] text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
               <span>Meta Cloud API Live • 99.99%</span>
             </div>
 
+            {/* Apple-Style Theme Toggle */}
+            <ThemeToggle />
+
             {/* Apple-Style Prepaid Balance Pill */}
-            <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.1] hover:border-emerald-500/40 pl-3 pr-1.5 py-1 rounded-full text-xs font-semibold text-slate-200 shadow-inner backdrop-blur-md transition-all">
+            <div className="flex items-center gap-2 bg-slate-100/90 dark:bg-white/[0.05] border border-slate-200/80 dark:border-white/[0.1] hover:border-emerald-500/40 pl-3 pr-1.5 py-1 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xs dark:shadow-inner backdrop-blur-md transition-all">
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span className="font-extrabold text-white">₹{walletBalance}</span>
-                <span className="text-slate-400 hidden md:inline">Balance</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="font-extrabold text-slate-900 dark:text-white">₹{walletBalance}</span>
+                <span className="text-slate-500 dark:text-slate-400 hidden md:inline">Balance</span>
               </span>
               <Link
                 href="/dashboard/wallet"
@@ -434,24 +438,24 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             {/* Notification Bell */}
             <Link
               href="/dashboard/logs"
-              className="w-9 h-9 rounded-full bg-white/[0.05] border border-white/[0.1] hover:border-white/[0.2] hover:bg-white/[0.1] flex items-center justify-center text-slate-300 hover:text-white transition shadow-inner cursor-pointer relative"
+              className="w-9 h-9 rounded-full bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.1] hover:border-slate-300 dark:hover:border-white/[0.2] hover:bg-slate-200/70 dark:hover:bg-white/[0.1] flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition shadow-xs dark:shadow-inner cursor-pointer relative"
               title="Audit Logs & Activity"
             >
               <BellIcon className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]"></span>
             </Link>
 
             {/* Settings Icon */}
             <Link
               href="/dashboard/settings"
-              className="w-9 h-9 rounded-full bg-white/[0.05] border border-white/[0.1] hover:border-white/[0.2] hover:bg-white/[0.1] flex items-center justify-center text-slate-300 hover:text-white transition shadow-inner cursor-pointer"
+              className="w-9 h-9 rounded-full bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.1] hover:border-slate-300 dark:hover:border-white/[0.2] hover:bg-slate-200/70 dark:hover:bg-white/[0.1] flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition shadow-xs dark:shadow-inner cursor-pointer"
               title="Workspace Settings"
             >
               <SettingsIcon className="w-4 h-4" />
             </Link>
 
             {/* User Avatar Circle */}
-            <div className="flex items-center gap-2 pl-2 border-l border-white/[0.1]">
+            <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-white/[0.1]">
               <div
                 className="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-[0_0_14px_rgba(16,185,129,0.3)] select-none border border-white/20"
                 title={userName}
@@ -460,7 +464,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               </div>
               <button
                 onClick={handleLogout}
-                className="text-slate-400 hover:text-rose-400 text-xs font-bold transition hidden sm:inline cursor-pointer"
+                className="text-slate-500 dark:text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 text-xs font-bold transition hidden sm:inline cursor-pointer"
                 title="Logout"
               >
                 Logout
