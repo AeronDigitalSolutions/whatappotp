@@ -23,10 +23,10 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fbfbfd] dark:bg-[#04060c] text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-black overflow-x-hidden w-full relative transition-colors duration-300">
+    <div className="min-h-screen bg-[#fbfbfd] dark:bg-[#04060c] text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-black overflow-x-clip w-full relative transition-colors duration-300">
       {/* 1. TOP ANNOUNCEMENT BANNER */}
       {showOfferBar && (
-        <div className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white text-xs sm:text-sm font-semibold py-2 px-4 shadow-[0_4px_20px_rgba(16,185,129,0.25)] flex items-center justify-between relative z-50 w-full overflow-hidden border-b border-emerald-400/30">
+        <div className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white text-xs sm:text-sm font-semibold py-2 px-4 shadow-[0_4px_20px_rgba(16,185,129,0.25)] flex items-center justify-between relative z-40 w-full overflow-hidden border-b border-emerald-400/30">
           <div className="flex-1 flex items-center justify-center gap-2 sm:gap-3 flex-wrap text-center max-w-7xl mx-auto">
             <span className="font-medium">Start your 30-Day WhatsApp Platform Trial for just <strong className="font-black text-white underline decoration-emerald-200">₹500 + GST</strong> 🎉</span>
             <button
@@ -46,8 +46,8 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 2. NAVIGATION BAR */}
-      <header className="sticky top-0 z-40 bg-white/85 dark:bg-[#070b14]/85 backdrop-blur-2xl border-b border-slate-200/80 dark:border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-colors duration-300 w-full">
+      {/* 2. NAVIGATION BAR (STICKY HEADER) */}
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#070b14]/90 backdrop-blur-2xl border-b border-slate-200/80 dark:border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-colors duration-300 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
