@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getApiUrl } from "@/lib/api";
 import SocialAuthButtons from "@/components/SocialAuthButtons";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -57,8 +58,13 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#fbfbfd] dark:bg-[#030712] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300 relative">
+      {/* Floating Theme Switcher */}
+      <div className="fixed top-5 right-5 z-50">
+        <ThemeToggle />
+      </div>
+
+      <div className="max-w-md w-full bg-white dark:bg-[#0B101D] rounded-3xl shadow-xl dark:shadow-2xl border border-slate-200/90 dark:border-white/10 p-8 sm:p-10 space-y-6 transition-colors duration-300">
         <div className="flex flex-col items-center text-center">
           <Link href="/" className="inline-block mb-3 group">
             <img
@@ -67,32 +73,38 @@ export default function SignupPage() {
               className="w-12 h-12 rounded-2xl object-contain shadow-xs group-hover:scale-105 transition mx-auto"
             />
           </Link>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Create your account</h1>
-          <p className="text-slate-500 mt-1 text-xs">Get started with <b>Digital Beings</b> today</p>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Create your account</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-1 text-xs">
+            Get started with <b className="text-slate-900 dark:text-slate-200">Digital Beings</b> today
+          </p>
         </div>
 
         {selectedPlan && (
-          <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-3 rounded-xl text-xs flex items-center justify-between shadow-2xs">
-            <div className="flex items-center gap-2">
-              <span className="text-base">🎁</span>
+          <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-950 dark:text-emerald-200 p-3.5 rounded-2xl text-xs flex items-center justify-between shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <span className="text-lg">🎁</span>
               <div>
-                <span className="font-extrabold block">
+                <span className="font-extrabold block text-emerald-900 dark:text-emerald-100">
                   {selectedPlan === "TRIAL" && "Starter Trial (₹500 / 30 Days)"}
                   {selectedPlan === "BASIC" && "Basic Business Plan (₹1,000 / month)"}
                   {selectedPlan === "PROFESSIONAL" && "Professional Plan (₹2,500 / month)"}
                 </span>
-                <span className="text-[11px] text-emerald-700">
+                <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium">
                   Account will be linked for instant activation on dashboard
                 </span>
               </div>
             </div>
-            <span className="px-2 py-0.5 bg-emerald-200 text-emerald-900 font-extrabold rounded text-[10px]">
+            <span className="px-2 py-0.5 bg-emerald-200 dark:bg-emerald-800 text-emerald-900 dark:text-emerald-100 font-extrabold rounded text-[10px] tracking-wide">
               SELECTED
             </span>
           </div>
         )}
 
-        {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm border border-red-100">{error}</div>}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-300 p-3.5 rounded-xl text-sm border border-red-200 dark:border-red-800/50">
+            {error}
+          </div>
+        )}
 
         {/* Social Logins (Google & Meta) */}
         <SocialAuthButtons onError={setError} onLoading={setLoading} loading={loading} />
@@ -100,49 +112,65 @@ export default function SignupPage() {
         {/* Standard Email / Password Form */}
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Full Name</label>
+            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1.5">
+              Full Name
+            </label>
             <input
               type="text"
               required
               value={name}
               onChange={e => setName(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+              className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs"
               placeholder="Aryan Gautam"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email</label>
+            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1.5">
+              Email
+            </label>
             <input
               type="email"
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+              className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs"
               placeholder="you@company.com"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Password</label>
+            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1.5">
+              Password
+            </label>
             <input
               type="password"
               required
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+              className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs"
               placeholder="••••••••"
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#154336] hover:bg-[#0f3127] text-white font-bold py-2.5 rounded-xl transition disabled:opacity-50 text-sm shadow-sm cursor-pointer"
+            className="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold py-3 rounded-xl transition disabled:opacity-50 text-sm shadow-md hover:shadow-emerald-500/20 cursor-pointer flex items-center justify-center gap-2"
           >
-            {loading ? "Creating account..." : selectedPlan ? `Proceed to Activate ${selectedPlan === "TRIAL" ? "₹500 Trial" : selectedPlan === "BASIC" ? "₹1,000 Plan" : "₹2,500 Plan"}` : "Create Account"}
+            {loading
+              ? "Creating account..."
+              : selectedPlan
+              ? `Proceed to Activate ${selectedPlan === "TRIAL" ? "₹500 Trial" : selectedPlan === "BASIC" ? "₹1,000 Plan" : "₹2,500 Plan"}`
+              : "Create Account"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-slate-500">
-          Already have an account? <Link href={`/login${selectedPlan ? `?plan=${selectedPlan}` : ''}`} className="text-blue-600 hover:text-blue-700 font-semibold">Sign in</Link>
+        <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+          Already have an account?{" "}
+          <Link
+            href={`/login${selectedPlan ? `?plan=${selectedPlan}` : ''}`}
+            className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-bold hover:underline"
+          >
+            Sign in
+          </Link>
         </p>
       </div>
     </div>

@@ -140,15 +140,20 @@ html:not(.dark) table tbody td {
 }
 
 /* Light mode form controls */
+html:not(.dark) {
+  color-scheme: light !important;
+}
+
 html:not(.dark) input:not([type="checkbox"]):not([type="radio"]),
 html:not(.dark) textarea,
 html:not(.dark) select {
-  color: #000000 !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
 }
 
 html:not(.dark) input::placeholder,
 html:not(.dark) textarea::placeholder {
-  color: #475569 !important;
+  color: #94a3b8 !important;
 }
 
 /* Crisp Card Borders in Light Mode */

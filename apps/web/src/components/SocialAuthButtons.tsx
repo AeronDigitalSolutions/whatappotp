@@ -139,7 +139,7 @@ export default function SocialAuthButtons({ onError, onLoading, loading }: Socia
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold py-2.5 px-4 rounded-xl shadow-xs transition disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 bg-white dark:bg-[#111827] border border-slate-300 dark:border-white/10 hover:border-slate-400 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-[#1a2333] text-slate-800 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl shadow-xs transition disabled:opacity-50 cursor-pointer"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -167,7 +167,7 @@ export default function SocialAuthButtons({ onError, onLoading, loading }: Socia
           type="button"
           onClick={handleMetaLogin}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 bg-[#0866FF] hover:bg-[#0756d6] text-white font-semibold py-2.5 px-4 rounded-xl shadow-xs transition disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 bg-[#0866FF] hover:bg-[#0756d6] text-white font-semibold py-2.5 px-4 rounded-xl shadow-xs transition disabled:opacity-50 cursor-pointer"
         >
           <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -178,11 +178,11 @@ export default function SocialAuthButtons({ onError, onLoading, loading }: Socia
 
       {/* Divider */}
       <div className="relative flex py-2 items-center">
-        <div className="flex-grow border-t border-slate-200"></div>
-        <span className="flex-shrink mx-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <div className="flex-grow border-t border-slate-200 dark:border-white/10"></div>
+        <span className="flex-shrink mx-4 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
           or continue with email
         </span>
-        <div className="flex-grow border-t border-slate-200"></div>
+        <div className="flex-grow border-t border-slate-200 dark:border-white/10"></div>
       </div>
     </>
   );
