@@ -420,7 +420,7 @@ print(f"OTP Delivered in {response.latency_ms}ms! ID: {response.message_id}")`
                       FL
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-xs leading-none">Flora Luxe Official ✓</h4>
+                      <h4 className="font-bold text-xs leading-none text-white !text-white">Flora Luxe Official ✓</h4>
                       <span className="text-[10px] text-emerald-200">Official Business Account</span>
                     </div>
                   </div>
@@ -1513,10 +1513,10 @@ print(f"OTP Delivered in {response.latency_ms}ms! ID: {response.message_id}")`
       <section className="bg-[#f5f5f7] dark:bg-[#080d1a] border-t border-slate-200/80 dark:border-white/[0.08] py-20 sm:py-28 transition-colors duration-200">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-3xl bg-slate-950 dark:bg-[#0B101D] text-white p-10 sm:p-16 border border-slate-800 dark:border-white/10 shadow-xl text-center space-y-6">
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-white !text-white">
               Ready to 5X Your Revenue With WhatsApp?
             </h2>
-            <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            <p className="text-slate-200 !text-slate-200 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
               Join 210,000+ businesses automating broadcasts, OTPs, and customer support with official Meta Cloud APIs.
             </p>
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">

@@ -88,44 +88,80 @@ html:not(.dark) body {
   color: #000000;
 }
 
-/* Headings in Light Mode: True Pitch Black */
-html:not(.dark) h1,
-html:not(.dark) h2,
-html:not(.dark) h3,
-html:not(.dark) h4,
-html:not(.dark) h5,
-html:not(.dark) h6 {
+/* Headings in Light Mode: True Pitch Black on light surfaces */
+html:not(.dark) h1:not(.text-white):not([class*="text-emerald-"]):not([class*="text-slate-100"]):not([class*="text-slate-200"]),
+html:not(.dark) h2:not(.text-white):not([class*="text-emerald-"]):not([class*="text-slate-100"]):not([class*="text-slate-200"]),
+html:not(.dark) h3:not(.text-white):not([class*="text-emerald-"]):not([class*="text-slate-100"]):not([class*="text-slate-200"]),
+html:not(.dark) h4:not(.text-white):not([class*="text-emerald-"]):not([class*="text-slate-100"]):not([class*="text-slate-200"]),
+html:not(.dark) h5:not(.text-white):not([class*="text-emerald-"]):not([class*="text-slate-100"]):not([class*="text-slate-200"]),
+html:not(.dark) h6:not(.text-white):not([class*="text-emerald-"]):not([class*="text-slate-100"]):not([class*="text-slate-200"]) {
   color: #000000;
 }
 
-/* Elevate Faint Grays to Deep Solid Black & High-Contrast Tones in Light Mode */
-html:not(.dark) .text-slate-950,
-html:not(.dark) .text-slate-900,
-html:not(.dark) .text-slate-800,
-html:not(.dark) .text-gray-950,
-html:not(.dark) .text-gray-900,
-html:not(.dark) .text-gray-800 {
+/* Explicit white text and headings inside dark surfaces in Light Mode */
+html:not(.dark) .text-white,
+html:not(.dark) h1.text-white,
+html:not(.dark) h2.text-white,
+html:not(.dark) h3.text-white,
+html:not(.dark) h4.text-white,
+html:not(.dark) h5.text-white,
+html:not(.dark) h6.text-white,
+html:not(.dark) .bg-slate-950 h1,
+html:not(.dark) .bg-slate-950 h2,
+html:not(.dark) .bg-slate-950 h3,
+html:not(.dark) .bg-slate-950 h4,
+html:not(.dark) .bg-slate-900 h1,
+html:not(.dark) .bg-slate-900 h2,
+html:not(.dark) .bg-slate-900 h3,
+html:not(.dark) .bg-slate-900 h4,
+html:not(.dark) .bg-black h1,
+html:not(.dark) .bg-black h2,
+html:not(.dark) .bg-black h3,
+html:not(.dark) .bg-black h4,
+html:not(.dark) [class*="bg-slate-950"] h1,
+html:not(.dark) [class*="bg-slate-950"] h2,
+html:not(.dark) [class*="bg-slate-950"] h3,
+html:not(.dark) [class*="bg-slate-950"] h4,
+html:not(.dark) [class*="bg-slate-900"] h1,
+html:not(.dark) [class*="bg-slate-900"] h2,
+html:not(.dark) [class*="bg-slate-900"] h3,
+html:not(.dark) [class*="bg-slate-900"] h4,
+html:not(.dark) [class*="bg-black"] h1,
+html:not(.dark) [class*="bg-black"] h2,
+html:not(.dark) [class*="bg-black"] h3,
+html:not(.dark) [class*="bg-black"] h4 {
+  color: #ffffff !important;
+}
+
+html:not(.dark) [class*="bg-slate-950"] p,
+html:not(.dark) [class*="bg-slate-900"] p,
+html:not(.dark) [class*="bg-black"] p,
+html:not(.dark) .bg-slate-950 p,
+html:not(.dark) .bg-slate-900 p,
+html:not(.dark) .bg-black p {
+  color: #e2e8f0 !important;
+}
+
+/* Elevate Faint Grays to Deep Solid Black & High-Contrast Tones on Light Surfaces */
+html:not(.dark) :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not([class*="bg-black"]) > .text-slate-950,
+html:not(.dark) :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not([class*="bg-black"]) > .text-slate-900,
+html:not(.dark) :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not([class*="bg-black"]) > .text-slate-800 {
   color: #000000 !important;
 }
 
-html:not(.dark) .text-slate-700,
-html:not(.dark) .text-gray-700 {
+html:not(.dark) :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not([class*="bg-black"]) > .text-slate-700 {
   color: #0a0e17 !important;
 }
 
-html:not(.dark) .text-slate-600,
-html:not(.dark) .text-gray-600 {
+html:not(.dark) :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not([class*="bg-black"]) > .text-slate-600 {
   color: #111827 !important;
 }
 
-html:not(.dark) .text-slate-500,
-html:not(.dark) .text-gray-500,
-html:not(.dark) .text-muted-foreground {
+html:not(.dark) :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not([class*="bg-black"]) > .text-slate-500 {
   color: #1f2937 !important;
 }
 
-html:not(.dark) .text-slate-400,
-html:not(.dark) .text-gray-400 {
+html:not(.dark) :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not([class*="bg-black"]) > .text-slate-400 {
   color: #374151 !important;
 }
 
