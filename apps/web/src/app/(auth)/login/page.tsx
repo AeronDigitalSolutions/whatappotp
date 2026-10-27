@@ -47,6 +47,12 @@ export default function LoginPage() {
         localStorage.setItem("db_preview_role", "SUPER_ADMIN");
       }
 
+      if (data.user?.isEmployee || data.user?.role === "EMPLOYEE" || data.user?.email === "emp@digitalbeings.com") {
+        localStorage.setItem("db_preview_role", "EMPLOYEE");
+        router.push("/office");
+        return;
+      }
+
       if (selectedPlan) {
         localStorage.setItem("pendingPlan", selectedPlan);
         router.push("/dashboard?activate=true");

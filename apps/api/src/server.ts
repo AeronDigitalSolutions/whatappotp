@@ -92,10 +92,102 @@ fastify.post("/v1/auth/signup", async (request: any, reply) => {
   }
 });
 
+// --- OFFICE / EMPLOYEE SEEDING & AUTHENTICATION ---
+async function ensureDefaultOfficeEmployee() {
+  try {
+    const empEmail = "emp@digitalbeings.com";
+    const empPassword = "emp@123";
+    let user = await prisma.user.findUnique({ where: { email: empEmail } });
+    if (!user) {
+      const hashedPassword = hashPassword(empPassword);
+      user = await prisma.user.create({
+        data: {
+          id: crypto.randomUUID(),
+          email: empEmail,
+          passwordHash: hashedPassword,
+          name: "Office Sales Representative",
+          emailVerified: true,
+          isSuperAdmin: false
+        }
+      });
+      console.log("[OfficeAuth] Created default employee account:", empEmail);
+    } else {
+      // Ensure password is up to date
+      const passwordMatches = user.passwordHash && verifyPassword(empPassword, user.passwordHash);
+      if (!passwordMatches) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            passwordHash: hashPassword(empPassword)
+          }
+        });
+        console.log("[OfficeAuth] Updated password for default employee:", empEmail);
+      }
+    }
+
+    // Ensure employee has an organization and project
+    let membership = await prisma.membership.findFirst({
+      where: { userId: user.id },
+      include: { organization: { include: { projects: true } } }
+    });
+
+    if (!membership) {
+      const org = await prisma.organization.create({
+        data: {
+          id: crypto.randomUUID(),
+          name: "Digital Beings Office Operations",
+          plan: "ENTERPRISE",
+          seatsAllowed: 100,
+          extraSeats: 0,
+          obaIncluded: true
+        }
+      });
+
+      membership = await prisma.membership.create({
+        data: {
+          id: crypto.randomUUID(),
+          userId: user.id,
+          organizationId: org.id,
+          role: "employee"
+        },
+        include: { organization: { include: { projects: true } } }
+      });
+
+      await prisma.project.create({
+        data: {
+          id: crypto.randomUUID(),
+          organizationId: org.id,
+          name: "Sales & Client Management"
+        }
+      });
+
+      await prisma.wallet.create({
+        data: {
+          id: crypto.randomUUID(),
+          organizationId: org.id,
+          balance: 999999.00
+        }
+      });
+      console.log("[OfficeAuth] Assigned Office Operations organization to employee");
+    }
+    return { user, membership };
+  } catch (err: any) {
+    console.error("[OfficeAuth] Error ensuring default employee:", err.message);
+    return null;
+  }
+}
+
 fastify.post("/v1/auth/login", async (request: any, reply) => {
   const { email, password } = request.body;
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const cleanEmail = String(email || "").trim().toLowerCase();
+
+    // If logging in as office employee, guarantee account existence
+    if (cleanEmail === "emp@digitalbeings.com") {
+      await ensureDefaultOfficeEmployee();
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: cleanEmail } });
     if (!user || !user.passwordHash || !verifyPassword(password, user.passwordHash)) {
       return reply.status(401).send({ error: "Invalid email or password" });
     }
@@ -107,7 +199,25 @@ fastify.post("/v1/auth/login", async (request: any, reply) => {
 
     if (!membership) return reply.status(500).send({ error: "Account corrupted (no organization)" });
 
-    return reply.send({ success: true, user: { id: user.id, email: user.email, name: user.name, isSuperAdmin: Boolean(user.isSuperAdmin) }, projectId: membership.organization.projects[0]?.id, organizationId: membership.organizationId });
+    const isEmployee = cleanEmail === "emp@digitalbeings.com" || 
+                       cleanEmail.endsWith("@digitalbeings.com") ||
+                       membership.role === "employee" ||
+                       membership.role === "office";
+
+    return reply.send({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        isSuperAdmin: Boolean(user.isSuperAdmin),
+        isEmployee: Boolean(isEmployee),
+        userType: isEmployee ? "EMPLOYEE" : "USER",
+        role: isEmployee ? "EMPLOYEE" : (user.isSuperAdmin ? "SUPER_ADMIN" : membership.role)
+      },
+      projectId: membership.organization.projects[0]?.id,
+      organizationId: membership.organizationId
+    });
   } catch (err: any) {
     return reply.status(500).send({ error: "Login failed: " + err.message });
   }
@@ -5077,6 +5187,7 @@ fastify.delete("/v1/team/member/:membershipId", async (request: any, reply) => {
 const start = async () => {
   try {
     await initCampaignTables();
+    await ensureDefaultOfficeEmployee();
     const portEnv = process.env.PORT;
     if (portEnv && isNaN(Number(portEnv))) {
        await fastify.listen({ path: portEnv }); 
