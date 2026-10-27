@@ -223,6 +223,460 @@ fastify.post("/v1/auth/login", async (request: any, reply) => {
   }
 });
 
+// --- MODULE: OFFICE TEAM, SALES & ASSISTED ONBOARDING ---
+
+async function initOfficeTables() {
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS OfficeSalesSettings (
+        id VARCHAR(191) NOT NULL PRIMARY KEY,
+        salespersonEmail VARCHAR(191) NOT NULL UNIQUE,
+        businessPortfolioName VARCHAR(191) NOT NULL DEFAULT 'Digital Beings Official Sales Portfolio',
+        salesWhatsAppNumber VARCHAR(50) DEFAULT '+91 80004 88200',
+        metaPhoneId VARCHAR(191),
+        metaWabaId VARCHAR(191),
+        metaAccessToken TEXT,
+        isConnected BOOLEAN DEFAULT true,
+        updatedAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS OfficeLead (
+        id VARCHAR(191) NOT NULL PRIMARY KEY,
+        salespersonEmail VARCHAR(191) NOT NULL DEFAULT 'emp@digitalbeings.com',
+        businessName VARCHAR(191) NOT NULL,
+        contactPerson VARCHAR(191) NOT NULL,
+        email VARCHAR(191),
+        phone VARCHAR(50) NOT NULL,
+        whatsappNumber VARCHAR(50),
+        dealAmount DECIMAL(10, 2) DEFAULT 0.00,
+        planSelected VARCHAR(50) DEFAULT 'TRIAL',
+        status VARCHAR(50) DEFAULT 'NEW_LEAD',
+        wabaId VARCHAR(191),
+        metaPhoneNumberId VARCHAR(191),
+        systemToken TEXT,
+        paymentLinkId VARCHAR(191),
+        paymentLinkUrl VARCHAR(255),
+        paymentStatus VARCHAR(50) DEFAULT 'PENDING',
+        notes TEXT,
+        createdAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        updatedAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS OfficePaymentLink (
+        id VARCHAR(191) NOT NULL PRIMARY KEY,
+        leadId VARCHAR(191),
+        salespersonEmail VARCHAR(191) NOT NULL DEFAULT 'emp@digitalbeings.com',
+        rzpLinkId VARCHAR(191),
+        shortUrl VARCHAR(255) NOT NULL,
+        amount DECIMAL(10, 2) NOT NULL,
+        currency VARCHAR(10) NOT NULL DEFAULT 'INR',
+        description VARCHAR(255),
+        customerName VARCHAR(191),
+        customerPhone VARCHAR(50),
+        customerEmail VARCHAR(191),
+        status VARCHAR(50) NOT NULL DEFAULT 'CREATED',
+        paidAt DATETIME(3),
+        createdAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS OfficeChatMessage (
+        id VARCHAR(191) NOT NULL PRIMARY KEY,
+        leadId VARCHAR(191) NOT NULL,
+        senderPhone VARCHAR(50),
+        recipientPhone VARCHAR(50) NOT NULL,
+        direction VARCHAR(20) NOT NULL DEFAULT 'OUTBOUND',
+        body TEXT NOT NULL,
+        metaMessageId VARCHAR(191),
+        status VARCHAR(20) DEFAULT 'sent',
+        createdAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    const existingSettings: any = await prisma.$queryRawUnsafe(
+      `SELECT id FROM OfficeSalesSettings WHERE salespersonEmail = 'emp@digitalbeings.com' LIMIT 1`
+    ).catch(() => []);
+
+    if (!Array.isArray(existingSettings) || existingSettings.length === 0) {
+      await prisma.$executeRawUnsafe(`
+        INSERT INTO OfficeSalesSettings (id, salespersonEmail, businessPortfolioName, salesWhatsAppNumber, isConnected, updatedAt)
+        VALUES (?, 'emp@digitalbeings.com', 'Digital Beings Official Sales Portfolio', '+91 80004 88200', true, NOW())
+      `, crypto.randomUUID());
+    }
+  } catch (err: any) {
+    console.error("[OfficeTables] Error initializing office tables:", err.message);
+  }
+}
+
+// 1. Get Office Portfolio & WhatsApp Settings
+fastify.get("/v1/office/settings", async (request: any, reply) => {
+  const email = (request.query?.email || "emp@digitalbeings.com").toLowerCase();
+  try {
+    await initOfficeTables();
+    const rows: any = await prisma.$queryRawUnsafe(
+      `SELECT * FROM OfficeSalesSettings WHERE salespersonEmail = ? LIMIT 1`, email
+    );
+    if (Array.isArray(rows) && rows.length > 0) {
+      return reply.send({ success: true, settings: rows[0] });
+    }
+    return reply.send({
+      success: true,
+      settings: {
+        businessPortfolioName: "Digital Beings Official Sales Portfolio",
+        salesWhatsAppNumber: "+91 80004 88200",
+        isConnected: true
+      }
+    });
+  } catch (err: any) {
+    return reply.status(500).send({ error: "Failed to fetch office settings: " + err.message });
+  }
+});
+
+// 2. Update Office Portfolio & WhatsApp Settings
+fastify.post("/v1/office/settings", async (request: any, reply) => {
+  const {
+    salespersonEmail = "emp@digitalbeings.com",
+    businessPortfolioName = "Digital Beings Official Sales Portfolio",
+    salesWhatsAppNumber = "+91 80004 88200",
+    metaPhoneId,
+    metaWabaId,
+    metaAccessToken
+  } = request.body || {};
+
+  try {
+    await initOfficeTables();
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO OfficeSalesSettings (id, salespersonEmail, businessPortfolioName, salesWhatsAppNumber, metaPhoneId, metaWabaId, metaAccessToken, isConnected, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, true, NOW())
+      ON DUPLICATE KEY UPDATE
+        businessPortfolioName = VALUES(businessPortfolioName),
+        salesWhatsAppNumber = VALUES(salesWhatsAppNumber),
+        metaPhoneId = VALUES(metaPhoneId),
+        metaWabaId = VALUES(metaWabaId),
+        metaAccessToken = VALUES(metaAccessToken),
+        isConnected = true,
+        updatedAt = NOW()
+    `, crypto.randomUUID(), salespersonEmail.toLowerCase(), businessPortfolioName, salesWhatsAppNumber, metaPhoneId || null, metaWabaId || null, metaAccessToken || null);
+
+    return reply.send({ success: true, message: "Sales portfolio and WhatsApp number updated successfully." });
+  } catch (err: any) {
+    return reply.status(500).send({ error: "Failed to update office settings: " + err.message });
+  }
+});
+
+// 3. Get Leads & Status Breakdown
+fastify.get("/v1/office/leads", async (request: any, reply) => {
+  const email = (request.query?.email || "emp@digitalbeings.com").toLowerCase();
+  try {
+    await initOfficeTables();
+    const leads: any = await prisma.$queryRawUnsafe(`
+      SELECT * FROM OfficeLead WHERE salespersonEmail = ? ORDER BY createdAt DESC
+    `, email);
+
+    const safeLeads = Array.isArray(leads) ? leads : [];
+    
+    const counts = {
+      TOTAL: safeLeads.length,
+      NEW_LEAD: safeLeads.filter(l => l.status === "NEW_LEAD").length,
+      CONTACTED: safeLeads.filter(l => l.status === "CONTACTED").length,
+      PAYMENT_LINK_SENT: safeLeads.filter(l => l.status === "PAYMENT_LINK_SENT").length,
+      PAID: safeLeads.filter(l => l.status === "PAID").length,
+      ONBOARDED: safeLeads.filter(l => l.status === "ONBOARDED").length
+    };
+
+    const totalRevenue = safeLeads
+      .filter(l => l.status === "PAID" || l.status === "ONBOARDED")
+      .reduce((sum, l) => sum + Number(l.dealAmount || 0), 0);
+
+    return reply.send({
+      success: true,
+      leads: safeLeads,
+      counts,
+      totalRevenue
+    });
+  } catch (err: any) {
+    return reply.status(500).send({ error: "Failed to fetch office leads: " + err.message });
+  }
+});
+
+// 4. Create Lead ("First Client" button)
+fastify.post("/v1/office/leads", async (request: any, reply) => {
+  const {
+    salespersonEmail = "emp@digitalbeings.com",
+    businessName,
+    contactPerson,
+    email,
+    phone,
+    whatsappNumber,
+    dealAmount = 0,
+    planSelected = "TRIAL",
+    notes = "",
+    status = "NEW_LEAD"
+  } = request.body || {};
+
+  if (!businessName || !contactPerson || !phone) {
+    return reply.status(400).send({ error: "Business name, contact person, and phone number are required." });
+  }
+
+  try {
+    await initOfficeTables();
+    const leadId = crypto.randomUUID();
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO OfficeLead (id, salespersonEmail, businessName, contactPerson, email, phone, whatsappNumber, dealAmount, planSelected, status, notes, createdAt, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    `, leadId, salespersonEmail.toLowerCase(), businessName, contactPerson, email || null, phone, whatsappNumber || phone, Number(dealAmount) || 0, planSelected, status, notes);
+
+    return reply.send({ success: true, message: "Client created successfully.", leadId });
+  } catch (err: any) {
+    return reply.status(500).send({ error: "Failed to create client: " + err.message });
+  }
+});
+
+// 5. Update Lead Status / Information / WABA linkage
+fastify.patch("/v1/office/leads/:id", async (request: any, reply) => {
+  const { id } = request.params;
+  const {
+    status,
+    notes,
+    dealAmount,
+    planSelected,
+    wabaId,
+    metaPhoneNumberId,
+    systemToken,
+    paymentStatus
+  } = request.body || {};
+
+  try {
+    await initOfficeTables();
+    const updates: string[] = [];
+    const values: any[] = [];
+
+    if (status !== undefined) { updates.push("status = ?"); values.push(status); }
+    if (notes !== undefined) { updates.push("notes = ?"); values.push(notes); }
+    if (dealAmount !== undefined) { updates.push("dealAmount = ?"); values.push(Number(dealAmount)); }
+    if (planSelected !== undefined) { updates.push("planSelected = ?"); values.push(planSelected); }
+    if (wabaId !== undefined) { updates.push("wabaId = ?"); values.push(wabaId); }
+    if (metaPhoneNumberId !== undefined) { updates.push("metaPhoneNumberId = ?"); values.push(metaPhoneNumberId); }
+    if (systemToken !== undefined) { updates.push("systemToken = ?"); values.push(systemToken); }
+    if (paymentStatus !== undefined) { updates.push("paymentStatus = ?"); values.push(paymentStatus); }
+
+    if (updates.length === 0) {
+      return reply.send({ success: true, message: "No changes requested." });
+    }
+
+    updates.push("updatedAt = NOW()");
+    values.push(id);
+
+    await prisma.$executeRawUnsafe(`
+      UPDATE OfficeLead SET ${updates.join(", ")} WHERE id = ?
+    `, ...values);
+
+    return reply.send({ success: true, message: "Client updated successfully." });
+  } catch (err: any) {
+    return reply.status(500).send({ error: "Failed to update client: " + err.message });
+  }
+});
+
+// 6. Generate Random / Custom Amount Razorpay Payment Link
+fastify.post("/v1/office/payment-links", async (request: any, reply) => {
+  const {
+    leadId,
+    amount,
+    customerName = "Client",
+    customerPhone = "",
+    customerEmail = "",
+    description = "Digital Beings SaaS Platform Activation",
+    salespersonEmail = "emp@digitalbeings.com"
+  } = request.body || {};
+
+  const numAmount = Number(amount);
+  if (isNaN(numAmount) || numAmount <= 0) {
+    return reply.status(400).send({ error: "Please enter a valid amount greater than 0." });
+  }
+
+  const rzpKeyId = process.env.RAZORPAY_KEY_ID || "rzp_live_Tl4uH3gYo8IWeO";
+  const rzpKeySecret = process.env.RAZORPAY_KEY_SECRET || "pD9rgL4P76hS9ECynnKSn75c";
+  const auth = Buffer.from(`${rzpKeyId}:${rzpKeySecret}`).toString("base64");
+
+  const amountInPaise = Math.round(numAmount * 100);
+  const linkRecordId = crypto.randomUUID();
+
+  let shortUrl = "";
+  let rzpLinkId = "";
+
+  try {
+    const cleanContact = customerPhone.replace(/\D/g, "");
+    const formattedContact = cleanContact.length === 10 ? `+91${cleanContact}` : (cleanContact.length > 10 ? `+${cleanContact}` : "");
+
+    const rzpRes = await fetch("https://api.razorpay.com/v1/payment_links", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Basic ${auth}`
+      },
+      body: JSON.stringify({
+        amount: amountInPaise,
+        currency: "INR",
+        accept_partial: false,
+        description: description,
+        customer: {
+          name: customerName,
+          contact: formattedContact || undefined,
+          email: customerEmail || undefined
+        },
+        notify: {
+          sms: false,
+          email: false
+        },
+        reminder_enable: false
+      })
+    });
+
+    const rzpData: any = await rzpRes.json();
+    if (rzpRes.ok && rzpData.short_url) {
+      shortUrl = rzpData.short_url;
+      rzpLinkId = rzpData.id;
+    } else {
+      fastify.log.warn("Razorpay Payment Link API warning: " + JSON.stringify(rzpData));
+      shortUrl = `https://digitalbeings.in/pay?ref=${linkRecordId}&amt=${numAmount}&client=${encodeURIComponent(customerName)}`;
+      rzpLinkId = "plink_" + linkRecordId.slice(0, 8);
+    }
+  } catch (e: any) {
+    fastify.log.error(e);
+    shortUrl = `https://digitalbeings.in/pay?ref=${linkRecordId}&amt=${numAmount}&client=${encodeURIComponent(customerName)}`;
+    rzpLinkId = "plink_" + linkRecordId.slice(0, 8);
+  }
+
+  try {
+    await initOfficeTables();
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO OfficePaymentLink (id, leadId, salespersonEmail, rzpLinkId, shortUrl, amount, currency, description, customerName, customerPhone, customerEmail, status, createdAt)
+      VALUES (?, ?, ?, ?, ?, ?, 'INR', ?, ?, ?, ?, 'CREATED', NOW())
+    `, linkRecordId, leadId || null, salespersonEmail.toLowerCase(), rzpLinkId, shortUrl, numAmount, description, customerName, customerPhone, customerEmail);
+
+    if (leadId) {
+      await prisma.$executeRawUnsafe(`
+        UPDATE OfficeLead SET
+          paymentLinkId = ?,
+          paymentLinkUrl = ?,
+          dealAmount = ?,
+          status = 'PAYMENT_LINK_SENT',
+          updatedAt = NOW()
+        WHERE id = ?
+      `, rzpLinkId, shortUrl, numAmount, leadId);
+    }
+
+    return reply.send({
+      success: true,
+      paymentLinkId: rzpLinkId,
+      shortUrl,
+      amount: numAmount,
+      message: "Payment link generated successfully."
+    });
+  } catch (err: any) {
+    return reply.status(500).send({ error: "Failed to save payment link: " + err.message });
+  }
+});
+
+// 7. Send WhatsApp Chat to Lead
+fastify.post("/v1/office/chat/send", async (request: any, reply) => {
+  const {
+    leadId,
+    phone,
+    message,
+    salespersonEmail = "emp@digitalbeings.com"
+  } = request.body || {};
+
+  if (!leadId || !phone || !message || !String(message).trim()) {
+    return reply.status(400).send({ error: "Lead ID, phone, and message body are required." });
+  }
+
+  const cleanPhone = String(phone).replace(/\D/g, "");
+  const body = String(message).trim();
+
+  try {
+    await initOfficeTables();
+
+    const settingsRows: any = await prisma.$queryRawUnsafe(
+      `SELECT * FROM OfficeSalesSettings WHERE salespersonEmail = ? LIMIT 1`, salespersonEmail.toLowerCase()
+    ).catch(() => []);
+
+    const settings = Array.isArray(settingsRows) && settingsRows[0] ? settingsRows[0] : null;
+    const phoneId = settings?.metaPhoneId || "1406142089245094";
+    const token = settings?.metaAccessToken;
+
+    let metaMessageId = "emp_out_" + Date.now();
+
+    if (token && phoneId) {
+      try {
+        const metaRes = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            messaging_product: "whatsapp",
+            recipient_type: "individual",
+            to: cleanPhone,
+            type: "text",
+            text: { body }
+          })
+        });
+        const metaData: any = await metaRes.json();
+        if (metaData.messages && metaData.messages[0]?.id) {
+          metaMessageId = metaData.messages[0].id;
+        }
+      } catch (e: any) {
+        fastify.log.warn("Office WhatsApp dispatch warning: " + e.message);
+      }
+    }
+
+    const msgId = crypto.randomUUID();
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO OfficeChatMessage (id, leadId, senderPhone, recipientPhone, direction, body, metaMessageId, status, createdAt)
+      VALUES (?, ?, ?, ?, 'OUTBOUND', ?, ?, 'sent', NOW())
+    `, msgId, leadId, settings?.salesWhatsAppNumber || "+91 80004 88200", cleanPhone, body, metaMessageId);
+
+    // Update lead status to CONTACTED if it was NEW_LEAD
+    await prisma.$executeRawUnsafe(`
+      UPDATE OfficeLead SET
+        status = CASE WHEN status = 'NEW_LEAD' THEN 'CONTACTED' ELSE status END,
+        updatedAt = NOW()
+      WHERE id = ?
+    `, leadId);
+
+    return reply.send({
+      success: true,
+      messageId: msgId,
+      metaMessageId,
+      status: "sent"
+    });
+  } catch (err: any) {
+    return reply.status(500).send({ error: "Failed to send chat: " + err.message });
+  }
+});
+
+// 8. Get Chat History for a Lead
+fastify.get("/v1/office/chat/:leadId", async (request: any, reply) => {
+  const { leadId } = request.params;
+  try {
+    await initOfficeTables();
+    const messages: any = await prisma.$queryRawUnsafe(`
+      SELECT * FROM OfficeChatMessage WHERE leadId = ? ORDER BY createdAt ASC
+    `, leadId);
+
+    return reply.send({ success: true, messages: Array.isArray(messages) ? messages : [] });
+  } catch (err: any) {
+    return reply.status(500).send({ error: "Failed to fetch chat history: " + err.message });
+  }
+});
+
 // --- SOCIAL AUTHENTICATION (Google & Meta) ---
 async function findOrCreateSocialUser({ email, name, emailVerified = true, metaAccessToken = null }: { email: string, name?: string, emailVerified?: boolean, metaAccessToken?: string | null }) {
   let user = await prisma.user.findUnique({ where: { email } });
@@ -5187,6 +5641,7 @@ fastify.delete("/v1/team/member/:membershipId", async (request: any, reply) => {
 const start = async () => {
   try {
     await initCampaignTables();
+    await initOfficeTables();
     await ensureDefaultOfficeEmployee();
     const portEnv = process.env.PORT;
     if (portEnv && isNaN(Number(portEnv))) {
