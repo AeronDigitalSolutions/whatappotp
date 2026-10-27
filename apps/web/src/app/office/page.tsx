@@ -85,13 +85,13 @@ export default function OfficeDashboardPage() {
   // Settings & Single Business Portfolio
   const [settings, setSettings] = useState<SalesSettings>({
     businessPortfolioName: "Digital Beings Official Sales Portfolio",
-    salesWhatsAppNumber: "+91 80004 88200",
-    isConnected: true
+    salesWhatsAppNumber: "",
+    isConnected: false
   });
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [settingsForm, setSettingsForm] = useState({
     businessPortfolioName: "Digital Beings Official Sales Portfolio",
-    salesWhatsAppNumber: "+91 80004 88200",
+    salesWhatsAppNumber: "",
     metaPhoneId: "",
     metaWabaId: "",
     metaAccessToken: ""
@@ -190,10 +190,16 @@ export default function OfficeDashboardPage() {
       const setRes = await fetch(`${getApiUrl()}/v1/office/settings?email=${encodeURIComponent(email)}`);
       const setData = await setRes.json();
       if (setData.success && setData.settings) {
-        setSettings(setData.settings);
+        const rawNum = setData.settings.salesWhatsAppNumber;
+        const validNum = rawNum && rawNum !== "+91 80004 88200" ? rawNum : "";
+        setSettings({
+          ...setData.settings,
+          salesWhatsAppNumber: validNum,
+          isConnected: Boolean(validNum && validNum.trim().length > 5)
+        });
         setSettingsForm({
           businessPortfolioName: setData.settings.businessPortfolioName || "Digital Beings Official Sales Portfolio",
-          salesWhatsAppNumber: setData.settings.salesWhatsAppNumber || "+91 80004 88200",
+          salesWhatsAppNumber: validNum,
           metaPhoneId: setData.settings.metaPhoneId || "",
           metaWabaId: setData.settings.metaWabaId || "",
           metaAccessToken: setData.settings.metaAccessToken || ""
@@ -641,23 +647,36 @@ export default function OfficeDashboardPage() {
               <span className="text-[10px] font-black tracking-wider uppercase text-slate-500 dark:text-slate-400">
                 Active Portfolio
               </span>
-              <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Live
-              </span>
+              {settings.salesWhatsAppNumber ? (
+                <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Live
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 text-[10px] font-bold text-amber-500 dark:text-amber-400">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  Not Connected
+                </span>
+              )}
             </div>
             <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
               {settings.businessPortfolioName}
             </p>
             <div className="flex items-center justify-between pt-1">
-              <span className="text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-300">
-                {settings.salesWhatsAppNumber}
-              </span>
+              {settings.salesWhatsAppNumber ? (
+                <span className="text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-300">
+                  {settings.salesWhatsAppNumber}
+                </span>
+              ) : (
+                <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold italic">
+                  No Number Linked
+                </span>
+              )}
               <button
                 onClick={() => setSettingsModalOpen(true)}
                 className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
               >
-                Configure
+                {settings.salesWhatsAppNumber ? "Configure" : "+ Connect"}
               </button>
             </div>
           </div>
@@ -1057,9 +1076,18 @@ export default function OfficeDashboardPage() {
                     <span className="font-extrabold text-sm text-slate-900 dark:text-white">
                       Lead Chats
                     </span>
-                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                      {settings.salesWhatsAppNumber}
-                    </span>
+                    {settings.salesWhatsAppNumber ? (
+                      <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                        {settings.salesWhatsAppNumber}
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => setSettingsModalOpen(true)}
+                        className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer flex items-center gap-1"
+                      >
+                        <span>⚠️ Connect Number</span>
+                      </button>
+                    )}
                   </div>
                   <input
                     type="text"
@@ -1535,13 +1563,26 @@ export default function OfficeDashboardPage() {
           ========================================================================= */}
           {activeModule === "portfolio" && (
             <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-white/10 shadow-xs space-y-6 max-w-3xl">
-              <div>
-                <h2 className="text-xl font-black text-slate-900 dark:text-white">
-                  Sales Business Portfolio &amp; WhatsApp Settings
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Manage the official business portfolio and connected WhatsApp number used by your sales team to chat with prospective leads.
-                </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                    Sales Business Portfolio &amp; WhatsApp Settings
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Manage the official business portfolio and connected WhatsApp number used by your sales team to chat with prospective leads.
+                  </p>
+                </div>
+                {settings.salesWhatsAppNumber ? (
+                  <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-bold border border-emerald-200 dark:border-emerald-500/30 flex items-center gap-1.5 shrink-0 self-start sm:self-center">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Connected
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-200 dark:border-amber-500/30 flex items-center gap-1.5 shrink-0 self-start sm:self-center">
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    Not Connected
+                  </span>
+                )}
               </div>
 
               <form onSubmit={handleSaveSettings} className="space-y-4">
@@ -1563,6 +1604,7 @@ export default function OfficeDashboardPage() {
                   </label>
                   <input
                     type="text"
+                    placeholder="e.g. +91 98765 43210"
                     value={settingsForm.salesWhatsAppNumber}
                     onChange={(e) => setSettingsForm({ ...settingsForm, salesWhatsAppNumber: e.target.value })}
                     className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
@@ -2136,6 +2178,7 @@ export default function OfficeDashboardPage() {
                 </label>
                 <input
                   type="text"
+                  placeholder="e.g. +91 98765 43210"
                   value={settingsForm.salesWhatsAppNumber}
                   onChange={(e) => setSettingsForm({ ...settingsForm, salesWhatsAppNumber: e.target.value })}
                   className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"

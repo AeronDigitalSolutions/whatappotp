@@ -232,11 +232,11 @@ async function initOfficeTables() {
         id VARCHAR(191) NOT NULL PRIMARY KEY,
         salespersonEmail VARCHAR(191) NOT NULL UNIQUE,
         businessPortfolioName VARCHAR(191) NOT NULL DEFAULT 'Digital Beings Official Sales Portfolio',
-        salesWhatsAppNumber VARCHAR(50) DEFAULT '+91 80004 88200',
+        salesWhatsAppNumber VARCHAR(50) DEFAULT NULL,
         metaPhoneId VARCHAR(191),
         metaWabaId VARCHAR(191),
         metaAccessToken TEXT,
-        isConnected BOOLEAN DEFAULT true,
+        isConnected BOOLEAN DEFAULT false,
         updatedAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
@@ -305,8 +305,15 @@ async function initOfficeTables() {
     if (!Array.isArray(existingSettings) || existingSettings.length === 0) {
       await prisma.$executeRawUnsafe(`
         INSERT INTO OfficeSalesSettings (id, salespersonEmail, businessPortfolioName, salesWhatsAppNumber, isConnected, updatedAt)
-        VALUES (?, 'emp@digitalbeings.com', 'Digital Beings Official Sales Portfolio', '+91 80004 88200', true, NOW())
+        VALUES (?, 'emp@digitalbeings.com', 'Digital Beings Official Sales Portfolio', NULL, false, NOW())
       `, crypto.randomUUID());
+    } else {
+      // Clear out previous hardcoded placeholder if no custom token was configured
+      await prisma.$executeRawUnsafe(`
+        UPDATE OfficeSalesSettings
+        SET salesWhatsAppNumber = NULL, isConnected = false
+        WHERE salespersonEmail = 'emp@digitalbeings.com' AND salesWhatsAppNumber = '+91 80004 88200' AND metaAccessToken IS NULL
+      `).catch(() => {});
     }
   } catch (err: any) {
     console.error("[OfficeTables] Error initializing office tables:", err.message);
@@ -322,14 +329,21 @@ fastify.get("/v1/office/settings", async (request: any, reply) => {
       `SELECT * FROM OfficeSalesSettings WHERE salespersonEmail = ? LIMIT 1`, email
     );
     if (Array.isArray(rows) && rows.length > 0) {
-      return reply.send({ success: true, settings: rows[0] });
+      const s = rows[0];
+      return reply.send({
+        success: true,
+        settings: {
+          ...s,
+          isConnected: Boolean(s.salesWhatsAppNumber && String(s.salesWhatsAppNumber).trim())
+        }
+      });
     }
     return reply.send({
       success: true,
       settings: {
         businessPortfolioName: "Digital Beings Official Sales Portfolio",
-        salesWhatsAppNumber: "+91 80004 88200",
-        isConnected: true
+        salesWhatsAppNumber: null,
+        isConnected: false
       }
     });
   } catch (err: any) {
@@ -342,26 +356,29 @@ fastify.post("/v1/office/settings", async (request: any, reply) => {
   const {
     salespersonEmail = "emp@digitalbeings.com",
     businessPortfolioName = "Digital Beings Official Sales Portfolio",
-    salesWhatsAppNumber = "+91 80004 88200",
+    salesWhatsAppNumber = null,
     metaPhoneId,
     metaWabaId,
     metaAccessToken
   } = request.body || {};
 
+  const cleanNum = salesWhatsAppNumber && String(salesWhatsAppNumber).trim() ? String(salesWhatsAppNumber).trim() : null;
+  const isConn = Boolean(cleanNum && cleanNum.length > 5);
+
   try {
     await initOfficeTables();
     await prisma.$executeRawUnsafe(`
       INSERT INTO OfficeSalesSettings (id, salespersonEmail, businessPortfolioName, salesWhatsAppNumber, metaPhoneId, metaWabaId, metaAccessToken, isConnected, updatedAt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, true, NOW())
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
       ON DUPLICATE KEY UPDATE
         businessPortfolioName = VALUES(businessPortfolioName),
         salesWhatsAppNumber = VALUES(salesWhatsAppNumber),
         metaPhoneId = VALUES(metaPhoneId),
         metaWabaId = VALUES(metaWabaId),
         metaAccessToken = VALUES(metaAccessToken),
-        isConnected = true,
+        isConnected = VALUES(isConnected),
         updatedAt = NOW()
-    `, crypto.randomUUID(), salespersonEmail.toLowerCase(), businessPortfolioName, salesWhatsAppNumber, metaPhoneId || null, metaWabaId || null, metaAccessToken || null);
+    `, crypto.randomUUID(), salespersonEmail.toLowerCase(), businessPortfolioName, cleanNum, metaPhoneId || null, metaWabaId || null, metaAccessToken || null, isConn);
 
     return reply.send({ success: true, message: "Sales portfolio and WhatsApp number updated successfully." });
   } catch (err: any) {
