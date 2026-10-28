@@ -43,12 +43,24 @@ export default function LoginPage() {
       localStorage.setItem("projectId", data.projectId);
       localStorage.setItem("organizationId", data.organizationId);
 
-      if (data.user?.isSuperAdmin) {
+      const isOfficeStaff = Boolean(
+        data.user?.isEmployee ||
+        data.user?.officeRole ||
+        data.user?.role === "EMPLOYEE" ||
+        data.user?.role === "OFFICE_ADMIN" ||
+        data.user?.role === "OFFICE_MANAGER" ||
+        data.user?.email === "admin@digitalbeings.in" ||
+        data.user?.email === "emp@digitalbeings.in" ||
+        data.user?.email === "emp@digitalbeings.com"
+      );
+
+      if (data.user?.isSuperAdmin || data.user?.role === "OFFICE_ADMIN" || data.user?.email === "admin@digitalbeings.in") {
         localStorage.setItem("db_preview_role", "SUPER_ADMIN");
+      } else if (isOfficeStaff) {
+        localStorage.setItem("db_preview_role", "EMPLOYEE");
       }
 
-      if (data.user?.isEmployee || data.user?.role === "EMPLOYEE" || data.user?.email === "emp@digitalbeings.com") {
-        localStorage.setItem("db_preview_role", "EMPLOYEE");
+      if (isOfficeStaff) {
         router.push("/office");
         return;
       }
@@ -130,7 +142,7 @@ export default function LoginPage() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-2xs"
-              placeholder="you@company.com"
+              placeholder="admin@digitalbeings.in"
             />
           </div>
           <div>

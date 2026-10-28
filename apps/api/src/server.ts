@@ -93,55 +93,58 @@ fastify.post("/v1/auth/signup", async (request: any, reply) => {
 });
 
 // --- OFFICE / EMPLOYEE SEEDING & AUTHENTICATION ---
-async function ensureDefaultOfficeEmployee() {
+async function ensureSystemOfficeAccount(email: string, pass: string, name: string, isSuperAdmin: boolean = false) {
   try {
-    const empEmail = "emp@digitalbeings.com";
-    const empPassword = "emp@123";
-    let user = await prisma.user.findUnique({ where: { email: empEmail } });
+    const clean = email.toLowerCase().trim();
+    let user = await prisma.user.findUnique({ where: { email: clean } });
     if (!user) {
-      const hashedPassword = hashPassword(empPassword);
       user = await prisma.user.create({
         data: {
           id: crypto.randomUUID(),
-          email: empEmail,
-          passwordHash: hashedPassword,
-          name: "Office Sales Representative",
+          email: clean,
+          passwordHash: hashPassword(pass),
+          name,
           emailVerified: true,
-          isSuperAdmin: false
+          isSuperAdmin
         }
       });
-      console.log("[OfficeAuth] Created default employee account:", empEmail);
+      console.log(`[OfficeAuth] Created system account: ${clean}`);
     } else {
-      // Ensure password is up to date
-      const passwordMatches = user.passwordHash && verifyPassword(empPassword, user.passwordHash);
-      if (!passwordMatches) {
+      const passwordMatches = user.passwordHash && verifyPassword(pass, user.passwordHash);
+      if (!passwordMatches || user.isSuperAdmin !== isSuperAdmin) {
         await prisma.user.update({
           where: { id: user.id },
           data: {
-            passwordHash: hashPassword(empPassword)
+            passwordHash: hashPassword(pass),
+            isSuperAdmin
           }
         });
-        console.log("[OfficeAuth] Updated password for default employee:", empEmail);
+        console.log(`[OfficeAuth] Synced credentials for system account: ${clean}`);
       }
     }
 
-    // Ensure employee has an organization and project
     let membership = await prisma.membership.findFirst({
       where: { userId: user.id },
       include: { organization: { include: { projects: true } } }
     });
 
     if (!membership) {
-      const org = await prisma.organization.create({
-        data: {
-          id: crypto.randomUUID(),
-          name: "Digital Beings Office Operations",
-          plan: "ENTERPRISE",
-          seatsAllowed: 100,
-          extraSeats: 0,
-          obaIncluded: true
-        }
+      let org = await prisma.organization.findFirst({
+        where: { name: "Digital Beings Office Operations" }
       });
+
+      if (!org) {
+        org = await prisma.organization.create({
+          data: {
+            id: crypto.randomUUID(),
+            name: "Digital Beings Office Operations",
+            plan: "ENTERPRISE",
+            seatsAllowed: 100,
+            extraSeats: 0,
+            obaIncluded: true
+          }
+        });
+      }
 
       membership = await prisma.membership.create({
         data: {
@@ -157,7 +160,7 @@ async function ensureDefaultOfficeEmployee() {
         data: {
           id: crypto.randomUUID(),
           organizationId: org.id,
-          name: "Sales & Client Management"
+          name: "Sales & Operations Management"
         }
       });
 
@@ -168,12 +171,25 @@ async function ensureDefaultOfficeEmployee() {
           balance: 999999.00
         }
       });
-      console.log("[OfficeAuth] Assigned Office Operations organization to employee");
+      console.log(`[OfficeAuth] Initialized organization & wallet for ${clean}`);
     }
-    return { user, membership };
   } catch (err: any) {
-    console.error("[OfficeAuth] Error ensuring default employee:", err.message);
-    return null;
+    console.error(`[OfficeAuth] Error ensuring system account ${email}:`, err.message);
+  }
+}
+
+async function ensureDefaultOfficeEmployee() {
+  try {
+    // 1. Executive Super Admin (Owner controlling all managers)
+    await ensureSystemOfficeAccount("admin@digitalbeings.in", "admin@123", "Executive Super Admin", true);
+
+    // 2. Office Manager (@digitalbeings.in)
+    await ensureSystemOfficeAccount("emp@digitalbeings.in", "emp@123", "Office Manager", false);
+
+    // 3. Office Manager alias (@digitalbeings.com)
+    await ensureSystemOfficeAccount("emp@digitalbeings.com", "emp@123", "Office Manager", false);
+  } catch (err: any) {
+    console.error("[OfficeAuth] Error ensuring default employees:", err.message);
   }
 }
 
@@ -185,8 +201,12 @@ fastify.post("/v1/auth/login", async (request: any, reply) => {
     // Guarantee office database initialization
     await initOfficeTables();
 
-    // If logging in as primary office employee, guarantee account existence
-    if (cleanEmail === "emp@digitalbeings.com") {
+    // If logging in as primary office admin or manager, guarantee account existence
+    if (
+      cleanEmail === "admin@digitalbeings.in" ||
+      cleanEmail === "emp@digitalbeings.in" ||
+      cleanEmail === "emp@digitalbeings.com"
+    ) {
       await ensureDefaultOfficeEmployee();
     }
 
@@ -203,7 +223,8 @@ fastify.post("/v1/auth/login", async (request: any, reply) => {
           allowedModules = JSON.parse(emp.allowedModules);
         } catch (e) {}
 
-        const isManager = emp.role === "OFFICE_MANAGER";
+        const isSuperAdmin = emp.role === "OFFICE_ADMIN" || cleanEmail === "admin@digitalbeings.in";
+        const isManager = emp.role === "OFFICE_MANAGER" || isSuperAdmin;
 
         return reply.send({
           success: true,
@@ -211,13 +232,16 @@ fastify.post("/v1/auth/login", async (request: any, reply) => {
             id: emp.id,
             email: emp.email,
             name: emp.name,
-            role: emp.role,
+            role: isSuperAdmin ? "OFFICE_ADMIN" : emp.role,
             officeRole: emp.role,
-            isManager,
-            isSuperAdmin: false,
+            isAdmin: Boolean(isSuperAdmin),
+            isSuperAdmin: Boolean(isSuperAdmin),
+            isManager: Boolean(isManager),
             isEmployee: true,
             userType: "EMPLOYEE",
-            allowedModules,
+            allowedModules: isSuperAdmin
+              ? ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team"]
+              : allowedModules,
             canViewAllLeads: Boolean(emp.canViewAllLeads || isManager),
             canManageSettings: Boolean(emp.canManageSettings || isManager),
             canViewRevenue: Boolean(emp.canViewRevenue || isManager)
@@ -241,7 +265,10 @@ fastify.post("/v1/auth/login", async (request: any, reply) => {
 
     if (!membership) return reply.status(500).send({ error: "Account corrupted (no organization)" });
 
-    const isEmployee = cleanEmail === "emp@digitalbeings.com" || 
+    const isEmployee = cleanEmail === "admin@digitalbeings.in" ||
+                       cleanEmail === "emp@digitalbeings.in" ||
+                       cleanEmail === "emp@digitalbeings.com" || 
+                       cleanEmail.endsWith("@digitalbeings.in") ||
                        cleanEmail.endsWith("@digitalbeings.com") ||
                        membership.role === "employee" ||
                        membership.role === "office";
@@ -289,7 +316,7 @@ async function initOfficeTables() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
 
-    const defaultManagerModules = JSON.stringify([
+    const defaultFullModules = JSON.stringify([
       "leads",
       "chat",
       "payments",
@@ -300,6 +327,33 @@ async function initOfficeTables() {
       "team"
     ]);
 
+    // 1. Seed Executive Super Admin (Owner controlling all managers)
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO OfficeEmployee (id, email, passwordHash, name, role, allowedModules, canViewAllLeads, canManageSettings, canViewRevenue, isActive, updatedAt)
+      VALUES (?, 'admin@digitalbeings.in', ?, 'Executive Super Admin', 'OFFICE_ADMIN', ?, true, true, true, true, NOW())
+      ON DUPLICATE KEY UPDATE
+        role = 'OFFICE_ADMIN',
+        allowedModules = ?,
+        canViewAllLeads = true,
+        canManageSettings = true,
+        canViewRevenue = true,
+        isActive = true
+    `, crypto.randomUUID(), hashPassword("admin@123"), defaultFullModules, defaultFullModules);
+
+    // 2. Seed Primary Office Manager (@digitalbeings.in)
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO OfficeEmployee (id, email, passwordHash, name, role, allowedModules, canViewAllLeads, canManageSettings, canViewRevenue, isActive, updatedAt)
+      VALUES (?, 'emp@digitalbeings.in', ?, 'Office Manager', 'OFFICE_MANAGER', ?, true, true, true, true, NOW())
+      ON DUPLICATE KEY UPDATE
+        role = 'OFFICE_MANAGER',
+        allowedModules = ?,
+        canViewAllLeads = true,
+        canManageSettings = true,
+        canViewRevenue = true,
+        isActive = true
+    `, crypto.randomUUID(), hashPassword("emp@123"), defaultFullModules, defaultFullModules);
+
+    // 3. Keep emp@digitalbeings.com synchronized as an alias
     await prisma.$executeRawUnsafe(`
       INSERT INTO OfficeEmployee (id, email, passwordHash, name, role, allowedModules, canViewAllLeads, canManageSettings, canViewRevenue, isActive, updatedAt)
       VALUES (?, 'emp@digitalbeings.com', ?, 'Office Manager', 'OFFICE_MANAGER', ?, true, true, true, true, NOW())
@@ -310,7 +364,7 @@ async function initOfficeTables() {
         canManageSettings = true,
         canViewRevenue = true,
         isActive = true
-    `, crypto.randomUUID(), hashPassword("emp@123"), defaultManagerModules, defaultManagerModules);
+    `, crypto.randomUUID(), hashPassword("emp@123"), defaultFullModules, defaultFullModules);
 
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS OfficeSalesSettings (
@@ -326,10 +380,21 @@ async function initOfficeTables() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
 
+    // Ensure Sales Settings exist for Admin and Manager
+    await prisma.$executeRawUnsafe(`
+      INSERT IGNORE INTO OfficeSalesSettings (id, salespersonEmail, businessPortfolioName, salesWhatsAppNumber, isConnected, updatedAt)
+      VALUES (?, 'admin@digitalbeings.in', 'Digital Beings Executive Portfolio', NULL, false, NOW())
+    `, crypto.randomUUID());
+
+    await prisma.$executeRawUnsafe(`
+      INSERT IGNORE INTO OfficeSalesSettings (id, salespersonEmail, businessPortfolioName, salesWhatsAppNumber, isConnected, updatedAt)
+      VALUES (?, 'emp@digitalbeings.in', 'Digital Beings Official Sales Portfolio', NULL, false, NOW())
+    `, crypto.randomUUID());
+
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS OfficeLead (
         id VARCHAR(191) NOT NULL PRIMARY KEY,
-        salespersonEmail VARCHAR(191) NOT NULL DEFAULT 'emp@digitalbeings.com',
+        salespersonEmail VARCHAR(191) NOT NULL DEFAULT 'admin@digitalbeings.in',
         businessName VARCHAR(191) NOT NULL,
         contactPerson VARCHAR(191) NOT NULL,
         email VARCHAR(191),
@@ -354,7 +419,7 @@ async function initOfficeTables() {
       CREATE TABLE IF NOT EXISTS OfficePaymentLink (
         id VARCHAR(191) NOT NULL PRIMARY KEY,
         leadId VARCHAR(191),
-        salespersonEmail VARCHAR(191) NOT NULL DEFAULT 'emp@digitalbeings.com',
+        salespersonEmail VARCHAR(191) NOT NULL DEFAULT 'admin@digitalbeings.in',
         rzpLinkId VARCHAR(191),
         shortUrl VARCHAR(255) NOT NULL,
         amount DECIMAL(10, 2) NOT NULL,
@@ -407,7 +472,7 @@ async function initOfficeTables() {
 
 // 1. Get Office Portfolio & WhatsApp Settings
 fastify.get("/v1/office/settings", async (request: any, reply) => {
-  const email = (request.query?.email || "emp@digitalbeings.com").toLowerCase();
+  const email = (request.query?.email || "admin@digitalbeings.in").toLowerCase();
   try {
     await initOfficeTables();
     const rows: any = await prisma.$queryRawUnsafe(
@@ -439,7 +504,7 @@ fastify.get("/v1/office/settings", async (request: any, reply) => {
 // 2. Update Office Portfolio & WhatsApp Settings
 fastify.post("/v1/office/settings", async (request: any, reply) => {
   const {
-    salespersonEmail = "emp@digitalbeings.com",
+    salespersonEmail = "admin@digitalbeings.in",
     businessPortfolioName = "Digital Beings Official Sales Portfolio",
     salesWhatsAppNumber = null,
     metaPhoneId,
@@ -471,9 +536,9 @@ fastify.post("/v1/office/settings", async (request: any, reply) => {
   }
 });
 
-// 3. Get Leads & Status Breakdown (Role-aware: Managers/authorized see all; Executives see assigned)
+// 3. Get Leads & Status Breakdown (Role-aware: Admins/Managers/authorized see all; Executives see assigned)
 fastify.get("/v1/office/leads", async (request: any, reply) => {
-  const email = (request.query?.email || "emp@digitalbeings.com").toLowerCase();
+  const email = (request.query?.email || "admin@digitalbeings.in").toLowerCase();
   try {
     await initOfficeTables();
 
@@ -482,7 +547,11 @@ fastify.get("/v1/office/leads", async (request: any, reply) => {
       `SELECT role, canViewAllLeads FROM OfficeEmployee WHERE email = ? LIMIT 1`, email
     ).catch(() => []);
 
-    const canViewAll = empRows.length > 0 && (empRows[0].role === "OFFICE_MANAGER" || Boolean(empRows[0].canViewAllLeads));
+    const canViewAll = empRows.length > 0 && (
+      empRows[0].role === "OFFICE_ADMIN" ||
+      empRows[0].role === "OFFICE_MANAGER" ||
+      Boolean(empRows[0].canViewAllLeads)
+    );
 
     let leads: any = [];
     if (canViewAll) {
@@ -524,7 +593,7 @@ fastify.get("/v1/office/leads", async (request: any, reply) => {
 // 4. Create Lead ("First Client" button)
 fastify.post("/v1/office/leads", async (request: any, reply) => {
   const {
-    salespersonEmail = "emp@digitalbeings.com",
+    salespersonEmail = "admin@digitalbeings.in",
     businessName,
     contactPerson,
     email,
@@ -610,7 +679,7 @@ fastify.post("/v1/office/payment-links", async (request: any, reply) => {
     customerPhone = "",
     customerEmail = "",
     description = "Digital Beings SaaS Platform Activation",
-    salespersonEmail = "emp@digitalbeings.com"
+    salespersonEmail = "admin@digitalbeings.in"
   } = request.body || {};
 
   const numAmount = Number(amount);
@@ -704,7 +773,7 @@ fastify.post("/v1/office/payment-links", async (request: any, reply) => {
 
 // 6.b Get All Payment Links Generated by Office Team (Role-aware)
 fastify.get("/v1/office/payment-links", async (request: any, reply) => {
-  const email = (request.query?.email || "emp@digitalbeings.com").toLowerCase();
+  const email = (request.query?.email || "admin@digitalbeings.in").toLowerCase();
   try {
     await initOfficeTables();
 
@@ -712,7 +781,11 @@ fastify.get("/v1/office/payment-links", async (request: any, reply) => {
       `SELECT role, canViewRevenue FROM OfficeEmployee WHERE email = ? LIMIT 1`, email
     ).catch(() => []);
 
-    const canViewAll = empRows.length > 0 && (empRows[0].role === "OFFICE_MANAGER" || Boolean(empRows[0].canViewRevenue));
+    const canViewAll = empRows.length > 0 && (
+      empRows[0].role === "OFFICE_ADMIN" ||
+      empRows[0].role === "OFFICE_MANAGER" ||
+      Boolean(empRows[0].canViewRevenue)
+    );
 
     let links: any = [];
     if (canViewAll) {
@@ -816,7 +889,7 @@ fastify.post("/v1/office/payment-links/:id/verify", async (request: any, reply) 
 
 // 6.d Sync All Pending Payment Links with Razorpay
 fastify.post("/v1/office/payment-links/sync-all", async (request: any, reply) => {
-  const { salespersonEmail = "emp@digitalbeings.com" } = request.body || {};
+  const { salespersonEmail = "admin@digitalbeings.in" } = request.body || {};
   try {
     await initOfficeTables();
     const pendingLinks: any = await prisma.$queryRawUnsafe(`
@@ -881,7 +954,7 @@ fastify.post("/v1/office/chat/send", async (request: any, reply) => {
     leadId,
     phone,
     message,
-    salespersonEmail = "emp@digitalbeings.com"
+    salespersonEmail = "admin@digitalbeings.in"
   } = request.body || {};
 
   if (!leadId || !phone || !message || !String(message).trim()) {
@@ -1014,7 +1087,7 @@ fastify.post("/v1/office/team", async (request: any, reply) => {
     canViewAllLeads = false,
     canManageSettings = false,
     canViewRevenue = false,
-    createdBy = "emp@digitalbeings.com"
+    createdBy = "admin@digitalbeings.in"
   } = request.body || {};
 
   if (!name || !email || !password) {
@@ -1022,8 +1095,23 @@ fastify.post("/v1/office/team", async (request: any, reply) => {
   }
 
   const cleanEmail = String(email).trim().toLowerCase();
+  const cleanCreator = String(createdBy).trim().toLowerCase();
+
   try {
     await initOfficeTables();
+
+    // Enforce role hierarchy: only Executive Super Admin can create/assign Manager or Admin accounts
+    if (role === "OFFICE_ADMIN" || role === "OFFICE_MANAGER") {
+      const creatorRows: any = await prisma.$queryRawUnsafe(
+        `SELECT role FROM OfficeEmployee WHERE email = ? LIMIT 1`, cleanCreator
+      ).catch(() => []);
+      const creatorRole = creatorRows?.[0]?.role;
+      const isCreatorAdmin = cleanCreator === "admin@digitalbeings.in" || creatorRole === "OFFICE_ADMIN";
+      if (!isCreatorAdmin) {
+        return reply.status(403).send({ error: "Only an Executive Super Admin can create or assign Manager roles." });
+      }
+    }
+
     const existing: any = await prisma.$queryRawUnsafe(
       `SELECT id FROM OfficeEmployee WHERE email = ? LIMIT 1`, cleanEmail
     ).catch(() => []);
@@ -1039,7 +1127,7 @@ fastify.post("/v1/office/team", async (request: any, reply) => {
     await prisma.$executeRawUnsafe(`
       INSERT INTO OfficeEmployee (id, email, passwordHash, name, phone, role, allowedModules, canViewAllLeads, canManageSettings, canViewRevenue, isActive, createdBy, createdAt, updatedAt)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true, ?, NOW(), NOW())
-    `, empId, cleanEmail, hashed, name, phone || null, role, modsJson, Boolean(canViewAllLeads || role === "OFFICE_MANAGER"), Boolean(canManageSettings || role === "OFFICE_MANAGER"), Boolean(canViewRevenue || role === "OFFICE_MANAGER"), createdBy);
+    `, empId, cleanEmail, hashed, name, phone || null, role, modsJson, Boolean(canViewAllLeads || role === "OFFICE_MANAGER" || role === "OFFICE_ADMIN"), Boolean(canManageSettings || role === "OFFICE_MANAGER" || role === "OFFICE_ADMIN"), Boolean(canViewRevenue || role === "OFFICE_MANAGER" || role === "OFFICE_ADMIN"), cleanCreator);
 
     // Initialize default sales settings row for employee
     await prisma.$executeRawUnsafe(`
@@ -1066,11 +1154,46 @@ fastify.patch("/v1/office/team/:id", async (request: any, reply) => {
     canViewAllLeads,
     canManageSettings,
     canViewRevenue,
-    isActive
+    isActive,
+    actor
   } = request.body || {};
 
   try {
     await initOfficeTables();
+
+    const target: any = await prisma.$queryRawUnsafe(
+      `SELECT email, role FROM OfficeEmployee WHERE id = ? LIMIT 1`, id
+    );
+
+    if (!Array.isArray(target) || target.length === 0) {
+      return reply.status(404).send({ error: "Team member not found" });
+    }
+
+    const targetEmail = target[0].email;
+    const targetRole = target[0].role;
+
+    // Check actor permissions
+    const actorEmail = String(request.query?.actor || actor || "").toLowerCase();
+    const actorRows: any = actorEmail ? await prisma.$queryRawUnsafe(`SELECT role FROM OfficeEmployee WHERE email = ? LIMIT 1`, actorEmail).catch(() => []) : [];
+    const isActorAdmin = actorEmail === "admin@digitalbeings.in" || actorRows?.[0]?.role === "OFFICE_ADMIN";
+
+    // Protect Super Admin from non-admin modifications
+    if ((targetEmail === "admin@digitalbeings.in" || targetRole === "OFFICE_ADMIN") && !isActorAdmin) {
+      return reply.status(403).send({ error: "Only an Executive Super Admin can modify the Super Admin account." });
+    }
+
+    // Protect Managers from being altered by non-admins (other than themselves)
+    if (targetRole === "OFFICE_MANAGER" && !isActorAdmin && actorEmail && actorEmail !== targetEmail) {
+      return reply.status(403).send({ error: "Only an Executive Super Admin can modify other Manager accounts." });
+    }
+
+    // Role promotion restriction
+    if (role !== undefined && (role === "OFFICE_ADMIN" || role === "OFFICE_MANAGER")) {
+      if (!isActorAdmin) {
+        return reply.status(403).send({ error: "Only an Executive Super Admin can promote or assign Manager roles." });
+      }
+    }
+
     const updates: string[] = [];
     const values: any[] = [];
 
@@ -1112,11 +1235,32 @@ fastify.patch("/v1/office/team/:id", async (request: any, reply) => {
 fastify.delete("/v1/office/team/:id", async (request: any, reply) => {
   const { id } = request.params;
   const permanent = request.query?.permanent === "true";
+  const actorEmail = String(request.query?.actor || request.body?.actor || "").toLowerCase();
+
   try {
     await initOfficeTables();
-    const target: any = await prisma.$queryRawUnsafe(`SELECT email FROM OfficeEmployee WHERE id = ? LIMIT 1`, id);
-    if (Array.isArray(target) && target.length > 0 && target[0].email === "emp@digitalbeings.com") {
-      return reply.status(403).send({ error: "Primary Master Manager account cannot be deleted or deactivated." });
+    const target: any = await prisma.$queryRawUnsafe(`SELECT email, role FROM OfficeEmployee WHERE id = ? LIMIT 1`, id);
+
+    if (Array.isArray(target) && target.length > 0) {
+      const tEmail = target[0].email;
+      const tRole = target[0].role;
+
+      if (tEmail === "admin@digitalbeings.in" || tRole === "OFFICE_ADMIN") {
+        return reply.status(403).send({ error: "Executive Super Admin account cannot be deleted or deactivated." });
+      }
+
+      if (tEmail === "emp@digitalbeings.in" || tEmail === "emp@digitalbeings.com") {
+        return reply.status(403).send({ error: "Primary Office Manager account cannot be deleted or deactivated." });
+      }
+
+      // Check if actor is an admin when attempting to delete a Manager
+      if (tRole === "OFFICE_MANAGER") {
+        const actorRows: any = actorEmail ? await prisma.$queryRawUnsafe(`SELECT role FROM OfficeEmployee WHERE email = ? LIMIT 1`, actorEmail).catch(() => []) : [];
+        const isActorAdmin = actorEmail === "admin@digitalbeings.in" || actorRows?.[0]?.role === "OFFICE_ADMIN";
+        if (!isActorAdmin) {
+          return reply.status(403).send({ error: "Only an Executive Super Admin can remove or deactivate Office Managers." });
+        }
+      }
     }
 
     if (permanent) {
