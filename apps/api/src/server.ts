@@ -614,6 +614,151 @@ fastify.get("/v1/office/payment-links", async (request: any, reply) => {
   }
 });
 
+// 6.c Real-time Verify Payment Link Status with Razorpay API (No screenshot needed)
+fastify.post("/v1/office/payment-links/:id/verify", async (request: any, reply) => {
+  const { id } = request.params;
+  try {
+    await initOfficeTables();
+
+    // Query by UUID or rzpLinkId
+    const links: any = await prisma.$queryRawUnsafe(`
+      SELECT * FROM OfficePaymentLink WHERE id = ? OR rzpLinkId = ? LIMIT 1
+    `, id, id);
+
+    if (!Array.isArray(links) || links.length === 0) {
+      return reply.status(404).send({ error: "Payment link not found in system." });
+    }
+
+    const link = links[0];
+    const rzpLinkId = link.rzpLinkId;
+
+    if (!rzpLinkId || !rzpLinkId.startsWith("plink_")) {
+      return reply.send({
+        success: true,
+        isPaid: link.status === "PAID",
+        status: link.status,
+        message: link.status === "PAID" ? "Payment confirmed." : "Custom payment link (not registered in Razorpay API)."
+      });
+    }
+
+    const rzpKeyId = process.env.RAZORPAY_KEY_ID || "rzp_live_Tl4uH3gYo8IWeO";
+    const rzpKeySecret = process.env.RAZORPAY_KEY_SECRET || "pD9rgL4P76hS9ECynnKSn75c";
+    const auth = Buffer.from(`${rzpKeyId}:${rzpKeySecret}`).toString("base64");
+
+    const rzpRes = await fetch(`https://api.razorpay.com/v1/payment_links/${rzpLinkId}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Basic ${auth}`
+      }
+    });
+
+    if (!rzpRes.ok) {
+      const errData = await rzpRes.json().catch(() => ({}));
+      return reply.status(rzpRes.status).send({ error: "Razorpay check error: " + JSON.stringify(errData) });
+    }
+
+    const rzpData: any = await rzpRes.json();
+    const isPaid = rzpData.status === "paid" || Number(rzpData.amount_paid) >= Number(rzpData.amount);
+
+    if (isPaid) {
+      await prisma.$executeRawUnsafe(`
+        UPDATE OfficePaymentLink SET status = 'PAID', paidAt = NOW() WHERE id = ?
+      `, link.id);
+
+      if (link.leadId) {
+        await prisma.$executeRawUnsafe(`
+          UPDATE OfficeLead SET status = 'PAID', paymentStatus = 'PAID', updatedAt = NOW() WHERE id = ?
+        `, link.leadId);
+      } else {
+        await prisma.$executeRawUnsafe(`
+          UPDATE OfficeLead SET status = 'PAID', paymentStatus = 'PAID', updatedAt = NOW() WHERE paymentLinkId = ?
+        `, rzpLinkId);
+      }
+
+      return reply.send({
+        success: true,
+        isPaid: true,
+        status: "PAID",
+        amountPaid: Number(rzpData.amount_paid || rzpData.amount) / 100,
+        paidAt: new Date().toISOString(),
+        paymentDetails: rzpData.payments || [],
+        message: "Payment verified successfully! Client has paid and is ready for onboarding."
+      });
+    }
+
+    return reply.send({
+      success: true,
+      isPaid: false,
+      status: rzpData.status?.toUpperCase() || "CREATED",
+      amountPaid: Number(rzpData.amount_paid || 0) / 100,
+      message: "Payment link has not been completed yet."
+    });
+  } catch (err: any) {
+    return reply.status(500).send({ error: "Failed to verify payment status: " + err.message });
+  }
+});
+
+// 6.d Sync All Pending Payment Links with Razorpay
+fastify.post("/v1/office/payment-links/sync-all", async (request: any, reply) => {
+  const { salespersonEmail = "emp@digitalbeings.com" } = request.body || {};
+  try {
+    await initOfficeTables();
+    const pendingLinks: any = await prisma.$queryRawUnsafe(`
+      SELECT * FROM OfficePaymentLink WHERE status = 'CREATED' AND rzpLinkId LIKE 'plink_%' AND salespersonEmail = ?
+    `, salespersonEmail.toLowerCase());
+
+    if (!Array.isArray(pendingLinks) || pendingLinks.length === 0) {
+      return reply.send({ success: true, verifiedCount: 0, newlyPaidCount: 0, message: "No pending payment links to sync." });
+    }
+
+    const rzpKeyId = process.env.RAZORPAY_KEY_ID || "rzp_live_Tl4uH3gYo8IWeO";
+    const rzpKeySecret = process.env.RAZORPAY_KEY_SECRET || "pD9rgL4P76hS9ECynnKSn75c";
+    const auth = Buffer.from(`${rzpKeyId}:${rzpKeySecret}`).toString("base64");
+
+    let newlyPaidCount = 0;
+
+    for (const link of pendingLinks) {
+      try {
+        const rzpRes = await fetch(`https://api.razorpay.com/v1/payment_links/${link.rzpLinkId}`, {
+          method: "GET",
+          headers: { Authorization: `Basic ${auth}` }
+        });
+        if (rzpRes.ok) {
+          const rzpData: any = await rzpRes.json();
+          if (rzpData.status === "paid" || Number(rzpData.amount_paid) >= Number(rzpData.amount)) {
+            newlyPaidCount++;
+            await prisma.$executeRawUnsafe(`
+              UPDATE OfficePaymentLink SET status = 'PAID', paidAt = NOW() WHERE id = ?
+            `, link.id);
+            if (link.leadId) {
+              await prisma.$executeRawUnsafe(`
+                UPDATE OfficeLead SET status = 'PAID', paymentStatus = 'PAID', updatedAt = NOW() WHERE id = ?
+              `, link.leadId);
+            } else {
+              await prisma.$executeRawUnsafe(`
+                UPDATE OfficeLead SET status = 'PAID', paymentStatus = 'PAID', updatedAt = NOW() WHERE paymentLinkId = ?
+              `, link.rzpLinkId);
+            }
+          }
+        }
+      } catch (e) {
+        // Continue
+      }
+    }
+
+    return reply.send({
+      success: true,
+      verifiedCount: pendingLinks.length,
+      newlyPaidCount,
+      message: newlyPaidCount > 0
+        ? `Found ${newlyPaidCount} newly paid payment(s)! Leads updated to Paid status.`
+        : "Checked pending links. All are still pending."
+    });
+  } catch (err: any) {
+    return reply.status(500).send({ error: "Failed to sync payment links: " + err.message });
+  }
+});
+
 // 7. Send WhatsApp Chat to Lead
 fastify.post("/v1/office/chat/send", async (request: any, reply) => {
   const {
@@ -1979,6 +2124,25 @@ fastify.post("/v1/billing/webhook", async (request: any, reply) => {
       }
     } catch (dbErr) { fastify.log.error(dbErr); }
   }
+
+  if (request.body.event === "payment_link.paid") {
+    const plink = request.body.payload?.payment_link?.entity;
+    if (plink && plink.id) {
+      try {
+        await initOfficeTables();
+        await prisma.$executeRawUnsafe(`
+          UPDATE OfficePaymentLink SET status = 'PAID', paidAt = NOW() WHERE rzpLinkId = ?
+        `, plink.id);
+        await prisma.$executeRawUnsafe(`
+          UPDATE OfficeLead SET status = 'PAID', paymentStatus = 'PAID', updatedAt = NOW() WHERE paymentLinkId = ?
+        `, plink.id);
+        fastify.log.info(`[OfficePayment] Webhook auto-verified payment link ${plink.id}`);
+      } catch (err: any) {
+        fastify.log.error(`[OfficePayment] Webhook error: ${err.message}`);
+      }
+    }
+  }
+
   return reply.send({ status: "ok" });
 });
 

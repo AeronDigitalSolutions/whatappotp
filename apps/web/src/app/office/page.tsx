@@ -115,6 +115,9 @@ export default function OfficeDashboardPage() {
   // Payment Links list
   const [paymentLinks, setPaymentLinks] = useState<PaymentLinkItem[]>([]);
   const [loadingPayLinks, setLoadingPayLinks] = useState(false);
+  const [verifyingLinkId, setVerifyingLinkId] = useState<string | null>(null);
+  const [syncingAllLinks, setSyncingAllLinks] = useState(false);
+  const [verifyToast, setVerifyToast] = useState<{ message: string; type: "success" | "info" | "error" } | null>(null);
 
   // "First Client" / New Lead Modal
   const [clientModalOpen, setClientModalOpen] = useState(false);
@@ -406,6 +409,75 @@ export default function OfficeDashboardPage() {
       navigator.clipboard.writeText(url);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
+    }
+  };
+
+  // Real-time Verify Payment with Razorpay API (No screenshot needed)
+  const handleVerifyPayment = async (linkOrLeadId: string, isLead: boolean = false) => {
+    setVerifyingLinkId(linkOrLeadId);
+    try {
+      let targetId = linkOrLeadId;
+      if (isLead) {
+        const lead = leads.find((l) => l.id === linkOrLeadId);
+        targetId = lead?.paymentLinkId || lead?.id || linkOrLeadId;
+      }
+
+      const res = await fetch(`${getApiUrl()}/v1/office/payment-links/${targetId}/verify`, {
+        method: "POST"
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to verify payment status");
+
+      if (data.isPaid) {
+        setVerifyToast({
+          message: `🎉 Payment Verified! ₹${data.amountPaid} has been confirmed via Razorpay. Client is marked as PAID and ready for onboarding!`,
+          type: "success"
+        });
+        loadDashboardData(user?.email);
+        loadPaymentLinks(user?.email);
+      } else {
+        setVerifyToast({
+          message: `⏳ Payment Pending: Razorpay reports status as "${data.status}". The client has not completed payment yet.`,
+          type: "info"
+        });
+      }
+    } catch (err: any) {
+      setVerifyToast({
+        message: `Error verifying payment: ${err.message}`,
+        type: "error"
+      });
+    } finally {
+      setVerifyingLinkId(null);
+      setTimeout(() => setVerifyToast(null), 6000);
+    }
+  };
+
+  // Sync All Pending Payment Links with Razorpay
+  const handleSyncAllPaymentLinks = async () => {
+    setSyncingAllLinks(true);
+    try {
+      const res = await fetch(`${getApiUrl()}/v1/office/payment-links/sync-all`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ salespersonEmail: user?.email || "emp@digitalbeings.com" })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Sync failed");
+
+      setVerifyToast({
+        message: data.message,
+        type: data.newlyPaidCount > 0 ? "success" : "info"
+      });
+      loadDashboardData(user?.email);
+      loadPaymentLinks(user?.email);
+    } catch (err: any) {
+      setVerifyToast({
+        message: `Sync error: ${err.message}`,
+        type: "error"
+      });
+    } finally {
+      setSyncingAllLinks(false);
+      setTimeout(() => setVerifyToast(null), 6000);
     }
   };
 
@@ -843,6 +915,32 @@ export default function OfficeDashboardPage() {
 
         {/* Dynamic Workspace Container */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+          {/* Real-time Payment Verification Alert Toast */}
+          {verifyToast && (
+            <div
+              className={`p-4 rounded-2xl border text-xs sm:text-sm font-bold flex items-center justify-between shadow-lg transition animate-in fade-in slide-in-from-top-4 ${
+                verifyToast.type === "success"
+                  ? "bg-emerald-50 text-emerald-950 dark:bg-emerald-950/90 dark:text-emerald-100 border-emerald-300 dark:border-emerald-700"
+                  : verifyToast.type === "info"
+                  ? "bg-amber-50 text-amber-950 dark:bg-amber-950/90 dark:text-amber-100 border-amber-300 dark:border-amber-700"
+                  : "bg-red-50 text-red-950 dark:bg-red-950/90 dark:text-red-100 border-red-300 dark:border-red-700"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xl">
+                  {verifyToast.type === "success" ? "✅" : verifyToast.type === "info" ? "⏳" : "⚠️"}
+                </span>
+                <span>{verifyToast.message}</span>
+              </div>
+              <button
+                onClick={() => setVerifyToast(null)}
+                className="text-xs opacity-70 hover:opacity-100 p-1 font-extrabold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           {/* =========================================================================
               MODULE 1: LEADS & PIPELINE
           ========================================================================= */}
@@ -1044,6 +1142,17 @@ export default function OfficeDashboardPage() {
                               >
                                 💳 Pay Link
                               </button>
+
+                              {lead.status === "PAYMENT_LINK_SENT" && (
+                                <button
+                                  onClick={() => handleVerifyPayment(lead.id, true)}
+                                  disabled={verifyingLinkId === lead.id}
+                                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-bold text-xs shadow-2xs transition cursor-pointer"
+                                  title="Check with Razorpay if client has paid (no screenshot needed)"
+                                >
+                                  {verifyingLinkId === lead.id ? "Checking..." : "⚡ Verify Pay"}
+                                </button>
+                              )}
 
                               {lead.status === "PAID" && (
                                 <button
@@ -1350,21 +1459,36 @@ export default function OfficeDashboardPage() {
 
               {/* Payment Links History Table */}
               <div className="bg-white dark:bg-[#0B101D] rounded-3xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden">
-                <div className="p-5 border-b border-slate-200/90 dark:border-white/10 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-extrabold text-sm text-slate-900 dark:text-white">
-                      Generated Payment Links History
-                    </h2>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 font-bold text-slate-600 dark:text-slate-300">
-                      {paymentLinks.length}
-                    </span>
+                <div className="p-5 border-b border-slate-200/90 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                        Generated Payment Links History
+                      </h2>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 font-bold text-slate-600 dark:text-slate-300">
+                        {paymentLinks.length}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      Verify client payments in real-time directly from Razorpay without requesting screenshots.
+                    </p>
                   </div>
-                  <button
-                    onClick={() => loadPaymentLinks(user?.email)}
-                    className="text-xs font-bold text-emerald-600 hover:underline cursor-pointer"
-                  >
-                    Refresh
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleSyncAllPaymentLinks}
+                      disabled={syncingAllLinks}
+                      className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                      title="Sync all pending links with Razorpay API"
+                    >
+                      <span>{syncingAllLinks ? "Syncing Razorpay..." : "⚡ Sync All Payments"}</span>
+                    </button>
+                    <button
+                      onClick={() => loadPaymentLinks(user?.email)}
+                      className="text-xs font-bold text-slate-600 dark:text-slate-400 hover:underline cursor-pointer px-2 py-1"
+                    >
+                      Refresh
+                    </button>
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -1414,20 +1538,55 @@ export default function OfficeDashboardPage() {
                               </a>
                             </td>
                             <td className="py-3.5 px-4">
-                              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
-                                {link.status}
-                              </span>
+                              {link.status === "PAID" ? (
+                                <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 shadow-2xs">
+                                  <span>✓</span>
+                                  <span>PAID &amp; VERIFIED</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
+                                  <span>⏳</span>
+                                  <span>Awaiting Payment</span>
+                                </span>
+                              )}
                             </td>
                             <td className="py-3.5 px-4 text-slate-500 text-[11px]">
                               {new Date(link.createdAt).toLocaleDateString()}
                             </td>
-                            <td className="py-3.5 px-5 text-right space-x-2">
+                            <td className="py-3.5 px-5 text-right space-x-2 whitespace-nowrap">
+                              {link.status !== "PAID" ? (
+                                <button
+                                  onClick={() => handleVerifyPayment(link.id, false)}
+                                  disabled={verifyingLinkId === link.id}
+                                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs shadow-2xs transition cursor-pointer"
+                                  title="Check with Razorpay if client has paid"
+                                >
+                                  {verifyingLinkId === link.id ? "Checking..." : "⚡ Verify Payment"}
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => setActiveModule("onboarding")}
+                                  className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-2xs transition cursor-pointer"
+                                >
+                                  🚀 Onboard Client
+                                </button>
+                              )}
                               <button
                                 onClick={() => handleCopyLink(link.shortUrl)}
-                                className="px-3 py-1 rounded-lg bg-slate-100 dark:bg-white/10 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+                                className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/10 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
                               >
-                                Copy Link
+                                {copiedLink ? "✓ Copied" : "Copy Link"}
                               </button>
+                              <a
+                                href={`https://wa.me/?text=${encodeURIComponent(
+                                  `Hello ${link.customerName || ""}, here is your Digital Beings activation payment link: ${link.shortUrl}`
+                                )}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 dark:text-emerald-300 font-bold text-xs transition inline-block"
+                              >
+                                WhatsApp
+                              </a>
                             </td>
                           </tr>
                         ))
