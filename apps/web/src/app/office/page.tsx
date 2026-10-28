@@ -13,7 +13,24 @@ export type OfficeModule =
   | "onboarding"
   | "portfolio"
   | "revenue"
-  | "activity";
+  | "activity"
+  | "team";
+
+export interface TeamMember {
+  id: string;
+  email: string;
+  name: string;
+  phone?: string;
+  role: "OFFICE_MANAGER" | "SALES_EXECUTIVE" | "ONBOARDING_SPECIALIST";
+  allowedModules: OfficeModule[];
+  canViewAllLeads: boolean;
+  canManageSettings: boolean;
+  canViewRevenue: boolean;
+  isActive: boolean;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
 
 interface Lead {
   id: string;
@@ -166,6 +183,25 @@ export default function OfficeDashboardPage() {
   });
   const [savingWaba, setSavingWaba] = useState(false);
 
+  // Team & Role Management
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [loadingTeam, setLoadingTeam] = useState(false);
+  const [teamModalOpen, setTeamModalOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [teamForm, setTeamForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+    role: "SALES_EXECUTIVE" as "OFFICE_MANAGER" | "SALES_EXECUTIVE" | "ONBOARDING_SPECIALIST",
+    allowedModules: ["leads", "chat", "payments"] as OfficeModule[],
+    canViewAllLeads: false,
+    canManageSettings: false,
+    canViewRevenue: false
+  });
+  const [savingTeamMember, setSavingTeamMember] = useState(false);
+  const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null);
+
   // Initial Load & Auth Check
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -177,8 +213,15 @@ export default function OfficeDashboardPage() {
       try {
         const parsed = JSON.parse(storedUser);
         setUser(parsed);
+        const isMgr = Boolean(parsed.isManager || parsed.role === "OFFICE_MANAGER" || parsed.officeRole === "OFFICE_MANAGER" || parsed.isSuperAdmin);
+        if (!isMgr && Array.isArray(parsed.allowedModules) && parsed.allowedModules.length > 0) {
+          if (!parsed.allowedModules.includes("leads")) {
+            setActiveModule(parsed.allowedModules[0] as OfficeModule);
+          }
+        }
         loadDashboardData(parsed.email);
         loadPaymentLinks(parsed.email);
+        loadTeamMembers();
       } catch (e) {
         router.push("/login");
       } finally {
@@ -186,6 +229,21 @@ export default function OfficeDashboardPage() {
       }
     }
   }, [router]);
+
+  const loadTeamMembers = async () => {
+    setLoadingTeam(true);
+    try {
+      const res = await fetch(`${getApiUrl()}/v1/office/team`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.members)) {
+        setTeamMembers(data.members);
+      }
+    } catch (e) {
+      console.error("Error loading team members:", e);
+    } finally {
+      setLoadingTeam(false);
+    }
+  };
 
   const loadDashboardData = async (email: string = "emp@digitalbeings.com") => {
     try {
@@ -263,6 +321,164 @@ export default function OfficeDashboardPage() {
       localStorage.removeItem("organizationId");
       localStorage.removeItem("db_preview_role");
       router.push("/login");
+    }
+  };
+
+  // --- TEAM & PERMISSIONS ACTIONS ---
+  const openCreateTeamModal = () => {
+    setEditingMember(null);
+    setTeamForm({
+      name: "",
+      email: "",
+      password: "",
+      phone: "",
+      role: "SALES_EXECUTIVE",
+      allowedModules: ["leads", "chat", "payments"],
+      canViewAllLeads: false,
+      canManageSettings: false,
+      canViewRevenue: false
+    });
+    setTeamModalOpen(true);
+  };
+
+  const openEditTeamModal = (m: TeamMember) => {
+    setEditingMember(m);
+    setTeamForm({
+      name: m.name,
+      email: m.email,
+      password: "",
+      phone: m.phone || "",
+      role: m.role,
+      allowedModules: m.allowedModules || ["leads", "chat", "payments"],
+      canViewAllLeads: Boolean(m.canViewAllLeads),
+      canManageSettings: Boolean(m.canManageSettings),
+      canViewRevenue: Boolean(m.canViewRevenue)
+    });
+    setTeamModalOpen(true);
+  };
+
+  const handleSelectRolePreset = (role: "OFFICE_MANAGER" | "SALES_EXECUTIVE" | "ONBOARDING_SPECIALIST") => {
+    if (role === "OFFICE_MANAGER") {
+      setTeamForm((prev) => ({
+        ...prev,
+        role,
+        allowedModules: ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team"],
+        canViewAllLeads: true,
+        canManageSettings: true,
+        canViewRevenue: true
+      }));
+    } else if (role === "ONBOARDING_SPECIALIST") {
+      setTeamForm((prev) => ({
+        ...prev,
+        role,
+        allowedModules: ["leads", "chat", "onboarding", "portfolio"],
+        canViewAllLeads: true,
+        canManageSettings: false,
+        canViewRevenue: false
+      }));
+    } else {
+      // SALES_EXECUTIVE
+      setTeamForm((prev) => ({
+        ...prev,
+        role,
+        allowedModules: ["leads", "chat", "payments"],
+        canViewAllLeads: false,
+        canManageSettings: false,
+        canViewRevenue: false
+      }));
+    }
+  };
+
+  const handleToggleModule = (mod: OfficeModule) => {
+    setTeamForm((prev) => {
+      const exists = prev.allowedModules.includes(mod);
+      const updated = exists
+        ? prev.allowedModules.filter((m) => m !== mod)
+        : [...prev.allowedModules, mod];
+      return { ...prev, allowedModules: updated };
+    });
+  };
+
+  const handleSaveTeamMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingTeamMember(true);
+    try {
+      if (editingMember) {
+        // Edit existing
+        const res = await fetch(`${getApiUrl()}/v1/office/team/${editingMember.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(teamForm)
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || "Failed to update member");
+      } else {
+        // Create new
+        const res = await fetch(`${getApiUrl()}/v1/office/team`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...teamForm,
+            createdBy: user?.email || "emp@digitalbeings.com"
+          })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || "Failed to create member");
+      }
+
+      setTeamModalOpen(false);
+      loadTeamMembers();
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    } finally {
+      setSavingTeamMember(false);
+    }
+  };
+
+  const handleToggleMemberActive = async (m: TeamMember) => {
+    try {
+      const res = await fetch(`${getApiUrl()}/v1/office/team/${m.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !m.isActive })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to update status");
+      loadTeamMembers();
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  const handleDeleteTeamMember = async (id: string) => {
+    if (!confirm("Are you sure you want to deactivate this team member? They will no longer be able to log in.")) return;
+    setDeletingMemberId(id);
+    try {
+      const res = await fetch(`${getApiUrl()}/v1/office/team/${id}`, {
+        method: "DELETE"
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to remove member");
+      loadTeamMembers();
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    } finally {
+      setDeletingMemberId(null);
+    }
+  };
+
+  const handleReassignLead = async (leadId: string, newSalespersonEmail: string) => {
+    try {
+      const res = await fetch(`${getApiUrl()}/v1/office/leads/${leadId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ salespersonEmail: newSalespersonEmail })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to reassign lead");
+      loadDashboardData(user?.email);
+    } catch (err: any) {
+      alert("Reassign failed: " + err.message);
     }
   };
 
@@ -593,11 +809,33 @@ export default function OfficeDashboardPage() {
     );
   }
 
+  // Role & Permissions computation
+  const isManager = Boolean(
+    user?.isManager ||
+    user?.role === "OFFICE_MANAGER" ||
+    user?.officeRole === "OFFICE_MANAGER" ||
+    user?.isSuperAdmin
+  );
+
+  const allowedModulesList: OfficeModule[] = isManager
+    ? ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team"]
+    : (Array.isArray(user?.allowedModules) && user.allowedModules.length > 0
+      ? (user.allowedModules as OfficeModule[])
+      : ["leads", "chat", "payments"]);
+
   // Left Vertical Menu Items Definition
-  const menuItems = [
+  const menuItems: {
+    id: OfficeModule;
+    name: string;
+    category: "sales" | "ops";
+    icon: React.ReactNode;
+    badge?: string;
+    badgeColor?: string;
+  }[] = [
     {
-      id: "leads" as OfficeModule,
+      id: "leads",
       name: "Leads & Pipeline",
+      category: "sales",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -607,8 +845,9 @@ export default function OfficeDashboardPage() {
       badgeColor: "bg-emerald-500 text-white"
     },
     {
-      id: "chat" as OfficeModule,
+      id: "chat",
       name: "2-Way Lead Chat",
+      category: "sales",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -618,8 +857,9 @@ export default function OfficeDashboardPage() {
       badgeColor: "bg-emerald-600 text-white"
     },
     {
-      id: "payments" as OfficeModule,
+      id: "payments",
       name: "Payment Links",
+      category: "sales",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -629,8 +869,9 @@ export default function OfficeDashboardPage() {
       badgeColor: "bg-indigo-600 text-white"
     },
     {
-      id: "onboarding" as OfficeModule,
+      id: "onboarding",
       name: "Client Onboarding",
+      category: "sales",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -640,8 +881,9 @@ export default function OfficeDashboardPage() {
       badgeColor: "bg-amber-500 text-white"
     },
     {
-      id: "portfolio" as OfficeModule,
+      id: "portfolio",
       name: "Portfolio & WhatsApp",
+      category: "ops",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -649,8 +891,9 @@ export default function OfficeDashboardPage() {
       )
     },
     {
-      id: "revenue" as OfficeModule,
+      id: "revenue",
       name: "Revenue & Targets",
+      category: "ops",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -658,15 +901,33 @@ export default function OfficeDashboardPage() {
       )
     },
     {
-      id: "activity" as OfficeModule,
+      id: "activity",
       name: "Activity & Logs",
+      category: "ops",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       )
+    },
+    {
+      id: "team",
+      name: "Team & Permissions",
+      category: "ops",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ),
+      badge: teamMembers.length > 0 ? `${teamMembers.length}` : undefined,
+      badgeColor: "bg-purple-600 text-white"
     }
   ];
+
+  // Filter modules based on employee role & permissions
+  const visibleMenuItems = menuItems.filter((item) => allowedModulesList.includes(item.id));
+  const salesMenuItems = visibleMenuItems.filter((item) => item.category === "sales");
+  const opsMenuItems = visibleMenuItems.filter((item) => item.category === "ops");
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] dark:bg-[#030712] text-slate-900 dark:text-slate-100 flex flex-col md:flex-row antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-200">
@@ -744,104 +1005,128 @@ export default function OfficeDashboardPage() {
                   No Number Linked
                 </span>
               )}
-              <button
-                onClick={() => setSettingsModalOpen(true)}
-                className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
-              >
-                {settings.salesWhatsAppNumber ? "Configure" : "+ Connect"}
-              </button>
+              {(isManager || user?.canManageSettings) && (
+                <button
+                  onClick={() => setSettingsModalOpen(true)}
+                  className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+                >
+                  {settings.salesWhatsAppNumber ? "Configure" : "+ Connect"}
+                </button>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Middle: Navigation Modules */}
+        {/* Middle: Navigation Modules (Filtered by Allowed Permissions) */}
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
           {/* Section: Core Workflows */}
-          <div>
-            <div className="px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              Sales &amp; Outreach
+          {salesMenuItems.length > 0 && (
+            <div>
+              <div className="px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Sales &amp; Outreach
+              </div>
+              <nav className="space-y-1">
+                {salesMenuItems.map((item) => {
+                  const isActive = activeModule === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveModule(item.id);
+                        setMobileSidebarOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer text-left ${
+                        isActive
+                          ? "bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-xs"
+                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={isActive ? "text-white dark:text-slate-950" : "text-slate-500 dark:text-slate-400"}>
+                          {item.icon}
+                        </span>
+                        <span>{item.name}</span>
+                      </div>
+                      {item.badge && (
+                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${item.badgeColor || "bg-slate-200 dark:bg-white/10"}`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
             </div>
-            <nav className="space-y-1">
-              {menuItems.slice(0, 4).map((item) => {
-                const isActive = activeModule === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveModule(item.id);
-                      setMobileSidebarOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer text-left ${
-                      isActive
-                        ? "bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-xs"
-                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={isActive ? "text-white dark:text-slate-950" : "text-slate-500 dark:text-slate-400"}>
-                        {item.icon}
-                      </span>
-                      <span>{item.name}</span>
-                    </div>
-                    {item.badge && (
-                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${item.badgeColor || "bg-slate-200 dark:bg-white/10"}`}>
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
+          )}
 
           {/* Section: Management & Analytics */}
-          <div>
-            <div className="px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              Operations &amp; Analytics
+          {opsMenuItems.length > 0 && (
+            <div>
+              <div className="px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Operations &amp; Security
+              </div>
+              <nav className="space-y-1">
+                {opsMenuItems.map((item) => {
+                  const isActive = activeModule === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveModule(item.id);
+                        setMobileSidebarOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer text-left ${
+                        isActive
+                          ? "bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-xs"
+                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={isActive ? "text-white dark:text-slate-950" : "text-slate-500 dark:text-slate-400"}>
+                          {item.icon}
+                        </span>
+                        <span>{item.name}</span>
+                      </div>
+                      {item.badge && (
+                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${item.badgeColor || "bg-slate-200 dark:bg-white/10"}`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
             </div>
-            <nav className="space-y-1">
-              {menuItems.slice(4).map((item) => {
-                const isActive = activeModule === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveModule(item.id);
-                      setMobileSidebarOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer text-left ${
-                      isActive
-                        ? "bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-xs"
-                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={isActive ? "text-white dark:text-slate-950" : "text-slate-500 dark:text-slate-400"}>
-                        {item.icon}
-                      </span>
-                      <span>{item.name}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
+          )}
         </div>
 
         {/* Bottom: Employee Profile & Logout */}
         <div className="p-4 border-t border-slate-200/80 dark:border-white/10 space-y-3 bg-slate-50/50 dark:bg-white/[0.02]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-emerald-600 text-white font-extrabold flex items-center justify-center text-xs shrink-0">
-                ES
+              <div className={`w-8 h-8 rounded-full ${isManager ? "bg-purple-600" : (user?.role === "ONBOARDING_SPECIALIST" || user?.officeRole === "ONBOARDING_SPECIALIST" ? "bg-sky-600" : "bg-emerald-600")} text-white font-extrabold flex items-center justify-center text-xs shrink-0 shadow-xs`}>
+                {user?.name
+                  ? user.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
+                  : (isManager ? "OM" : "SE")}
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                  Sales Representative
+                  {user?.name || (isManager ? "Office Manager" : "Sales Representative")}
                 </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                  {user?.email || "emp@digitalbeings.com"}
-                </span>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded-md border ${
+                    isManager
+                      ? "bg-purple-50 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 border-purple-200 dark:border-purple-500/30"
+                      : (user?.role === "ONBOARDING_SPECIALIST" || user?.officeRole === "ONBOARDING_SPECIALIST"
+                        ? "bg-sky-50 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 border-sky-200 dark:border-sky-500/30"
+                        : "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30")
+                  }`}>
+                    {isManager ? "Manager" : (user?.role === "ONBOARDING_SPECIALIST" || user?.officeRole === "ONBOARDING_SPECIALIST" ? "Onboarding" : "Sales Exec")}
+                  </span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                    {user?.email || "emp@digitalbeings.com"}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -1901,6 +2186,289 @@ export default function OfficeDashboardPage() {
               </div>
             </div>
           )}
+
+          {/* =========================================================================
+              MODULE 8: TEAM & PERMISSIONS MANAGEMENT (RBAC)
+          ========================================================================= */}
+          {activeModule === "team" && (
+            <div className="space-y-6">
+              {/* Header Banner */}
+              <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-white/10 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="space-y-2 max-w-xl">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-500/15 text-purple-700 dark:text-purple-300 text-xs font-bold border border-purple-200 dark:border-purple-500/30">
+                    <span>👥 Staff &amp; Access Governance</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                    Team Roles &amp; Permissions
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Manage office staff, assign roles (Office Manager, Sales Executive, Onboarding Specialist), and grant granular module access for each team member.
+                  </p>
+                </div>
+
+                {isManager && (
+                  <button
+                    onClick={openCreateTeamModal}
+                    className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm shadow-xs transition flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>+ Add Team Member</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Staff KPI Summary Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[
+                  {
+                    label: "Total Staff",
+                    count: teamMembers.length,
+                    bg: "bg-slate-50 dark:bg-white/5",
+                    text: "text-slate-900 dark:text-white",
+                    icon: "👥"
+                  },
+                  {
+                    label: "Office Managers",
+                    count: teamMembers.filter((m) => m.role === "OFFICE_MANAGER").length,
+                    bg: "bg-purple-50 dark:bg-purple-500/10",
+                    text: "text-purple-600 dark:text-purple-400",
+                    icon: "👑"
+                  },
+                  {
+                    label: "Sales Executives",
+                    count: teamMembers.filter((m) => m.role === "SALES_EXECUTIVE").length,
+                    bg: "bg-emerald-50 dark:bg-emerald-500/10",
+                    text: "text-emerald-600 dark:text-emerald-400",
+                    icon: "💼"
+                  },
+                  {
+                    label: "Onboarding Specialists",
+                    count: teamMembers.filter((m) => m.role === "ONBOARDING_SPECIALIST").length,
+                    bg: "bg-sky-50 dark:bg-sky-500/10",
+                    text: "text-sky-600 dark:text-sky-400",
+                    icon: "🚀"
+                  }
+                ].map((stat, idx) => (
+                  <div
+                    key={idx}
+                    className={`${stat.bg} p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 flex items-center justify-between`}
+                  >
+                    <div>
+                      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                        {stat.label}
+                      </span>
+                      <span className={`text-2xl font-black ${stat.text} mt-1 block`}>
+                        {stat.count}
+                      </span>
+                    </div>
+                    <span className="text-2xl">{stat.icon}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Team Members Roster Table */}
+              <div className="bg-white dark:bg-[#0B101D] rounded-3xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden">
+                <div className="p-5 border-b border-slate-200/90 dark:border-white/10 flex items-center justify-between">
+                  <div>
+                    <h2 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                      Staff Directory &amp; Permissions Matrix
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Toggle active status, edit role presets, or adjust module visibility for individual salespersons.
+                    </p>
+                  </div>
+                  <button
+                    onClick={loadTeamMembers}
+                    className="text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>🔄 Refresh</span>
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200/90 dark:border-white/10 bg-slate-50/75 dark:bg-white/[0.02] text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold">
+                        <th className="py-3.5 px-5">Staff Member</th>
+                        <th className="py-3.5 px-4">Role</th>
+                        <th className="py-3.5 px-4">Allowed Modules</th>
+                        <th className="py-3.5 px-4">Privileges</th>
+                        <th className="py-3.5 px-4">Status</th>
+                        <th className="py-3.5 px-5 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200/70 dark:divide-white/[0.06]">
+                      {teamMembers.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-12 text-center text-slate-500">
+                            {loadingTeam ? "Loading team members..." : "No team members found."}
+                          </td>
+                        </tr>
+                      ) : (
+                        teamMembers.map((m) => {
+                          const isPrimaryManager = m.email === "emp@digitalbeings.com";
+                          return (
+                            <tr key={m.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition">
+                              <td className="py-4 px-5">
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={`w-9 h-9 rounded-full ${
+                                      m.role === "OFFICE_MANAGER"
+                                        ? "bg-purple-600"
+                                        : m.role === "ONBOARDING_SPECIALIST"
+                                        ? "bg-sky-600"
+                                        : "bg-emerald-600"
+                                    } text-white font-extrabold flex items-center justify-center text-xs shrink-0 shadow-xs`}
+                                  >
+                                    {m.name
+                                      ? m.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+                                      : "ST"}
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="font-extrabold text-slate-900 dark:text-white text-sm">
+                                        {m.name}
+                                      </span>
+                                      {isPrimaryManager && (
+                                        <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                          PRIMARY
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                                      {m.email} {m.phone ? `• ${m.phone}` : ""}
+                                    </span>
+                                  </div>
+                                </div>
+                              </td>
+
+                              <td className="py-4 px-4">
+                                <span
+                                  className={`inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-lg border ${
+                                    m.role === "OFFICE_MANAGER"
+                                      ? "bg-purple-50 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300 border-purple-200 dark:border-purple-500/30"
+                                      : m.role === "ONBOARDING_SPECIALIST"
+                                      ? "bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300 border-sky-200 dark:border-sky-500/30"
+                                      : "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30"
+                                  }`}
+                                >
+                                  <span>{m.role === "OFFICE_MANAGER" ? "👑" : m.role === "ONBOARDING_SPECIALIST" ? "🚀" : "💼"}</span>
+                                  <span>
+                                    {m.role === "OFFICE_MANAGER"
+                                      ? "Office Manager"
+                                      : m.role === "ONBOARDING_SPECIALIST"
+                                      ? "Onboarding Spec"
+                                      : "Sales Executive"}
+                                  </span>
+                                </span>
+                              </td>
+
+                              <td className="py-4 px-4">
+                                <div className="flex flex-wrap gap-1 max-w-xs">
+                                  {m.allowedModules?.map((mod) => (
+                                    <span
+                                      key={mod}
+                                      className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 uppercase tracking-wider"
+                                    >
+                                      {mod}
+                                    </span>
+                                  ))}
+                                </div>
+                              </td>
+
+                              <td className="py-4 px-4">
+                                <div className="flex flex-col gap-0.5 text-[10px] font-semibold">
+                                  <span className={m.canViewAllLeads ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}>
+                                    {m.canViewAllLeads ? "✓ All Leads" : "• Own Leads Only"}
+                                  </span>
+                                  <span className={m.canManageSettings ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}>
+                                    {m.canManageSettings ? "✓ Settings" : "• No Settings"}
+                                  </span>
+                                  <span className={m.canViewRevenue ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}>
+                                    {m.canViewRevenue ? "✓ Revenue" : "• No Revenue"}
+                                  </span>
+                                </div>
+                              </td>
+
+                              <td className="py-4 px-4">
+                                {isPrimaryManager ? (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    Permanent Active
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleToggleMemberActive(m)}
+                                    disabled={!isManager}
+                                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                                      m.isActive
+                                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 hover:bg-emerald-100"
+                                        : "bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:bg-slate-200"
+                                    }`}
+                                  >
+                                    <span
+                                      className={`w-1.5 h-1.5 rounded-full ${
+                                        m.isActive ? "bg-emerald-500" : "bg-slate-400"
+                                      }`}
+                                    />
+                                    {m.isActive ? "Active" : "Deactivated"}
+                                  </button>
+                                )}
+                              </td>
+
+                              <td className="py-4 px-5 text-right space-x-2">
+                                {isManager && (
+                                  <>
+                                    <button
+                                      onClick={() => openEditTeamModal(m)}
+                                      className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white font-bold text-xs transition cursor-pointer"
+                                    >
+                                      ✏️ Permissions
+                                    </button>
+
+                                    {!isPrimaryManager && (
+                                      <button
+                                        onClick={() => handleDeleteTeamMember(m.id)}
+                                        disabled={deletingMemberId === m.id}
+                                        className="px-2.5 py-1.5 rounded-lg border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 font-bold text-xs transition cursor-pointer"
+                                      >
+                                        {deletingMemberId === m.id ? "..." : "Remove"}
+                                      </button>
+                                    )}
+                                  </>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Access Restricted Screen if current activeModule is not in allowed list */}
+          {!allowedModulesList.includes(activeModule) && (
+            <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-10 border border-slate-200/90 dark:border-white/10 shadow-xs flex flex-col items-center justify-center text-center space-y-4 max-w-xl mx-auto my-12">
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center justify-center text-2xl">
+                🔒
+              </div>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                Module Access Restricted
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Your role does not have permission to view the{" "}
+                <span className="font-bold capitalize">{activeModule}</span> module. Please contact your Office Manager to grant access in the Team &amp; Permissions module.
+              </p>
+              <button
+                onClick={() => setActiveModule(allowedModulesList[0] || "leads")}
+                className="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-xs shadow-xs transition cursor-pointer"
+              >
+                Return to {allowedModulesList[0] || "Pipeline"}
+              </button>
+            </div>
+          )}
         </main>
       </div>
 
@@ -2358,6 +2926,240 @@ export default function OfficeDashboardPage() {
                   className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition cursor-pointer"
                 >
                   {savingSettings ? "Saving..." : "Save Settings"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL 5: TEAM MEMBER & PERMISSIONS MODAL (RBAC)
+      ========================================================================= */}
+      {teamModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-6 sm:p-8 max-w-2xl w-full border border-slate-200/90 dark:border-white/10 shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-black text-slate-900 dark:text-white">
+                  {editingMember ? "Edit Team Member & Permissions" : "Add New Office Team Member"}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Configure employee credentials, role presets, and specific module access rights.
+                </p>
+              </div>
+              <button
+                onClick={() => setTeamModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveTeamMember} className="space-y-5">
+              {/* Basic Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Staff Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Vikram Sharma"
+                    value={teamForm.name}
+                    onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Login Email *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="e.g. vikram@digitalbeings.com"
+                    value={teamForm.email}
+                    onChange={(e) => setTeamForm({ ...teamForm, email: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Phone / WhatsApp Number
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. +91 98765 43210"
+                    value={teamForm.phone}
+                    onChange={(e) => setTeamForm({ ...teamForm, phone: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Password {editingMember ? "(Leave empty to keep current)" : "*"}
+                  </label>
+                  <input
+                    type="password"
+                    required={!editingMember}
+                    placeholder={editingMember ? "••••••••" : "Choose secure password"}
+                    value={teamForm.password}
+                    onChange={(e) => setTeamForm({ ...teamForm, password: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+              </div>
+
+              {/* 1-Click Role Presets */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+                  Role Preset (1-Click Setup)
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {[
+                    {
+                      role: "SALES_EXECUTIVE" as const,
+                      title: "💼 Sales Executive",
+                      desc: "Leads, Chat, Payment Links"
+                    },
+                    {
+                      role: "ONBOARDING_SPECIALIST" as const,
+                      title: "🚀 Onboarding Spec",
+                      desc: "Leads, Chat, WABA Onboarding"
+                    },
+                    {
+                      role: "OFFICE_MANAGER" as const,
+                      title: "👑 Office Manager",
+                      desc: "Full Master Access & Team Mgmt"
+                    }
+                  ].map((preset) => {
+                    const isSelected = teamForm.role === preset.role;
+                    return (
+                      <button
+                        key={preset.role}
+                        type="button"
+                        onClick={() => handleSelectRolePreset(preset.role)}
+                        className={`p-3 rounded-2xl border text-left transition cursor-pointer ${
+                          isSelected
+                            ? "bg-purple-50 border-purple-400 dark:bg-purple-500/15 dark:border-purple-500 text-purple-900 dark:text-purple-200 ring-2 ring-purple-500/30"
+                            : "bg-slate-50 border-slate-200/90 dark:bg-white/5 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100"
+                        }`}
+                      >
+                        <span className="font-extrabold text-xs block">{preset.title}</span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                          {preset.desc}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Granular Module Checkboxes */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Granular Module Access
+                  </label>
+                  <span className="text-[11px] text-slate-500">
+                    Checked modules will appear in their sidebar
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { id: "leads" as OfficeModule, label: "Leads & Pipeline" },
+                    { id: "chat" as OfficeModule, label: "2-Way Lead Chat" },
+                    { id: "payments" as OfficeModule, label: "Payment Links" },
+                    { id: "onboarding" as OfficeModule, label: "Client Onboarding" },
+                    { id: "portfolio" as OfficeModule, label: "Portfolio Settings" },
+                    { id: "revenue" as OfficeModule, label: "Revenue Analytics" },
+                    { id: "activity" as OfficeModule, label: "Activity & Logs" },
+                    { id: "team" as OfficeModule, label: "Team & Permissions" }
+                  ].map((mod) => {
+                    const checked = teamForm.allowedModules.includes(mod.id);
+                    return (
+                      <label
+                        key={mod.id}
+                        onClick={() => handleToggleModule(mod.id)}
+                        className={`p-2.5 rounded-xl border flex items-center gap-2 cursor-pointer transition select-none text-xs font-bold ${
+                          checked
+                            ? "bg-purple-50 text-purple-900 border-purple-300 dark:bg-purple-500/15 dark:text-purple-200 dark:border-purple-500/40"
+                            : "bg-slate-50 text-slate-600 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          readOnly
+                          className="rounded text-purple-600 focus:ring-purple-500"
+                        />
+                        <span className="truncate">{mod.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Special Privileges */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/90 dark:border-white/10 space-y-2.5">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                  Data Visibility &amp; Administrative Overrides
+                </span>
+
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={teamForm.canViewAllLeads}
+                    onChange={(e) => setTeamForm({ ...teamForm, canViewAllLeads: e.target.checked })}
+                    className="rounded text-purple-600 focus:ring-purple-500"
+                  />
+                  <span>Can View All Leads (Overrides personal assignment isolation)</span>
+                </label>
+
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={teamForm.canManageSettings}
+                    onChange={(e) => setTeamForm({ ...teamForm, canManageSettings: e.target.checked })}
+                    className="rounded text-purple-600 focus:ring-purple-500"
+                  />
+                  <span>Can Manage WhatsApp &amp; WABA Settings</span>
+                </label>
+
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={teamForm.canViewRevenue}
+                    onChange={(e) => setTeamForm({ ...teamForm, canViewRevenue: e.target.checked })}
+                    className="rounded text-purple-600 focus:ring-purple-500"
+                  />
+                  <span>Can View Closed Revenue &amp; Financial Targets</span>
+                </label>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setTeamModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingTeamMember}
+                  className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+                >
+                  {savingTeamMember ? "Saving..." : (editingMember ? "Save Permissions" : "Add Team Member")}
                 </button>
               </div>
             </form>
