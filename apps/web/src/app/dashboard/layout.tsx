@@ -75,9 +75,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [userEmail, setUserEmail] = useState("");
   const [orgId, setOrgId] = useState("");
   const [walletBalance, setWalletBalance] = useState("0.00");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isActivated, isDemo, triggerPaywall, subscription: contextSub } = useSubscription();
 
   const { activeRole, activeRoleDef, hasAccess, canAccessPath, setActiveRole } = usePermissions();
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const titles: Record<string, string> = {
@@ -171,32 +176,265 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   const isCurrentPathAllowed = canAccessPath(pathname);
 
-  // Group visibility checks
-  const showConversationsSection =
-    hasAccess("inbox") ||
-    hasAccess("automations") ||
-    hasAccess("ecommerce") ||
-    hasAccess("campaigns") ||
-    hasAccess("templates");
+  // Group visibility checks (Reorganized into 4 clean, user-friendly categories)
+  // Category 1: Core Daily Messaging & Conversations
+  const showMessagingSection = true;
 
-  const showVerificationSection =
+  // Category 2: Setup, Templates & Outreach Campaigns
+  const showCampaignsSetupSection =
+    hasAccess("campaigns") ||
+    hasAccess("templates") ||
     hasAccess("numbers") ||
-    hasAccess("green-tick") ||
+    hasAccess("green-tick");
+
+  // Category 3: Utilities, E-Commerce, Wallet & Developer Tools
+  const showUtilitiesSection =
+    hasAccess("ecommerce") ||
+    hasAccess("wallet") ||
+    hasAccess("api_keys") ||
     hasAccess("logs");
 
-  const showBillingSection =
-    hasAccess("wallet") ||
-    hasAccess("pricing_admin") ||
-    hasAccess("api_keys") ||
-    hasAccess("settings");
-
-  const showAdminSection =
+  // Category 4: Workspace Governance, Roles & Platform Settings
+  const showGovernanceSection =
     hasAccess("team") ||
+    hasAccess("settings") ||
+    hasAccess("pricing_admin") ||
     hasAccess("super_admin");
+
+  const renderNavLinks = (onItemClick?: () => void) => (
+    <>
+      {/* Category 1: Messaging & Conversations */}
+      {showMessagingSection && (
+        <div className="space-y-1">
+          <p className="px-3 text-[10.5px] font-black text-white/80 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+            <span>Messaging &amp; Conversations</span>
+          </p>
+          <Link href="/dashboard" onClick={onItemClick} className={navLinkClass("/dashboard")}>
+            <div className="flex items-center gap-3 min-w-0">
+              <DashboardIcon className={iconClass("/dashboard")} />
+              <span className="truncate">Overview</span>
+            </div>
+            {pathname === "/dashboard" && (
+              <span className="w-1.5 h-1.5 rounded-full bg-white dark:bg-emerald-400 shadow-[0_0_8px_#ffffff] dark:shadow-[0_0_8px_#34d399]" />
+            )}
+          </Link>
+          {hasAccess("inbox") && (
+            <Link href="/dashboard/inbox" onClick={onItemClick} className={navLinkClass("/dashboard/inbox")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <InboxIcon className={iconClass("/dashboard/inbox")} />
+                <span className="truncate">Live Chat Inbox</span>
+              </div>
+              <span className="text-[10px] bg-white/15 text-white dark:bg-emerald-500/15 dark:text-emerald-300 border border-white/20 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold shadow-xs">2-Way</span>
+            </Link>
+          )}
+          {hasAccess("automations") && (
+            <Link href="/dashboard/automations" onClick={onItemClick} className={navLinkClass("/dashboard/automations")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <BotIcon className={iconClass("/dashboard/automations")} />
+                <span className="truncate">Chatbot Automations</span>
+              </div>
+              <span className="text-[10px] bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-2 py-0.5 rounded-full font-extrabold shadow-[0_0_10px_rgba(168,85,247,0.4)]">Auto-Reply</span>
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* Category 2: Campaigns & Asset Setup */}
+      {showCampaignsSetupSection && (
+        <div className="space-y-1 pt-2 border-t border-white/10 dark:border-white/[0.08]">
+          <p className="px-3 text-[10.5px] font-black text-white/80 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+            <span>Campaigns &amp; Setup</span>
+          </p>
+          {hasAccess("campaigns") && (
+            <Link href="/dashboard/campaigns" onClick={onItemClick} className={navLinkClass("/dashboard/campaigns")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <CampaignIcon className={iconClass("/dashboard/campaigns")} />
+                <span className="truncate">Broadcast Campaigns</span>
+              </div>
+              <span className="text-[10px] bg-white/15 text-white dark:bg-white/10 dark:text-slate-300 border border-white/20 dark:border-white/10 px-2 py-0.5 rounded-full font-bold">Bulk</span>
+            </Link>
+          )}
+          {hasAccess("templates") && (
+            <Link href="/dashboard/templates" onClick={onItemClick} className={navLinkClass("/dashboard/templates")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <TemplateIcon className={iconClass("/dashboard/templates")} />
+                <span className="truncate">Template Studio</span>
+              </div>
+            </Link>
+          )}
+          {hasAccess("numbers") && (
+            <Link href="/dashboard/numbers" onClick={onItemClick} className={navLinkClass("/dashboard/numbers")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <PhoneRoutingIcon className={iconClass("/dashboard/numbers")} />
+                <span className="truncate">Numbers &amp; Routing</span>
+              </div>
+            </Link>
+          )}
+          {hasAccess("green-tick") && (
+            <Link href="/dashboard/green-tick" onClick={onItemClick} className={navLinkClass("/dashboard/green-tick")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <ShieldCheckIcon className={iconClass("/dashboard/green-tick")} />
+                <span className="truncate">WhatsApp Verification</span>
+              </div>
+              <span className="text-[10px] bg-emerald-400/20 text-white dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-300/30 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold shadow-xs">Official</span>
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* Category 3: Utilities & Integrations */}
+      {showUtilitiesSection && (
+        <div className="space-y-1 pt-2 border-t border-white/10 dark:border-white/[0.08]">
+          <p className="px-3 text-[10.5px] font-black text-white/80 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+            <span>Utilities &amp; Integrations</span>
+          </p>
+          {hasAccess("ecommerce") && (
+            <Link href="/dashboard/ecommerce" onClick={onItemClick} className={navLinkClass("/dashboard/ecommerce")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <ShoppingBagIcon className={iconClass("/dashboard/ecommerce")} />
+                <span className="truncate">E-Commerce Recipes</span>
+              </div>
+              <span className="text-[10px] bg-amber-400/20 text-white dark:bg-amber-500/15 dark:text-amber-300 border border-amber-300/30 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold shadow-xs">Shopify</span>
+            </Link>
+          )}
+          {hasAccess("wallet") && (
+            <Link href="/dashboard/wallet" onClick={onItemClick} className={navLinkClass("/dashboard/wallet")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <WalletIcon className={iconClass("/dashboard/wallet")} />
+                <span className="truncate">Wallet &amp; Billing</span>
+              </div>
+            </Link>
+          )}
+          {hasAccess("api_keys") && (
+            <Link href="/dashboard/api-keys" onClick={onItemClick} className={navLinkClass("/dashboard/api-keys")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <KeyIcon className={iconClass("/dashboard/api-keys")} />
+                <span className="truncate">API Keys &amp; Webhooks</span>
+              </div>
+              <span className="text-[10px] bg-white/15 text-white dark:bg-white/10 dark:text-slate-300 border border-white/20 dark:border-white/10 px-2 py-0.5 rounded-full font-bold">REST</span>
+            </Link>
+          )}
+          {hasAccess("logs") && (
+            <Link href="/dashboard/logs" onClick={onItemClick} className={navLinkClass("/dashboard/logs")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <AuditLogsIcon className={iconClass("/dashboard/logs")} />
+                <span className="truncate">Logs &amp; Audits</span>
+              </div>
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* Category 4: Workspace & Settings */}
+      {showGovernanceSection && (
+        <div className="space-y-1 pt-2 border-t border-white/10 dark:border-white/[0.08]">
+          <p className="px-3 text-[10.5px] font-black text-white/80 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
+            <span>Workspace &amp; Settings</span>
+          </p>
+          {hasAccess("team") && (
+            <Link href="/dashboard/team" onClick={onItemClick} className={navLinkClass("/dashboard/team")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <TeamIcon className={iconClass("/dashboard/team")} />
+                <span className="truncate">Team &amp; Custom Roles</span>
+              </div>
+              <span className="text-[10px] bg-purple-400/20 text-white dark:bg-purple-500/15 dark:text-purple-300 border border-purple-300/30 dark:border-purple-500/30 px-2 py-0.5 rounded-full font-bold">RBAC</span>
+            </Link>
+          )}
+          {hasAccess("settings") && (
+            <Link href="/dashboard/settings" onClick={onItemClick} className={navLinkClass("/dashboard/settings")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <SettingsIcon className={iconClass("/dashboard/settings")} />
+                <span className="truncate">Settings</span>
+              </div>
+            </Link>
+          )}
+          {hasAccess("pricing_admin") && (
+            <Link href="/dashboard/pricing-admin" onClick={onItemClick} className={navLinkClass("/dashboard/pricing-admin")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <PricingAdminIcon className={iconClass("/dashboard/pricing-admin")} />
+                <span className="truncate">Pricing &amp; Safety Admin</span>
+              </div>
+            </Link>
+          )}
+          {hasAccess("super_admin") && (
+            <Link href="/dashboard/super-admin" onClick={onItemClick} className={navLinkClass("/dashboard/super-admin")}>
+              <div className="flex items-center gap-3 min-w-0">
+                <SuperAdminIcon className={iconClass("/dashboard/super-admin")} />
+                <span className="truncate">Platform Super Admin</span>
+              </div>
+              <span className="text-[10px] bg-emerald-400/20 text-white dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-300/30 dark:border-emerald-400/40 px-2 py-0.5 rounded-full font-bold shadow-[0_0_10px_rgba(52,211,153,0.3)]">Master</span>
+            </Link>
+          )}
+        </div>
+      )}
+    </>
+  );
 
   return (
     <div className="min-h-screen bg-[#fbfbfd] dark:bg-[#04060c] flex text-slate-900 dark:text-slate-100 transition-colors duration-300">
-      {/* Sidebar with Apple VisionOS/macOS-Grade Frosted Glass Navigation */}
+      {/* Mobile Drawer Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 md:hidden transition-opacity"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sliding Drawer */}
+      <aside
+        className={`fixed top-0 bottom-0 left-0 w-[280px] bg-[#154336] dark:bg-[#070b14] z-50 flex flex-col shadow-2xl md:hidden transform transition-transform duration-300 ease-out border-r border-[#10382d] dark:border-white/[0.08] ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="h-16 flex items-center justify-between px-5 border-b border-white/10 dark:border-white/[0.08] shrink-0">
+          <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 group">
+            <div className="relative">
+              <img
+                src="/icon.png"
+                alt="Digital Beings"
+                className="w-8 h-8 rounded-xl object-contain shadow-md shrink-0"
+              />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#154336] dark:border-[#070b14] shadow-[0_0_8px_#10b981]" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-base tracking-tight text-white dark:text-slate-100 leading-tight flex items-center gap-1">
+                Digital<span className="text-emerald-300 dark:apple-emerald-gradient">Beings</span>
+              </span>
+              <span className="text-[10px] font-bold text-white/80 dark:text-slate-400 tracking-wider uppercase">
+                Secure • Connect • Grow
+              </span>
+            </div>
+          </Link>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition cursor-pointer"
+            aria-label="Close Navigation Menu"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <nav className="flex-1 p-3.5 space-y-4 overflow-y-auto">
+          {renderNavLinks(() => setMobileMenuOpen(false))}
+        </nav>
+
+        {/* Mobile Active Role Footer */}
+        <div className="p-3.5 bg-black/15 dark:bg-white/[0.02] border-t border-white/10 dark:border-white/[0.08] shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-white/10 dark:bg-white/[0.05] border border-white/15 dark:border-white/[0.1] flex items-center justify-center text-white dark:text-emerald-400 shrink-0 shadow-inner">
+              <ShieldCheckIcon className="w-4 h-4 text-white dark:text-emerald-400" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] uppercase font-bold text-white/80 dark:text-slate-400 tracking-wider">Active Workspace Role</span>
+              <span className="text-xs font-black text-white truncate">{activeRoleDef.badge}</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Desktop Sidebar with Apple VisionOS/macOS-Grade Frosted Glass Navigation */}
       <aside
         id="dashboard-sidebar"
         className="w-[276px] bg-[#154336] dark:bg-[#070b14]/95 backdrop-blur-2xl border-r border-[#10382d] dark:border-white/[0.08] hidden md:flex flex-col shrink-0 h-screen sticky top-0 shadow-[4px_0_24px_rgba(21,67,54,0.15)] dark:shadow-[4px_0_30px_rgba(0,0,0,0.6)] z-20 text-white dark:text-slate-200 transition-colors duration-300"
@@ -222,170 +460,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
 
-        <nav className="flex-1 p-3.5 space-y-5 overflow-y-auto">
-
-          {/* Section 1: Core Messaging */}
-          {showConversationsSection && (
-            <div className="space-y-1">
-              <p className="px-3 text-[10.5px] font-black text-white/80 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
-                <span>Conversations &amp; Engagement</span>
-              </p>
-              <Link href="/dashboard" className={navLinkClass("/dashboard")}>
-                <div className="flex items-center gap-3 min-w-0">
-                  <DashboardIcon className={iconClass("/dashboard")} />
-                  <span className="truncate">Overview</span>
-                </div>
-                {pathname === "/dashboard" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white dark:bg-emerald-400 shadow-[0_0_8px_#ffffff] dark:shadow-[0_0_8px_#34d399]" />
-                )}
-              </Link>
-              {hasAccess("inbox") && (
-                <Link href="/dashboard/inbox" className={navLinkClass("/dashboard/inbox")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <InboxIcon className={iconClass("/dashboard/inbox")} />
-                    <span className="truncate">Live Chat Inbox</span>
-                  </div>
-                  <span className="text-[10px] bg-white/15 text-white dark:bg-emerald-500/15 dark:text-emerald-300 border border-white/20 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold shadow-xs">2-Way</span>
-                </Link>
-              )}
-              {hasAccess("automations") && (
-                <Link href="/dashboard/automations" className={navLinkClass("/dashboard/automations")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <BotIcon className={iconClass("/dashboard/automations")} />
-                    <span className="truncate">Chatbot Automations</span>
-                  </div>
-                  <span className="text-[10px] bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-2 py-0.5 rounded-full font-extrabold shadow-[0_0_10px_rgba(168,85,247,0.4)]">New</span>
-                </Link>
-              )}
-              {hasAccess("ecommerce") && (
-                <Link href="/dashboard/ecommerce" className={navLinkClass("/dashboard/ecommerce")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <ShoppingBagIcon className={iconClass("/dashboard/ecommerce")} />
-                    <span className="truncate">E-Commerce Recipes</span>
-                  </div>
-                  <span className="text-[10px] bg-amber-400/20 text-white dark:bg-amber-500/15 dark:text-amber-300 border border-amber-300/30 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold shadow-xs">Shopify</span>
-                </Link>
-              )}
-              {hasAccess("campaigns") && (
-                <Link href="/dashboard/campaigns" className={navLinkClass("/dashboard/campaigns")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <CampaignIcon className={iconClass("/dashboard/campaigns")} />
-                    <span className="truncate">Broadcast Campaigns</span>
-                  </div>
-                  <span className="text-[10px] bg-white/15 text-white dark:bg-white/10 dark:text-slate-300 border border-white/20 dark:border-white/10 px-2 py-0.5 rounded-full font-bold">Bulk</span>
-                </Link>
-              )}
-              {hasAccess("templates") && (
-                <Link href="/dashboard/templates" className={navLinkClass("/dashboard/templates")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <TemplateIcon className={iconClass("/dashboard/templates")} />
-                    <span className="truncate">Template Studio</span>
-                  </div>
-                </Link>
-              )}
-            </div>
-          )}
-
-          {/* Section 2: Numbers & Compliance */}
-          {showVerificationSection && (
-            <div className="space-y-1">
-              <p className="px-3 text-[10.5px] font-black text-white/80 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
-                <span>WhatsApp &amp; Verification</span>
-              </p>
-              {hasAccess("numbers") && (
-                <Link href="/dashboard/numbers" className={navLinkClass("/dashboard/numbers")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <PhoneRoutingIcon className={iconClass("/dashboard/numbers")} />
-                    <span className="truncate">Numbers &amp; Routing</span>
-                  </div>
-                </Link>
-              )}
-              {hasAccess("green-tick") && (
-                <Link href="/dashboard/green-tick" className={navLinkClass("/dashboard/green-tick")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <ShieldCheckIcon className={iconClass("/dashboard/green-tick")} />
-                    <span className="truncate">WhatsApp Verification</span>
-                  </div>
-                </Link>
-              )}
-              {hasAccess("logs") && (
-                <Link href="/dashboard/logs" className={navLinkClass("/dashboard/logs")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <AuditLogsIcon className={iconClass("/dashboard/logs")} />
-                    <span className="truncate">Logs &amp; Audits</span>
-                  </div>
-                </Link>
-              )}
-            </div>
-          )}
-
-          {/* Section 3: Wallet & Billing */}
-          {showBillingSection && (
-            <div className="space-y-1">
-              <p className="px-3 text-[10.5px] font-black text-white/80 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
-                <span>Wallet &amp; Developers</span>
-              </p>
-              {hasAccess("wallet") && (
-                <Link href="/dashboard/wallet" className={navLinkClass("/dashboard/wallet")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <WalletIcon className={iconClass("/dashboard/wallet")} />
-                    <span className="truncate">Wallet &amp; Billing</span>
-                  </div>
-                </Link>
-              )}
-              {hasAccess("pricing_admin") && (
-                <Link href="/dashboard/pricing-admin" className={navLinkClass("/dashboard/pricing-admin")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <PricingAdminIcon className={iconClass("/dashboard/pricing-admin")} />
-                    <span className="truncate">Pricing &amp; Safety Admin</span>
-                  </div>
-                </Link>
-              )}
-              {hasAccess("api_keys") && (
-                <Link href="/dashboard/api-keys" className={navLinkClass("/dashboard/api-keys")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <KeyIcon className={iconClass("/dashboard/api-keys")} />
-                    <span className="truncate">API Keys</span>
-                  </div>
-                </Link>
-              )}
-              {hasAccess("settings") && (
-                <Link href="/dashboard/settings" className={navLinkClass("/dashboard/settings")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <SettingsIcon className={iconClass("/dashboard/settings")} />
-                    <span className="truncate">Settings</span>
-                  </div>
-                </Link>
-              )}
-            </div>
-          )}
-
-          {/* Section 4: Administration & Team Roles */}
-          {showAdminSection && (
-            <div className="space-y-1 pt-2 border-t border-white/10 dark:border-white/[0.08]">
-              <p className="px-3 text-[10.5px] font-black text-white/80 dark:text-slate-400 uppercase tracking-widest pb-1 flex items-center gap-2">
-                <span>Team &amp; Governance</span>
-              </p>
-              {hasAccess("team") && (
-                <Link href="/dashboard/team" className={navLinkClass("/dashboard/team")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <TeamIcon className={iconClass("/dashboard/team")} />
-                    <span className="truncate">Team &amp; Custom Roles</span>
-                  </div>
-                  <span className="text-[10px] bg-purple-400/20 text-white dark:bg-purple-500/15 dark:text-purple-300 border border-purple-300/30 dark:border-purple-500/30 px-2 py-0.5 rounded-full font-bold">RBAC</span>
-                </Link>
-              )}
-              {hasAccess("super_admin") && (
-                <Link href="/dashboard/super-admin" className={navLinkClass("/dashboard/super-admin")}>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <SuperAdminIcon className={iconClass("/dashboard/super-admin")} />
-                    <span className="truncate">Platform Super Admin</span>
-                  </div>
-                  <span className="text-[10px] bg-emerald-400/20 text-white dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-300/30 dark:border-emerald-400/40 px-2 py-0.5 rounded-full font-bold shadow-[0_0_10px_rgba(52,211,153,0.3)]">Master</span>
-                </Link>
-              )}
-            </div>
-          )}
+        <nav className="flex-1 p-3.5 space-y-4 overflow-y-auto">
+          {renderNavLinks()}
         </nav>
 
         {/* Current Active Role Footer Tag */}
@@ -410,15 +486,28 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
         {/* Apple Frosted Glass Header */}
         <header className="bg-white/90 dark:bg-[#070b14]/85 backdrop-blur-2xl border-b border-slate-200/90 dark:border-white/[0.08] flex items-center px-4 sm:px-8 py-3.5 justify-between shrink-0 shadow-[0_2px_15px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.3)] z-30 min-h-[4.5rem] transition-colors duration-300">
-          <div className="flex flex-col justify-center">
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-950 dark:text-slate-100 dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] flex items-center gap-2 transition-colors">
-              <span>{currentModuleTitle}</span>
-            </h1>
-            {currentModuleSubtitle && (
-              <p className="text-[13px] text-slate-800 dark:text-slate-300 font-semibold mt-0.5 hidden sm:block">
-                {currentModuleSubtitle}
-              </p>
-            )}
+          <div className="flex items-center gap-3">
+            {/* Mobile Navigation Toggle Button */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden p-2 -ml-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer"
+              aria-label="Open Navigation Menu"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            <div className="flex flex-col justify-center">
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-950 dark:text-slate-100 dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] flex items-center gap-2 transition-colors">
+                <span>{currentModuleTitle}</span>
+              </h1>
+              {currentModuleSubtitle && (
+                <p className="text-[13px] text-slate-800 dark:text-slate-300 font-semibold mt-0.5 hidden sm:block">
+                  {currentModuleSubtitle}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center space-x-2.5 sm:space-x-3.5">
