@@ -145,23 +145,35 @@ export default function DashboardOverview() {
         if (data.asset) setAsset(data.asset);
       }
 
-      // Check registered phone numbers
+      // Check registered phone numbers and Meta credentials
       try {
         const numRes = await fetch(`${getApiUrl()}/v1/meta/numbers/${pid}`);
         const numData = await numRes.json();
         if (numData.success && Array.isArray(numData.numbers) && numData.numbers.length > 0) {
           setHasNumber(true);
           setConnectedPhone(numData.numbers[0].displayPhone || numData.numbers[0].phoneNumber || null);
-        } else if (data?.asset?.displayPhone) {
+        } else if (data?.asset?.displayPhone || data?.asset?.phoneId) {
           setHasNumber(true);
-          setConnectedPhone(data.asset.displayPhone);
+          setConnectedPhone(data.asset.displayPhone || data.asset.phoneId);
         } else {
-          setHasNumber(false);
+          // Double check project for linked Meta credentials
+          try {
+            const projRes = await fetch(`${getApiUrl()}/v1/project/${pid}`);
+            const projData = await projRes.json();
+            if (projData.success && projData.project && (projData.project.metaPhoneId || projData.project.metaAccessToken)) {
+              setHasNumber(true);
+              setConnectedPhone(projData.project.displayPhone || projData.project.metaPhoneId || "Linked");
+            } else {
+              setHasNumber(false);
+            }
+          } catch {
+            setHasNumber(false);
+          }
         }
       } catch {
-        if (data?.asset?.displayPhone) {
+        if (data?.asset?.displayPhone || data?.asset?.phoneId) {
           setHasNumber(true);
-          setConnectedPhone(data.asset.displayPhone);
+          setConnectedPhone(data.asset.displayPhone || data.asset.phoneId);
         } else {
           setHasNumber(false);
         }
@@ -226,399 +238,553 @@ export default function DashboardOverview() {
         </h1>
       </div>
 
-      {/* 2. Number Status & Connection Gate / Live Instant Test */}
-      {hasNumber === false ? (
-        <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-              <WhatsAppIcon className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-bold text-sm sm:text-base text-slate-950 dark:text-white">
-                  Link Your WhatsApp Number &amp; Meta Account
-                </h2>
-                <span className="text-[10px] font-bold bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">
-                  Action Required
+      {/* 2. Content Switching: Unconnected State vs Full Live Operational Dashboard */}
+      {hasNumber === null ? (
+        /* Loading Skeleton */
+        <div className="space-y-6 animate-pulse">
+          <div className="h-64 rounded-3xl bg-slate-200/60 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="h-32 rounded-2xl bg-slate-200/60 dark:bg-white/[0.04]" />
+            <div className="h-32 rounded-2xl bg-slate-200/60 dark:bg-white/[0.04]" />
+            <div className="h-32 rounded-2xl bg-slate-200/60 dark:bg-white/[0.04]" />
+          </div>
+        </div>
+      ) : hasNumber === false ? (
+        /* ============================================================== */
+        /* UNCONNECTED STATE: ONLY CONNECT META ACCOUNT IS DISPLAYED      */
+        /* ============================================================== */
+        <div className="space-y-6">
+          {/* Main Hero Connection Box */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-white to-slate-50/80 dark:from-[#0B101D] dark:to-[#080D1A] border border-slate-200 dark:border-white/10 p-6 sm:p-10 shadow-xl dark:shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+            {/* Ambient Background Glow */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20" />
+
+            <div className="relative z-10 max-w-3xl">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/25 text-emerald-700 dark:text-emerald-400 text-xs font-bold mb-5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Action Required • Workspace Setup</span>
+              </div>
+
+              {/* Title & Description */}
+              <div className="flex items-start gap-4 sm:gap-5">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 flex items-center justify-center shrink-0 shadow-[0_0_25px_rgba(16,185,129,0.35)]">
+                  <WhatsAppIcon className="w-8 h-8 sm:w-9 sm:h-9" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-3xl font-black tracking-tight text-slate-950 dark:text-white leading-tight">
+                    Connect Your Meta Account &amp; WhatsApp Number
+                  </h2>
+                  <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium mt-2 leading-relaxed">
+                    To start sending live messages, automated AI replies, and broadcast campaigns, connect your Meta Business Portfolio or WhatsApp Cloud API number. Once connected, your live telemetry, inbox, and campaign tools will automatically activate.
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 mt-8 pt-6 border-t border-slate-200/80 dark:border-white/10">
+                <Link
+                  href="/dashboard/setup"
+                  className="px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-sm font-black rounded-xl transition shadow-[0_0_20px_rgba(16,185,129,0.3)] text-center flex items-center justify-center gap-2 cursor-pointer group"
+                >
+                  <WhatsAppIcon className="w-4 h-4" />
+                  <span>Connect Meta Account</span>
+                  <span className="group-hover:translate-x-1 transition-transform">➔</span>
+                </Link>
+
+                <Link
+                  href="/dashboard/numbers"
+                  className="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.12] text-slate-800 dark:text-white text-sm font-bold rounded-xl transition border border-slate-300/80 dark:border-white/10 text-center flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <PhoneRoutingIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                  <span>Configure Number Manually</span>
+                </Link>
+              </div>
+
+              {/* Trust & Meta Compliance Guarantee */}
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-6 pt-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheckIcon className="w-4 h-4 text-emerald-500" />
+                  Official Meta Cloud API
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <ZapIcon className="w-4 h-4 text-amber-500" />
+                  Instant Automatic Sync
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  256-Bit Encrypted Token Storage
                 </span>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                Connect your Meta Business Portfolio or Facebook account to register, fetch, and route your WhatsApp Business number.
-              </p>
             </div>
           </div>
-          <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
-            <Link
-              href="/dashboard/setup"
-              className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-xs font-black rounded-lg transition shadow-xs text-center cursor-pointer"
-            >
-              Connect Meta Account ➔
-            </Link>
-            <Link
-              href="/dashboard/numbers"
-              className="w-full sm:w-auto px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-slate-800 dark:text-white text-xs font-bold rounded-lg transition border border-slate-200 dark:border-white/10 text-center"
-            >
-              Manage Numbers
-            </Link>
+
+          {/* 3 Step Setup Guide Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white/80 dark:bg-[#0B101D]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-black text-sm flex items-center justify-center border border-emerald-500/20">
+                  1
+                </div>
+                <h3 className="font-bold text-sm text-slate-950 dark:text-white">
+                  Link Facebook / Meta Portfolio
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                  Log in with Facebook to link your Meta Business Manager and grant WhatsApp Cloud API permissions in seconds.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <span>Official Meta OAuth</span>
+              </div>
+            </div>
+
+            <div className="bg-white/80 dark:bg-[#0B101D]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-black text-sm flex items-center justify-center border border-indigo-500/20">
+                  2
+                </div>
+                <h3 className="font-bold text-sm text-slate-950 dark:text-white">
+                  Select Business Phone Number
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                  Choose an existing WhatsApp Business phone number or register a new verified number directly with Meta.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                <span>Auto-routed &amp; Verified</span>
+              </div>
+            </div>
+
+            <div className="bg-white/80 dark:bg-[#0B101D]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 font-black text-sm flex items-center justify-center border border-purple-500/20">
+                  3
+                </div>
+                <h3 className="font-bold text-sm text-slate-950 dark:text-white">
+                  Dashboard Automatically Activates
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                  Your live telemetry, 2-way inbox, AI chatbots, broadcast campaigns, and template studio unlock instantly.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 text-[11px] font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
+                <span>Immediate Operational Readiness</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Features That Will Unlock Card */}
+          <div className="bg-slate-50/80 dark:bg-[#080D1A]/90 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 backdrop-blur-xl">
+            <h3 className="text-xs font-bold tracking-widest text-slate-500 dark:text-slate-400 uppercase mb-4">
+              FEATURES WAITING TO UNLOCK UPON CONNECTION
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white/60 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <BotIcon className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs text-slate-900 dark:text-white">AI Chatbots &amp; Automations</h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Automated replies &amp; interactive flows</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white/60 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                  <CampaignIcon className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs text-slate-900 dark:text-white">Broadcast Campaigns</h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Bulk marketing with rich media &amp; buttons</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white/60 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5">
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                  <TemplateIcon className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs text-slate-900 dark:text-white">Template Studio</h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Official Meta approval sync in real-time</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white/60 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <ShoppingBagIcon className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs text-slate-900 dark:text-white">E-Commerce Automation</h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Shopify &amp; WooCommerce abandoned carts</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       ) : (
-        <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                Instant Gateway Test
-              </span>
-              {connectedPhone && (
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                  ({connectedPhone})
+        /* ============================================================== */
+        /* CONNECTED STATE: FULL OPERATIONAL TELEMETRY & CAMPAIGNS         */
+        /* ============================================================== */
+        <div className="space-y-6">
+          {/* Instant Gateway Test */}
+          <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                  Instant Gateway Test
                 </span>
-              )}
-            </div>
-            <h2 className="text-base font-bold text-slate-950 dark:text-white">
-              Send a Live WhatsApp OTP to Your Phone
-            </h2>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
-              Dispatch a test verification code directly through your linked WhatsApp number.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:max-w-md shrink-0">
-            <form onSubmit={handleSendTest} className="flex items-center gap-2 flex-1">
-              <input
-                type="text"
-                required
-                value={testPhone}
-                onChange={(e) => setTestPhone(e.target.value)}
-                placeholder="+919876543210"
-                className="flex-1 bg-slate-50 dark:bg-white/[0.05] border border-slate-300 dark:border-white/10 text-slate-950 dark:text-white font-mono text-xs rounded-lg px-3 py-2 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-bold"
-              />
-              <button
-                type="submit"
-                disabled={testSending || !testPhone}
-                className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-xs rounded-lg transition whitespace-nowrap cursor-pointer disabled:opacity-50"
-              >
-                {testSending ? "Sending..." : "Send Test ➔"}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Test Result Toast Banner if sent */}
-      {testResult && (
-        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 font-mono flex items-center justify-between">
-          <span className="font-bold">✓ Live OTP Dispatched in 1.2s!</span>
-          <span className="text-[11px]">Req ID: {testResult.requestId || "req_ok"}</span>
-        </div>
-      )}
-
-      {/* 3. Core Quick Actions (Compact Bento Grid: AI Agent, Campaigns, Templates) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-        {/* Card 1: Build Your AI Agent */}
-        <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-xs flex items-center justify-between gap-3 hover:border-emerald-500/40 transition">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-              <BotIcon className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-bold text-sm text-slate-950 dark:text-white truncate">Build Your AI Agent</h3>
-              <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate">Automate conversations &amp; lead qualification</p>
-            </div>
-          </div>
-          <Link
-            href="/dashboard/automations"
-            className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-xs font-black rounded-lg transition whitespace-nowrap shrink-0 shadow-xs"
-          >
-            Create Agent
-          </Link>
-        </div>
-
-        {/* Card 2: Broadcast Campaigns */}
-        <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-xs flex items-center justify-between gap-3 hover:border-emerald-500/40 transition">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-              <CampaignIcon className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-bold text-sm text-slate-950 dark:text-white truncate">Broadcast Campaigns</h3>
-              <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate">Bulk promotional &amp; utility broadcasts</p>
-            </div>
-          </div>
-          <Link
-            href="/dashboard/campaigns"
-            className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white text-xs font-bold rounded-lg transition whitespace-nowrap shrink-0 border border-slate-200 dark:border-white/10"
-          >
-            Launch
-          </Link>
-        </div>
-
-        {/* Card 3: Template Studio */}
-        <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-xs flex items-center justify-between gap-3 hover:border-emerald-500/40 transition">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-              <TemplateIcon className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-bold text-sm text-slate-950 dark:text-white truncate">Template Studio</h3>
-              <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate">Create &amp; sync Meta-approved templates</p>
-            </div>
-          </div>
-          <Link
-            href="/dashboard/templates"
-            className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white text-xs font-bold rounded-lg transition whitespace-nowrap shrink-0 border border-slate-200 dark:border-white/10"
-          >
-            Manage
-          </Link>
-        </div>
-      </div>
-
-      {/* 6. Operations & Live Telemetry Section (Apple Bento Specular Metric Cards) */}
-      <div className="space-y-4 pt-2">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold tracking-widest text-slate-500 dark:text-slate-400 uppercase">
-            LIVE TELEMETRY &amp; METRICS
-          </span>
-          <button
-            onClick={() => loadDashboardData(true)}
-            disabled={refreshing}
-            className="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 cursor-pointer"
-          >
-            <RefreshIcon className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
-            <span>Refresh Telemetry</span>
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Total Dispatched */}
-          <div className="bg-white/80 dark:bg-[#0B101D]/80 hover:bg-slate-50 dark:hover:bg-[#0F172A]/90 border border-slate-200/80 dark:border-white/[0.08] hover:border-emerald-500/40 rounded-2xl p-5 backdrop-blur-xl shadow-sm dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold">
-                  <SendAirplaneIcon className="w-4 h-4" />
-                </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Total Dispatched</span>
+                {connectedPhone && (
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                    ({connectedPhone})
+                  </span>
+                )}
               </div>
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                <TrendingUpIcon className="w-3 h-3" />
-                <span>14.2%</span>
-              </span>
-            </div>
-            <div className="mt-3 text-3xl font-black text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-b dark:from-white dark:via-slate-100 dark:to-slate-400 tracking-tight">
-              {metrics.totalSent.toLocaleString()}
-            </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
-              ✓ {metrics.totalDelivered.toLocaleString()} delivered • {metrics.totalFailed} failed
-            </div>
-          </div>
-
-          {/* Card 2: Avg Delivery Speed */}
-          <div className="bg-white/80 dark:bg-[#0B101D]/80 hover:bg-slate-50 dark:hover:bg-[#0F172A]/90 border border-slate-200/80 dark:border-white/[0.08] hover:border-emerald-500/40 rounded-2xl p-5 backdrop-blur-xl shadow-sm dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-600 dark:text-sky-400 font-bold">
-                  <ZapIcon className="w-4 h-4" />
-                </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Avg Delivery Speed</span>
-              </div>
-              <span className="px-2 py-0.5 bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30 text-[10px] font-extrabold rounded-full">
-                ULTRA-FAST
-              </span>
-            </div>
-            <div className="mt-3 text-3xl font-black text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-b dark:from-white dark:via-slate-100 dark:to-slate-400 tracking-tight">
-              {metrics.avgDeliveryLatency}
-            </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
-              99.4% delivered in &lt; 3s via Cloud API
-            </div>
-          </div>
-
-          {/* Card 3: Delivery Rate */}
-          <div className="bg-white/80 dark:bg-[#0B101D]/80 hover:bg-slate-50 dark:hover:bg-[#0F172A]/90 border border-slate-200/80 dark:border-white/[0.08] hover:border-emerald-500/40 rounded-2xl p-5 backdrop-blur-xl shadow-sm dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold">
-                  <ShieldCheckIcon className="w-4 h-4" />
-                </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Delivery Rate</span>
-              </div>
-              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                {metrics.verificationRate}% verified
-              </span>
-            </div>
-            <div className="mt-3 text-3xl font-black text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-b dark:from-white dark:via-slate-100 dark:to-slate-400 tracking-tight">
-              {metrics.deliveryRate}%
-            </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
-              Direct Meta Cloud API WebSocket
-            </div>
-          </div>
-
-          {/* Card 4: Wallet Balance */}
-          <div className="bg-white/80 dark:bg-[#0B101D]/80 hover:bg-slate-50 dark:hover:bg-[#0F172A]/90 border border-slate-200/80 dark:border-white/[0.08] hover:border-emerald-500/40 rounded-2xl p-5 backdrop-blur-xl shadow-sm dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-300 font-bold">
-                  <WalletIcon className="w-4 h-4" />
-                </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Wallet Balance</span>
-              </div>
-              <Link
-                href="/dashboard/wallet"
-                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
-              >
-                Top-up →
-              </Link>
-            </div>
-            <div className="mt-3 text-3xl font-black text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-b dark:from-white dark:via-slate-100 dark:to-slate-400 tracking-tight">
-              ₹{Number(metrics.walletBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-            </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
-              Runway: <span className="font-bold text-slate-900 dark:text-white">~{metrics.estimatedOtpRunway.toLocaleString()}</span> OTPs
-            </div>
-          </div>
-        </div>
-
-        {/* 7-Day Messaging Throughput Chart */}
-        <div className="bg-slate-50/60 dark:bg-[#080D1A]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-3xl p-6 backdrop-blur-2xl shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                  <BarChart2DIcon className="w-4 h-4" />
-                </div>
-                <span>7-Day Messaging Throughput &amp; Delivery Trend</span>
+              <h2 className="text-base font-bold text-slate-950 dark:text-white">
+                Send a Live WhatsApp OTP to Your Phone
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
-                Daily volume comparison between dispatched, delivered, and failed messages.
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                Dispatch a test verification code directly through your linked WhatsApp number.
               </p>
             </div>
-            <div className="flex items-center gap-4 text-xs font-bold text-slate-600 dark:text-slate-300">
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-md bg-[#10B981] shadow-[0_0_8px_#10B981]"></span> Delivered
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-md bg-slate-300 dark:bg-white/30"></span> Dispatched
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-md bg-rose-500 dark:bg-rose-400 shadow-[0_0_8px_#fb7185]"></span> Failed
-              </span>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:max-w-md shrink-0">
+              <form onSubmit={handleSendTest} className="flex items-center gap-2 flex-1">
+                <input
+                  type="text"
+                  required
+                  value={testPhone}
+                  onChange={(e) => setTestPhone(e.target.value)}
+                  placeholder="+919876543210"
+                  className="flex-1 bg-slate-50 dark:bg-white/[0.05] border border-slate-300 dark:border-white/10 text-slate-950 dark:text-white font-mono text-xs rounded-lg px-3 py-2 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-bold"
+                />
+                <button
+                  type="submit"
+                  disabled={testSending || !testPhone}
+                  className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-xs rounded-lg transition whitespace-nowrap cursor-pointer disabled:opacity-50"
+                >
+                  {testSending ? "Sending..." : "Send Test ➔"}
+                </button>
+              </form>
             </div>
           </div>
 
-          <div className="pt-6 pb-2">
-            <div className="grid grid-cols-7 gap-3 sm:gap-6 items-end h-56 border-b border-slate-200 dark:border-white/[0.08] px-2">
-              {trend.map((t, idx) => {
-                const heightPct = Math.round((t.sent / maxTrendSent) * 100);
-                const deliveredHeight = t.sent > 0 ? Math.round((t.delivered / t.sent) * 100) : 0;
-
-                return (
-                  <div key={idx} className="flex flex-col items-center gap-2 group relative">
-                    <div className="absolute -top-14 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900/95 backdrop-blur-md text-white text-xs py-1.5 px-3 rounded-xl pointer-events-none whitespace-nowrap z-10 shadow-lg border border-white/20">
-                      <p className="font-bold">{t.day}: {t.sent} Sent</p>
-                      <p className="text-emerald-400 font-semibold">✓ {t.delivered} Delivered ({t.sent > 0 ? Math.round((t.delivered/t.sent)*100) : 0}%)</p>
-                    </div>
-
-                    <div className="w-full max-w-[46px] bg-slate-100 dark:bg-white/[0.03] rounded-xl overflow-hidden flex flex-col justify-end h-44 relative border border-slate-200 dark:border-white/[0.08] shadow-inner">
-                      <div
-                        style={{ height: `${heightPct}%` }}
-                        className="w-full bg-slate-300/80 dark:bg-white/20 rounded-t-lg transition-all duration-500 relative flex flex-col justify-end"
-                      >
-                        <div
-                          style={{ height: `${deliveredHeight}%` }}
-                          className="w-full bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-lg transition-all duration-500 shadow-[0_0_12px_rgba(16,185,129,0.3)]"
-                        ></div>
-                      </div>
-                    </div>
-
-                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition">
-                      {t.day}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 pt-2 text-center text-xs">
-            <div className="p-3.5 bg-white/90 dark:bg-white/[0.03] rounded-2xl border border-slate-200/80 dark:border-white/[0.06] shadow-sm">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-extrabold tracking-wide block">Avg Daily Volume</span>
-              <span className="text-sm font-black text-slate-900 dark:text-white mt-0.5 block">
-                {Math.round(metrics.totalSent / 7)} msgs / day
-              </span>
-            </div>
-            <div className="p-3.5 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
-              <span className="text-[11px] text-emerald-700 dark:text-emerald-300 uppercase font-extrabold tracking-wide block">Peak Delivery Window</span>
-              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block">11:00 AM – 1:00 PM</span>
-            </div>
-            <div className="p-3.5 bg-white/90 dark:bg-white/[0.03] rounded-2xl border border-slate-200/80 dark:border-white/[0.06] shadow-sm">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-extrabold tracking-wide block">Meta API Latency</span>
-              <span className="text-sm font-black text-slate-900 dark:text-white mt-0.5 block">42ms Ping</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Real-Time Activity Stream */}
-        <div className="bg-slate-50/60 dark:bg-[#080D1A]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-3xl p-6 backdrop-blur-2xl shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                  <Activity2DIcon className="w-4 h-4" />
-                </div>
-                <span>Real-Time Activity Stream</span>
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
-                Live dispatches, verification logs, and wallet billing events.
-              </p>
-            </div>
-            <Link
-              href="/dashboard/logs"
-              className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline transition"
-            >
-              View Full Audit Logs →
-            </Link>
-          </div>
-
-          {recentActivity.length === 0 ? (
-            <div className="p-8 text-center bg-white/80 dark:bg-white/[0.02] rounded-2xl border border-slate-200/80 dark:border-white/[0.06] shadow-sm">
-              <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold">No recent dispatches logged yet.</p>
-              <p className="text-xs text-slate-500 mt-1 font-medium">Send a test OTP or launch a campaign to see live events stream here.</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-200/80 dark:divide-white/[0.06]">
-              {recentActivity.map((evt) => (
-                <div key={evt.id} className="py-3.5 flex items-center justify-between gap-4 text-xs hover:bg-slate-100/70 dark:hover:bg-white/[0.03] px-2.5 rounded-xl transition">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
-                      evt.type === 'OTP' ? 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30' :
-                      evt.type === 'CAMPAIGN' ? 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                    }`}>
-                      {evt.type === 'OTP' ? <KeyIcon className="w-4 h-4" /> : evt.type === 'CAMPAIGN' ? <CampaignIcon className="w-4 h-4" /> : <WalletIcon className="w-4 h-4" />}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{evt.title}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">{evt.subtitle} • {new Date(evt.timestamp).toLocaleTimeString()}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="font-mono text-slate-500 dark:text-slate-400 text-xs hidden sm:inline">{evt.latency}</span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase ${
-                      evt.status === 'delivered' || evt.status === 'completed' || evt.status === 'credit'
-                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                        : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30'
-                    }`}>
-                      {evt.status}
-                    </span>
-                    <span className="font-bold text-slate-900 dark:text-white text-xs">{evt.cost}</span>
-                  </div>
-                </div>
-              ))}
+          {/* Test Result Toast Banner if sent */}
+          {testResult && (
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 font-mono flex items-center justify-between">
+              <span className="font-bold">✓ Live OTP Dispatched in 1.2s!</span>
+              <span className="text-[11px]">Req ID: {testResult.requestId || "req_ok"}</span>
             </div>
           )}
+
+          {/* Quick Actions (Bento Grid: AI Agent, Campaigns, Templates) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            {/* Card 1: Build Your AI Agent */}
+            <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-xs flex items-center justify-between gap-3 hover:border-emerald-500/40 transition">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <BotIcon className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm text-slate-950 dark:text-white truncate">Build Your AI Agent</h3>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate">Automate conversations &amp; lead qualification</p>
+                </div>
+              </div>
+              <Link
+                href="/dashboard/automations"
+                className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 text-xs font-black rounded-lg transition whitespace-nowrap shrink-0 shadow-xs"
+              >
+                Create Agent
+              </Link>
+            </div>
+
+            {/* Card 2: Broadcast Campaigns */}
+            <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-xs flex items-center justify-between gap-3 hover:border-emerald-500/40 transition">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                  <CampaignIcon className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm text-slate-950 dark:text-white truncate">Broadcast Campaigns</h3>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate">Bulk promotional &amp; utility broadcasts</p>
+                </div>
+              </div>
+              <Link
+                href="/dashboard/campaigns"
+                className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white text-xs font-bold rounded-lg transition whitespace-nowrap shrink-0 border border-slate-200 dark:border-white/10"
+              >
+                Launch
+              </Link>
+            </div>
+
+            {/* Card 3: Template Studio */}
+            <div className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-xs flex items-center justify-between gap-3 hover:border-emerald-500/40 transition">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                  <TemplateIcon className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm text-slate-950 dark:text-white truncate">Template Studio</h3>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate">Create &amp; sync Meta-approved templates</p>
+                </div>
+              </div>
+              <Link
+                href="/dashboard/templates"
+                className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white text-xs font-bold rounded-lg transition whitespace-nowrap shrink-0 border border-slate-200 dark:border-white/10"
+              >
+                Manage
+              </Link>
+            </div>
+          </div>
+
+          {/* Operations & Live Telemetry Section */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold tracking-widest text-slate-500 dark:text-slate-400 uppercase">
+                LIVE TELEMETRY &amp; METRICS
+              </span>
+              <button
+                onClick={() => loadDashboardData(true)}
+                disabled={refreshing}
+                className="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 cursor-pointer"
+              >
+                <RefreshIcon className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+                <span>Refresh Telemetry</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Card 1: Total Dispatched */}
+              <div className="bg-white/80 dark:bg-[#0B101D]/80 hover:bg-slate-50 dark:hover:bg-[#0F172A]/90 border border-slate-200/80 dark:border-white/[0.08] hover:border-emerald-500/40 rounded-2xl p-5 backdrop-blur-xl shadow-sm dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold">
+                      <SendAirplaneIcon className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Total Dispatched</span>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                    <TrendingUpIcon className="w-3 h-3" />
+                    <span>14.2%</span>
+                  </span>
+                </div>
+                <div className="mt-3 text-3xl font-black text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-b dark:from-white dark:via-slate-100 dark:to-slate-400 tracking-tight">
+                  {metrics.totalSent.toLocaleString()}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                  ✓ {metrics.totalDelivered.toLocaleString()} delivered • {metrics.totalFailed} failed
+                </div>
+              </div>
+
+              {/* Card 2: Avg Delivery Speed */}
+              <div className="bg-white/80 dark:bg-[#0B101D]/80 hover:bg-slate-50 dark:hover:bg-[#0F172A]/90 border border-slate-200/80 dark:border-white/[0.08] hover:border-emerald-500/40 rounded-2xl p-5 backdrop-blur-xl shadow-sm dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-600 dark:text-sky-400 font-bold">
+                      <ZapIcon className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Avg Delivery Speed</span>
+                  </div>
+                  <span className="px-2 py-0.5 bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30 text-[10px] font-extrabold rounded-full">
+                    ULTRA-FAST
+                  </span>
+                </div>
+                <div className="mt-3 text-3xl font-black text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-b dark:from-white dark:via-slate-100 dark:to-slate-400 tracking-tight">
+                  {metrics.avgDeliveryLatency}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                  99.4% delivered in &lt; 3s via Cloud API
+                </div>
+              </div>
+
+              {/* Card 3: Delivery Rate */}
+              <div className="bg-white/80 dark:bg-[#0B101D]/80 hover:bg-slate-50 dark:hover:bg-[#0F172A]/90 border border-slate-200/80 dark:border-white/[0.08] hover:border-emerald-500/40 rounded-2xl p-5 backdrop-blur-xl shadow-sm dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold">
+                      <ShieldCheckIcon className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Delivery Rate</span>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                    {metrics.verificationRate}% verified
+                  </span>
+                </div>
+                <div className="mt-3 text-3xl font-black text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-b dark:from-white dark:via-slate-100 dark:to-slate-400 tracking-tight">
+                  {metrics.deliveryRate}%
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                  Direct Meta Cloud API WebSocket
+                </div>
+              </div>
+
+              {/* Card 4: Wallet Balance */}
+              <div className="bg-white/80 dark:bg-[#0B101D]/80 hover:bg-slate-50 dark:hover:bg-[#0F172A]/90 border border-slate-200/80 dark:border-white/[0.08] hover:border-emerald-500/40 rounded-2xl p-5 backdrop-blur-xl shadow-sm dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-300 font-bold">
+                      <WalletIcon className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Wallet Balance</span>
+                  </div>
+                  <Link
+                    href="/dashboard/wallet"
+                    className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                  >
+                    Top-up →
+                  </Link>
+                </div>
+                <div className="mt-3 text-3xl font-black text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-b dark:from-white dark:via-slate-100 dark:to-slate-400 tracking-tight">
+                  ₹{Number(metrics.walletBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                  Runway: <span className="font-bold text-slate-900 dark:text-white">~{metrics.estimatedOtpRunway.toLocaleString()}</span> OTPs
+                </div>
+              </div>
+            </div>
+
+            {/* 7-Day Messaging Throughput Chart */}
+            <div className="bg-slate-50/60 dark:bg-[#080D1A]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-3xl p-6 backdrop-blur-2xl shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                      <BarChart2DIcon className="w-4 h-4" />
+                    </div>
+                    <span>7-Day Messaging Throughput &amp; Delivery Trend</span>
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                    Daily volume comparison between dispatched, delivered, and failed messages.
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 text-xs font-bold text-slate-600 dark:text-slate-300">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-md bg-[#10B981] shadow-[0_0_8px_#10B981]"></span> Delivered
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-md bg-slate-300 dark:bg-white/30"></span> Dispatched
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-md bg-rose-500 dark:bg-rose-400 shadow-[0_0_8px_#fb7185]"></span> Failed
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-6 pb-2">
+                <div className="grid grid-cols-7 gap-3 sm:gap-6 items-end h-56 border-b border-slate-200 dark:border-white/[0.08] px-2">
+                  {trend.map((t, idx) => {
+                    const heightPct = Math.round((t.sent / maxTrendSent) * 100);
+                    const deliveredHeight = t.sent > 0 ? Math.round((t.delivered / t.sent) * 100) : 0;
+
+                    return (
+                      <div key={idx} className="flex flex-col items-center gap-2 group relative">
+                        <div className="absolute -top-14 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900/95 backdrop-blur-md text-white text-xs py-1.5 px-3 rounded-xl pointer-events-none whitespace-nowrap z-10 shadow-lg border border-white/20">
+                          <p className="font-bold">{t.day}: {t.sent} Sent</p>
+                          <p className="text-emerald-400 font-semibold">✓ {t.delivered} Delivered ({t.sent > 0 ? Math.round((t.delivered/t.sent)*100) : 0}%)</p>
+                        </div>
+
+                        <div className="w-full max-w-[46px] bg-slate-100 dark:bg-white/[0.03] rounded-xl overflow-hidden flex flex-col justify-end h-44 relative border border-slate-200 dark:border-white/[0.08] shadow-inner">
+                          <div
+                            style={{ height: `${heightPct}%` }}
+                            className="w-full bg-slate-300/80 dark:bg-white/20 rounded-t-lg transition-all duration-500 relative flex flex-col justify-end"
+                          >
+                            <div
+                              style={{ height: `${deliveredHeight}%` }}
+                              className="w-full bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-lg transition-all duration-500 shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+                            ></div>
+                          </div>
+                        </div>
+
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition">
+                          {t.day}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 pt-2 text-center text-xs">
+                <div className="p-3.5 bg-white/90 dark:bg-white/[0.03] rounded-2xl border border-slate-200/80 dark:border-white/[0.06] shadow-sm">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-extrabold tracking-wide block">Avg Daily Volume</span>
+                  <span className="text-sm font-black text-slate-900 dark:text-white mt-0.5 block">
+                    {Math.round(metrics.totalSent / 7)} msgs / day
+                  </span>
+                </div>
+                <div className="p-3.5 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+                  <span className="text-[11px] text-emerald-700 dark:text-emerald-300 uppercase font-extrabold tracking-wide block">Peak Delivery Window</span>
+                  <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block">11:00 AM – 1:00 PM</span>
+                </div>
+                <div className="p-3.5 bg-white/90 dark:bg-white/[0.03] rounded-2xl border border-slate-200/80 dark:border-white/[0.06] shadow-sm">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-extrabold tracking-wide block">Meta API Latency</span>
+                  <span className="text-sm font-black text-slate-900 dark:text-white mt-0.5 block">42ms Ping</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Real-Time Activity Stream */}
+            <div className="bg-slate-50/60 dark:bg-[#080D1A]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-3xl p-6 backdrop-blur-2xl shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                      <Activity2DIcon className="w-4 h-4" />
+                    </div>
+                    <span>Real-Time Activity Stream</span>
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                    Live dispatches, verification logs, and wallet billing events.
+                  </p>
+                </div>
+                <Link
+                  href="/dashboard/logs"
+                  className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline transition"
+                >
+                  View Full Audit Logs →
+                </Link>
+              </div>
+
+              {recentActivity.length === 0 ? (
+                <div className="p-8 text-center bg-white/80 dark:bg-white/[0.02] rounded-2xl border border-slate-200/80 dark:border-white/[0.06] shadow-sm">
+                  <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold">No recent dispatches logged yet.</p>
+                  <p className="text-xs text-slate-500 mt-1 font-medium">Send a test OTP or launch a campaign to see live events stream here.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-200/80 dark:divide-white/[0.06]">
+                  {recentActivity.map((evt) => (
+                    <div key={evt.id} className="py-3.5 flex items-center justify-between gap-4 text-xs hover:bg-slate-100/70 dark:hover:bg-white/[0.03] px-2.5 rounded-xl transition">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                          evt.type === 'OTP' ? 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30' :
+                          evt.type === 'CAMPAIGN' ? 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                        }`}>
+                          {evt.type === 'OTP' ? <KeyIcon className="w-4 h-4" /> : evt.type === 'CAMPAIGN' ? <CampaignIcon className="w-4 h-4" /> : <WalletIcon className="w-4 h-4" />}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{evt.title}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">{evt.subtitle} • {new Date(evt.timestamp).toLocaleTimeString()}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="font-mono text-slate-500 dark:text-slate-400 text-xs hidden sm:inline">{evt.latency}</span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase ${
+                          evt.status === 'delivered' || evt.status === 'completed' || evt.status === 'credit'
+                            ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                            : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+                        }`}>
+                          {evt.status}
+                        </span>
+                        <span className="font-bold text-slate-900 dark:text-white text-xs">{evt.cost}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Quick WhatsApp Dispatch Modal */}
       {showTestModal && (
