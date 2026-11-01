@@ -30,18 +30,23 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     try {
       const res = await fetch(`${getApiUrl()}/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email: email.trim(), password }),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || "Login failed");
 
       localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("projectId", data.projectId);
-      localStorage.setItem("organizationId", data.organizationId);
+      if (data.projectId) localStorage.setItem("projectId", data.projectId);
+      if (data.organizationId) localStorage.setItem("organizationId", data.organizationId);
 
       const isOfficeStaff = Boolean(
         data.user?.isEmployee ||
@@ -61,19 +66,24 @@ export default function LoginPage() {
       }
 
       if (isOfficeStaff) {
-        router.push("/office");
+        window.location.href = "/office";
         return;
       }
 
       if (selectedPlan) {
         localStorage.setItem("pendingPlan", selectedPlan);
-        router.push("/dashboard?activate=true");
+        window.location.href = "/dashboard?activate=true";
       } else {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
     } catch (err: any) {
-      setError(err.message);
+      if (err.name === "AbortError") {
+        setError("Login timed out. Please check your network and try again.");
+      } else {
+        setError(err.message || "Login failed");
+      }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };

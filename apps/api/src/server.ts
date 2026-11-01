@@ -29,6 +29,7 @@ fastify.register(cors, { origin: "*", methods: ["GET", "POST", "PUT", "DELETE", 
 
 // Initialize database-backed pricing engine & run periodic reconciliation
 seedInitialBillingConfig().catch((err) => fastify.log.error(err));
+initOfficeTables().then(() => ensureDefaultOfficeEmployee()).catch((err) => fastify.log.error(err));
 setInterval(() => reconcileStaleReservations().catch((err) => fastify.log.error(err)), 10 * 60 * 1000);
 
 fastify.get("/health", async () => {
@@ -178,19 +179,31 @@ async function ensureSystemOfficeAccount(email: string, pass: string, name: stri
   }
 }
 
+let defaultOfficeEmployeeInitialized = false;
+let defaultOfficeEmployeePromise: Promise<void> | null = null;
+
 async function ensureDefaultOfficeEmployee() {
-  try {
-    // 1. Executive Super Admin (Owner controlling all managers)
-    await ensureSystemOfficeAccount("admin@digitalbeings.in", "admin@123", "Executive Super Admin", true);
+  if (defaultOfficeEmployeeInitialized) return;
+  if (defaultOfficeEmployeePromise) return defaultOfficeEmployeePromise;
 
-    // 2. Office Manager (@digitalbeings.in)
-    await ensureSystemOfficeAccount("emp@digitalbeings.in", "emp@123", "Office Manager", false);
+  defaultOfficeEmployeePromise = (async () => {
+    try {
+      // 1. Executive Super Admin (Owner controlling all managers)
+      await ensureSystemOfficeAccount("admin@digitalbeings.in", "admin@123", "Executive Super Admin", true);
 
-    // 3. Office Manager alias (@digitalbeings.com)
-    await ensureSystemOfficeAccount("emp@digitalbeings.com", "emp@123", "Office Manager", false);
-  } catch (err: any) {
-    console.error("[OfficeAuth] Error ensuring default employees:", err.message);
-  }
+      // 2. Office Manager (@digitalbeings.in)
+      await ensureSystemOfficeAccount("emp@digitalbeings.in", "emp@123", "Office Manager", false);
+
+      // 3. Office Manager alias (@digitalbeings.com)
+      await ensureSystemOfficeAccount("emp@digitalbeings.com", "emp@123", "Office Manager", false);
+      defaultOfficeEmployeeInitialized = true;
+    } catch (err: any) {
+      console.error("[OfficeAuth] Error ensuring default employees:", err.message);
+      defaultOfficeEmployeePromise = null;
+    }
+  })();
+
+  return defaultOfficeEmployeePromise;
 }
 
 fastify.post("/v1/auth/login", async (request: any, reply) => {
@@ -198,15 +211,15 @@ fastify.post("/v1/auth/login", async (request: any, reply) => {
   try {
     const cleanEmail = String(email || "").trim().toLowerCase();
 
-    // Guarantee office database initialization
-    await initOfficeTables();
-
-    // If logging in as primary office admin or manager, guarantee account existence
-    if (
+    // Fast-path: only await if not already initialized
+    if (!officeTablesInitialized) {
+      await initOfficeTables();
+    }
+    if (!defaultOfficeEmployeeInitialized && (
       cleanEmail === "admin@digitalbeings.in" ||
       cleanEmail === "emp@digitalbeings.in" ||
       cleanEmail === "emp@digitalbeings.com"
-    ) {
+    )) {
       await ensureDefaultOfficeEmployee();
     }
 
@@ -295,8 +308,15 @@ fastify.post("/v1/auth/login", async (request: any, reply) => {
 
 // --- MODULE: OFFICE TEAM, SALES & ASSISTED ONBOARDING ---
 
+let officeTablesInitialized = false;
+let officeTablesInitPromise: Promise<void> | null = null;
+
 async function initOfficeTables() {
-  try {
+  if (officeTablesInitialized) return;
+  if (officeTablesInitPromise) return officeTablesInitPromise;
+
+  officeTablesInitPromise = (async () => {
+    try {
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS OfficeEmployee (
         id VARCHAR(191) NOT NULL PRIMARY KEY,
@@ -465,9 +485,14 @@ async function initOfficeTables() {
         WHERE salespersonEmail = 'emp@digitalbeings.com' AND salesWhatsAppNumber = '+91 80004 88200' AND metaAccessToken IS NULL
       `).catch(() => {});
     }
-  } catch (err: any) {
-    console.error("[OfficeTables] Error initializing office tables:", err.message);
-  }
+      officeTablesInitialized = true;
+    } catch (err: any) {
+      console.error("[OfficeTables] Error initializing office tables:", err.message);
+      officeTablesInitPromise = null;
+    }
+  })();
+
+  return officeTablesInitPromise;
 }
 
 // 1. Get Office Portfolio & WhatsApp Settings
