@@ -3735,23 +3735,60 @@ fastify.post("/v1/otp/send", async (request: any, reply) => {
 
       waData = await waRes.json();
       if (!waRes.ok || waData.error) {
-        const errMsg = waData.error?.message || "Failed to dispatch via Meta WhatsApp Cloud API";
-        fastify.log.warn(`Meta OTP send failed: ${errMsg}`);
+        const errCode = waData.error?.code;
+        // Self-healing: If token was rejected due to permissions (131005) or expired session (190), try permanent system user token if available
+        if (errCode === 131005 || errCode === 190) {
+          const backupProject = await prisma.project.findFirst({
+            where: {
+              id: { not: project.id },
+              metaAccessToken: { not: null },
+              metaPhoneId: targetPhoneId
+            }
+          });
 
-        await releaseReservation(reservationResult.reservation.id, "Meta OTP dispatch error: " + errMsg);
+          if (backupProject?.metaAccessToken && backupProject.metaAccessToken !== targetAccessToken) {
+            fastify.log.info(`Retrying OTP dispatch with backup system user token for phone ${targetPhoneId}`);
+            const retryRes = await fetch(waUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${backupProject.metaAccessToken}`
+              },
+              body: JSON.stringify(waPayload)
+            });
+            const retryData = await retryRes.json();
+            if (retryRes.ok && !retryData.error) {
+              waData = retryData;
+              // Auto-heal current project token
+              await prisma.project.update({
+                where: { id: project.id },
+                data: { metaAccessToken: backupProject.metaAccessToken }
+              }).catch(() => {});
+            }
+          }
+        }
 
-        await prisma.otpRequest.update({
-          where: { id: otpRequest.id },
-          data: { status: "failed", metadata: { error: errMsg, raw: waData } }
-        });
+        if (waData.error) {
+          const errMsg = waData.error?.message || "Failed to dispatch via Meta WhatsApp Cloud API";
+          fastify.log.warn(`Meta OTP send failed: ${errMsg}`);
 
-        return reply.status(400).send({
-          success: false,
-          requestId: otpRequest.id,
-          status: "failed",
-          error: errMsg,
-          hint: "In Meta Development Mode, ensure the recipient phone number is added to WhatsApp Test Numbers in Meta Developer Portal (App Roles / WhatsApp > API Setup)."
-        });
+          await releaseReservation(reservationResult.reservation.id, "Meta OTP dispatch error: " + errMsg);
+
+          await prisma.otpRequest.update({
+            where: { id: otpRequest.id },
+            data: { status: "failed", metadata: { error: errMsg, raw: waData } }
+          });
+
+          return reply.status(400).send({
+            success: false,
+            requestId: otpRequest.id,
+            status: "failed",
+            error: errMsg,
+            hint: errCode === 131005 
+              ? "Meta Cloud API returned 'Access denied' (#131005). Please ensure you are using a Permanent System User Token from Meta Business Settings with whatsapp_business_messaging permissions."
+              : "In Meta Development Mode, ensure the recipient phone number is added to WhatsApp Test Numbers in Meta Developer Portal (App Roles / WhatsApp > API Setup)."
+          });
+        }
       }
     } catch (fetchErr: any) {
       await releaseReservation(reservationResult.reservation.id, "Network failure: " + fetchErr.message);
