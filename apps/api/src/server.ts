@@ -1659,12 +1659,21 @@ fastify.get("/v1/meta/accounts/:projectId", async (request: any, reply) => {
       return reply.send({ success: false, error: "Facebook API Error: " + bizData.error.message });
     }
 
+    const isMasterAdminProject = project.id === "09107424-8301-4259-a7b5-a9e207f3bfca" || targetPid === "default";
+
     let businesses = bizData.data || [];
     if (businesses.length === 0) {
-      businesses = [
-        { id: "205078357411585", name: "Digital Being" },
-        { id: "1787910995900172", name: "ishinna_b_sadana" }
-      ];
+      if (!isMasterAdminProject) {
+        // Client Workspace: Strictly isolated to the client's own portfolio
+        businesses = [
+          { id: "1787910995900172", name: "ishinna_b_sadana" }
+        ];
+      } else {
+        businesses = [
+          { id: "205078357411585", name: "Digital Being" },
+          { id: "1787910995900172", name: "ishinna_b_sadana" }
+        ];
+      }
     }
     
     for (const biz of businesses) {
@@ -1718,7 +1727,11 @@ fastify.get("/v1/meta/accounts/:projectId", async (request: any, reply) => {
        });
     }
 
-    return reply.send({ success: true, businesses: tree, raw: bizData });
+    const finalBusinesses = !isMasterAdminProject 
+      ? tree.filter(b => b.id !== "205078357411585") 
+      : tree;
+
+    return reply.send({ success: true, businesses: finalBusinesses, raw: bizData });
   } catch (error: any) {
     fastify.log.error(error);
     return reply.status(500).send({ error: "Failed to fetch hierarchical accounts from Meta" });
@@ -1787,7 +1800,19 @@ fastify.get("/v1/meta/numbers/:projectId", async (request: any, reply) => {
     if (project.metaAccessToken) {
       try {
         const token = project.metaAccessToken;
-        const bizIds = ["205078357411585", "1787910995900172"];
+        const isMasterAdminProject = project.id === "09107424-8301-4259-a7b5-a9e207f3bfca" || projectId === "default";
+        
+        if (!isMasterAdminProject) {
+          // Clean up any platform sandbox test numbers mistakenly synced into this client project
+          await prisma.phoneNumber.deleteMany({
+            where: {
+              projectId,
+              phoneId: "1406142089245094" // Platform Test Number +1 555-147-8020
+            }
+          }).catch(() => {});
+        }
+
+        const bizIds = !isMasterAdminProject ? ["1787910995900172"] : ["205078357411585", "1787910995900172"];
         for (const bizId of bizIds) {
           const wabaRes = await fetch(`https://graph.facebook.com/v19.0/${bizId}/owned_whatsapp_business_accounts?access_token=${token}`);
           const wabaData = await wabaRes.json();
