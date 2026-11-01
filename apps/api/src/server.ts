@@ -253,7 +253,7 @@ fastify.post("/v1/auth/login", async (request: any, reply) => {
             isEmployee: true,
             userType: "EMPLOYEE",
             allowedModules: isSuperAdmin
-              ? ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team"]
+              ? ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team", "users"]
               : allowedModules,
             canViewAllLeads: Boolean(emp.canViewAllLeads || isManager),
             canManageSettings: Boolean(emp.canManageSettings || isManager),
@@ -296,7 +296,7 @@ fastify.post("/v1/auth/login", async (request: any, reply) => {
         isEmployee: Boolean(isEmployee),
         userType: isEmployee ? "EMPLOYEE" : "USER",
         role: isEmployee ? "EMPLOYEE" : (user.isSuperAdmin ? "SUPER_ADMIN" : membership.role),
-        allowedModules: isEmployee ? ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team"] : []
+        allowedModules: isEmployee ? ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team", "users"] : []
       },
       projectId: membership.organization.projects[0]?.id,
       organizationId: membership.organizationId
@@ -344,7 +344,8 @@ async function initOfficeTables() {
       "portfolio",
       "revenue",
       "activity",
-      "team"
+      "team",
+      "users"
     ]);
 
     // 1. Seed Executive Super Admin (Owner controlling all managers)

@@ -14,7 +14,8 @@ export type OfficeModule =
   | "portfolio"
   | "revenue"
   | "activity"
-  | "team";
+  | "team"
+  | "users";
 
 export interface TeamMember {
   id: string;
@@ -202,6 +203,37 @@ export default function OfficeDashboardPage() {
   const [savingTeamMember, setSavingTeamMember] = useState(false);
   const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null);
 
+  // Platform Super Admin Master Directory (Onboarded Users & Clients)
+  const [platformStats, setPlatformStats] = useState<any>(null);
+  const [platformBusinesses, setPlatformBusinesses] = useState<any[]>([]);
+  const [platformUsers, setPlatformUsers] = useState<any[]>([]);
+  const [loadingPlatformData, setLoadingPlatformData] = useState(false);
+  const [platformTab, setPlatformTab] = useState<"users" | "businesses">("users");
+  const [platformSearchQuery, setPlatformSearchQuery] = useState("");
+
+  const loadPlatformData = async () => {
+    setLoadingPlatformData(true);
+    try {
+      const [statsRes, bizRes, usersRes] = await Promise.all([
+        fetch(`${getApiUrl()}/v1/super-admin/stats`),
+        fetch(`${getApiUrl()}/v1/super-admin/businesses`),
+        fetch(`${getApiUrl()}/v1/super-admin/users`)
+      ]);
+      const [statsData, bizData, usersData] = await Promise.all([
+        statsRes.json(),
+        bizRes.json(),
+        usersRes.json()
+      ]);
+      if (statsData.success) setPlatformStats(statsData.stats);
+      if (bizData.success) setPlatformBusinesses(bizData.businesses || []);
+      if (usersData.success) setPlatformUsers(usersData.users || []);
+    } catch (err) {
+      console.error("Error loading platform data:", err);
+    } finally {
+      setLoadingPlatformData(false);
+    }
+  };
+
   // Initial Load & Auth Check
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -222,6 +254,7 @@ export default function OfficeDashboardPage() {
         loadDashboardData(parsed.email);
         loadPaymentLinks(parsed.email);
         loadTeamMembers();
+        loadPlatformData();
       } catch (e) {
         router.push("/login");
       } finally {
@@ -840,7 +873,7 @@ export default function OfficeDashboardPage() {
   );
 
   const allowedModulesList: OfficeModule[] = isManager
-    ? ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team"]
+    ? ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team", "users"]
     : (Array.isArray(user?.allowedModules) && user.allowedModules.length > 0
       ? (user.allowedModules as OfficeModule[])
       : ["leads", "chat", "payments"]);
@@ -943,6 +976,18 @@ export default function OfficeDashboardPage() {
       ),
       badge: teamMembers.length > 0 ? `${teamMembers.length}` : undefined,
       badgeColor: "bg-purple-600 text-white"
+    },
+    {
+      id: "users",
+      name: "Onboarded Users & Clients",
+      category: "ops",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      ),
+      badge: platformUsers.length > 0 ? String(platformUsers.length) : undefined,
+      badgeColor: "bg-blue-600 text-white"
     }
   ];
 
@@ -2515,6 +2560,396 @@ export default function OfficeDashboardPage() {
             </div>
           )}
 
+          {/* =========================================================================
+              MODULE 9: ONBOARDED CLIENTS & PLATFORM USERS (SUPER ADMIN REGISTRY)
+          ========================================================================= */}
+          {activeModule === "users" && (
+            <div className="space-y-6">
+              {/* Header Banner */}
+              <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-white/10 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="space-y-2 max-w-xl">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 text-xs font-bold border border-blue-200 dark:border-blue-500/30">
+                    <span>👑 Super Admin Master Directory</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                    Onboarded Clients &amp; Users
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Live multi-tenant registry of all registered customer organizations, onboarded clients, and active platform users across Digital Beings.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <button
+                    onClick={loadPlatformData}
+                    disabled={loadingPlatformData}
+                    className="px-4 py-2.5 rounded-xl bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white font-bold text-xs shadow-2xs hover:bg-slate-50 dark:hover:bg-white/15 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    <span className={loadingPlatformData ? "animate-spin" : ""}>🔄</span>
+                    <span>{loadingPlatformData ? "Syncing..." : "Refresh Registry"}</span>
+                  </button>
+                  <button
+                    onClick={() => setClientModalOpen(true)}
+                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>+ Onboard New Client</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* KPI Strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                <div className="bg-white dark:bg-[#0B101D] p-5 rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xs">
+                  <div className="flex items-center justify-between text-slate-400 mb-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Platform Users</span>
+                    <span className="text-lg">👥</span>
+                  </div>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white">
+                    {platformStats?.totalUsers || platformUsers.length || 0}
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Owners, admins &amp; staff</p>
+                </div>
+
+                <div className="bg-white dark:bg-[#0B101D] p-5 rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xs">
+                  <div className="flex items-center justify-between text-slate-400 mb-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Client Businesses</span>
+                    <span className="text-lg">🏢</span>
+                  </div>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white">
+                    {platformStats?.totalBusinesses || platformBusinesses.length || 0}
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Active tenant organizations</p>
+                </div>
+
+                <div className="bg-white dark:bg-[#0B101D] p-5 rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xs">
+                  <div className="flex items-center justify-between text-slate-400 mb-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Wallet Reserves</span>
+                    <span className="text-lg">💳</span>
+                  </div>
+                  <div className="text-2xl font-black text-emerald-600">
+                    ₹{platformStats ? Number(platformStats.totalWalletReserves || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
+                  </div>
+                  <p className="text-[11px] text-emerald-600/80 font-medium mt-0.5">Customer balance in circulation</p>
+                </div>
+
+                <div className="bg-white dark:bg-[#0B101D] p-5 rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xs">
+                  <div className="flex items-center justify-between text-slate-400 mb-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Lifetime Dispatches</span>
+                    <span className="text-lg">🚀</span>
+                  </div>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white">
+                    {platformStats?.totalMessagesDispatched ? platformStats.totalMessagesDispatched.toLocaleString() : "0"}
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Verified OTPs &amp; broadcasts</p>
+                </div>
+              </div>
+
+              {/* Main Directory Table Container */}
+              <div className="bg-white dark:bg-[#0B101D] rounded-3xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden">
+                {/* Tabs & Search Toolbar */}
+                <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/[0.06] border border-transparent dark:border-white/10 p-1 rounded-xl">
+                    <button
+                      onClick={() => setPlatformTab("users")}
+                      className={`px-4 py-2 text-xs font-bold rounded-lg transition cursor-pointer ${
+                        platformTab === "users"
+                          ? "bg-white dark:bg-white/[0.1] text-slate-900 dark:text-white shadow-2xs"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <span>👥 Client Users</span>
+                      <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-white/10">
+                        {platformUsers.length}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => setPlatformTab("businesses")}
+                      className={`px-4 py-2 text-xs font-bold rounded-lg transition cursor-pointer ${
+                        platformTab === "businesses"
+                          ? "bg-white dark:bg-white/[0.1] text-slate-900 dark:text-white shadow-2xs"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <span>🏢 Client Businesses</span>
+                      <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-white/10">
+                        {platformBusinesses.length}
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="relative w-full md:w-80">
+                    <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                      🔍
+                    </span>
+                    <input
+                      type="text"
+                      placeholder={platformTab === "users" ? "Search users by name, email, org..." : "Search businesses by name, owner..."}
+                      value={platformSearchQuery}
+                      onChange={(e) => setPlatformSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Tab 1: Platform Users Table */}
+                {platformTab === "users" && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50/75 dark:bg-white/[0.02] border-b border-slate-100 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                        <tr>
+                          <th className="py-3.5 px-5">User &amp; Identity</th>
+                          <th className="py-3.5 px-4">Organization / Tenant</th>
+                          <th className="py-3.5 px-4">Membership Role</th>
+                          <th className="py-3.5 px-4">Joined Date</th>
+                          <th className="py-3.5 px-4">Account Status</th>
+                          <th className="py-3.5 px-5 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+                        {loadingPlatformData ? (
+                          <tr>
+                            <td colSpan={6} className="py-12 text-center text-slate-400">
+                              <div className="inline-block animate-spin mr-2">🔄</div>
+                              Loading platform user directory...
+                            </td>
+                          </tr>
+                        ) : platformUsers.filter((u) => {
+                          const q = platformSearchQuery.toLowerCase().trim();
+                          if (!q) return true;
+                          return (
+                            (u.name && u.name.toLowerCase().includes(q)) ||
+                            (u.email && u.email.toLowerCase().includes(q)) ||
+                            (u.organizationName && u.organizationName.toLowerCase().includes(q)) ||
+                            (u.id && u.id.toLowerCase().includes(q))
+                          );
+                        }).length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-12 text-center text-slate-400">
+                              No platform users found matching your search.
+                            </td>
+                          </tr>
+                        ) : (
+                          platformUsers.filter((u) => {
+                            const q = platformSearchQuery.toLowerCase().trim();
+                            if (!q) return true;
+                            return (
+                              (u.name && u.name.toLowerCase().includes(q)) ||
+                              (u.email && u.email.toLowerCase().includes(q)) ||
+                              (u.organizationName && u.organizationName.toLowerCase().includes(q)) ||
+                              (u.id && u.id.toLowerCase().includes(q))
+                            );
+                          }).map((u) => {
+                            const isUserSuperAdmin = Boolean(u.isSuperAdmin);
+                            return (
+                              <tr key={u.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition">
+                                <td className="py-4 px-5">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
+                                      {(u.name || u.email || "U").slice(0, 2).toUpperCase()}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-extrabold text-slate-900 dark:text-white truncate">
+                                          {u.name || "Registered User"}
+                                        </span>
+                                        {isUserSuperAdmin && (
+                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
+                                            👑 Super Admin
+                                          </span>
+                                        )}
+                                      </div>
+                                      <span className="text-slate-500 dark:text-slate-400 text-[11px] block truncate font-mono">
+                                        {u.email}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </td>
+
+                                <td className="py-4 px-4">
+                                  {u.organizationName ? (
+                                    <div>
+                                      <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                                        {u.organizationName}
+                                      </span>
+                                      <span className="text-[10px] text-slate-400 font-mono">
+                                        ID: {u.organizationId ? `${u.organizationId.slice(0, 8)}...` : "--"}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-slate-400 italic text-[11px]">No Organization</span>
+                                  )}
+                                </td>
+
+                                <td className="py-4 px-4">
+                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
+                                    u.membershipRole === "owner"
+                                      ? "bg-purple-50 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300 border-purple-200 dark:border-purple-500/30"
+                                      : u.membershipRole === "admin"
+                                      ? "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300 border-blue-200 dark:border-blue-500/30"
+                                      : u.membershipRole === "employee"
+                                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30"
+                                      : "bg-slate-50 text-slate-700 dark:bg-white/10 dark:text-slate-300 border-slate-200 dark:border-white/10"
+                                  }`}>
+                                    {u.membershipRole === "owner" ? "👑 Owner" : u.membershipRole === "employee" ? "👔 Staff" : u.membershipRole || "Member"}
+                                  </span>
+                                </td>
+
+                                <td className="py-4 px-4 text-slate-500 dark:text-slate-400 text-[11px]">
+                                  {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "--"}
+                                </td>
+
+                                <td className="py-4 px-4">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    Active Client
+                                  </span>
+                                </td>
+
+                                <td className="py-4 px-5 text-right">
+                                  <button
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(u.email);
+                                      setVerifyToast({ message: `Copied ${u.email} to clipboard!`, type: "success" });
+                                      setTimeout(() => setVerifyToast(null), 3000);
+                                    }}
+                                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white font-bold text-xs transition cursor-pointer inline-flex items-center gap-1"
+                                  >
+                                    <span>📋</span> Copy Email
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Tab 2: Client Businesses Table */}
+                {platformTab === "businesses" && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50/75 dark:bg-white/[0.02] border-b border-slate-100 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                        <tr>
+                          <th className="py-3.5 px-5">Business / Organization</th>
+                          <th className="py-3.5 px-4">Owner &amp; Primary Contact</th>
+                          <th className="py-3.5 px-4">Connected WhatsApp</th>
+                          <th className="py-3.5 px-4">Team Members</th>
+                          <th className="py-3.5 px-4">Wallet Balance</th>
+                          <th className="py-3.5 px-5 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+                        {loadingPlatformData ? (
+                          <tr>
+                            <td colSpan={6} className="py-12 text-center text-slate-400">
+                              <div className="inline-block animate-spin mr-2">🔄</div>
+                              Loading businesses...
+                            </td>
+                          </tr>
+                        ) : platformBusinesses.filter((b) => {
+                          const q = platformSearchQuery.toLowerCase().trim();
+                          if (!q) return true;
+                          return (
+                            (b.name && b.name.toLowerCase().includes(q)) ||
+                            (b.ownerEmail && b.ownerEmail.toLowerCase().includes(q)) ||
+                            (b.ownerName && b.ownerName.toLowerCase().includes(q)) ||
+                            (b.id && b.id.toLowerCase().includes(q))
+                          );
+                        }).length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-12 text-center text-slate-400">
+                              No businesses found matching your search.
+                            </td>
+                          </tr>
+                        ) : (
+                          platformBusinesses.filter((b) => {
+                            const q = platformSearchQuery.toLowerCase().trim();
+                            if (!q) return true;
+                            return (
+                              (b.name && b.name.toLowerCase().includes(q)) ||
+                              (b.ownerEmail && b.ownerEmail.toLowerCase().includes(q)) ||
+                              (b.ownerName && b.ownerName.toLowerCase().includes(q)) ||
+                              (b.id && b.id.toLowerCase().includes(q))
+                            );
+                          }).map((b) => {
+                            return (
+                              <tr key={b.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition">
+                                <td className="py-4 px-5">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
+                                      🏢
+                                    </div>
+                                    <div>
+                                      <span className="font-extrabold text-slate-900 dark:text-white block">
+                                        {b.name}
+                                      </span>
+                                      <span className="text-[10px] text-slate-400 font-mono">
+                                        ID: {b.id ? `${b.id.slice(0, 10)}...` : "--"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </td>
+
+                                <td className="py-4 px-4">
+                                  <div>
+                                    <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                                      {b.ownerName || "Organization Owner"}
+                                    </span>
+                                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                                      {b.ownerEmail || "--"}
+                                    </span>
+                                  </div>
+                                </td>
+
+                                <td className="py-4 px-4">
+                                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
+                                    Number(b.phoneCount || 0) > 0
+                                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30"
+                                      : "bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400 border-slate-200 dark:border-white/10"
+                                  }`}>
+                                    <span>📱</span>
+                                    <span>{Number(b.phoneCount || 0) > 0 ? `${b.phoneCount} Number Connected` : "No Number Linked"}</span>
+                                  </span>
+                                </td>
+
+                                <td className="py-4 px-4 text-slate-700 dark:text-slate-300 font-semibold text-[11px]">
+                                  👥 {b.memberCount || 1} Member{b.memberCount !== 1 ? "s" : ""}
+                                </td>
+
+                                <td className="py-4 px-4">
+                                  <span className="font-black text-emerald-600 text-sm">
+                                    ₹{Number(b.walletBalance || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  </span>
+                                </td>
+
+                                <td className="py-4 px-5 text-right">
+                                  <button
+                                    onClick={() => {
+                                      if (b.ownerEmail) {
+                                        navigator.clipboard.writeText(b.ownerEmail);
+                                        setVerifyToast({ message: `Copied owner email: ${b.ownerEmail}`, type: "success" });
+                                        setTimeout(() => setVerifyToast(null), 3000);
+                                      }
+                                    }}
+                                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white font-bold text-xs transition cursor-pointer"
+                                  >
+                                    Copy Contact
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Access Restricted Screen if current activeModule is not in allowed list */}
           {!allowedModulesList.includes(activeModule) && (
             <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-10 border border-slate-200/90 dark:border-white/10 shadow-xs flex flex-col items-center justify-center text-center space-y-4 max-w-xl mx-auto my-12">
@@ -3179,7 +3614,8 @@ export default function OfficeDashboardPage() {
                     { id: "portfolio" as OfficeModule, label: "Portfolio Settings" },
                     { id: "revenue" as OfficeModule, label: "Revenue Analytics" },
                     { id: "activity" as OfficeModule, label: "Activity & Logs" },
-                    { id: "team" as OfficeModule, label: "Team & Permissions" }
+                    { id: "team" as OfficeModule, label: "Team & Permissions" },
+                    { id: "users" as OfficeModule, label: "Users & Clients" }
                   ].map((mod) => {
                     const checked = teamForm.allowedModules.includes(mod.id);
                     return (
