@@ -566,25 +566,27 @@ export default function WhatsAppVerificationPage() {
           </div>
         </div>
 
-      {/* Official Clarification Banner (Trustworthy Positioning) */}
-      <div className="bg-slate-50 dark:bg-[#0B101D]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-4 md:p-5 text-xs text-slate-700 dark:text-slate-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 backdrop-blur-xl">
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center justify-center font-bold text-sm shrink-0">
-            ℹ️
+      {/* Official Clarification Banner (Trustworthy Positioning) - Shown after submission */}
+      {isSubmittedOrReviewed && (
+        <div className="bg-slate-50 dark:bg-[#0B101D]/80 border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-4 md:p-5 text-xs text-slate-700 dark:text-slate-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 backdrop-blur-xl">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center justify-center font-bold text-sm shrink-0">
+              ℹ️
+            </div>
+            <div>
+              <span className="font-bold text-slate-900 dark:text-slate-100 block mb-0.5">
+                Official Business Account vs. Meta Verified
+              </span>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl">
+                An <b>Official Business Account (OBA)</b> displays Meta's green verified checkmark badge (✅) and verified brand name in chat headers at no platform fee. Meta awards this exclusively to authentic, actively searched brands through an editorial review of organic news coverage. This is distinct from the Meta Verified paid subscription.
+              </p>
+            </div>
           </div>
-          <div>
-            <span className="font-bold text-slate-900 dark:text-slate-100 block mb-0.5">
-              Official Business Account vs. Meta Verified
-            </span>
-            <p className="text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl">
-              An <b>Official Business Account (OBA)</b> displays Meta's green verified checkmark badge (✅) and verified brand name in chat headers at no platform fee. Meta awards this exclusively to authentic, actively searched brands through an editorial review of organic news coverage. This is distinct from the Meta Verified paid subscription.
-            </p>
+          <div className="shrink-0 flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+            <span>Review time: <b className="dark:text-slate-200">2–4 business days</b></span>
           </div>
         </div>
-        <div className="shrink-0 flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-          <span>Review time: <b className="dark:text-slate-200">2–4 business days</b></span>
-        </div>
-      </div>
+      )}
 
       {/* Persistent Status Tracking View (If Submitted, Under Review, Verified, or Rejected) */}
       {isSubmittedOrReviewed && (
@@ -722,10 +724,10 @@ export default function WhatsAppVerificationPage() {
       )}
 
       {/* STEP CONTENT CONTAINER */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Main Step Workspace (8 Cols) */}
-        <div className="lg:col-span-8">
-          <div ref={leftColRef} className={`${isLong ? "sticky bottom-6" : "sticky top-6"} space-y-6`}>
+      <div className={isSubmittedOrReviewed ? "grid grid-cols-1 lg:grid-cols-12 gap-8" : "max-w-4xl mx-auto w-full"}>
+        {/* Main Step Workspace */}
+        <div className={isSubmittedOrReviewed ? "lg:col-span-8" : "w-full"}>
+          <div ref={leftColRef} className={isSubmittedOrReviewed ? `${isLong ? "sticky bottom-6" : "sticky top-6"} space-y-6` : "space-y-6"}>
 
           {/* Dynamic Animated Workflow Header & Active Step Banner */}
           <div className="bg-white dark:bg-[#0B101D]/80 p-5 md:p-6 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-4 backdrop-blur-xl">
@@ -1605,8 +1607,9 @@ export default function WhatsAppVerificationPage() {
 
         </div>
 
-        {/* Right Column: All Instructions & Reviewer Guidance (4 Cols) */}
-        <div className="lg:col-span-4 space-y-5">
+        {/* Right Column: All Instructions & Reviewer Guidance (4 Cols) - Shown after submission */}
+        {isSubmittedOrReviewed && (
+          <div className="lg:col-span-4 space-y-5">
 
           {/* Dynamic Contextual Guidance Card for Active Step */}
           <div className="bg-white dark:bg-[#0B101D]/80 p-5 rounded-2xl border border-slate-200/90 dark:border-white/[0.08] shadow-2xs space-y-4 backdrop-blur-xl">
@@ -1944,7 +1947,8 @@ export default function WhatsAppVerificationPage() {
               Digital Beings connects directly via Meta's official Cloud API. We do not charge fees for Official Business Account badge evaluation or guarantee editorial outcomes.
             </p>
           </div>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
