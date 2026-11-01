@@ -210,6 +210,51 @@ export default function OfficeDashboardPage() {
   const [loadingPlatformData, setLoadingPlatformData] = useState(false);
   const [platformTab, setPlatformTab] = useState<"users" | "businesses">("users");
   const [platformSearchQuery, setPlatformSearchQuery] = useState("");
+  const [platformRoleFilter, setPlatformRoleFilter] = useState<string>("ALL");
+  const [platformPlanFilter, setPlatformPlanFilter] = useState<string>("ALL");
+  const [platformSortBy, setPlatformSortBy] = useState<string>("newest");
+
+  // Create User Modal State
+  const [createUserModalOpen, setCreateUserModalOpen] = useState(false);
+  const [createUserData, setCreateUserData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    organizationName: "",
+    role: "owner",
+    plan: "TRIAL",
+    specialAccess: false,
+    initialWalletBalance: "0"
+  });
+  const [creatingUser, setCreatingUser] = useState(false);
+
+  // Edit Plan & Access Modal State
+  const [editPlanModalOpen, setEditPlanModalOpen] = useState(false);
+  const [selectedOrgForPlan, setSelectedOrgForPlan] = useState<{
+    id: string;
+    name: string;
+    ownerEmail?: string;
+    currentPlan: string;
+    specialAccess: boolean;
+    planExpiresAt?: string | null;
+    walletBalance?: number;
+  } | null>(null);
+  const [editPlanForm, setEditPlanForm] = useState({
+    plan: "TRIAL",
+    specialAccess: false,
+    walletAdjustment: "0"
+  });
+  const [savingPlan, setSavingPlan] = useState(false);
+
+  // Delete Confirm Modal State
+  const [deleteConfirmModalOpen, setDeleteConfirmModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: "user" | "business";
+    id: string;
+    name: string;
+    email?: string;
+  } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const loadPlatformData = async () => {
     setLoadingPlatformData(true);
@@ -231,6 +276,125 @@ export default function OfficeDashboardPage() {
       console.error("Error loading platform data:", err);
     } finally {
       setLoadingPlatformData(false);
+    }
+  };
+
+  const handleCreatePlatformUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreatingUser(true);
+    try {
+      const res = await fetch(`${getApiUrl()}/v1/super-admin/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: createUserData.name,
+          email: createUserData.email,
+          password: createUserData.password,
+          organizationName: createUserData.organizationName,
+          role: createUserData.role,
+          plan: createUserData.plan,
+          specialAccess: createUserData.specialAccess,
+          initialWalletBalance: Number(createUserData.initialWalletBalance) || 0
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to create user");
+      setVerifyToast({ message: `Successfully created ${createUserData.email}!`, type: "success" });
+      setTimeout(() => setVerifyToast(null), 3000);
+      setCreateUserModalOpen(false);
+      setCreateUserData({
+        name: "",
+        email: "",
+        password: "",
+        organizationName: "",
+        role: "owner",
+        plan: "TRIAL",
+        specialAccess: false,
+        initialWalletBalance: "0"
+      });
+      loadPlatformData();
+    } catch (err: any) {
+      setVerifyToast({ message: err.message, type: "error" });
+      setTimeout(() => setVerifyToast(null), 4000);
+    } finally {
+      setCreatingUser(false);
+    }
+  };
+
+  const handleOpenEditPlan = (orgId: string, orgName: string, currentPlan: string, ownerEmail?: string, planExpiresAt?: string | null, walletBalance?: number) => {
+    const isSpecial = currentPlan === "SPECIAL_ACCESS" || (planExpiresAt && new Date(planExpiresAt).getFullYear() > 2090);
+    setSelectedOrgForPlan({
+      id: orgId,
+      name: orgName,
+      ownerEmail,
+      currentPlan,
+      specialAccess: Boolean(isSpecial),
+      planExpiresAt,
+      walletBalance
+    });
+    setEditPlanForm({
+      plan: isSpecial ? "SPECIAL_ACCESS" : currentPlan || "TRIAL",
+      specialAccess: Boolean(isSpecial),
+      walletAdjustment: "0"
+    });
+    setEditPlanModalOpen(true);
+  };
+
+  const handleSavePlanAndAccess = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedOrgForPlan) return;
+    setSavingPlan(true);
+    try {
+      const res = await fetch(`${getApiUrl()}/v1/super-admin/plan/${selectedOrgForPlan.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan: editPlanForm.plan,
+          specialAccess: editPlanForm.specialAccess,
+          walletAdjustment: Number(editPlanForm.walletAdjustment) || 0
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to update plan");
+      setVerifyToast({ message: `Successfully updated plan for ${selectedOrgForPlan.name}!`, type: "success" });
+      setTimeout(() => setVerifyToast(null), 3000);
+      setEditPlanModalOpen(false);
+      setSelectedOrgForPlan(null);
+      loadPlatformData();
+    } catch (err: any) {
+      setVerifyToast({ message: err.message, type: "error" });
+      setTimeout(() => setVerifyToast(null), 4000);
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
+  const handleOpenDeleteConfirm = (type: "user" | "business", id: string, name: string, email?: string) => {
+    setDeleteTarget({ type, id, name, email });
+    setDeleteConfirmModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const endpoint = deleteTarget.type === "user"
+        ? `${getApiUrl()}/v1/super-admin/users/${deleteTarget.id}`
+        : `${getApiUrl()}/v1/super-admin/businesses/${deleteTarget.id}`;
+
+      const res = await fetch(endpoint, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to delete");
+      setVerifyToast({ message: `Deleted ${deleteTarget.name} successfully`, type: "success" });
+      setTimeout(() => setVerifyToast(null), 3000);
+      setDeleteConfirmModalOpen(false);
+      setDeleteTarget(null);
+      loadPlatformData();
+    } catch (err: any) {
+      setVerifyToast({ message: err.message, type: "error" });
+      setTimeout(() => setVerifyToast(null), 4000);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -2575,11 +2739,11 @@ export default function OfficeDashboardPage() {
                     Onboarded Clients &amp; Users
                   </h1>
                   <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Live multi-tenant registry of all registered customer organizations, onboarded clients, and active platform users across Digital Beings.
+                    Full administrative authority to create, delete, filter, and govern client plans. Upgrade, degrade, or grant special free access without requiring payment.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2.5">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <button
                     onClick={loadPlatformData}
                     disabled={loadingPlatformData}
@@ -2589,10 +2753,10 @@ export default function OfficeDashboardPage() {
                     <span>{loadingPlatformData ? "Syncing..." : "Refresh Registry"}</span>
                   </button>
                   <button
-                    onClick={() => setClientModalOpen(true)}
-                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                    onClick={() => setCreateUserModalOpen(true)}
+                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
                   >
-                    <span>+ Onboard New Client</span>
+                    <span>+ Create User &amp; Client</span>
                   </button>
                 </div>
               </div>
@@ -2646,48 +2810,119 @@ export default function OfficeDashboardPage() {
 
               {/* Main Directory Table Container */}
               <div className="bg-white dark:bg-[#0B101D] rounded-3xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden">
-                {/* Tabs & Search Toolbar */}
-                <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/[0.06] border border-transparent dark:border-white/10 p-1 rounded-xl">
-                    <button
-                      onClick={() => setPlatformTab("users")}
-                      className={`px-4 py-2 text-xs font-bold rounded-lg transition cursor-pointer ${
-                        platformTab === "users"
-                          ? "bg-white dark:bg-white/[0.1] text-slate-900 dark:text-white shadow-2xs"
-                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                      }`}
-                    >
-                      <span>👥 Client Users</span>
-                      <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-white/10">
-                        {platformUsers.length}
+                {/* Tabs & Full Filter / Sort / Search Toolbar */}
+                <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-white/10 space-y-3.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/[0.06] border border-transparent dark:border-white/10 p-1 rounded-xl">
+                      <button
+                        onClick={() => setPlatformTab("users")}
+                        className={`px-4 py-2 text-xs font-bold rounded-lg transition cursor-pointer ${
+                          platformTab === "users"
+                            ? "bg-white dark:bg-white/[0.1] text-slate-900 dark:text-white shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        <span>👥 Client Users</span>
+                        <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-white/10">
+                          {platformUsers.length}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => setPlatformTab("businesses")}
+                        className={`px-4 py-2 text-xs font-bold rounded-lg transition cursor-pointer ${
+                          platformTab === "businesses"
+                            ? "bg-white dark:bg-white/[0.1] text-slate-900 dark:text-white shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        <span>🏢 Client Businesses</span>
+                        <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-white/10">
+                          {platformBusinesses.length}
+                        </span>
+                      </button>
+                    </div>
+
+                    <div className="relative flex-1 max-w-md">
+                      <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                        🔍
                       </span>
-                    </button>
-                    <button
-                      onClick={() => setPlatformTab("businesses")}
-                      className={`px-4 py-2 text-xs font-bold rounded-lg transition cursor-pointer ${
-                        platformTab === "businesses"
-                          ? "bg-white dark:bg-white/[0.1] text-slate-900 dark:text-white shadow-2xs"
-                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                      }`}
-                    >
-                      <span>🏢 Client Businesses</span>
-                      <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-white/10">
-                        {platformBusinesses.length}
-                      </span>
-                    </button>
+                      <input
+                        type="text"
+                        placeholder={platformTab === "users" ? "Search users by name, email, org, or ID..." : "Search businesses by name, owner, ID..."}
+                        value={platformSearchQuery}
+                        onChange={(e) => setPlatformSearchQuery(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
                   </div>
 
-                  <div className="relative w-full md:w-80">
-                    <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400 text-xs">
-                      🔍
-                    </span>
-                    <input
-                      type="text"
-                      placeholder={platformTab === "users" ? "Search users by name, email, org..." : "Search businesses by name, owner..."}
-                      value={platformSearchQuery}
-                      onChange={(e) => setPlatformSearchQuery(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                  {/* Filter and Sort Row */}
+                  <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs">
+                    {/* Role Filter (Only for users tab) */}
+                    {platformTab === "users" && (
+                      <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-xl">
+                        <span className="text-[11px] font-bold text-slate-400">Role:</span>
+                        <select
+                          value={platformRoleFilter}
+                          onChange={(e) => setPlatformRoleFilter(e.target.value)}
+                          className="bg-transparent font-bold text-slate-800 dark:text-slate-200 text-xs focus:outline-none cursor-pointer"
+                        >
+                          <option value="ALL">All Roles</option>
+                          <option value="owner">👑 Owners Only</option>
+                          <option value="admin">🛡️ Admins</option>
+                          <option value="employee">👔 Staff / Employees</option>
+                          <option value="super_admin">⭐ Super Admins</option>
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Plan Filter */}
+                    <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-xl">
+                      <span className="text-[11px] font-bold text-slate-400">Plan:</span>
+                      <select
+                        value={platformPlanFilter}
+                        onChange={(e) => setPlatformPlanFilter(e.target.value)}
+                        className="bg-transparent font-bold text-slate-800 dark:text-slate-200 text-xs focus:outline-none cursor-pointer"
+                      >
+                        <option value="ALL">All Plans</option>
+                        <option value="SPECIAL_ACCESS">🌟 VIP Special Access (Free)</option>
+                        <option value="TRIAL">⚡ 30-Day Starter Trial</option>
+                        <option value="BASIC">💼 Basic Plan (₹1,000)</option>
+                        <option value="PROFESSIONAL">🚀 Professional (₹2,500)</option>
+                        <option value="ENTERPRISE">🏢 Enterprise</option>
+                        <option value="UNPAID">⏳ Unpaid / Demo</option>
+                      </select>
+                    </div>
+
+                    {/* Sort By */}
+                    <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-xl">
+                      <span className="text-[11px] font-bold text-slate-400">Sort:</span>
+                      <select
+                        value={platformSortBy}
+                        onChange={(e) => setPlatformSortBy(e.target.value)}
+                        className="bg-transparent font-bold text-slate-800 dark:text-slate-200 text-xs focus:outline-none cursor-pointer"
+                      >
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="name_asc">Name (A - Z)</option>
+                        <option value="wallet_desc">Wallet Balance (High to Low)</option>
+                      </select>
+                    </div>
+
+                    {/* Clear Filters */}
+                    {(platformSearchQuery || platformRoleFilter !== "ALL" || platformPlanFilter !== "ALL" || platformSortBy !== "newest") && (
+                      <button
+                        onClick={() => {
+                          setPlatformSearchQuery("");
+                          setPlatformRoleFilter("ALL");
+                          setPlatformPlanFilter("ALL");
+                          setPlatformSortBy("newest");
+                        }}
+                        className="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline px-2 py-1"
+                      >
+                        Reset Filters
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -2699,127 +2934,259 @@ export default function OfficeDashboardPage() {
                         <tr>
                           <th className="py-3.5 px-5">User &amp; Identity</th>
                           <th className="py-3.5 px-4">Organization / Tenant</th>
-                          <th className="py-3.5 px-4">Membership Role</th>
+                          <th className="py-3.5 px-4">Role</th>
+                          <th className="py-3.5 px-4">Plan &amp; Access Status</th>
+                          <th className="py-3.5 px-4">Wallet Balance</th>
                           <th className="py-3.5 px-4">Joined Date</th>
-                          <th className="py-3.5 px-4">Account Status</th>
                           <th className="py-3.5 px-5 text-right">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
                         {loadingPlatformData ? (
                           <tr>
-                            <td colSpan={6} className="py-12 text-center text-slate-400">
+                            <td colSpan={7} className="py-12 text-center text-slate-400">
                               <div className="inline-block animate-spin mr-2">🔄</div>
                               Loading platform user directory...
                             </td>
                           </tr>
-                        ) : platformUsers.filter((u) => {
-                          const q = platformSearchQuery.toLowerCase().trim();
-                          if (!q) return true;
-                          return (
-                            (u.name && u.name.toLowerCase().includes(q)) ||
-                            (u.email && u.email.toLowerCase().includes(q)) ||
-                            (u.organizationName && u.organizationName.toLowerCase().includes(q)) ||
-                            (u.id && u.id.toLowerCase().includes(q))
-                          );
-                        }).length === 0 ? (
+                        ) : platformUsers
+                          .filter((u) => {
+                            const q = platformSearchQuery.toLowerCase().trim();
+                            if (q) {
+                              const matches =
+                                (u.name && u.name.toLowerCase().includes(q)) ||
+                                (u.email && u.email.toLowerCase().includes(q)) ||
+                                (u.organizationName && u.organizationName.toLowerCase().includes(q)) ||
+                                (u.id && u.id.toLowerCase().includes(q));
+                              if (!matches) return false;
+                            }
+                            if (platformRoleFilter !== "ALL") {
+                              if (platformRoleFilter === "super_admin" && !u.isSuperAdmin) return false;
+                              if (platformRoleFilter === "owner" && u.membershipRole !== "owner") return false;
+                              if (platformRoleFilter === "admin" && u.membershipRole !== "admin") return false;
+                              if (platformRoleFilter === "employee" && u.membershipRole !== "employee") return false;
+                            }
+                            if (platformPlanFilter !== "ALL") {
+                              const userPlan = (u.organizationPlan || "UNPAID").toUpperCase();
+                              if (platformPlanFilter === "SPECIAL_ACCESS") {
+                                const isSpecial = userPlan === "SPECIAL_ACCESS" || (u.planExpiresAt && new Date(u.planExpiresAt).getFullYear() > 2090);
+                                if (!isSpecial) return false;
+                              } else if (userPlan !== platformPlanFilter) {
+                                return false;
+                              }
+                            }
+                            return true;
+                          })
+                          .sort((a, b) => {
+                            if (platformSortBy === "newest") {
+                              return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+                            }
+                            if (platformSortBy === "oldest") {
+                              return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+                            }
+                            if (platformSortBy === "name_asc") {
+                              return (a.name || a.email || "").localeCompare(b.name || b.email || "");
+                            }
+                            if (platformSortBy === "wallet_desc") {
+                              return Number(b.walletBalance || 0) - Number(a.walletBalance || 0);
+                            }
+                            return 0;
+                          }).length === 0 ? (
                           <tr>
-                            <td colSpan={6} className="py-12 text-center text-slate-400">
-                              No platform users found matching your search.
+                            <td colSpan={7} className="py-12 text-center text-slate-400">
+                              No platform users found matching your filters.
                             </td>
                           </tr>
                         ) : (
-                          platformUsers.filter((u) => {
-                            const q = platformSearchQuery.toLowerCase().trim();
-                            if (!q) return true;
-                            return (
-                              (u.name && u.name.toLowerCase().includes(q)) ||
-                              (u.email && u.email.toLowerCase().includes(q)) ||
-                              (u.organizationName && u.organizationName.toLowerCase().includes(q)) ||
-                              (u.id && u.id.toLowerCase().includes(q))
-                            );
-                          }).map((u) => {
-                            const isUserSuperAdmin = Boolean(u.isSuperAdmin);
-                            return (
-                              <tr key={u.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition">
-                                <td className="py-4 px-5">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
-                                      {(u.name || u.email || "U").slice(0, 2).toUpperCase()}
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-extrabold text-slate-900 dark:text-white truncate">
-                                          {u.name || "Registered User"}
-                                        </span>
-                                        {isUserSuperAdmin && (
-                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
-                                            👑 Super Admin
-                                          </span>
-                                        )}
+                          platformUsers
+                            .filter((u) => {
+                              const q = platformSearchQuery.toLowerCase().trim();
+                              if (q) {
+                                const matches =
+                                  (u.name && u.name.toLowerCase().includes(q)) ||
+                                  (u.email && u.email.toLowerCase().includes(q)) ||
+                                  (u.organizationName && u.organizationName.toLowerCase().includes(q)) ||
+                                  (u.id && u.id.toLowerCase().includes(q));
+                                if (!matches) return false;
+                              }
+                              if (platformRoleFilter !== "ALL") {
+                                if (platformRoleFilter === "super_admin" && !u.isSuperAdmin) return false;
+                                if (platformRoleFilter === "owner" && u.membershipRole !== "owner") return false;
+                                if (platformRoleFilter === "admin" && u.membershipRole !== "admin") return false;
+                                if (platformRoleFilter === "employee" && u.membershipRole !== "employee") return false;
+                              }
+                              if (platformPlanFilter !== "ALL") {
+                                const userPlan = (u.organizationPlan || "UNPAID").toUpperCase();
+                                if (platformPlanFilter === "SPECIAL_ACCESS") {
+                                  const isSpecial = userPlan === "SPECIAL_ACCESS" || (u.planExpiresAt && new Date(u.planExpiresAt).getFullYear() > 2090);
+                                  if (!isSpecial) return false;
+                                } else if (userPlan !== platformPlanFilter) {
+                                  return false;
+                                }
+                              }
+                              return true;
+                            })
+                            .sort((a, b) => {
+                              if (platformSortBy === "newest") {
+                                return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+                              }
+                              if (platformSortBy === "oldest") {
+                                return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+                              }
+                              if (platformSortBy === "name_asc") {
+                                return (a.name || a.email || "").localeCompare(b.name || b.email || "");
+                              }
+                              if (platformSortBy === "wallet_desc") {
+                                return Number(b.walletBalance || 0) - Number(a.walletBalance || 0);
+                              }
+                              return 0;
+                            })
+                            .map((u) => {
+                              const isUserSuperAdmin = Boolean(u.isSuperAdmin);
+                              const plan = (u.organizationPlan || "UNPAID").toUpperCase();
+                              const isSpecial = plan === "SPECIAL_ACCESS" || (u.planExpiresAt && new Date(u.planExpiresAt).getFullYear() > 2090);
+                              const isProtectedAdmin = u.email === "admin@digitalbeings.in";
+
+                              return (
+                                <tr key={u.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition">
+                                  <td className="py-4 px-5">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
+                                        {(u.name || u.email || "U").slice(0, 2).toUpperCase()}
                                       </div>
-                                      <span className="text-slate-500 dark:text-slate-400 text-[11px] block truncate font-mono">
-                                        {u.email}
+                                      <div className="min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-extrabold text-slate-900 dark:text-white truncate">
+                                            {u.name || "Registered User"}
+                                          </span>
+                                          {isUserSuperAdmin && (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
+                                              👑 Super Admin
+                                            </span>
+                                          )}
+                                        </div>
+                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block truncate font-mono">
+                                          {u.email}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </td>
+
+                                  <td className="py-4 px-4">
+                                    {u.organizationName ? (
+                                      <div>
+                                        <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                                          {u.organizationName}
+                                        </span>
+                                        <span className="text-[10px] text-slate-400 font-mono">
+                                          ID: {u.organizationId ? `${u.organizationId.slice(0, 8)}...` : "--"}
+                                        </span>
+                                      </div>
+                                    ) : (
+                                      <span className="text-slate-400 italic text-[11px]">No Organization</span>
+                                    )}
+                                  </td>
+
+                                  <td className="py-4 px-4">
+                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
+                                      u.membershipRole === "owner"
+                                        ? "bg-purple-50 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300 border-purple-200 dark:border-purple-500/30"
+                                        : u.membershipRole === "admin"
+                                        ? "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300 border-blue-200 dark:border-blue-500/30"
+                                        : u.membershipRole === "employee"
+                                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30"
+                                        : "bg-slate-50 text-slate-700 dark:bg-white/10 dark:text-slate-300 border-slate-200 dark:border-white/10"
+                                    }`}>
+                                      {u.membershipRole === "owner" ? "👑 Owner" : u.membershipRole === "employee" ? "👔 Staff" : u.membershipRole || "Member"}
+                                    </span>
+                                  </td>
+
+                                  {/* Plan & Special Access */}
+                                  <td className="py-4 px-4">
+                                    <div className="flex flex-col gap-1 items-start">
+                                      {isSpecial ? (
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-black bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40 shadow-2xs">
+                                          <span>🌟</span> VIP Special Access
+                                        </span>
+                                      ) : plan === "TRIAL" ? (
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-amber-50 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
+                                          <span>⚡</span> Starter Trial
+                                        </span>
+                                      ) : plan === "BASIC" ? (
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-blue-50 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
+                                          <span>💼</span> Basic Plan
+                                        </span>
+                                      ) : plan === "PROFESSIONAL" ? (
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-indigo-50 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30">
+                                          <span>🚀</span> Professional
+                                        </span>
+                                      ) : plan === "ENTERPRISE" ? (
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-purple-50 text-purple-800 dark:bg-purple-500/15 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30">
+                                          <span>🏢</span> Enterprise
+                                        </span>
+                                      ) : (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-400 border border-slate-200 dark:border-white/10">
+                                          ⏳ Unpaid
+                                        </span>
+                                      )}
+                                      <span className="text-[10px] text-slate-400">
+                                        {isSpecial ? "Zero Paywall • Lifetime" : u.planExpiresAt ? `Expires: ${new Date(u.planExpiresAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}` : "No Active Sub"}
                                       </span>
                                     </div>
-                                  </div>
-                                </td>
+                                  </td>
 
-                                <td className="py-4 px-4">
-                                  {u.organizationName ? (
-                                    <div>
-                                      <span className="font-bold text-slate-800 dark:text-slate-200 block">
-                                        {u.organizationName}
+                                  {/* Wallet Balance */}
+                                  <td className="py-4 px-4">
+                                    <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-xs">
+                                      ₹{Number(u.walletBalance || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </span>
+                                  </td>
+
+                                  <td className="py-4 px-4 text-slate-500 dark:text-slate-400 text-[11px]">
+                                    {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "--"}
+                                  </td>
+
+                                  {/* Actions */}
+                                  <td className="py-4 px-5 text-right space-x-1.5 whitespace-nowrap">
+                                    {u.organizationId && (
+                                      <button
+                                        onClick={() => handleOpenEditPlan(u.organizationId, u.organizationName || "Client Organization", u.organizationPlan || "TRIAL", u.email, u.planExpiresAt, Number(u.walletBalance || 0))}
+                                        className="px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-500/25 border border-blue-200 dark:border-blue-500/30 font-bold text-xs transition cursor-pointer"
+                                        title="Upgrade/Degrade plan, give special access without paying"
+                                      >
+                                        ⚙️ Plan &amp; Access
+                                      </button>
+                                    )}
+
+                                    <button
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(u.email);
+                                        setVerifyToast({ message: `Copied ${u.email} to clipboard!`, type: "success" });
+                                        setTimeout(() => setVerifyToast(null), 3000);
+                                      }}
+                                      className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
+                                      title="Copy user email"
+                                    >
+                                      📋 Copy
+                                    </button>
+
+                                    {isProtectedAdmin ? (
+                                      <span className="px-2 py-1 text-[10px] font-bold text-slate-400 italic">
+                                        🛡️ Master
                                       </span>
-                                      <span className="text-[10px] text-slate-400 font-mono">
-                                        ID: {u.organizationId ? `${u.organizationId.slice(0, 8)}...` : "--"}
-                                      </span>
-                                    </div>
-                                  ) : (
-                                    <span className="text-slate-400 italic text-[11px]">No Organization</span>
-                                  )}
-                                </td>
-
-                                <td className="py-4 px-4">
-                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
-                                    u.membershipRole === "owner"
-                                      ? "bg-purple-50 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300 border-purple-200 dark:border-purple-500/30"
-                                      : u.membershipRole === "admin"
-                                      ? "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300 border-blue-200 dark:border-blue-500/30"
-                                      : u.membershipRole === "employee"
-                                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30"
-                                      : "bg-slate-50 text-slate-700 dark:bg-white/10 dark:text-slate-300 border-slate-200 dark:border-white/10"
-                                  }`}>
-                                    {u.membershipRole === "owner" ? "👑 Owner" : u.membershipRole === "employee" ? "👔 Staff" : u.membershipRole || "Member"}
-                                  </span>
-                                </td>
-
-                                <td className="py-4 px-4 text-slate-500 dark:text-slate-400 text-[11px]">
-                                  {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "--"}
-                                </td>
-
-                                <td className="py-4 px-4">
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                    Active Client
-                                  </span>
-                                </td>
-
-                                <td className="py-4 px-5 text-right">
-                                  <button
-                                    onClick={() => {
-                                      navigator.clipboard.writeText(u.email);
-                                      setVerifyToast({ message: `Copied ${u.email} to clipboard!`, type: "success" });
-                                      setTimeout(() => setVerifyToast(null), 3000);
-                                    }}
-                                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white font-bold text-xs transition cursor-pointer inline-flex items-center gap-1"
-                                  >
-                                    <span>📋</span> Copy Email
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })
+                                    ) : (
+                                      <button
+                                        onClick={() => handleOpenDeleteConfirm("user", u.id, u.name || u.email, u.email)}
+                                        className="px-2.5 py-1.5 rounded-lg bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-200 dark:border-red-500/30 font-bold text-xs transition cursor-pointer"
+                                        title="Delete user"
+                                      >
+                                        🗑️ Delete
+                                      </button>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })
                         )}
                       </tbody>
                     </table>
@@ -2833,8 +3200,9 @@ export default function OfficeDashboardPage() {
                       <thead className="bg-slate-50/75 dark:bg-white/[0.02] border-b border-slate-100 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                         <tr>
                           <th className="py-3.5 px-5">Business / Organization</th>
-                          <th className="py-3.5 px-4">Owner &amp; Primary Contact</th>
-                          <th className="py-3.5 px-4">Connected WhatsApp</th>
+                          <th className="py-3.5 px-4">Owner &amp; Contact</th>
+                          <th className="py-3.5 px-4">Plan &amp; Access</th>
+                          <th className="py-3.5 px-4">WhatsApp Numbers</th>
                           <th className="py-3.5 px-4">Team Members</th>
                           <th className="py-3.5 px-4">Wallet Balance</th>
                           <th className="py-3.5 px-5 text-right">Actions</th>
@@ -2843,104 +3211,201 @@ export default function OfficeDashboardPage() {
                       <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
                         {loadingPlatformData ? (
                           <tr>
-                            <td colSpan={6} className="py-12 text-center text-slate-400">
+                            <td colSpan={7} className="py-12 text-center text-slate-400">
                               <div className="inline-block animate-spin mr-2">🔄</div>
                               Loading businesses...
                             </td>
                           </tr>
-                        ) : platformBusinesses.filter((b) => {
-                          const q = platformSearchQuery.toLowerCase().trim();
-                          if (!q) return true;
-                          return (
-                            (b.name && b.name.toLowerCase().includes(q)) ||
-                            (b.ownerEmail && b.ownerEmail.toLowerCase().includes(q)) ||
-                            (b.ownerName && b.ownerName.toLowerCase().includes(q)) ||
-                            (b.id && b.id.toLowerCase().includes(q))
-                          );
-                        }).length === 0 ? (
+                        ) : platformBusinesses
+                          .filter((b) => {
+                            const q = platformSearchQuery.toLowerCase().trim();
+                            if (q) {
+                              const matches =
+                                (b.name && b.name.toLowerCase().includes(q)) ||
+                                (b.ownerEmail && b.ownerEmail.toLowerCase().includes(q)) ||
+                                (b.ownerName && b.ownerName.toLowerCase().includes(q)) ||
+                                (b.id && b.id.toLowerCase().includes(q));
+                              if (!matches) return false;
+                            }
+                            if (platformPlanFilter !== "ALL") {
+                              const bPlan = (b.plan || "UNPAID").toUpperCase();
+                              if (platformPlanFilter === "SPECIAL_ACCESS") {
+                                const isSpecial = bPlan === "SPECIAL_ACCESS" || (b.planExpiresAt && new Date(b.planExpiresAt).getFullYear() > 2090);
+                                if (!isSpecial) return false;
+                              } else if (bPlan !== platformPlanFilter) {
+                                return false;
+                              }
+                            }
+                            return true;
+                          })
+                          .sort((a, b) => {
+                            if (platformSortBy === "newest") {
+                              return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+                            }
+                            if (platformSortBy === "oldest") {
+                              return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+                            }
+                            if (platformSortBy === "name_asc") {
+                              return (b.name || "").localeCompare(a.name || "");
+                            }
+                            if (platformSortBy === "wallet_desc") {
+                              return Number(b.walletBalance || 0) - Number(a.walletBalance || 0);
+                            }
+                            return 0;
+                          }).length === 0 ? (
                           <tr>
-                            <td colSpan={6} className="py-12 text-center text-slate-400">
+                            <td colSpan={7} className="py-12 text-center text-slate-400">
                               No businesses found matching your search.
                             </td>
                           </tr>
                         ) : (
-                          platformBusinesses.filter((b) => {
-                            const q = platformSearchQuery.toLowerCase().trim();
-                            if (!q) return true;
-                            return (
-                              (b.name && b.name.toLowerCase().includes(q)) ||
-                              (b.ownerEmail && b.ownerEmail.toLowerCase().includes(q)) ||
-                              (b.ownerName && b.ownerName.toLowerCase().includes(q)) ||
-                              (b.id && b.id.toLowerCase().includes(q))
-                            );
-                          }).map((b) => {
-                            return (
-                              <tr key={b.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition">
-                                <td className="py-4 px-5">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
-                                      🏢
+                          platformBusinesses
+                            .filter((b) => {
+                              const q = platformSearchQuery.toLowerCase().trim();
+                              if (q) {
+                                const matches =
+                                  (b.name && b.name.toLowerCase().includes(q)) ||
+                                  (b.ownerEmail && b.ownerEmail.toLowerCase().includes(q)) ||
+                                  (b.ownerName && b.ownerName.toLowerCase().includes(q)) ||
+                                  (b.id && b.id.toLowerCase().includes(q));
+                                if (!matches) return false;
+                              }
+                              if (platformPlanFilter !== "ALL") {
+                                const bPlan = (b.plan || "UNPAID").toUpperCase();
+                                if (platformPlanFilter === "SPECIAL_ACCESS") {
+                                  const isSpecial = bPlan === "SPECIAL_ACCESS" || (b.planExpiresAt && new Date(b.planExpiresAt).getFullYear() > 2090);
+                                  if (!isSpecial) return false;
+                                } else if (bPlan !== platformPlanFilter) {
+                                  return false;
+                                }
+                              }
+                              return true;
+                            })
+                            .sort((a, b) => {
+                              if (platformSortBy === "newest") {
+                                return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+                              }
+                              if (platformSortBy === "oldest") {
+                                return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+                              }
+                              if (platformSortBy === "name_asc") {
+                                return (b.name || "").localeCompare(a.name || "");
+                              }
+                              if (platformSortBy === "wallet_desc") {
+                                return Number(b.walletBalance || 0) - Number(a.walletBalance || 0);
+                              }
+                              return 0;
+                            })
+                            .map((b) => {
+                              const bPlan = (b.plan || "UNPAID").toUpperCase();
+                              const isSpecial = bPlan === "SPECIAL_ACCESS" || (b.planExpiresAt && new Date(b.planExpiresAt).getFullYear() > 2090);
+                              const isOfficeOrg = b.name === "Digital Beings Office Operations";
+
+                              return (
+                                <tr key={b.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition">
+                                  <td className="py-4 px-5">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
+                                        🏢
+                                      </div>
+                                      <div>
+                                        <span className="font-extrabold text-slate-900 dark:text-white block">
+                                          {b.name}
+                                        </span>
+                                        <span className="text-[10px] text-slate-400 font-mono">
+                                          ID: {b.id ? `${b.id.slice(0, 10)}...` : "--"}
+                                        </span>
+                                      </div>
                                     </div>
+                                  </td>
+
+                                  <td className="py-4 px-4">
                                     <div>
-                                      <span className="font-extrabold text-slate-900 dark:text-white block">
-                                        {b.name}
+                                      <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                                        {b.ownerName || "Organization Owner"}
                                       </span>
-                                      <span className="text-[10px] text-slate-400 font-mono">
-                                        ID: {b.id ? `${b.id.slice(0, 10)}...` : "--"}
+                                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                                        {b.ownerEmail || "--"}
                                       </span>
                                     </div>
-                                  </div>
-                                </td>
+                                  </td>
 
-                                <td className="py-4 px-4">
-                                  <div>
-                                    <span className="font-bold text-slate-800 dark:text-slate-200 block">
-                                      {b.ownerName || "Organization Owner"}
+                                  {/* Plan & Special Access */}
+                                  <td className="py-4 px-4">
+                                    {isSpecial ? (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-black bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40 shadow-2xs">
+                                        <span>🌟</span> VIP Special Access
+                                      </span>
+                                    ) : bPlan === "TRIAL" ? (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-amber-50 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
+                                        <span>⚡</span> Starter Trial
+                                      </span>
+                                    ) : bPlan === "BASIC" ? (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-blue-50 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
+                                        <span>💼</span> Basic Plan
+                                      </span>
+                                    ) : bPlan === "PROFESSIONAL" ? (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-indigo-50 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30">
+                                        <span>🚀</span> Professional
+                                      </span>
+                                    ) : bPlan === "ENTERPRISE" ? (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-purple-50 text-purple-800 dark:bg-purple-500/15 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30">
+                                        <span>🏢</span> Enterprise
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-400 border border-slate-200 dark:border-white/10">
+                                        ⏳ Unpaid
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  <td className="py-4 px-4">
+                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
+                                      Number(b.phoneCount || 0) > 0
+                                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30"
+                                        : "bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400 border border-slate-200 dark:border-white/10"
+                                    }`}>
+                                      <span>📱</span>
+                                      <span>{Number(b.phoneCount || 0) > 0 ? `${b.phoneCount} Number Connected` : "No Number Linked"}</span>
                                     </span>
-                                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                                      {b.ownerEmail || "--"}
+                                  </td>
+
+                                  <td className="py-4 px-4 text-slate-700 dark:text-slate-300 font-semibold text-[11px]">
+                                    👥 {b.memberCount || 1} Member{b.memberCount !== 1 ? "s" : ""}
+                                  </td>
+
+                                  <td className="py-4 px-4">
+                                    <span className="font-black text-emerald-600 text-sm">
+                                      ₹{Number(b.walletBalance || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
-                                  </div>
-                                </td>
+                                  </td>
 
-                                <td className="py-4 px-4">
-                                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
-                                    Number(b.phoneCount || 0) > 0
-                                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30"
-                                      : "bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400 border-slate-200 dark:border-white/10"
-                                  }`}>
-                                    <span>📱</span>
-                                    <span>{Number(b.phoneCount || 0) > 0 ? `${b.phoneCount} Number Connected` : "No Number Linked"}</span>
-                                  </span>
-                                </td>
+                                  <td className="py-4 px-5 text-right space-x-1.5 whitespace-nowrap">
+                                    <button
+                                      onClick={() => handleOpenEditPlan(b.id, b.name, b.plan || "TRIAL", b.ownerEmail, b.planExpiresAt, Number(b.walletBalance || 0))}
+                                      className="px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-500/25 border border-blue-200 dark:border-blue-500/30 font-bold text-xs transition cursor-pointer"
+                                      title="Upgrade/Degrade plan, give special access without paying"
+                                    >
+                                      ⚙️ Manage Plan
+                                    </button>
 
-                                <td className="py-4 px-4 text-slate-700 dark:text-slate-300 font-semibold text-[11px]">
-                                  👥 {b.memberCount || 1} Member{b.memberCount !== 1 ? "s" : ""}
-                                </td>
-
-                                <td className="py-4 px-4">
-                                  <span className="font-black text-emerald-600 text-sm">
-                                    ₹{Number(b.walletBalance || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                  </span>
-                                </td>
-
-                                <td className="py-4 px-5 text-right">
-                                  <button
-                                    onClick={() => {
-                                      if (b.ownerEmail) {
-                                        navigator.clipboard.writeText(b.ownerEmail);
-                                        setVerifyToast({ message: `Copied owner email: ${b.ownerEmail}`, type: "success" });
-                                        setTimeout(() => setVerifyToast(null), 3000);
-                                      }
-                                    }}
-                                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white font-bold text-xs transition cursor-pointer"
-                                  >
-                                    Copy Contact
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })
+                                    {isOfficeOrg ? (
+                                      <span className="px-2 py-1 text-[10px] font-bold text-slate-400 italic">
+                                        🛡️ Office Hub
+                                      </span>
+                                    ) : (
+                                      <button
+                                        onClick={() => handleOpenDeleteConfirm("business", b.id, b.name)}
+                                        className="px-2.5 py-1.5 rounded-lg bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-200 dark:border-red-500/30 font-bold text-xs transition cursor-pointer"
+                                        title="Delete business tenant"
+                                      >
+                                        🗑️ Delete
+                                      </button>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })
                         )}
                       </tbody>
                     </table>
@@ -3696,6 +4161,371 @@ export default function OfficeDashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL 6: CREATE USER & CLIENT ORGANIZATION MODAL
+      ========================================================================= */}
+      {createUserModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-slate-200/90 dark:border-white/10 shadow-2xl space-y-5 my-8 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>➕ Provision Client &amp; User</span>
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Directly create a new user account, business workspace, and assign their plan.
+                </p>
+              </div>
+              <button
+                onClick={() => setCreateUserModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreatePlatformUser} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Client / User Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Rahul Verma"
+                    value={createUserData.name}
+                    onChange={(e) => setCreateUserData({ ...createUserData, name: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Login Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="e.g. rahul@example.com"
+                    value={createUserData.email}
+                    onChange={(e) => setCreateUserData({ ...createUserData, email: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Initial Password *
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Minimum 6 characters"
+                    value={createUserData.password}
+                    onChange={(e) => setCreateUserData({ ...createUserData, password: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Company / Organization Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Leave empty for personal org"
+                    value={createUserData.organizationName}
+                    onChange={(e) => setCreateUserData({ ...createUserData, organizationName: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Organization Role
+                  </label>
+                  <select
+                    value={createUserData.role}
+                    onChange={(e) => setCreateUserData({ ...createUserData, role: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="owner" className="text-black">Owner (Full Control)</option>
+                    <option value="admin" className="text-black">Admin</option>
+                    <option value="staff" className="text-black">Staff / Member</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Subscription Tier
+                  </label>
+                  <select
+                    value={createUserData.plan}
+                    onChange={(e) => {
+                      const newPlan = e.target.value;
+                      setCreateUserData({
+                        ...createUserData,
+                        plan: newPlan,
+                        specialAccess: newPlan === "SPECIAL_ACCESS" ? true : createUserData.specialAccess
+                      });
+                    }}
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="SPECIAL_ACCESS" className="text-black">🌟 Special VIP Access</option>
+                    <option value="TRIAL" className="text-black">⚡ Free 7-Day Trial</option>
+                    <option value="BASIC" className="text-black">💼 Basic (₹999/mo)</option>
+                    <option value="PROFESSIONAL" className="text-black">🚀 Professional (₹2,499/mo)</option>
+                    <option value="ENTERPRISE" className="text-black">🏢 Enterprise (₹4,999/mo)</option>
+                    <option value="UNPAID" className="text-black">🔒 Unpaid (Paywall locked)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Initial Balance (₹)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={createUserData.initialWalletBalance}
+                    onChange={(e) => setCreateUserData({ ...createUserData, initialWalletBalance: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Special Access VIP Checkbox */}
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="createSpecialAccess"
+                  checked={createUserData.specialAccess}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setCreateUserData({
+                      ...createUserData,
+                      specialAccess: checked,
+                      plan: checked ? "SPECIAL_ACCESS" : (createUserData.plan === "SPECIAL_ACCESS" ? "TRIAL" : createUserData.plan)
+                    });
+                  }}
+                  className="mt-1 rounded text-amber-600 focus:ring-amber-500 h-4 w-4"
+                />
+                <label htmlFor="createSpecialAccess" className="text-xs text-amber-900 dark:text-amber-200 cursor-pointer">
+                  <span className="font-extrabold block text-amber-800 dark:text-amber-300">
+                    Grant Special VIP Access (Start Without Paying)
+                  </span>
+                  Bypasses Razorpay paywall completely, unlocks all features, and sets lifetime subscription validity.
+                </label>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setCreateUserModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingUser}
+                  className="px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+                >
+                  {creatingUser ? "Creating..." : "Create Organization & User"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL 7: EDIT PLAN & SPECIAL ACCESS MODAL
+      ========================================================================= */}
+      {editPlanModalOpen && selectedOrgForPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-slate-200/90 dark:border-white/10 shadow-2xl space-y-5 my-8 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>⚙️ Manage Plan &amp; Access</span>
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Update plan tier, grant free VIP access, or adjust wallet balance.
+                </p>
+              </div>
+              <button
+                onClick={() => setEditPlanModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Target Org Info Card */}
+            <div className="p-3.5 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-slate-900 dark:text-white">
+                  {selectedOrgForPlan.name}
+                </span>
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold">
+                  {selectedOrgForPlan.currentPlan}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span>Owner: {selectedOrgForPlan.ownerEmail || "No owner attached"}</span>
+                <span>Wallet: ₹{Number(selectedOrgForPlan.walletBalance || 0).toLocaleString("en-IN")}</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSavePlanAndAccess} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                  Change Plan Tier
+                </label>
+                <select
+                  value={editPlanForm.plan}
+                  onChange={(e) => {
+                    const newPlan = e.target.value;
+                    setEditPlanForm({
+                      ...editPlanForm,
+                      plan: newPlan,
+                      specialAccess: newPlan === "SPECIAL_ACCESS" ? true : editPlanForm.specialAccess
+                    });
+                  }}
+                  className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="SPECIAL_ACCESS" className="text-black">🌟 Special VIP Access (Zero Paywall)</option>
+                  <option value="TRIAL" className="text-black">⚡ Free 7-Day Trial</option>
+                  <option value="BASIC" className="text-black">💼 Basic (₹999 / month)</option>
+                  <option value="PROFESSIONAL" className="text-black">🚀 Professional (₹2,499 / month)</option>
+                  <option value="ENTERPRISE" className="text-black">🏢 Enterprise (₹4,999 / month)</option>
+                  <option value="UNPAID" className="text-black">🔒 Unpaid / Paywall Locked</option>
+                </select>
+              </div>
+
+              {/* Special VIP Access Toggle */}
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="editSpecialAccess"
+                  checked={editPlanForm.specialAccess}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setEditPlanForm({
+                      ...editPlanForm,
+                      specialAccess: checked,
+                      plan: checked ? "SPECIAL_ACCESS" : (editPlanForm.plan === "SPECIAL_ACCESS" ? "TRIAL" : editPlanForm.plan)
+                    });
+                  }}
+                  className="mt-1 rounded text-amber-600 focus:ring-amber-500 h-4 w-4"
+                />
+                <label htmlFor="editSpecialAccess" className="text-xs text-amber-900 dark:text-amber-200 cursor-pointer">
+                  <span className="font-extrabold block text-amber-800 dark:text-amber-300">
+                    Grant Special VIP Access (Start Without Paying)
+                  </span>
+                  Allows this client to start immediately with full platform access, unlimited API keys, and no payment required. Sets expiration to year 2099.
+                </label>
+              </div>
+
+              {/* Wallet Balance Adjustment */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                  Adjust Wallet Balance (₹)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    placeholder="0 (e.g. +500 to add, -200 to deduct)"
+                    value={editPlanForm.walletAdjustment}
+                    onChange={(e) => setEditPlanForm({ ...editPlanForm, walletAdjustment: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                  Enter a positive number to credit funds, or a negative number to debit funds.
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setEditPlanModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingPlan}
+                  className="px-6 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+                >
+                  {savingPlan ? "Saving..." : "Save Plan & Access"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL 8: PERMANENT DELETION CONFIRMATION MODAL
+      ========================================================================= */}
+      {deleteConfirmModalOpen && deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-6 sm:p-8 max-w-md w-full border border-red-500/20 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-200">
+            <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center text-2xl font-black mx-auto">
+              ⚠️
+            </div>
+
+            <div className="text-center space-y-1">
+              <h3 className="text-base font-black text-slate-900 dark:text-white">
+                Delete {deleteTarget.type === "user" ? "User Account" : "Client Organization"}?
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Are you sure you want to permanently delete{" "}
+                <span className="font-bold text-slate-800 dark:text-slate-200">
+                  {deleteTarget.name}
+                </span>{" "}
+                {deleteTarget.email ? `(${deleteTarget.email})` : ""}?
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-300 text-[11px] leading-relaxed">
+              {deleteTarget.type === "business"
+                ? "This will delete the client organization along with all its projects, memberships, wallets, and settings. This action cannot be undone."
+                : "This user will immediately lose access and be removed from all workspaces. This action cannot be undone."}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmModalOpen(false)}
+                className="flex-1 px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={handleConfirmDelete}
+                className="flex-1 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+              >
+                {deleting ? "Deleting..." : "Permanently Delete"}
+              </button>
+            </div>
           </div>
         </div>
       )}

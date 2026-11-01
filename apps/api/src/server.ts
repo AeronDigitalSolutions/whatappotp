@@ -2198,7 +2198,8 @@ fastify.get("/v1/wallet/:organizationId", async (request: any, reply) => {
     const expiryTime = org?.planExpiresAt ? new Date(org.planExpiresAt).getTime() : 0;
     const daysRemaining = expiryTime > now ? Math.max(0, Math.ceil((expiryTime - now) / (1000 * 60 * 60 * 24))) : 0;
     const isExpired = org?.planExpiresAt ? new Date(org.planExpiresAt) < new Date() : (plan === "UNPAID");
-    const isPaidPlan = plan !== "UNPAID" && Boolean(org?.planExpiresAt) && !isExpired;
+    const isSpecialAccess = plan === "SPECIAL_ACCESS" || (org?.planExpiresAt && new Date(org.planExpiresAt).getFullYear() > 2090);
+    const isPaidPlan = isSpecialAccess || (plan !== "UNPAID" && Boolean(org?.planExpiresAt) && !isExpired);
 
     const hasUsedTrial = invoices.some(inv => Number(inv.baseAmount) === 500) || (plan === "TRIAL");
 
@@ -5967,12 +5968,16 @@ fastify.get("/v1/super-admin/users", async (request: any, reply) => {
         u.createdAt,
         o.id as organizationId,
         o.name as organizationName,
+        o.plan as organizationPlan,
+        o.planExpiresAt as planExpiresAt,
+        COALESCE(w.balance, 0) as walletBalance,
         m.role as membershipRole,
         r.name as customRoleName,
         r.permissions as rolePermissions
       FROM User u
       LEFT JOIN Membership m ON u.id = m.userId
       LEFT JOIN Organization o ON m.organizationId = o.id
+      LEFT JOIN Wallet w ON o.id = w.organizationId
       LEFT JOIN OrganizationRole r ON m.roleId = r.id
       ORDER BY u.createdAt DESC
     `);
@@ -5984,6 +5989,216 @@ fastify.get("/v1/super-admin/users", async (request: any, reply) => {
   } catch (err: any) {
     fastify.log.error(err);
     return reply.status(500).send({ error: "Failed to fetch platform users: " + err.message });
+  }
+});
+
+// 3.1 Create User & Client Organization
+fastify.post("/v1/super-admin/users", async (request: any, reply) => {
+  try {
+    const {
+      name,
+      email,
+      password,
+      organizationName,
+      role = "owner",
+      plan = "TRIAL",
+      specialAccess = false,
+      initialWalletBalance = 0,
+      isSuperAdmin = false
+    } = request.body || {};
+
+    if (!email || !password) {
+      return reply.status(400).send({ error: "Email and password are required" });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const existing = await prisma.user.findUnique({ where: { email: cleanEmail } });
+    if (existing) {
+      return reply.status(400).send({ error: "User with this email already exists" });
+    }
+
+    const user = await prisma.user.create({
+      data: {
+        id: crypto.randomUUID(),
+        email: cleanEmail,
+        name: name || "Client User",
+        passwordHash: hashPassword(password),
+        isSuperAdmin: Boolean(isSuperAdmin),
+        emailVerified: true
+      }
+    });
+
+    const effectivePlan = specialAccess ? "SPECIAL_ACCESS" : (plan || "TRIAL");
+    const planExpiresAt = specialAccess
+      ? new Date("2099-12-31T23:59:59Z")
+      : effectivePlan === "TRIAL"
+      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      : effectivePlan === "UNPAID"
+      ? null
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    const org = await prisma.organization.create({
+      data: {
+        id: crypto.randomUUID(),
+        name: organizationName || `${name || 'Client'} Organization`,
+        plan: effectivePlan,
+        planExpiresAt,
+        seatsAllowed: effectivePlan === "PROFESSIONAL" ? 6 : effectivePlan === "ENTERPRISE" || effectivePlan === "SPECIAL_ACCESS" ? 20 : 4,
+        extraSeats: 0,
+        obaIncluded: effectivePlan === "PROFESSIONAL" || effectivePlan === "ENTERPRISE" || effectivePlan === "SPECIAL_ACCESS"
+      }
+    });
+
+    await prisma.membership.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: user.id,
+        organizationId: org.id,
+        role: role || "owner"
+      }
+    });
+
+    await prisma.project.create({
+      data: {
+        id: crypto.randomUUID(),
+        organizationId: org.id,
+        name: "Default Project"
+      }
+    });
+
+    await prisma.wallet.create({
+      data: {
+        id: crypto.randomUUID(),
+        organizationId: org.id,
+        balance: Number(initialWalletBalance) || 0.00
+      }
+    });
+
+    return reply.send({
+      success: true,
+      user: { id: user.id, email: user.email, name: user.name, organizationId: org.id, organizationName: org.name, plan: org.plan }
+    });
+  } catch (err: any) {
+    fastify.log.error(err);
+    return reply.status(500).send({ error: "Failed to create user: " + err.message });
+  }
+});
+
+// 3.2 Delete Platform User
+fastify.delete("/v1/super-admin/users/:userId", async (request: any, reply) => {
+  try {
+    const { userId } = request.params;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return reply.status(404).send({ error: "User not found" });
+    }
+
+    if (user.email === "admin@digitalbeings.in") {
+      return reply.status(403).send({ error: "Cannot delete master Executive Super Admin account" });
+    }
+
+    // Remove from OfficeEmployee table if present
+    await prisma.$executeRawUnsafe(`DELETE FROM OfficeEmployee WHERE email = ?`, user.email).catch(() => {});
+
+    // Cascade delete memberships and user
+    await prisma.membership.deleteMany({ where: { userId } });
+    await prisma.user.delete({ where: { id: userId } });
+
+    return reply.send({ success: true, message: "User deleted successfully" });
+  } catch (err: any) {
+    fastify.log.error(err);
+    return reply.status(500).send({ error: "Failed to delete user: " + err.message });
+  }
+});
+
+// 3.3 Delete Organization / Business Tenant
+fastify.delete("/v1/super-admin/businesses/:organizationId", async (request: any, reply) => {
+  try {
+    const { organizationId } = request.params;
+    const org = await prisma.organization.findUnique({ where: { id: organizationId } });
+    if (!org) return reply.status(404).send({ error: "Organization not found" });
+
+    if (org.name === "Digital Beings Office Operations") {
+      return reply.status(403).send({ error: "Cannot delete primary Office Operations organization" });
+    }
+
+    await prisma.wallet.deleteMany({ where: { organizationId } });
+    await prisma.project.deleteMany({ where: { organizationId } });
+    await prisma.membership.deleteMany({ where: { organizationId } });
+    await prisma.organization.delete({ where: { id: organizationId } });
+
+    return reply.send({ success: true, message: "Organization deleted successfully" });
+  } catch (err: any) {
+    fastify.log.error(err);
+    return reply.status(500).send({ error: "Failed to delete organization: " + err.message });
+  }
+});
+
+// 3.4 Upgrade, Degrade or Grant Special VIP Access to Client Organization
+fastify.put("/v1/super-admin/plan/:organizationId", async (request: any, reply) => {
+  try {
+    const { organizationId } = request.params;
+    const {
+      plan,
+      specialAccess,
+      planExpiresAt,
+      walletAdjustment
+    } = request.body || {};
+
+    const org = await prisma.organization.findUnique({ where: { id: organizationId } });
+    if (!org) return reply.status(404).send({ error: "Organization not found" });
+
+    let targetPlan = plan || org.plan;
+    let targetExpiresAt: Date | null = org.planExpiresAt;
+
+    if (specialAccess === true || targetPlan === "SPECIAL_ACCESS") {
+      targetPlan = "SPECIAL_ACCESS";
+      targetExpiresAt = new Date("2099-12-31T23:59:59Z"); // Lifetime special access without paying
+    } else if (targetPlan === "UNPAID") {
+      targetExpiresAt = null;
+    } else if (planExpiresAt !== undefined) {
+      targetExpiresAt = planExpiresAt ? new Date(planExpiresAt) : null;
+    } else if (targetPlan !== org.plan) {
+      targetExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    }
+
+    const seats = targetPlan === "PROFESSIONAL" ? 6 : (targetPlan === "ENTERPRISE" || targetPlan === "SPECIAL_ACCESS" ? 20 : 4);
+
+    const updated = await prisma.organization.update({
+      where: { id: organizationId },
+      data: {
+        plan: targetPlan,
+        planExpiresAt: targetExpiresAt,
+        seatsAllowed: seats,
+        obaIncluded: targetPlan === "PROFESSIONAL" || targetPlan === "ENTERPRISE" || targetPlan === "SPECIAL_ACCESS"
+      }
+    });
+
+    let updatedWalletBalance: number | null = null;
+    if (walletAdjustment !== undefined && !isNaN(Number(walletAdjustment))) {
+      const adjustmentAmount = Number(walletAdjustment);
+      if (adjustmentAmount !== 0) {
+        const w = await prisma.wallet.findUnique({ where: { organizationId } });
+        if (w) {
+          const newBal = Math.max(0, Number(w.balance) + adjustmentAmount);
+          const updatedWallet = await prisma.wallet.update({
+            where: { organizationId },
+            data: { balance: newBal }
+          });
+          updatedWalletBalance = Number(updatedWallet.balance);
+        }
+      }
+    }
+
+    return reply.send({
+      success: true,
+      message: `Plan updated to ${targetPlan} successfully`,
+      organization: updated,
+      walletBalance: updatedWalletBalance
+    });
+  } catch (err: any) {
+    fastify.log.error(err);
+    return reply.status(500).send({ error: "Failed to update plan: " + err.message });
   }
 });
 
