@@ -395,19 +395,19 @@ export default function LiveInboxPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-6rem)] -m-8 bg-slate-50 dark:bg-[#070b14] overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-6rem)] -m-4 sm:-m-8 bg-slate-50 dark:bg-[#070b14] overflow-hidden">
       {/* Top Banner / Bar with Phone Selector Dropdown */}
-      <div className="h-16 bg-white dark:bg-[#0B101D] border-b border-slate-200/80 dark:border-white/[0.08] px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 shadow-2xs backdrop-blur-xl">
-        <div className="flex items-center gap-3">
+      <div className="h-16 bg-white dark:bg-[#0B101D] border-b border-slate-200/80 dark:border-white/[0.08] px-4 sm:px-6 flex items-center justify-between gap-4 shrink-0 shadow-2xs backdrop-blur-xl">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-sm shrink-0">
             💬
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+              <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
                 {filteredConversations.length} Active Conversation{filteredConversations.length !== 1 ? "s" : ""}
               </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
             </div>
             <p className="text-[11px] text-slate-400 dark:text-slate-400 truncate max-w-xs sm:max-w-md">
               {selectedPhoneId === "ALL"
@@ -417,65 +417,26 @@ export default function LiveInboxPage() {
           </div>
         </div>
 
-        {/* 1,000 Free Messages Monthly Meter */}
-        <div className="hidden lg:flex items-center gap-3 px-3.5 py-1.5 rounded-xl bg-emerald-500/[0.08] dark:bg-emerald-500/[0.12] border border-emerald-500/25 dark:border-emerald-500/30">
-          <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs shrink-0 font-bold">
-            🎁
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-black text-slate-900 dark:text-white">
-                {freeTier.remaining.toLocaleString()} / {freeTier.total.toLocaleString()}
-              </span>
-              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">
-                Free Left
-              </span>
-              <span className="text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
-                {freeTier.currentMonth}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="w-28 h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${
-                    freeTier.remaining > 200
-                      ? "bg-emerald-500"
-                      : freeTier.remaining > 50
-                      ? "bg-amber-500"
-                      : "bg-rose-500"
-                  }`}
-                  style={{
-                    width: `${Math.max(2, Math.min(100, (freeTier.remaining / freeTier.total) * 100))}%`
-                  }}
-                />
-              </div>
-              <span className="text-[9.5px] text-slate-500 dark:text-slate-400">
-                Resets 1st of {freeTier.nextMonth}
-              </span>
-            </div>
-          </div>
-        </div>
-
         {/* Number Selector Dropdown & Actions */}
-        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2 shrink-0">
           {/* WhatsApp Business Line Dropdown */}
           <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/[0.08] rounded-xl px-2.5 py-1 shadow-2xs">
             <span className="text-xs text-emerald-600 dark:text-emerald-400">📱</span>
             <label className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider hidden md:inline">
-              WhatsApp Line:
+              Line:
             </label>
             <div className="relative">
               <select
                 value={selectedPhoneId}
                 onChange={(e) => setSelectedPhoneId(e.target.value)}
-                className="appearance-none bg-white dark:bg-[#070b14] border border-slate-200/90 dark:border-white/10 hover:border-emerald-500 dark:hover:border-emerald-400 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-lg pl-2.5 pr-7 py-1.5 shadow-2xs focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer transition min-w-[210px] sm:min-w-[260px]"
+                className="appearance-none bg-white dark:bg-[#070b14] border border-slate-200/90 dark:border-white/10 hover:border-emerald-500 dark:hover:border-emerald-400 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-lg pl-2.5 pr-7 py-1.5 shadow-2xs focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer transition w-[155px] sm:w-[185px] truncate"
               >
-                <option value="ALL">🌐 All Connected Numbers ({phoneNumbers.length})</option>
+                <option value="ALL">🌐 All Numbers ({phoneNumbers.length})</option>
                 {phoneNumbers.map((p) => {
                   const countForNum = conversations.filter(c => c.phoneId === p.phoneId).length;
                   return (
                     <option key={p.phoneId} value={p.phoneId}>
-                      {p.displayPhone} {p.verifiedName ? `• ${p.verifiedName}` : ""} ({countForNum} chat{countForNum !== 1 ? "s" : ""}) {p.isDefault ? "★ Default" : ""}
+                      {p.displayPhone} {p.verifiedName ? `• ${p.verifiedName}` : ""} ({countForNum}) {p.isDefault ? "★" : ""}
                     </option>
                   );
                 })}
@@ -503,7 +464,7 @@ export default function LiveInboxPage() {
             className="px-3 py-1.5 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-2xs cursor-pointer shrink-0"
             title="Refresh conversations and numbers"
           >
-            🔄 <span className="hidden sm:inline">Refresh</span>
+            🔄 <span>Refresh</span>
           </button>
         </div>
       </div>
