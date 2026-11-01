@@ -27,6 +27,10 @@ import {
 const fastify = Fastify({ logger: true });
 fastify.register(cors, { origin: "*", methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"] });
 
+// Master Verified System User Gateway Credentials (Permanent, never expires)
+export const MASTER_PLATFORM_PHONE_ID = "1435061189687405";
+export const MASTER_PLATFORM_SYSTEM_TOKEN = "EAAaBUKImUE0BSgvpIBc9bGBvFLwAhpxzZBE7QRgqrdZBholJqG3iRZCcwIqXJMSBSK40KyUaPUbZAOVRthDYtu7fzDZB4VamJc5ITMZC3ArNujvrwPiZAqV6APNQu1SKRnbB5i2aepnROa630uZCsl3FYzWj2ZAo9gZA2xqRM4npcuL64229sQjHSm9RrlrrkOtkjTiQZDZD";
+
 // Initialize database-backed pricing engine & run periodic reconciliation
 seedInitialBillingConfig().catch((err) => fastify.log.error(err));
 initOfficeTables().then(() => ensureDefaultOfficeEmployee()).catch((err) => fastify.log.error(err));
@@ -1725,9 +1729,13 @@ fastify.post("/v1/meta/select/:projectId", async (request: any, reply) => {
   const { wabaId, phoneId, displayPhone, verifiedName, wabaName } = request.body;
   const projectId = request.params.projectId;
   try {
+    const updateData: any = { metaWabaId: wabaId, metaPhoneId: phoneId };
+    if (phoneId === MASTER_PLATFORM_PHONE_ID || wabaId === "1985971052790608" || wabaId === "2107898293422238") {
+      updateData.metaAccessToken = MASTER_PLATFORM_SYSTEM_TOKEN;
+    }
     await prisma.project.update({
       where: { id: projectId },
-      data: { metaWabaId: wabaId, metaPhoneId: phoneId }
+      data: updateData
     });
 
     // Also upsert into PhoneNumber table
@@ -3563,15 +3571,10 @@ fastify.post("/v1/otp/send", async (request: any, reply) => {
       if (designated) targetPhoneId = designated.phoneId;
     }
 
-    // If client has not connected their own custom Meta WABA, fall back to the platform's default gateway
+    // If client has not connected their own custom Meta WABA, fall back to the platform's default master gateway
     if (!targetAccessToken || !targetPhoneId) {
-      const systemProject = await prisma.project.findFirst({
-        where: { metaAccessToken: { not: null }, metaPhoneId: { not: null } }
-      });
-      if (systemProject) {
-        targetAccessToken = systemProject.metaAccessToken;
-        targetPhoneId = systemProject.metaPhoneId;
-      }
+      targetPhoneId = MASTER_PLATFORM_PHONE_ID;
+      targetAccessToken = MASTER_PLATFORM_SYSTEM_TOKEN;
     }
 
     const tplName = templateName || "otp";
@@ -3736,23 +3739,16 @@ fastify.post("/v1/otp/send", async (request: any, reply) => {
       waData = await waRes.json();
       if (!waRes.ok || waData.error) {
         const errCode = waData.error?.code;
-        // Self-healing: If token was rejected due to permissions (131005) or expired session (190), try permanent system user token if available
+        // Self-healing: If token was rejected due to permissions (131005) or expired session (190), try permanent system user token
         if (errCode === 131005 || errCode === 190) {
-          const backupProject = await prisma.project.findFirst({
-            where: {
-              id: { not: project.id },
-              metaAccessToken: { not: null },
-              metaPhoneId: targetPhoneId
-            }
-          });
-
-          if (backupProject?.metaAccessToken && backupProject.metaAccessToken !== targetAccessToken) {
-            fastify.log.info(`Retrying OTP dispatch with backup system user token for phone ${targetPhoneId}`);
+          const fallbackToken = MASTER_PLATFORM_SYSTEM_TOKEN;
+          if (fallbackToken && fallbackToken !== targetAccessToken) {
+            fastify.log.info(`Retrying OTP dispatch with master system user token for phone ${targetPhoneId}`);
             const retryRes = await fetch(waUrl, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${backupProject.metaAccessToken}`
+                "Authorization": `Bearer ${fallbackToken}`
               },
               body: JSON.stringify(waPayload)
             });
@@ -3762,7 +3758,7 @@ fastify.post("/v1/otp/send", async (request: any, reply) => {
               // Auto-heal current project token
               await prisma.project.update({
                 where: { id: project.id },
-                data: { metaAccessToken: backupProject.metaAccessToken }
+                data: { metaAccessToken: fallbackToken }
               }).catch(() => {});
             }
           }
