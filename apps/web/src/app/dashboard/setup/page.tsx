@@ -255,8 +255,8 @@ export default function SetupPage() {
   if (loading) {
     return (
       <div className="py-24 flex flex-col items-center justify-center space-y-4">
-        <Loader scale={0.9} color="#0f172a" />
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Loading WhatsApp Setup...</p>
+        <Loader scale={0.9} color="#10b981" />
+        <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Loading WhatsApp Setup...</p>
       </div>
     );
   }
@@ -400,8 +400,8 @@ export default function SetupPage() {
 
             {fetchingAccounts && !hasFetchedAccounts ? (
               <div className="py-12 text-center space-y-4">
-                <Loader scale={0.85} color="#0f172a" />
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Discovering Business Portfolios from Meta...</p>
+                <Loader scale={0.85} color="#10b981" />
+                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Discovering Business Portfolios from Meta...</p>
               </div>
             ) : fetchError || businesses.length === 0 ? (
               <div className="bg-orange-50 border border-orange-200 p-6 rounded-2xl space-y-4">
@@ -616,19 +616,19 @@ export default function SetupPage() {
           <div className="space-y-8">
             
             {/* Success Status Banner */}
-            <div className="bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white border border-emerald-200 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xs">
+            <div className="bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white dark:from-emerald-950/40 dark:via-[#0c1a1f] dark:to-[#0B101D] border border-emerald-200 dark:border-emerald-500/30 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xs dark:shadow-emerald-950/20 backdrop-blur-xl">
               <div className="flex items-start gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-[#00c853] text-white flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 shrink-0">
                   ✓
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Meta Link Complete &amp; Active</h2>
-                    <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-extrabold rounded-full border border-emerald-300">
+                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">Meta Link Complete &amp; Active</h2>
+                    <span className="px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-[11px] font-extrabold rounded-full border border-emerald-300 dark:border-emerald-500/40">
                       Cloud API Live
                     </span>
                   </div>
-                  <p className="text-slate-600 text-xs sm:text-sm mt-1 max-w-xl leading-relaxed">
+                  <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm mt-1.5 max-w-xl leading-relaxed">
                     Your official Meta WhatsApp account is linked. Below you can see all Business Portfolios found under this account, check which ones are active in this workspace, and connect additional portfolios or numbers.
                   </p>
                 </div>
@@ -637,7 +637,7 @@ export default function SetupPage() {
               <div className="flex items-center gap-2.5 shrink-0 self-stretch sm:self-auto justify-end">
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-4 py-2.5 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl shadow-2xs transition flex items-center gap-1.5"
+                  className="px-4 py-2.5 bg-white dark:bg-white/10 border border-slate-200 dark:border-white/15 hover:bg-slate-50 dark:hover:bg-white/20 text-slate-700 dark:text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>⚙️</span> Re-select Active Sender
                 </button>
@@ -646,44 +646,50 @@ export default function SetupPage() {
 
             {/* Metrics Overview Strip (Total Portfolios, Connected, Available WABAs) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-[#0B101D]/80 p-5 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-2xs backdrop-blur-xl">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Business Portfolios</span>
-                  <span className="text-lg">🏢</span>
+              <div className="bg-white dark:bg-[#0B101D]/90 p-5 rounded-2xl border border-slate-200 dark:border-white/[0.1] shadow-2xs backdrop-blur-xl">
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Business Portfolios</span>
+                  <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/10 flex items-center justify-center text-sm">
+                    🏢
+                  </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-slate-900">{totalPortfoliosCount}</span>
-                  <span className="text-xs text-slate-500 font-semibold">Found in Meta</span>
+                  <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">{totalPortfoliosCount}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Found in Meta</span>
                 </div>
-                <p className="text-[11px] text-emerald-600 font-semibold mt-1">
+                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1.5">
                   {connectedPortfoliosCount} of {totalPortfoliosCount} connected to this workspace
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-[#0B101D]/80 p-5 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-2xs backdrop-blur-xl">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Connected Numbers</span>
-                  <span className="text-lg">📱</span>
+              <div className="bg-white dark:bg-[#0B101D]/90 p-5 rounded-2xl border border-slate-200 dark:border-white/[0.1] shadow-2xs backdrop-blur-xl">
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Connected Numbers</span>
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm">
+                    📱
+                  </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-emerald-600">{connectedNumbersCount}</span>
-                  <span className="text-xs text-slate-500 font-semibold">Live in Dashboard</span>
+                  <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">{connectedNumbersCount}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Live in Dashboard</span>
                 </div>
-                <p className="text-[11px] text-slate-500 font-medium mt-1">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1.5">
                   Ready for OTP, Utility &amp; Marketing Broadcasts
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-[#0B101D]/80 p-5 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-2xs backdrop-blur-xl">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">WABAs Discovered</span>
-                  <span className="text-lg">💼</span>
+              <div className="bg-white dark:bg-[#0B101D]/90 p-5 rounded-2xl border border-slate-200 dark:border-white/[0.1] shadow-2xs backdrop-blur-xl">
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">WABAs Discovered</span>
+                  <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/10 flex items-center justify-center text-sm">
+                    💼
+                  </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-slate-900">{totalWabasCount}</span>
-                  <span className="text-xs text-slate-500 font-semibold">WhatsApp Accounts</span>
+                  <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">{totalWabasCount}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">WhatsApp Accounts</span>
                 </div>
-                <p className="text-[11px] text-slate-500 font-medium mt-1">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1.5">
                   Across all portfolios in your Meta account
                 </p>
               </div>
@@ -694,7 +700,7 @@ export default function SetupPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-black text-slate-900 dark:text-slate-100 tracking-tight">Business Portfolios &amp; Connected Profiles</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Explore each portfolio, inspect phone numbers, and link them to your workspace.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Explore each portfolio, inspect phone numbers, and link them to your workspace.</p>
                 </div>
                 <span className="text-xs font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.06] border border-transparent dark:border-white/10 px-2.5 py-1 rounded-md">
                   {businesses.length} Portfolios Found
@@ -703,12 +709,12 @@ export default function SetupPage() {
 
               {fetchingAccounts ? (
                 <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl border border-slate-200 dark:border-white/[0.08] p-12 text-center space-y-3 backdrop-blur-xl">
-                  <Loader scale={0.8} color="#0f172a" />
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Loading Portfolios from Meta...</p>
+                  <Loader scale={0.8} color="#10b981" />
+                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Loading Portfolios from Meta...</p>
                 </div>
               ) : businesses.length === 0 ? (
                 <div className="bg-white dark:bg-[#0B101D]/80 rounded-3xl border border-slate-200 dark:border-white/[0.08] p-10 text-center space-y-3 backdrop-blur-xl">
-                  <p className="text-sm font-bold text-slate-700">No Business Portfolios found in this Meta Account.</p>
+                  <p className="text-sm font-bold text-slate-700 dark:text-slate-200">No Business Portfolios found in this Meta Account.</p>
                   <p className="text-xs text-slate-400">Ensure your token has business_management permissions or add a portfolio below.</p>
                 </div>
               ) : (
@@ -722,14 +728,16 @@ export default function SetupPage() {
                     return (
                       <div
                         key={biz.id}
-                        className={`bg-white dark:bg-[#0B101D]/80 rounded-3xl border dark:border-white/[0.08] transition-all overflow-hidden shadow-2xs backdrop-blur-xl ${
-                          isBizConnected ? "border-emerald-300 ring-2 ring-emerald-500/10" : "border-slate-200"
+                        className={`bg-white dark:bg-[#0B101D]/80 rounded-3xl border transition-all overflow-hidden shadow-2xs backdrop-blur-xl ${
+                          isBizConnected
+                            ? "border-emerald-300 dark:border-emerald-500/40 ring-2 ring-emerald-500/10 dark:ring-emerald-500/20"
+                            : "border-slate-200 dark:border-white/[0.08]"
                         }`}
                       >
                         {/* Portfolio Header Bar */}
                         <div className="p-6 bg-slate-50/80 dark:bg-[#070b14] border-b border-slate-200 dark:border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-white/10 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
                               🏢
                             </div>
                             <div>
@@ -816,8 +824,10 @@ export default function SetupPage() {
                                         return (
                                           <div
                                             key={phone.id}
-                                            className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 bg-white dark:bg-[#0B101D] dark:border-white/10 ${
-                                              isPhoneConnected ? "border-emerald-300 shadow-2xs" : "border-slate-200"
+                                            className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 bg-white dark:bg-[#0B101D] ${
+                                              isPhoneConnected
+                                                ? "border-emerald-300 dark:border-emerald-500/40 ring-1 ring-emerald-500/20 shadow-2xs"
+                                                : "border-slate-200 dark:border-white/10"
                                             }`}
                                           >
                                             <div className="min-w-0">
@@ -939,12 +949,12 @@ export default function SetupPage() {
 
             {/* Next Steps Journey Navigation Strip */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <div className="bg-white dark:bg-[#0B101D]/80 p-6 rounded-3xl border border-slate-200 dark:border-white/[0.08] shadow-2xs space-y-3 backdrop-blur-xl">
+              <div className="bg-white dark:bg-[#0B101D]/90 p-6 rounded-3xl border border-slate-200 dark:border-white/[0.1] shadow-2xs space-y-3 backdrop-blur-xl">
                 <div className="flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">3</span>
-                  <h4 className="font-extrabold text-sm text-slate-900">Recharge Wallet &amp; Messaging Credits</h4>
+                  <span className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs">3</span>
+                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">Recharge Wallet &amp; Messaging Credits</h4>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                   Before you send live OTPs or marketing broadcasts, ensure your wallet balance covers Meta messaging fees.
                 </p>
                 <div className="pt-2">
@@ -958,25 +968,25 @@ export default function SetupPage() {
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-[#0B101D]/80 p-6 rounded-3xl border border-slate-200 dark:border-white/[0.08] shadow-2xs space-y-3 backdrop-blur-xl">
+              <div className="bg-white dark:bg-[#0B101D]/90 p-6 rounded-3xl border border-slate-200 dark:border-white/[0.1] shadow-2xs space-y-3 backdrop-blur-xl">
                 <div className="flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">4</span>
-                  <h4 className="font-extrabold text-sm text-slate-900">Configure Service Routing &amp; Templates</h4>
+                  <span className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">4</span>
+                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">Configure Service Routing &amp; Templates</h4>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                   Route traffic by category (OTP vs Marketing vs Utility) and submit message templates to Meta for instant approval.
                 </p>
                 <div className="pt-2 flex items-center gap-2 flex-wrap">
                   <Link
                     href="/dashboard/numbers"
-                    className="inline-flex items-center gap-1 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-2xs transition"
+                    className="inline-flex items-center gap-1 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-white/10 dark:hover:bg-white/20 text-white font-bold text-xs rounded-xl shadow-2xs transition"
                   >
                     <span>Numbers &amp; Routing</span>
                     <span>➔</span>
                   </Link>
                   <Link
                     href="/dashboard/templates"
-                    className="inline-flex items-center gap-1 px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-2xs transition"
+                    className="inline-flex items-center gap-1 px-3.5 py-2 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl shadow-2xs transition"
                   >
                     <span>Template Studio</span>
                     <span>➔</span>
