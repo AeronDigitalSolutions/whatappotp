@@ -49,6 +49,16 @@ interface ChatMessage {
   createdAt: string;
 }
 
+interface FreeTierInfo {
+  total: number;
+  used: number;
+  remaining: number;
+  currentMonth: string;
+  nextMonth: string;
+  nextResetDate?: string;
+  resetsInDays?: number;
+}
+
 const QUICK_RESPONSES = [
   "👋 Hello! Thanks for reaching out to Digital Beings. How can I help you today?",
   "📦 Please share your Order ID or registered mobile number and I'll track your package right away.",
@@ -74,6 +84,14 @@ export default function LiveInboxPage() {
   const [statusFilter, setStatusFilter] = useState<"ALL" | "OPEN" | "WAITING" | "RESOLVED">("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"chat" | "details">("chat");
+  const [freeTier, setFreeTier] = useState<FreeTierInfo>({
+    total: 1000,
+    used: 0,
+    remaining: 1000,
+    currentMonth: new Date().toLocaleString("en-US", { month: "long" }),
+    nextMonth: new Date(Date.now() + 30 * 24 * 3600 * 1000).toLocaleString("en-US", { month: "long" }),
+    resetsInDays: 30
+  });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -124,6 +142,9 @@ export default function LiveInboxPage() {
       const queryParam = selectedPhoneId && selectedPhoneId !== "ALL" ? `?phoneId=${encodeURIComponent(selectedPhoneId)}` : "";
       const res = await fetch(`${getApiUrl()}/v1/inbox/conversations/${projectId}${queryParam}`);
       const data = await res.json();
+      if (data.freeTier) {
+        setFreeTier(data.freeTier);
+      }
       if (data.success && Array.isArray(data.conversations)) {
         setConversations(data.conversations);
         if (data.conversations.length > 0) {
@@ -289,6 +310,11 @@ export default function LiveInboxPage() {
     setSending(true);
     const textToSend = replyText.trim();
     setReplyText("");
+    setFreeTier(prev => ({
+      ...prev,
+      used: prev.used + 1,
+      remaining: Math.max(0, prev.remaining - 1)
+    }));
 
     // Optimistic UI push
     const tempId = "temp-" + Date.now();
@@ -391,6 +417,45 @@ export default function LiveInboxPage() {
           </div>
         </div>
 
+        {/* 1,000 Free Messages Monthly Meter */}
+        <div className="hidden lg:flex items-center gap-3 px-3.5 py-1.5 rounded-xl bg-emerald-500/[0.08] dark:bg-emerald-500/[0.12] border border-emerald-500/25 dark:border-emerald-500/30">
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs shrink-0 font-bold">
+            🎁
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black text-slate-900 dark:text-white">
+                {freeTier.remaining.toLocaleString()} / {freeTier.total.toLocaleString()}
+              </span>
+              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">
+                Free Left
+              </span>
+              <span className="text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                {freeTier.currentMonth}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-28 h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    freeTier.remaining > 200
+                      ? "bg-emerald-500"
+                      : freeTier.remaining > 50
+                      ? "bg-amber-500"
+                      : "bg-rose-500"
+                  }`}
+                  style={{
+                    width: `${Math.max(2, Math.min(100, (freeTier.remaining / freeTier.total) * 100))}%`
+                  }}
+                />
+              </div>
+              <span className="text-[9.5px] text-slate-500 dark:text-slate-400">
+                Resets 1st of {freeTier.nextMonth}
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Number Selector Dropdown & Actions */}
         <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
           {/* WhatsApp Business Line Dropdown */}
@@ -449,6 +514,33 @@ export default function LiveInboxPage() {
         <div className="w-80 md:w-96 bg-white dark:bg-[#0B101D] border-r border-slate-200 dark:border-white/[0.08] flex flex-col shrink-0">
           {/* Search & Filters */}
           <div className="p-3 border-b border-slate-100 dark:border-white/[0.06] space-y-2.5">
+            {/* Free Monthly Messages Meter (Meta Free Tier) */}
+            <div className="p-2.5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-slate-100/40 dark:to-white/[0.02] border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-between gap-2 shadow-2xs">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0">
+                  🎁
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                      {freeTier.remaining.toLocaleString()} / {freeTier.total.toLocaleString()} Free Left
+                    </span>
+                    <span className="text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                      {freeTier.currentMonth}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                    Drops to 0 • Resets 1st of {freeTier.nextMonth}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right shrink-0">
+                <span className="text-[9.5px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-900 border border-emerald-500/30 px-1.5 py-0.5 rounded shadow-2xs">
+                  ₹0 Fee
+                </span>
+              </div>
+            </div>
+
             <div className="relative">
               <input
                 type="text"
@@ -805,8 +897,14 @@ export default function LiveInboxPage() {
                   )}
                 </div>
 
-                <div className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-1.5 shrink-0">
-                  <span>Customer receives reply from this verified business line</span>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2 shrink-0">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-bold text-[10.5px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    ₹0.00 Meta Fee
+                  </span>
+                  <span className="text-slate-400 dark:text-slate-500 text-[10.5px] hidden sm:inline">
+                    • {freeTier.remaining.toLocaleString()} free {freeTier.currentMonth} replies remaining
+                  </span>
                 </div>
               </div>
 

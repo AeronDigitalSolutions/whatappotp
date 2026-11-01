@@ -5169,7 +5169,40 @@ fastify.get("/v1/inbox/conversations/:projectId", async (request: any, reply) =>
       return { ...c, tags };
     });
 
-    return reply.send({ success: true, conversations: parsed });
+    // Compute current month's free tier usage (1,000 free service messages/month by Meta)
+    const now = new Date();
+    const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
+    const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0));
+
+    const countRows: any = await prisma.$queryRawUnsafe(`
+      SELECT COUNT(*) as count FROM ChatMessage
+      WHERE projectId = ? AND direction = 'OUTBOUND' AND createdAt >= ?
+    `, projectId, startOfMonth).catch(() => [{ count: 0 }]);
+
+    const usedCount = Number(countRows?.[0]?.count || 0);
+    const freeTierLimit = 1000;
+    const remainingCount = Math.max(0, freeTierLimit - usedCount);
+
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const currentMonthName = monthNames[now.getUTCMonth()];
+    const nextMonthName = monthNames[(now.getUTCMonth() + 1) % 12];
+
+    return reply.send({
+      success: true,
+      conversations: parsed,
+      freeTier: {
+        total: freeTierLimit,
+        used: usedCount,
+        remaining: remainingCount,
+        currentMonth: currentMonthName,
+        nextMonth: nextMonthName,
+        nextResetDate: nextMonth.toISOString(),
+        resetsInDays: Math.ceil((nextMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      }
+    });
   } catch (error: any) {
     fastify.log.error(error);
     return reply.status(500).send({ error: "Failed to fetch conversations" });

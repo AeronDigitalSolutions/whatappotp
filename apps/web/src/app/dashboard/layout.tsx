@@ -224,7 +224,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 <InboxIcon className={iconClass("/dashboard/inbox")} />
                 <span className="truncate">Live Chat Inbox</span>
               </div>
-              <span className="text-[10px] bg-white/15 text-white dark:bg-emerald-500/15 dark:text-emerald-300 border border-white/20 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold shadow-xs">2-Way</span>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-100 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-400/30 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-bold shadow-xs flex items-center gap-1">1,000 Free</span>
             </Link>
           )}
           {hasAccess("automations") && (
