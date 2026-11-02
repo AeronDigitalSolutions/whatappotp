@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
 import Loader from "@/components/Loader";
@@ -23,8 +24,13 @@ export default function TokenUpdateModal({
   const [loading, setLoading] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"quick" | "permanent">("permanent");
   const [localError, setLocalError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,10 +75,13 @@ export default function TokenUpdateModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div
-        className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden flex flex-col max-h-[90vh]"
+        className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden flex flex-col max-h-[90vh] my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -256,6 +265,7 @@ export default function TokenUpdateModal({
           </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

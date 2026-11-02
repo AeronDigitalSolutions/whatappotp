@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { getApiUrl } from "@/lib/api";
 import { useModal } from "@/context/ModalContext";
@@ -64,6 +65,7 @@ export default function TemplatesPage() {
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>("ALL");
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [search, setSearch] = useState("");
@@ -491,6 +493,7 @@ export default function TemplatesPage() {
   };
 
   useEffect(() => {
+    setMounted(true);
     loadBusinesses();
   }, []);
 
@@ -1735,14 +1738,14 @@ export default function TemplatesPage() {
       )}
 
       {/* CREATE TEMPLATE STUDIO MODAL (Two-Column Designer with Ultra-Realistic iPhone) */}
-      {showCreateModal && (
+      {mounted && showCreateModal && createPortal(
         <div
-          className="fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 z-50 overflow-hidden"
+          className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
           onClick={() => setShowCreateModal(false)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-5xl w-full shadow-2xl flex flex-col max-h-[92vh] border border-slate-200 dark:border-white/10 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-5xl w-full shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[88vh] border border-slate-200 dark:border-white/10 overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto"
           >
             {/* Modal Header */}
             <div className="shrink-0 flex justify-between items-center px-6 py-4 border-b border-slate-100 dark:border-white/10 bg-white dark:bg-[#0B101D] z-10">
@@ -2303,7 +2306,8 @@ export default function TemplatesPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Token Update Modal */}

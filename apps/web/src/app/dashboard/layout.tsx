@@ -574,7 +574,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Dynamic Route Protection Gate */}
-        <main className="flex-1 p-4 sm:p-8 overflow-auto relative z-10">
+        <main className="flex-1 p-4 sm:p-8 overflow-auto relative">
           {!isCurrentPathAllowed ? (
             <div className="max-w-xl mx-auto mt-12 bg-[#0a0f1d]/90 backdrop-blur-xl rounded-3xl border border-rose-500/30 p-8 shadow-[0_8px_32px_rgba(244,63,94,0.15)] text-center space-y-4">
               <div className="w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-3xl mx-auto border border-rose-500/20">
