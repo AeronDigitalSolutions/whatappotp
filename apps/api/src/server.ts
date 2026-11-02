@@ -2031,7 +2031,26 @@ fastify.post("/v1/meta/templates/:projectId", async (request: any, reply) => {
 
     const data = await res.json();
     if (!res.ok) {
-      return reply.status(400).send({ success: false, error: data.error?.message || "Meta rejected template creation", wabaId });
+      let friendlyError = data.error?.error_user_msg || data.error?.error_data?.details || data.error?.message || "Meta rejected template creation";
+      
+      const subcode = data.error?.error_subcode;
+      if (subcode === 2388072) {
+        friendlyError = "Meta Header Format Error: Text headers cannot contain emojis (e.g. 🎉), asterisks (*), formatting, or line breaks. Emojis can only be placed in the message body.";
+      } else if (subcode === 2388060) {
+        friendlyError = "Meta Button Format Error: Button text cannot contain emojis, symbols, newlines, or formatting characters. Keep button labels concise and plain text (e.g. 'View Order').";
+      } else if (subcode === 2388043) {
+        friendlyError = `Template Name Conflict: A template named "${name}" already exists on this WhatsApp account in language "${language}". Please choose a different template name.`;
+      } else if (subcode === 2388040) {
+        friendlyError = "Template Variable Sample Mismatch: Every variable bracket like {{1}}, {{2}} in your message body must have a non-empty sample value.";
+      }
+
+      fastify.log.warn({ metaTemplateError: data.error, payload }, "Meta rejected template creation");
+      return reply.status(400).send({
+        success: false,
+        error: friendlyError,
+        rawMetaError: data.error,
+        wabaId
+      });
     }
 
     return reply.send({ success: true, template: data, wabaId });

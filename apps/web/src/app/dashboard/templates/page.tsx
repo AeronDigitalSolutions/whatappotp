@@ -292,11 +292,11 @@ export default function TemplatesPage() {
         category: "UTILITY",
         language: "en_US",
         headerType: "TEXT",
-        headerText: "Order Confirmed! 🎉",
-        bodyText: "Hello {{Customer_Name}}, thank you for shopping with us! Your order {{Order_ID}} for {{Product_Name}} worth {{Total_Amount}} has been confirmed.",
+        headerText: "Order Confirmed",
+        bodyText: "Hello {{Customer_Name}}, thank you for shopping with us! 🎉 Your order {{Order_ID}} for {{Product_Name}} worth {{Total_Amount}} has been confirmed.",
         footerText: "Fast shipping via Digital Beings",
         buttonType: "URL",
-        buttonText: "View Order 📦",
+        buttonText: "View Order",
         buttonUrl: "https://digitalbeings.in/track"
       });
       setVariableDefs({
@@ -311,11 +311,11 @@ export default function TemplatesPage() {
         category: "MARKETING",
         language: "en_US",
         headerType: "TEXT",
-        headerText: "You left items in your cart! 🛒",
-        bodyText: "Hi {{Customer_Name}}, we noticed you left {{Product_Name}} in your cart! Complete your purchase today and get {{Offer_Discount}} with code {{Coupon_Code}}.",
+        headerText: "Items Waiting in Your Cart",
+        bodyText: "Hi {{Customer_Name}}, we noticed you left {{Product_Name}} in your cart! 🛒 Complete your purchase today and get {{Offer_Discount}} with code {{Coupon_Code}}.",
         footerText: "Limited time offer. Reply STOP to opt out.",
         buttonType: "URL",
-        buttonText: "Complete Purchase ➔",
+        buttonText: "Complete Purchase",
         buttonUrl: "https://digitalbeings.in/checkout"
       });
       setVariableDefs({
@@ -330,11 +330,11 @@ export default function TemplatesPage() {
         category: "UTILITY",
         language: "en_US",
         headerType: "TEXT",
-        headerText: "Out for Delivery Today! 🚚",
-        bodyText: "Hello {{Customer_Name}}, your shipment {{Order_ID}} is out for delivery with our delivery partner {{Rider_Name}} to {{Delivery_Address}}.",
+        headerText: "Out for Delivery Today",
+        bodyText: "Hello {{Customer_Name}}, your shipment {{Order_ID}} is out for delivery with our delivery partner {{Rider_Name}} to {{Delivery_Address}}. 🚚",
         footerText: "Contact driver via the tracking link below.",
         buttonType: "URL",
-        buttonText: "Live GPS Tracking 📍",
+        buttonText: "Live GPS Tracking",
         buttonUrl: "https://digitalbeings.in/track"
       });
       setVariableDefs({
@@ -603,12 +603,20 @@ export default function TemplatesPage() {
 
     const components: any[] = [];
 
+    // Helper to sanitize emojis and illegal characters from Meta header and button texts (Meta rule)
+    const sanitizeNonBodyText = (str: string) => {
+      return (str || "")
+        .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}*~_➔→←\n\r]/gu, "")
+        .trim();
+    };
+
     // Header
     if (formData.headerType === "TEXT" && formData.headerText) {
+      const cleanHeaderText = sanitizeNonBodyText(formData.headerText);
       components.push({
         type: "HEADER",
         format: "TEXT",
-        text: formData.headerText
+        text: cleanHeaderText || formData.headerText.trim()
       });
     } else if (formData.headerType === "IMAGE") {
       components.push({
@@ -676,23 +684,25 @@ export default function TemplatesPage() {
 
       // Buttons
       if (formData.buttonType === "URL" && formData.buttonText && formData.buttonUrl) {
+        const cleanBtnText = sanitizeNonBodyText(formData.buttonText) || formData.buttonText.trim();
         components.push({
           type: "BUTTONS",
           buttons: [
             {
               type: "URL",
-              text: formData.buttonText,
-              url: formData.buttonUrl
+              text: cleanBtnText.slice(0, 25),
+              url: formData.buttonUrl.trim()
             }
           ]
         });
       } else if (formData.buttonType === "QUICK_REPLY" && formData.buttonText) {
+        const cleanBtnText = sanitizeNonBodyText(formData.buttonText) || formData.buttonText.trim();
         components.push({
           type: "BUTTONS",
           buttons: [
             {
               type: "QUICK_REPLY",
-              text: formData.buttonText
+              text: cleanBtnText.slice(0, 25)
             }
           ]
         });
@@ -1922,7 +1932,14 @@ export default function TemplatesPage() {
                           </div>
                           {formData.headerType === "TEXT" && (
                             <div>
-                              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1">Header Text</label>
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                                  Header Text
+                                </label>
+                                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
+                                  Plain text only (no emojis in header)
+                                </span>
+                              </div>
                               <input
                                 type="text"
                                 placeholder="e.g. Order Update"
@@ -2129,9 +2146,14 @@ export default function TemplatesPage() {
                           </div>
                           {formData.buttonType !== "NONE" && (
                             <div>
-                              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1">
-                                Button Label
-                              </label>
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                                  Button Label
+                                </label>
+                                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                                  Plain text only (no emojis, max 25 chars)
+                                </span>
+                              </div>
                               <input
                                 type="text"
                                 placeholder="e.g. Track Order"
