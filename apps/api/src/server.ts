@@ -4041,12 +4041,53 @@ fastify.post("/v1/otp/verify", async (request: any, reply) => {
 // GET /v1/otp/logs/:projectId - Real-time OTP delivery & verification logs
 fastify.get("/v1/otp/logs/:projectId", async (request: any, reply) => {
   const { projectId } = request.params;
-  const { status, limit = 100 } = request.query || {};
+  const { status, purpose, startDate, endDate, limit = 500 } = request.query || {};
 
   try {
     const whereClause: any = { projectId };
+    const conditions: any[] = [];
+
     if (status && status !== "ALL") {
-      whereClause.status = status.toLowerCase();
+      conditions.push({ status: String(status).toLowerCase() });
+    }
+
+    if (purpose && purpose !== "ALL") {
+      const pUpper = String(purpose).toUpperCase();
+      if (pUpper === "AUTHENTICATION") {
+        conditions.push({
+          OR: [
+            { purpose: "AUTHENTICATION" },
+            { purpose: "authentication" },
+            { purpose: null }
+          ]
+        });
+      } else {
+        conditions.push({
+          OR: [
+            { purpose: pUpper },
+            { purpose: pUpper.toLowerCase() }
+          ]
+        });
+      }
+    }
+
+    if (startDate || endDate) {
+      const dateCond: any = {};
+      if (startDate) {
+        const s = new Date(startDate);
+        if (!isNaN(s.getTime())) dateCond.gte = s;
+      }
+      if (endDate) {
+        const e = new Date(endDate);
+        if (!isNaN(e.getTime())) dateCond.lte = e;
+      }
+      if (Object.keys(dateCond).length > 0) {
+        conditions.push({ createdAt: dateCond });
+      }
+    }
+
+    if (conditions.length > 0) {
+      whereClause.AND = conditions;
     }
 
     const requests = await prisma.otpRequest.findMany({
@@ -4057,7 +4098,7 @@ fastify.get("/v1/otp/logs/:projectId", async (request: any, reply) => {
         }
       },
       orderBy: { createdAt: "desc" },
-      take: Math.min(200, Number(limit) || 100)
+      take: Math.min(1000, Number(limit) || 500)
     });
 
     const logs = requests.map(r => ({
