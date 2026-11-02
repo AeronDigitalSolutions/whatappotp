@@ -236,10 +236,6 @@ export default function NumbersPage() {
     }
   };
 
-  // Group numbers matching each service category
-  const authNumbers = numbers.filter((n) => n.service?.includes("AUTHENTICATION"));
-  const marketingNumbers = numbers.filter((n) => n.service?.includes("MARKETING"));
-  const utilityNumbers = numbers.filter((n) => n.service?.includes("UTILITY"));
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
@@ -287,109 +283,7 @@ export default function NumbersPage() {
         </div>
       )}
 
-      {/* Services Overview Cards */}
-      {/* Services Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-        {/* Authentication Card */}
-        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition flex flex-col justify-between backdrop-blur-xl">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 text-xs shrink-0 font-bold">
-                🔑
-              </div>
-              <div>
-                <span className="text-xs font-bold text-slate-900 dark:text-slate-200">Authentication / OTP</span>
-                <p className="text-[10px] text-slate-700 dark:text-slate-400 font-medium">High-priority 2FA &amp; login codes</p>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.06]">
-            {authNumbers.length > 0 ? (
-              <div className="space-y-1.5">
-                {authNumbers.map((n) => (
-                  <div key={n.id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      <span className="font-bold text-xs text-slate-900 dark:text-slate-100 font-mono">{n.displayPhone}</span>
-                    </div>
-                    {n.isDefault ? (
-                      <span className="text-[10px] bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 px-1.5 py-0.5 rounded font-bold">Primary</span>
-                    ) : (
-                      <span className="text-[10px] bg-amber-50 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 px-1.5 py-0.5 rounded font-medium">Assigned</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 italic">No number assigned</span>
-            )}
-          </div>
-        </div>
 
-        {/* Marketing Card */}
-        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition flex flex-col justify-between backdrop-blur-xl">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-200/80 dark:border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs shrink-0 font-bold">
-                📢
-              </div>
-              <div>
-                <span className="text-xs font-bold text-slate-900 dark:text-slate-200">Marketing &amp; Promo</span>
-                <p className="text-[10px] text-slate-700 dark:text-slate-400 font-medium">Campaigns, offers &amp; announcements</p>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.06]">
-            {marketingNumbers.length > 0 ? (
-              <div className="space-y-1.5">
-                {marketingNumbers.map((n) => (
-                  <div key={n.id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                      <span className="font-bold text-xs text-slate-900 dark:text-slate-100 font-mono">{n.displayPhone}</span>
-                    </div>
-                    <span className="text-[10px] bg-purple-50 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 px-1.5 py-0.5 rounded font-bold">Active</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 italic">No number assigned</span>
-            )}
-          </div>
-        </div>
-
-        {/* Utility Card */}
-        <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/[0.08] shadow-2xs hover:border-slate-300 dark:hover:border-white/20 transition flex flex-col justify-between backdrop-blur-xl">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs shrink-0 font-bold">
-                📦
-              </div>
-              <div>
-                <span className="text-xs font-bold text-slate-900 dark:text-slate-200">Order Updates &amp; Utility</span>
-                <p className="text-[10px] text-slate-700 dark:text-slate-400 font-medium">Order alerts, invoices &amp; tracking</p>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.06]">
-            {utilityNumbers.length > 0 ? (
-              <div className="space-y-1.5">
-                {utilityNumbers.map((n) => (
-                  <div key={n.id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                      <span className="font-bold text-xs text-slate-900 dark:text-slate-100 font-mono">{n.displayPhone}</span>
-                    </div>
-                    <span className="text-[10px] bg-blue-50 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 px-1.5 py-0.5 rounded font-bold">Active</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 italic">No number assigned</span>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* Connected WhatsApp Numbers Table */}
       <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-xl shadow-sm overflow-hidden backdrop-blur-xl">
