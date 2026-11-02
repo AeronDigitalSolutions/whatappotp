@@ -948,10 +948,33 @@ html:not(.dark) .bg-slate-950 .text-slate-400 {
 .workflow-step-backward {
   animation: workflowSlideLeft 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
 .workflow-instruction-fade {
   animation: workflowFade 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+/* ========================================================
+   RAZORPAY STANDARD CHECKOUT MODAL STYLING & BACKDROP FIX
+   ======================================================== */
+.razorpay-container {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 999999 !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  color-scheme: light !important;
+}
+
+.razorpay-container * {
+  color-scheme: light !important;
+}
+
+iframe.razorpay-checkout-frame {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
 
 
 

@@ -166,7 +166,10 @@ export async function startSubscriptionCheckout({
         email: userEmail || "billing@digitalbeings.in",
         contact: ""
       },
-      theme: { color: "#154336" }
+      theme: { 
+        color: "#154336",
+        backdrop_color: "#070b14"
+      }
     };
 
     const rzp = new (window as any).Razorpay(options);

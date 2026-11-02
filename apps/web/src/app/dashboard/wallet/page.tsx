@@ -330,12 +330,27 @@ export default function WalletPage() {
           email: user?.email || "billing@digitalbeings.in",
           contact: ""
         },
-        theme: { color: "#059669" }
+        modal: {
+          backdropclose: true,
+          escape: true,
+          confirm_close: true,
+          animation: true,
+          ondismiss: function () {
+            setProcessingPayment(false);
+            setShowCartModal(true);
+          }
+        },
+        theme: {
+          color: "#059669",
+          backdrop_color: "#070b14"
+        }
       };
 
+      setShowCartModal(false);
       const rzp = new (window as any).Razorpay(options);
       rzp.on("payment.failed", function (response: any) {
         showError(response.error?.description || "Payment was cancelled or declined.", "Payment Failed");
+        setShowCartModal(true);
       });
       rzp.open();
     } catch (err: any) {
