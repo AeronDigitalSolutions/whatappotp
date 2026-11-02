@@ -14,6 +14,7 @@ import {
   releaseReservation, 
   creditWalletWithGstInvoice, 
   processSubscriptionPayment,
+  processBundlePayment,
   recordAdminAdjustment, 
   reconcileStaleReservations,
   refundFailedMessageDelivery 
@@ -2393,7 +2394,8 @@ fastify.post("/v1/billing/order", async (request: any, reply) => {
     organizationId, 
     type = "WALLET_RECHARGE", 
     planId, 
-    extraSeatsCount 
+    extraSeatsCount,
+    rechargeAmount
   } = request.body || {};
   const rzpKeyId = process.env.RAZORPAY_KEY_ID || "rzp_live_Tl4uH3gYo8IWeO";
   const rzpKeySecret = process.env.RAZORPAY_KEY_SECRET || "pD9rgL4P76hS9ECynnKSn75c";
@@ -2406,7 +2408,34 @@ fastify.post("/v1/billing/order", async (request: any, reply) => {
     const orgId = organizationId || "demo-org-id";
     let cleanBaseAmount = 100;
 
-    if (type === "SUBSCRIPTION") {
+    if (type === "BUNDLE") {
+      const rAmount = Number(rechargeAmount) || 0;
+      const sCount = Number(extraSeatsCount) || 0;
+      let planBase = 0;
+      if (planId === "TRIAL") {
+        const existingTrial = await prisma.invoice.findFirst({
+          where: { organizationId: orgId, baseAmount: 500 }
+        });
+        const currentOrg = await prisma.organization.findUnique({ where: { id: orgId } });
+        if (existingTrial || (currentOrg?.plan === "TRIAL" && currentOrg?.planExpiresAt)) {
+          return reply.status(400).send({
+            error: "The 30-Day Starter Trial (₹500 + GST) is an introductory plan for first-time evaluation only. Your workspace has already utilized this trial. Please upgrade to the Basic Plan (₹1,000 + GST) or Professional Plan (₹2,500 + GST) monthly subscription to continue."
+          });
+        }
+        planBase = 500;
+      } else if (planId === "PROFESSIONAL") {
+        planBase = 2500;
+      } else if (planId === "ENTERPRISE" || planId === "CUSTOM") {
+        planBase = 5000;
+      } else if (planId === "BASIC") {
+        planBase = 1000;
+      }
+
+      cleanBaseAmount = (rAmount > 0 ? rAmount : 0) + (sCount > 0 ? sCount * 500 : 0) + planBase;
+      if (cleanBaseAmount <= 0) {
+        return reply.status(400).send({ error: "Please select at least one item (Wallet Recharge, Seats, or Subscription Plan) to proceed." });
+      }
+    } else if (type === "SUBSCRIPTION") {
       if (planId === "TRIAL") {
         // Enforce that TRIAL is strictly a one-time introductory plan per organization
         const existingTrial = await prisma.invoice.findFirst({
@@ -2470,6 +2499,7 @@ fastify.post("/v1/billing/order", async (request: any, reply) => {
           orderType: type,
           planId: planId || "",
           extraSeatsCount: String(extraSeatsCount || 0),
+          rechargeAmount: String(rechargeAmount || 0),
           baseAmount: String(gst.baseAmount),
           taxAmount: String(gst.totalTaxAmount),
           totalAmount: String(gst.totalPayableAmount),
@@ -2491,6 +2521,7 @@ fastify.post("/v1/billing/order", async (request: any, reply) => {
       type,
       planId,
       extraSeatsCount,
+      rechargeAmount,
       baseAmount: gst.baseAmount,
       taxAmount: gst.totalTaxAmount,
       totalAmount: gst.totalPayableAmount,
@@ -2516,7 +2547,8 @@ fastify.post("/v1/billing/verify", async (request: any, reply) => {
     customerBilling,
     type = "WALLET_RECHARGE",
     planId,
-    extraSeatsCount
+    extraSeatsCount,
+    rechargeAmount
   } = request.body || {};
 
   const rzpKeySecret = process.env.RAZORPAY_KEY_SECRET || "pD9rgL4P76hS9ECynnKSn75c";
@@ -2537,6 +2569,23 @@ fastify.post("/v1/billing/verify", async (request: any, reply) => {
   const cleanBase = Number(baseAmount || amount) || 0;
 
   try {
+    if (type === "BUNDLE") {
+      const result = await processBundlePayment({
+        organizationId: orgId,
+        rechargeAmount: Number(rechargeAmount) || 0,
+        planId: planId || undefined,
+        extraSeatsCount: Number(extraSeatsCount) || 0,
+        baseAmount: cleanBase,
+        paymentId: razorpay_payment_id,
+        orderId: razorpay_order_id,
+        customerBilling
+      });
+
+      return reply.send({
+        ...result
+      });
+    }
+
     if (type === "SUBSCRIPTION" || type === "ADDON_SEAT" || type === "ADDON_OBA") {
       const result = await processSubscriptionPayment({
         organizationId: orgId,

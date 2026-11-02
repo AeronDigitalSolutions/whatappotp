@@ -663,6 +663,216 @@ export async function processSubscriptionPayment(params: SubscriptionPaymentPara
   }, { timeout: 30000, maxWait: 15000 });
 }
 
+export interface BundlePaymentParams {
+  organizationId: string;
+  rechargeAmount?: number;
+  planId?: "TRIAL" | "BASIC" | "PROFESSIONAL" | "ENTERPRISE" | "CUSTOM" | string;
+  extraSeatsCount?: number;
+  baseAmount: number;
+  paymentId: string;
+  orderId: string;
+  customerBilling?: any;
+}
+
+/**
+ * Atomic bundled purchase handler:
+ * Processes plan switch/upgrade, team seat additions, and wallet credits in one transaction,
+ * generating a single consolidated GST Tax Invoice.
+ */
+export async function processBundlePayment(params: BundlePaymentParams) {
+  const { organizationId, rechargeAmount = 0, planId, extraSeatsCount = 0, baseAmount, paymentId, orderId, customerBilling } = params;
+
+  return await prisma.$transaction(async (tx) => {
+    // 1. Idempotency Check
+    const existingInvoice = await tx.invoice.findFirst({ where: { paymentReference: paymentId } });
+    if (existingInvoice) {
+      return {
+        status: "ALREADY_PROCESSED",
+        success: true,
+        invoice: existingInvoice
+      };
+    }
+
+    // 2. Fetch or update billing profile
+    if (customerBilling) {
+      await tx.customerBillingProfile.upsert({
+        where: { organizationId },
+        update: {
+          legalBusinessName: customerBilling.legalBusinessName || undefined,
+          gstin: customerBilling.gstin || undefined,
+          billingAddress: customerBilling.billingAddress || undefined,
+          city: customerBilling.city || undefined,
+          state: customerBilling.state || undefined,
+          stateCode: customerBilling.stateCode || undefined,
+          country: customerBilling.country || "India"
+        },
+        create: {
+          id: crypto.randomUUID(),
+          organizationId,
+          legalBusinessName: customerBilling.legalBusinessName || null,
+          gstin: customerBilling.gstin || null,
+          billingAddress: customerBilling.billingAddress || null,
+          city: customerBilling.city || null,
+          state: customerBilling.state || null,
+          stateCode: customerBilling.stateCode || "27",
+          country: customerBilling.country || "India"
+        }
+      });
+    }
+
+    const profile = await tx.customerBillingProfile.findUnique({ where: { organizationId } });
+    const taxConfig = await tx.taxConfiguration.findFirst();
+
+    const supplierState = taxConfig?.supplierStateCode || "27";
+    const customerState = profile?.stateCode || "27";
+    const taxRate = Number(taxConfig?.taxRatePercent || 18.00);
+
+    // 3. Calculate GST breakdown
+    const gstBreakdown = calculateGstBreakdown(
+      baseAmount,
+      customerState,
+      supplierState,
+      taxRate,
+      profile?.taxExempt || false
+    );
+
+    // 4. Generate Tax Invoice Sequence
+    const now = new Date();
+    const yearMonth = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const invoiceCount = await tx.invoice.count();
+    const invoiceNumber = `INV-DB-${yearMonth}-${String(invoiceCount + 1).padStart(4, "0")}`;
+
+    const lineItems: string[] = [];
+    if (planId) lineItems.push(`Subscription: ${planId} Plan (30 Days)`);
+    if (extraSeatsCount > 0) lineItems.push(`Add-on: ${extraSeatsCount} Team Seat(s)`);
+    if (rechargeAmount > 0) lineItems.push(`Wallet Credit Top-up: ₹${rechargeAmount.toFixed(2)}`);
+
+    const invoiceDescription = lineItems.length > 0 ? lineItems.join(" + ") : `Digital Beings Platform Order`;
+
+    const invoice = await tx.invoice.create({
+      data: {
+        id: crypto.randomUUID(),
+        organizationId,
+        invoiceNumber,
+        type: "TAX_INVOICE",
+        paymentReference: paymentId,
+        orderId,
+        baseAmount: gstBreakdown.baseAmount,
+        gstRatePercent: gstBreakdown.gstRatePercent,
+        cgstAmount: gstBreakdown.cgstAmount,
+        sgstAmount: gstBreakdown.sgstAmount,
+        igstAmount: gstBreakdown.igstAmount,
+        totalTaxAmount: gstBreakdown.totalTaxAmount,
+        totalAmount: gstBreakdown.totalPayableAmount,
+        customerGstin: profile?.gstin || null,
+        customerBusinessName: profile?.legalBusinessName || null,
+        customerAddress: profile?.billingAddress || null,
+        customerState: profile?.state || null,
+        customerStateCode: profile?.stateCode || null,
+        status: "PAID"
+      }
+    });
+
+    const org = await tx.organization.findUnique({ where: { id: organizationId } });
+    if (!org) throw new Error(`Organization ${organizationId} not found`);
+
+    // 5. If Plan selected, update Organization subscription
+    let bonusFuel = 0;
+    if (planId) {
+      const seats = planId === "TRIAL" ? 1 : planId === "BASIC" ? 4 : (planId === "ENTERPRISE" || planId === "CUSTOM") ? 99 : 6;
+      const currentExpiry = org.planExpiresAt && new Date(org.planExpiresAt) > now ? new Date(org.planExpiresAt) : now;
+      const newExpiry = new Date(currentExpiry.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+      await tx.organization.update({
+        where: { id: organizationId },
+        data: {
+          plan: planId,
+          seatsAllowed: seats,
+          planExpiresAt: newExpiry,
+          obaIncluded: (planId === "PROFESSIONAL" || planId === "ENTERPRISE" || planId === "CUSTOM") ? true : org.obaIncluded
+        }
+      });
+
+      bonusFuel = planId === "BASIC" ? 50.0 : planId === "PROFESSIONAL" ? 100.0 : (planId === "ENTERPRISE" || planId === "CUSTOM") ? 250.0 : 0.0;
+    }
+
+    // 6. If Extra Seats selected, increment extraSeats
+    if (extraSeatsCount > 0) {
+      await tx.organization.update({
+        where: { id: organizationId },
+        data: {
+          extraSeats: { increment: extraSeatsCount }
+        }
+      });
+    }
+
+    // 7. If Recharge Amount > 0 or Bonus Fuel > 0, credit wallet balance
+    const totalCreditToAdd = (rechargeAmount > 0 ? rechargeAmount : 0) + bonusFuel;
+    if (totalCreditToAdd > 0) {
+      const wallet = await tx.wallet.upsert({
+        where: { organizationId },
+        update: { balance: { increment: totalCreditToAdd } },
+        create: {
+          id: crypto.randomUUID(),
+          organizationId,
+          balance: totalCreditToAdd,
+          reservedBalance: 0.0,
+          currency: "INR"
+        }
+      });
+
+      const balanceBefore = Number(wallet.balance) - totalCreditToAdd;
+      const balanceAfter = Number(wallet.balance);
+
+      await tx.walletLedgerEntry.create({
+        data: {
+          id: crypto.randomUUID(),
+          walletId: wallet.id,
+          entryType: "CREDIT_RECHARGE",
+          amount: totalCreditToAdd,
+          balanceBefore,
+          balanceAfter,
+          reservedBefore: Number(wallet.reservedBalance),
+          reservedAfter: Number(wallet.reservedBalance),
+          currency: "INR",
+          referenceType: "PAYMENT",
+          referenceId: paymentId,
+          description: `Wallet credit +₹${totalCreditToAdd.toFixed(2)} (${rechargeAmount > 0 ? `Recharge: ₹${rechargeAmount.toFixed(2)}` : ""}${bonusFuel > 0 ? ` Bonus: ₹${bonusFuel.toFixed(2)}` : ""}) [Invoice: ${invoiceNumber}]`,
+          metadata: {
+            invoiceId: invoice.id,
+            invoiceNumber,
+            orderId,
+            planId,
+            rechargeAmount,
+            bonusFuel,
+            totalPaidAtGateway: gstBreakdown.totalPayableAmount
+          },
+          idempotencyKey: `bundle_${paymentId}`
+        }
+      });
+
+      await tx.walletTransaction.create({
+        data: {
+          id: crypto.randomUUID(),
+          walletId: wallet.id,
+          amount: totalCreditToAdd,
+          type: "credit",
+          referenceId: paymentId,
+          description: `Combined Checkout Payment (${invoiceNumber})`
+        }
+      });
+    }
+
+    return {
+      status: "SUCCESS",
+      success: true,
+      type: "BUNDLE",
+      invoice,
+      description: invoiceDescription
+    };
+  }, { timeout: 30000, maxWait: 15000 });
+}
+
 /**
  * Administrative balance adjustment with mandatory audit reason.
  * Records compensating ledger entry rather than mutating historical records.

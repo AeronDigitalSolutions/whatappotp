@@ -88,19 +88,24 @@ export default function WalletPage() {
   const { showSuccess, showError, showWarning } = useModal();
   const [activeTab, setActiveTab] = useState<"overview" | "rates" | "invoices" | "ledger">("overview");
 
-  // Wallet State
+  // Wallet Balance State
   const [balance, setBalance] = useState<number>(0);
   const [reservedBalance, setReservedBalance] = useState<number>(0);
   const [availableBalance, setAvailableBalance] = useState<number>(0);
-  const [loading, setLoading] = useState(false);
-  const [amount, setAmount] = useState<number>(1000); // Base amount in INR
-
-  // Subscription State
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  const [showSeatModal, setShowSeatModal] = useState(false);
+
+  // User Purchase Intention / Action Cart State
+  const [rechargeActive, setRechargeActive] = useState<boolean>(true);
+  const [amount, setAmount] = useState<number>(1000); // Base message credits
+  const [customAmountInput, setCustomAmountInput] = useState<string>("1000");
+
+  const [seatsActive, setSeatsActive] = useState<boolean>(false);
   const [extraSeatCount, setExtraSeatCount] = useState<number>(1);
-  const [subscribing, setSubscribing] = useState(false);
+
+  const [planActive, setPlanActive] = useState<boolean>(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<"TRIAL" | "BASIC" | "PROFESSIONAL">("BASIC");
+
+  const [processingPayment, setProcessingPayment] = useState<boolean>(false);
 
   // Data lists
   const [rates, setRates] = useState<RateRule[]>([]);
@@ -126,11 +131,23 @@ export default function WalletPage() {
     ? (localStorage.getItem("organizationId") || user?.organizationId || user?.orgId || user?.projects?.[0]?.organizationId || "")
     : "";
 
-  // Real-time GST calculation
+  // Pricing calculations
+  const planPriceMap: Record<string, number> = {
+    TRIAL: 500,
+    BASIC: 1000,
+    PROFESSIONAL: 2500
+  };
+
+  const currentRechargeBase = rechargeActive ? (amount >= 100 ? amount : 0) : 0;
+  const currentSeatsBase = seatsActive ? (Math.max(1, extraSeatCount) * 500) : 0;
+  const currentPlanBase = planActive ? (planPriceMap[selectedPlanId] || 1000) : 0;
+
+  const totalBaseAmount = currentRechargeBase + currentSeatsBase + currentPlanBase;
   const gstRate = 18;
   const isOutOfState = billingProfile.stateCode !== "27";
-  const taxAmount = Math.round((amount * gstRate) / 100 * 100) / 100;
-  const totalPayable = Math.round((amount + taxAmount) * 100) / 100;
+  const taxAmount = Math.round((totalBaseAmount * gstRate) / 100 * 100) / 100;
+  const totalPayable = Math.round((totalBaseAmount + taxAmount) * 100) / 100;
+  const hasItemsSelected = totalBaseAmount > 0;
 
   const loadWalletData = async () => {
     if (!orgId) return;
@@ -153,6 +170,9 @@ export default function WalletPage() {
         }
         if (data.subscription) {
           setSubscription(data.subscription);
+          if (!data.subscription.isActivated) {
+            setPlanActive(true);
+          }
         }
       }
 
@@ -193,56 +213,75 @@ export default function WalletPage() {
     }
   };
 
-  const handleTopUp = async () => {
-    if (!subscription?.isActivated) {
-      showWarning(
-        "To recharge message fuel, you have to take our 30-Day Starter Trial (₹500 + GST) or choose a monthly subscription (₹1,000 or ₹2,500 + GST). Please select a subscription plan below first.",
-        "Subscription Required"
-      );
+  const ensureRazorpayLoaded = async () => {
+    if (typeof (window as any).Razorpay !== "undefined") return;
+    return new Promise<void>((resolve, reject) => {
+      const existingScript = document.querySelector('script[src*="checkout.razorpay.com"]');
+      if (existingScript) {
+        if ((window as any).Razorpay) return resolve();
+        existingScript.addEventListener("load", () => resolve());
+        existingScript.addEventListener("error", () => reject(new Error("Failed to load Razorpay checkout SDK")));
+      } else {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error("Unable to connect to Razorpay payment gateway"));
+        document.body.appendChild(script);
+      }
+    });
+  };
+
+  const handleCombinedCheckout = async () => {
+    if (!hasItemsSelected || totalBaseAmount <= 0) {
+      showWarning("Please select at least one purchase option below to proceed.", "No Option Selected");
       return;
     }
-    if (amount < 100) return showWarning("Minimum wallet recharge base amount is ₹100.", "Minimum Top-up");
 
-    setLoading(true);
+    if (rechargeActive && currentRechargeBase < 100) {
+      showWarning("Minimum wallet recharge base amount is ₹100.", "Minimum Top-up");
+      return;
+    }
+
+    // Subscription requirement check
+    if (rechargeActive && currentRechargeBase > 0 && !subscription?.isActivated && !planActive) {
+      showWarning(
+        "To recharge message fuel, you must have an active subscription or trial. We have automatically activated the Plan tile for you below—please select your plan to checkout together.",
+        "Subscription Required"
+      );
+      setPlanActive(true);
+      return;
+    }
+
+    setProcessingPayment(true);
     try {
-      if (typeof (window as any).Razorpay === "undefined") {
-        await new Promise<void>((resolve, reject) => {
-          const existingScript = document.querySelector('script[src*="checkout.razorpay.com"]');
-          if (existingScript) {
-            existingScript.addEventListener("load", () => resolve());
-            existingScript.addEventListener("error", () => reject(new Error("Failed to load Razorpay checkout SDK")));
-            if ((window as any).Razorpay) return resolve();
-          } else {
-            const script = document.createElement("script");
-            script.src = "https://checkout.razorpay.com/v1/checkout.js";
-            script.async = true;
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error("Unable to connect to Razorpay payment gateway"));
-            document.body.appendChild(script);
-          }
-        });
-      }
+      await ensureRazorpayLoaded();
 
-      // Create Order with base amount + additional GST calculation
+      // Initiate bundled order on backend
       const res = await fetch(`${getApiUrl()}/v1/billing/order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          amount: Math.round(amount), 
+        body: JSON.stringify({
+          type: "BUNDLE",
           organizationId: orgId,
-          customerBilling: billingProfile 
+          rechargeAmount: rechargeActive ? currentRechargeBase : 0,
+          extraSeatsCount: seatsActive ? extraSeatCount : 0,
+          planId: planActive ? selectedPlanId : undefined,
+          customerBilling: billingProfile
         })
       });
       const data = await res.json();
 
-      if (!data.success) throw new Error(data.error || "Failed to initiate payment order");
+      if (!data.success) {
+        throw new Error(data.error || "Failed to create order");
+      }
 
       const options = {
         key: data.keyId || "rzp_live_Tl4uH3gYo8IWeO",
-        amount: data.amount, // Paise (Base + 18% GST)
+        amount: data.amount, // in paise (Base + 18% GST)
         currency: "INR",
         name: "Digital Beings Infotech",
-        description: `Credits: ₹${amount} + 18% GST (Total: ₹${data.orderBreakdown?.totalPayableAmount || totalPayable})`,
+        description: `Order Total: ₹${data.totalAmount || totalPayable} (Base ₹${data.baseAmount} + 18% GST)`,
         image: "/icon.png",
         order_id: data.orderId,
         handler: async function (response: any) {
@@ -254,17 +293,23 @@ export default function WalletPage() {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
-                amount: amount,
+                type: "BUNDLE",
                 organizationId: orgId,
+                rechargeAmount: rechargeActive ? currentRechargeBase : 0,
+                extraSeatsCount: seatsActive ? extraSeatCount : 0,
+                planId: planActive ? selectedPlanId : undefined,
+                baseAmount: data.baseAmount,
                 customerBilling: billingProfile
               })
             });
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
               showSuccess(
-                `Payment received!\n\nSpendable Credits Added: ₹${amount.toFixed(2)}\nTax Invoice Generated: ${verifyData.invoice?.invoiceNumber || "Available in Invoices tab"}\nPayment ID: ${response.razorpay_payment_id}`,
-                "Recharge Successful"
+                `Payment verified!\n\nTax Invoice Generated: ${verifyData.invoice?.invoiceNumber || "Available in Invoices tab"}\nPayment ID: ${response.razorpay_payment_id}\n\nYour account features and credits have been credited instantly.`,
+                "Payment Successful"
               );
+            } else {
+              showError(verifyData.error || "Payment verification encountered an issue", "Verification Notice");
             }
           } catch (vErr) {
             showSuccess(`Payment received! ID: ${response.razorpay_payment_id}`, "Payment Completed");
@@ -285,154 +330,10 @@ export default function WalletPage() {
         showError(response.error?.description || "Payment was cancelled or declined.", "Payment Failed");
       });
       rzp.open();
-
     } catch (err: any) {
       showError("Failed to initiate checkout: " + err.message, "Payment Error");
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePurchaseSubscription = async (planId: "TRIAL" | "BASIC" | "PROFESSIONAL") => {
-    setSubscribing(true);
-    try {
-      if (typeof (window as any).Razorpay === "undefined") {
-        await new Promise<void>((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = "https://checkout.razorpay.com/v1/checkout.js";
-          script.async = true;
-          script.onload = () => resolve();
-          script.onerror = () => reject(new Error("Unable to connect to Razorpay payment gateway"));
-          document.body.appendChild(script);
-        });
-      }
-
-      const res = await fetch(`${getApiUrl()}/v1/billing/order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "SUBSCRIPTION",
-          planId,
-          organizationId: orgId,
-          customerBilling: billingProfile
-        })
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || "Failed to create subscription order");
-
-      const options = {
-        key: data.keyId || "rzp_live_Tl4uH3gYo8IWeO",
-        amount: data.amount,
-        currency: "INR",
-        name: "Digital Beings Infotech",
-        description: `${planId} Plan (Base ₹${data.baseAmount} + 18% GST)`,
-        image: "/icon.png",
-        order_id: data.orderId,
-        handler: async function (response: any) {
-          try {
-            const verifyRes = await fetch(`${getApiUrl()}/v1/billing/verify`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                type: "SUBSCRIPTION",
-                planId,
-                baseAmount: data.baseAmount,
-                organizationId: orgId,
-                customerBilling: billingProfile
-              })
-            });
-            const verifyData = await verifyRes.json();
-            if (verifyData.success) {
-              showSuccess(
-                `Subscribed to ${planId} Plan successfully!\nInvoice Generated: ${verifyData.invoice?.invoiceNumber || "In Invoices tab"}\nPayment ID: ${response.razorpay_payment_id}`,
-                "Subscription Active"
-              );
-              setShowSubscriptionModal(false);
-            }
-          } catch (vErr) {
-            showSuccess(`Payment verified! ID: ${response.razorpay_payment_id}`, "Subscription Active");
-          } finally {
-            loadWalletData();
-          }
-        },
-        prefill: {
-          name: billingProfile.legalBusinessName || user?.name || "Digital Beings Client",
-          email: user?.email || "billing@digitalbeings.in",
-          contact: ""
-        },
-        theme: { color: "#154336" }
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on("payment.failed", function (response: any) {
-        showError(response.error?.description || "Payment was cancelled or declined.", "Payment Failed");
-      });
-      rzp.open();
-    } catch (err: any) {
-      showError("Failed to initiate subscription: " + err.message, "Payment Error");
-    } finally {
-      setSubscribing(false);
-    }
-  };
-
-  const handlePurchaseExtraSeats = async (count: number) => {
-    setSubscribing(true);
-    try {
-      const res = await fetch(`${getApiUrl()}/v1/billing/order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "ADDON_SEAT",
-          extraSeatsCount: count,
-          organizationId: orgId,
-          customerBilling: billingProfile
-        })
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || "Failed to create seat order");
-
-      const options = {
-        key: data.keyId || "rzp_live_Tl4uH3gYo8IWeO",
-        amount: data.amount,
-        currency: "INR",
-        name: "Digital Beings Infotech",
-        description: `Add-on: ${count} Additional Team Seat(s) (₹${data.baseAmount} + 18% GST)`,
-        image: "/icon.png",
-        order_id: data.orderId,
-        handler: async function (response: any) {
-          try {
-            await fetch(`${getApiUrl()}/v1/billing/verify`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                type: "ADDON_SEAT",
-                extraSeatsCount: count,
-                baseAmount: data.baseAmount,
-                organizationId: orgId,
-                customerBilling: billingProfile
-              })
-            });
-            showSuccess(`Added ${count} team seat(s) successfully!`, "Seats Added");
-            setShowSeatModal(false);
-          } finally {
-            loadWalletData();
-          }
-        },
-        theme: { color: "#154336" }
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
-    } catch (err: any) {
-      showError(err.message, "Payment Error");
-    } finally {
-      setSubscribing(false);
+      setProcessingPayment(false);
     }
   };
 
@@ -440,46 +341,145 @@ export default function WalletPage() {
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
-      <div className="max-w-6xl mx-auto space-y-6 pb-16">
-        {/* Top Control Bar with 2D Vector Icons */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200/90 dark:border-white/[0.08]">
-          <div className="flex items-center gap-3.5">
+      {/* FIXED FLOATING TOP-RIGHT CHECKOUT CAPSULE */}
+      <div className="fixed top-24 right-4 sm:right-8 z-40 w-[calc(100%-2rem)] sm:w-88 transition-all duration-300 drop-shadow-2xl">
+        <div className="bg-slate-900/95 dark:bg-[#0B101D]/95 text-white backdrop-blur-2xl border-2 border-slate-700/80 dark:border-white/20 rounded-3xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.4)] space-y-4">
+          {/* Capsule Header */}
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800 dark:border-white/10">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-200">
+                Payment Summary
+              </span>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+              SAC: 998313
+            </span>
+          </div>
+
+          {/* Itemized Lines */}
+          <div className="space-y-2 text-xs">
+            {hasItemsSelected ? (
+              <>
+                {rechargeActive && currentRechargeBase > 0 && (
+                  <div className="flex items-center justify-between text-slate-300">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <span>💬</span> Message Fuel Credits
+                    </span>
+                    <span className="font-mono font-bold text-emerald-400">₹{currentRechargeBase.toFixed(2)}</span>
+                  </div>
+                )}
+                {seatsActive && currentSeatsBase > 0 && (
+                  <div className="flex items-center justify-between text-slate-300">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <span>👥</span> +{extraSeatCount} Extra Team Seat{extraSeatCount > 1 ? "s" : ""}
+                    </span>
+                    <span className="font-mono font-bold text-emerald-400">₹{currentSeatsBase.toFixed(2)}</span>
+                  </div>
+                )}
+                {planActive && currentPlanBase > 0 && (
+                  <div className="flex items-center justify-between text-slate-300">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <span>🚀</span> {selectedPlanId} Plan
+                    </span>
+                    <span className="font-mono font-bold text-emerald-400">₹{currentPlanBase.toFixed(2)}</span>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="py-2 text-center text-slate-400 italic text-[11px]">
+                No items selected. Choose an option on the left.
+              </div>
+            )}
+          </div>
+
+          {/* Subtotal & Taxes */}
+          <div className="pt-3 border-t border-slate-800 dark:border-white/10 space-y-1.5 text-xs">
+            <div className="flex justify-between text-slate-400">
+              <span>Base Subtotal (Excl. GST)</span>
+              <span className="font-mono font-semibold text-slate-200">₹{totalBaseAmount.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-slate-400">
+              <span>GST (18.0% {isOutOfState ? "IGST" : "CGST+SGST"})</span>
+              <span className="font-mono font-semibold text-slate-200">₹{taxAmount.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-baseline pt-2 border-t border-slate-800 dark:border-white/10">
+              <span className="text-sm font-extrabold text-white">Total Payable</span>
+              <div className="text-right">
+                <div className="text-2xl font-black text-emerald-400 font-mono">
+                  ₹{totalPayable.toFixed(2)}
+                </div>
+                <span className="text-[10px] text-slate-400">All taxes included</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Primary CTA Button */}
+          <button
+            onClick={handleCombinedCheckout}
+            disabled={processingPayment || !hasItemsSelected || totalBaseAmount <= 0}
+            className="w-full bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:via-emerald-500 hover:to-teal-500 text-slate-950 font-black py-3 px-4 rounded-2xl transition-all shadow-[0_4px_20px_rgba(16,185,129,0.35)] hover:shadow-[0_6px_25px_rgba(16,185,129,0.5)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm cursor-pointer"
+          >
+            {processingPayment ? (
+              <span>Connecting Gateway...</span>
+            ) : hasItemsSelected ? (
+              <span>⚡ Proceed to Payment (₹{totalPayable.toFixed(2)}) ➔</span>
+            ) : (
+              <span>Select an option to proceed</span>
+            )}
+          </button>
+          <div className="text-center text-[10px] text-slate-400 font-medium">
+            🔒 Secure 256-bit encrypted checkout via Razorpay
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto space-y-6 pb-28 pr-0 xl:pr-96">
+        {/* Workspace Baseline Status Strip */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/90 dark:border-white/[0.08]">
+          <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/90 dark:border-emerald-500/20 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0 font-bold shadow-2xs">
               <WalletIcon className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <span className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-                  Prepaid Balance: ₹{availableBalance.toFixed(2)}
+                  Spendable Balance: ₹{availableBalance.toFixed(2)}
                 </span>
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
-                Atomic ledger billing with GST compliance &amp; margin guard
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                {subscription?.plan === "TRIAL"
+                  ? "Starter Trial (30 Days)"
+                  : subscription?.plan === "PROFESSIONAL"
+                  ? "Professional Plan"
+                  : subscription?.plan === "ENTERPRISE"
+                  ? "Enterprise Plan"
+                  : "Basic Plan"}{" "}
+                • {subscription?.usedSeats || 1} of {subscription?.totalSeats || 4} Seats Used
               </p>
             </div>
           </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setShowProfileModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#0B101D]/80 border border-slate-200/90 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.05] transition shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition shadow-2xs cursor-pointer"
             >
-              <ShieldCheckIcon className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
+              <ShieldCheckIcon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>GST Profile</span>
             </button>
             <button
               onClick={loadWalletData}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#0B101D]/80 border border-slate-200/90 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.05] transition shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition shadow-2xs cursor-pointer"
             >
-              <RefreshIcon className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
+              <RefreshIcon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>Refresh</span>
             </button>
           </div>
         </div>
 
-        {/* Tab Navigation with 2D Icons */}
+        {/* Tab Navigation */}
         <div className="bg-white dark:bg-[#0B101D]/80 rounded-2xl border border-slate-200/90 dark:border-white/10 p-1.5 inline-flex items-center gap-1.5 shadow-2xs overflow-x-auto max-w-full">
           <button
             onClick={() => setActiveTab("overview")}
@@ -490,7 +490,7 @@ export default function WalletPage() {
             }`}
           >
             <WalletIcon className="w-4 h-4" />
-            <span>Wallet &amp; Recharge</span>
+            <span>Billing &amp; Packages</span>
           </button>
           <button
             onClick={() => setActiveTab("rates")}
@@ -523,67 +523,381 @@ export default function WalletPage() {
             }`}
           >
             <AuditLogsIcon className="w-4 h-4" />
-            <span>Ledger Audit Trail ({ledgerEntries.length})</span>
+            <span>Financial Ledger ({ledgerEntries.length})</span>
           </button>
         </div>
 
-        {/* TAB 1: OVERVIEW & RECHARGE */}
+        {/* TAB 1: OVERVIEW & ACTION TILES */}
         {activeTab === "overview" && (
           <div className="space-y-6">
-            {/* Active Subscription & Seat Status Banner */}
-            <div className="bg-[#154336] rounded-3xl p-6 sm:p-7 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border-2 border-emerald-500/60 relative overflow-hidden">
-              <div className="space-y-2 z-10">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-400 text-slate-950">
-                    ACTIVE SUBSCRIPTION
-                  </span>
-                  <span className="text-xs text-emerald-200 font-semibold">
-                    {subscription?.isExpired ? "Plan Expired" : `${subscription?.daysRemaining ?? 30} days remaining`}
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-3">
-                  <h3 className="text-2xl sm:text-3xl font-black text-white">
-                    {subscription?.plan === "TRIAL"
-                      ? "Starter Trial (₹500 + GST / 30 Days)"
-                      : subscription?.plan === "PROFESSIONAL"
-                      ? "Professional Plan (₹2,500 + GST / month)"
-                      : subscription?.plan === "ENTERPRISE"
-                      ? "Enterprise Custom Plan"
-                      : "Basic Plan (₹1,000 + GST / month)"}
-                  </h3>
-                </div>
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-emerald-100 font-medium pt-1">
-                  <span className="flex items-center gap-1.5">
-                    👥 <strong>{subscription?.usedSeats || 1} / {subscription?.totalSeats || 4} Seats Used</strong> ({subscription?.seatsAllowed || 4} included {subscription?.extraSeats ? `+ ${subscription.extraSeats} extra` : ""})
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    🟢 Green Tick (OBA): {subscription?.obaIncluded ? <span className="text-emerald-300 font-bold">✓ Included Free</span> : <span className="text-emerald-200">₹999 + GST Add-on</span>}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    ⚡ WhatsApp OTP: <span className="text-emerald-300 font-bold">₹0.20 + GST/msg</span> · Utility: <span className="text-emerald-300 font-bold">₹0.18 + GST/msg</span> · Marketing: <span className="text-emerald-300 font-bold">₹1.15 + GST/msg</span>
-                  </span>
-                </div>
+            {/* "What would you like to do today?" - Action Tiles */}
+            <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-7 shadow-xs">
+              <div className="mb-5">
+                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
+                  Select What You Want To Do
+                </span>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight mt-1">
+                  What would you like to do today?
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Click any tile to configure. You can select one action or combine multiple items into a single checkout.
+                </p>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0 flex-wrap z-10">
-                <button
-                  onClick={() => setShowSeatModal(true)}
-                  className="px-4 py-2.5 rounded-xl bg-emerald-900/80 hover:bg-emerald-800 text-white font-bold text-xs border border-emerald-600 transition cursor-pointer"
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Tile 1: Recharge Wallet */}
+                <div
+                  onClick={() => setRechargeActive(!rechargeActive)}
+                  className={`relative p-5 rounded-2xl border-2 transition cursor-pointer flex flex-col justify-between ${
+                    rechargeActive
+                      ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 shadow-md ring-2 ring-emerald-500/20"
+                      : "border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/20"
+                  }`}
                 >
-                  + Add Team Seats (₹500 + GST/mo)
-                </button>
-                <button
-                  onClick={() => setShowSubscriptionModal(true)}
-                  className="px-5 py-2.5 rounded-xl bg-white hover:bg-emerald-50 text-[#154336] font-extrabold text-xs shadow-md transition cursor-pointer"
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg">
+                        💬
+                      </div>
+                      <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                        rechargeActive ? "bg-emerald-600 text-white" : "bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400"
+                      }`}>
+                        {rechargeActive ? `✓ Selected (₹${currentRechargeBase.toLocaleString()})` : "+ Add"}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                        Recharge Message Wallet
+                      </h3>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                        Prepaid message credits for WhatsApp OTP, Utility alerts &amp; bulk broadcasts.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-slate-200/60 dark:border-white/[0.06] text-xs font-bold text-emerald-700 dark:text-emerald-400 flex items-center justify-between">
+                    <span>Wholesale rates</span>
+                    <span>₹0.20/OTP ➔</span>
+                  </div>
+                </div>
+
+                {/* Tile 2: Add Team Seats */}
+                <div
+                  onClick={() => setSeatsActive(!seatsActive)}
+                  className={`relative p-5 rounded-2xl border-2 transition cursor-pointer flex flex-col justify-between ${
+                    seatsActive
+                      ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 shadow-md ring-2 ring-emerald-500/20"
+                      : "border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/20"
+                  }`}
                 >
-                  Upgrade / Switch Plan ➔
-                </button>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-lg">
+                        👥
+                      </div>
+                      <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                        seatsActive ? "bg-emerald-600 text-white" : "bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400"
+                      }`}>
+                        {seatsActive ? `✓ Selected (+${extraSeatCount} Seat${extraSeatCount > 1 ? "s" : ""})` : "+ Add"}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                        Add Team Member Seats
+                      </h3>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                        Add support agents, managers, and sales reps to the multi-agent WhatsApp Inbox.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-slate-200/60 dark:border-white/[0.06] text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                    <span>₹500 + GST / seat / mo</span>
+                    <span>Expand Team ➔</span>
+                  </div>
+                </div>
+
+                {/* Tile 3: Upgrade / Switch Plan */}
+                <div
+                  onClick={() => setPlanActive(!planActive)}
+                  className={`relative p-5 rounded-2xl border-2 transition cursor-pointer flex flex-col justify-between ${
+                    planActive
+                      ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 shadow-md ring-2 ring-emerald-500/20"
+                      : "border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/20"
+                  }`}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="w-10 h-10 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg">
+                        🚀
+                      </div>
+                      <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                        planActive ? "bg-emerald-600 text-white" : "bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400"
+                      }`}>
+                        {planActive ? `✓ Selected (${selectedPlanId})` : "+ Add"}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                        Upgrade or Switch Plan
+                      </h3>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                        Upgrade tier for higher seat quotas, Meta Green Tick assistance, and AI Auto-replies.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-slate-200/60 dark:border-white/[0.06] text-xs font-bold text-emerald-700 dark:text-emerald-400 flex items-center justify-between">
+                    <span>Starter, Basic &amp; Pro tiers</span>
+                    <span>From ₹500 ➔</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Balance Overview Cards */}
+            {/* DYNAMIC CONFIGURATION PANELS */}
+
+            {/* Config Panel 1: Message Wallet Recharge */}
+            {rechargeActive && (
+              <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-7 shadow-xs space-y-5 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-150 dark:border-white/[0.06]">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 flex items-center justify-center text-sm font-bold text-emerald-700 dark:text-emerald-400">💬</span>
+                    <div>
+                      <h3 className="text-base font-black text-slate-900 dark:text-slate-100">Configure Message Wallet Recharge</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">100% of base credits are added to your spendable prepaid balance.</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setRechargeActive(false)} className="text-xs font-bold text-slate-400 hover:text-red-500 transition cursor-pointer">Remove ✕</button>
+                </div>
+
+                {/* Preset Pills */}
+                <div>
+                  <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+                    Select Credit Amount (Excl. GST)
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    {[500, 1000, 2500, 5000].map((val) => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => {
+                          setAmount(val);
+                          setCustomAmountInput(String(val));
+                        }}
+                        className={`py-3 px-3 rounded-xl border text-xs font-black transition cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+                          amount === val
+                            ? "bg-slate-900 dark:bg-emerald-600 text-white border-slate-900 dark:border-emerald-600 shadow-md scale-[1.02]"
+                            : "bg-slate-50 dark:bg-white/[0.04] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/[0.08]"
+                        }`}
+                      >
+                        <span className="text-sm">₹{val.toLocaleString()}</span>
+                        <span className="text-[10px] font-medium opacity-80">~{Math.floor(val / 0.20).toLocaleString()} OTPs</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom Amount */}
+                <div>
+                  <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">
+                    Or Enter Custom Amount (₹)
+                  </label>
+                  <div className="relative max-w-sm">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-base">₹</span>
+                    <input
+                      type="number"
+                      value={customAmountInput}
+                      onChange={(e) => {
+                        setCustomAmountInput(e.target.value);
+                        const parsed = Math.max(0, Number(e.target.value));
+                        setAmount(parsed);
+                      }}
+                      min="100"
+                      step="100"
+                      placeholder="Enter amount"
+                      className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl pl-8 pr-4 py-2.5 font-black text-slate-900 dark:text-white text-base focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
+                    Minimum recharge is ₹100. Wholesale OTP rate is ₹0.20 + GST per message.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Config Panel 2: Team Member Seats */}
+            {seatsActive && (
+              <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-7 shadow-xs space-y-4 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-150 dark:border-white/[0.06]">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 flex items-center justify-center text-sm font-bold text-blue-700 dark:text-blue-400">👥</span>
+                    <div>
+                      <h3 className="text-base font-black text-slate-900 dark:text-slate-100">Configure Additional Team Seats</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Each additional team member seat is ₹500 + GST / month.</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setSeatsActive(false)} className="text-xs font-bold text-slate-400 hover:text-red-500 transition cursor-pointer">Remove ✕</button>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-[#070b14] rounded-2xl border border-slate-200/80 dark:border-white/[0.06]">
+                  <div>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Number of Additional Seats to Add:</span>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      Current: {subscription?.totalSeats || 4} seats ➔ New Total: {(subscription?.totalSeats || 4) + extraSeatCount} seats
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setExtraSeatCount(Math.max(1, extraSeatCount - 1))}
+                      className="w-9 h-9 rounded-xl bg-white dark:bg-white/[0.08] border border-slate-300 dark:border-white/15 font-black text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.14] transition cursor-pointer text-lg flex items-center justify-center shadow-2xs"
+                    >
+                      -
+                    </button>
+                    <span className="w-10 text-center font-black text-xl text-slate-900 dark:text-slate-100">
+                      {extraSeatCount}
+                    </span>
+                    <button
+                      onClick={() => setExtraSeatCount(extraSeatCount + 1)}
+                      className="w-9 h-9 rounded-xl bg-white dark:bg-white/[0.08] border border-slate-300 dark:border-white/15 font-black text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.14] transition cursor-pointer text-lg flex items-center justify-center shadow-2xs"
+                    >
+                      +
+                    </button>
+                    <div className="pl-4 font-mono font-black text-base text-slate-900 dark:text-slate-100">
+                      ₹{(extraSeatCount * 500).toLocaleString()} <span className="text-xs font-normal text-slate-500">+ GST</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Config Panel 3: Upgrade / Switch Plan */}
+            {planActive && (
+              <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-7 shadow-xs space-y-4 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-150 dark:border-white/[0.06]">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 flex items-center justify-center text-sm font-bold text-purple-700 dark:text-purple-400">🚀</span>
+                    <div>
+                      <h3 className="text-base font-black text-slate-900 dark:text-slate-100">Select Subscription Plan to Upgrade / Switch</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Select your monthly plan. Flat predictable dashboard pricing.</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setPlanActive(false)} className="text-xs font-bold text-slate-400 hover:text-red-500 transition cursor-pointer">Remove ✕</button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Starter Trial */}
+                  <div
+                    onClick={() => setSelectedPlanId("TRIAL")}
+                    className={`p-4 rounded-2xl border-2 transition cursor-pointer flex flex-col justify-between ${
+                      selectedPlanId === "TRIAL"
+                        ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20 shadow-md ring-2 ring-emerald-500/20"
+                        : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20"
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-extrabold uppercase text-slate-600 dark:text-slate-400">Starter Trial</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-white/[0.08]">30 Days</span>
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-black text-slate-900 dark:text-slate-100">₹500</span>
+                        <sub className="text-[10px] font-bold text-slate-500 uppercase">+ GST</sub>
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">1 Seat. For first-time onboarding and API testing.</p>
+                      <ul className="text-xs text-slate-600 dark:text-slate-300 space-y-1 pt-2 border-t border-slate-100 dark:border-white/[0.08]">
+                        <li>✓ 1 User seat (Owner profile)</li>
+                        <li>✓ Full OTP &amp; Utility APIs</li>
+                        <li>✓ Pay-as-you-go message fuel</li>
+                      </ul>
+                    </div>
+                    <div className="mt-4 pt-2">
+                      <span className={`block w-full text-center py-2 rounded-xl text-xs font-black transition ${
+                        selectedPlanId === "TRIAL"
+                          ? "bg-slate-900 dark:bg-emerald-600 text-white"
+                          : "bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300"
+                      }`}>
+                        {selectedPlanId === "TRIAL" ? "✓ Selected (₹500)" : "Select Trial"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Basic Plan */}
+                  <div
+                    onClick={() => setSelectedPlanId("BASIC")}
+                    className={`p-4 rounded-2xl border-2 transition cursor-pointer flex flex-col justify-between ${
+                      selectedPlanId === "BASIC"
+                        ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20 shadow-md ring-2 ring-emerald-500/20"
+                        : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20"
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-extrabold uppercase text-slate-600 dark:text-slate-400">Basic Plan</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20">Popular</span>
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-black text-slate-900 dark:text-slate-100">₹1,000</span>
+                        <sub className="text-[10px] font-bold text-slate-500 uppercase">+ GST / mo</sub>
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">4 Seats. For growing teams using WhatsApp support inbox.</p>
+                      <ul className="text-xs text-slate-600 dark:text-slate-300 space-y-1 pt-2 border-t border-slate-100 dark:border-white/[0.08]">
+                        <li>✓ <strong>4 Seats</strong> (1 Owner + 3 Support)</li>
+                        <li>✓ <strong>₹50 Free Starter Fuel</strong> (~250 OTPs)</li>
+                        <li>✓ Live Chat Team Inbox &amp; Routing</li>
+                      </ul>
+                    </div>
+                    <div className="mt-4 pt-2">
+                      <span className={`block w-full text-center py-2 rounded-xl text-xs font-black transition ${
+                        selectedPlanId === "BASIC"
+                          ? "bg-slate-900 dark:bg-emerald-600 text-white"
+                          : "bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300"
+                      }`}>
+                        {selectedPlanId === "BASIC" ? "✓ Selected (₹1,000)" : "Select Basic"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Professional Plan */}
+                  <div
+                    onClick={() => setSelectedPlanId("PROFESSIONAL")}
+                    className={`p-4 rounded-2xl border-2 transition cursor-pointer flex flex-col justify-between ${
+                      selectedPlanId === "PROFESSIONAL"
+                        ? "border-emerald-400 bg-emerald-950/40 text-white shadow-lg ring-2 ring-emerald-400/40"
+                        : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20"
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-extrabold uppercase text-emerald-400">Professional</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500 text-slate-950 font-black">All-Inclusive</span>
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-black text-slate-900 dark:text-white">₹2,500</span>
+                        <sub className="text-[10px] font-bold text-slate-400 uppercase">+ GST / mo</sub>
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-300">6 Seats. E-Commerce funnels, AI auto-replies, Meta Green Tick.</p>
+                      <ul className="text-xs text-slate-600 dark:text-slate-200 space-y-1 pt-2 border-t border-slate-100 dark:border-white/[0.08]">
+                        <li>✓ <strong>6 Seats</strong> (1 Owner + 5 Support)</li>
+                        <li>✓ <strong>₹100 Free Starter Fuel</strong> (~500 OTPs)</li>
+                        <li>✓ <strong>Green Tick (OBA) Filing Support</strong></li>
+                        <li>✓ AI Assistant &amp; Smart Auto-Replies</li>
+                      </ul>
+                    </div>
+                    <div className="mt-4 pt-2">
+                      <span className={`block w-full text-center py-2 rounded-xl text-xs font-black transition ${
+                        selectedPlanId === "PROFESSIONAL"
+                          ? "bg-emerald-500 text-slate-950 font-black"
+                          : "bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300"
+                      }`}>
+                        {selectedPlanId === "PROFESSIONAL" ? "✓ Selected (₹2,500)" : "Select Pro"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Transparent Rate & Account Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {/* Available Balance */}
+              {/* Spendable Available Balance */}
               <div className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-6 rounded-3xl shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -644,158 +958,39 @@ export default function WalletPage() {
                 </div>
               </div>
             </div>
-
-            {/* Recharge & GST Breakdown Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Left: Recharge Amount Selection */}
-              <div className="lg:col-span-7 bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-sm">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">Add Wallet Balance</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
-                  Recharge your messaging credit. Base amount is credited 100% to your spendable balance. GST is invoiced separately.
-                </p>
-
-                {/* Preset Buttons */}
-                <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
-                  Select Credit Amount (Excl. GST)
-                </label>
-                <div className="grid grid-cols-4 gap-2 mb-4">
-                  {[500, 1000, 2500, 5000].map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => setAmount(val)}
-                      className={`py-2.5 text-xs font-extrabold rounded-xl border transition cursor-pointer ${
-                        amount === val
-                          ? "bg-slate-900 dark:bg-emerald-600 text-white border-slate-900 dark:border-emerald-600 shadow-sm"
-                          : "bg-slate-50 dark:bg-white/[0.04] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/[0.08]"
-                      }`}
-                    >
-                      ₹{val.toLocaleString()}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="mb-6">
-                  <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">
-                    Or Enter Custom Amount (₹)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-lg">₹</span>
-                    <input
-                      type="number"
-                      value={amount}
-                      onChange={(e) => setAmount(Math.max(0, Number(e.target.value)))}
-                      min="100"
-                      step="100"
-                      className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-4 py-3 font-extrabold text-slate-900 dark:text-white text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="p-4 bg-slate-50 dark:bg-white/[0.03] rounded-2xl border border-slate-100 dark:border-white/10 text-xs text-slate-600 dark:text-slate-300 space-y-1 mb-6">
-                  <div className="font-bold text-slate-800 dark:text-slate-200">🔒 Razorpay Tier-1 Payment Security</div>
-                  <div>UPI, Net Banking, Corporate Cards &amp; Business Credit supported. Wallet credit is instant upon gateway verification.</div>
-                </div>
-
-                <button
-                  onClick={handleTopUp}
-                  disabled={loading || amount < 100}
-                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold py-4 rounded-xl transition shadow hover:shadow-md disabled:opacity-50 flex items-center justify-center gap-2 text-base cursor-pointer"
-                >
-                  {loading ? (
-                    <span>Opening Checkout...</span>
-                  ) : (
-                    <>
-                      <span>⚡ Pay ₹{totalPayable.toFixed(2)} &amp; Recharge Wallet</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Right: Transparent Tax Calculation Breakdown */}
-              <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-800 dark:border-white/10 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
-                      Compliant Tax Breakdown
-                    </span>
-                    <span className="text-xs text-slate-400">SAC Code: 998313</span>
-                  </div>
-
-                  <h4 className="text-xl font-black text-white mb-4">Billing Computation</h4>
-
-                  <div className="space-y-3 divide-y divide-slate-800 text-sm">
-                    <div className="flex justify-between pt-2">
-                      <span className="text-slate-300">Spendable Message Credits</span>
-                      <span className="font-mono font-bold text-emerald-400">₹{amount.toFixed(2)}</span>
-                    </div>
-
-                    {!isOutOfState ? (
-                      <>
-                        <div className="flex justify-between pt-3">
-                          <span className="text-slate-400">CGST (9.0%)</span>
-                          <span className="font-mono text-slate-300">₹{(taxAmount / 2).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between pt-3">
-                          <span className="text-slate-400">SGST (9.0%)</span>
-                          <span className="font-mono text-slate-300">₹{(taxAmount / 2).toFixed(2)}</span>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex justify-between pt-3">
-                        <span className="text-slate-400">IGST (18.0%)</span>
-                        <span className="font-mono text-slate-300">₹{taxAmount.toFixed(2)}</span>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between pt-4 text-base font-black">
-                      <span className="text-white">Total Payable at Gateway</span>
-                      <span className="font-mono text-white text-lg">₹{totalPayable.toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 pt-5 border-t border-slate-800 text-[11px] text-slate-400 space-y-1">
-                  <div>✓ GST Tax Invoice generated immediately under GSTIN: 27AABCU9603R1ZM</div>
-                  <div>✓ If you have a GSTIN, full Input Tax Credit (ITC) can be claimed.</div>
-                </div>
-              </div>
-            </div>
           </div>
         )}
 
-        {/* TAB 2: LIVE RATE CARD */}
+        {/* TAB 2: OFFICIAL RATE CARD */}
         {activeTab === "rates" && (
           <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-sm backdrop-blur-xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100 dark:border-white/[0.06]">
               <div>
-                <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Active Wholesale Rate Card</h3>
+                <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Official Meta Wholesale Rate Card</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Pre-configured, database-backed Meta WhatsApp pass-through rates with built-in margin protection.
+                  Direct provider wholesale pricing with automated platform margin guards.
                 </p>
               </div>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
-                ● Live Database Rates
-              </span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">Live Meta Conversational Engine</span>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-white/[0.06]">
-                    <th className="py-3 px-4">Destination</th>
+                    <th className="py-3 px-4">Country</th>
                     <th className="py-3 px-4">Category</th>
-                    <th className="py-3 px-4">Meta Provider Cost</th>
-                    <th className="py-3 px-4">Digital Beings Retail Price</th>
-                    <th className="py-3 px-4">Gross Margin</th>
+                    <th className="py-3 px-4">Wholesale Cost</th>
+                    <th className="py-3 px-4">Billed Base Price</th>
+                    <th className="py-3 px-4">Margin</th>
                     <th className="py-3 px-4">Safety Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06] text-sm">
                   {rates.map((r) => (
                     <tr key={r.id} className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition">
-                      <td className="py-4 px-4 font-bold text-slate-800 dark:text-slate-200">
-                        {r.country} <span className="text-xs font-mono text-slate-400 dark:text-slate-500">({r.isoCode})</span>
+                      <td className="py-4 px-4 font-bold text-slate-900 dark:text-slate-100">
+                        {r.country} <span className="text-xs text-slate-400 font-mono">({r.isoCode})</span>
                       </td>
                       <td className="py-4 px-4 font-semibold text-slate-700 dark:text-slate-300">
                         {r.category === "AUTHENTICATION" ? "🔐 Authentication / OTP" :
@@ -841,7 +1036,7 @@ export default function WalletPage() {
               <div>
                 <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Tax Invoices</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Sequential, audit-ready GST tax invoices for wallet recharge transactions.
+                  Sequential, audit-ready GST tax invoices for wallet recharge &amp; subscription transactions.
                 </p>
               </div>
               <span className="text-xs text-slate-400 dark:text-slate-500">Issuer: Digital Beings Infotech Pvt Ltd</span>
@@ -849,7 +1044,7 @@ export default function WalletPage() {
 
             {invoices.length === 0 ? (
               <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
-                No invoices generated yet. Recharge your wallet to generate a compliant tax invoice.
+                No invoices generated yet. Recharge your wallet or purchase a plan to generate a compliant tax invoice.
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -894,7 +1089,7 @@ export default function WalletPage() {
                         <td className="py-4 px-4 text-right">
                           <button
                             onClick={() => setSelectedInvoice(inv)}
-                            className="px-3 py-1 bg-slate-100 dark:bg-white/[0.08] hover:bg-slate-200 dark:hover:bg-white/[0.14] text-slate-800 dark:text-slate-200 rounded-lg text-xs font-bold transition"
+                            className="px-3 py-1 bg-slate-100 dark:bg-white/[0.08] hover:bg-slate-200 dark:hover:bg-white/[0.14] text-slate-800 dark:text-slate-200 rounded-lg text-xs font-bold transition cursor-pointer"
                           >
                             View Invoice
                           </button>
@@ -908,7 +1103,7 @@ export default function WalletPage() {
           </div>
         )}
 
-        {/* TAB 4: IMMUTABLE DOUBLE-ENTRY LEDGER */}
+        {/* TAB 4: IMMUTABLE FINANCIAL LEDGER */}
         {activeTab === "ledger" && (
           <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-sm backdrop-blur-xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100 dark:border-white/[0.06]">
@@ -994,7 +1189,7 @@ export default function WalletPage() {
           <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 dark:border-white/10 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/[0.08]">
               <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">Customer Billing Profile</h3>
-              <button onClick={() => setShowProfileModal(false)} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xl font-bold">×</button>
+              <button onClick={() => setShowProfileModal(false)} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xl font-bold cursor-pointer">×</button>
             </div>
             <form onSubmit={handleSaveBillingProfile} className="space-y-4">
               <div>
@@ -1059,13 +1254,13 @@ export default function WalletPage() {
                 <button
                   type="button"
                   onClick={() => setShowProfileModal(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/[0.04]"
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/[0.04] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-bold transition"
+                  className="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-bold transition cursor-pointer"
                 >
                   Save Profile
                 </button>
@@ -1084,7 +1279,7 @@ export default function WalletPage() {
                 <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">Tax Invoice</h3>
                 <p className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold">{selectedInvoice.invoiceNumber}</p>
               </div>
-              <button onClick={() => setSelectedInvoice(null)} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-2xl font-bold">×</button>
+              <button onClick={() => setSelectedInvoice(null)} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-2xl font-bold cursor-pointer">×</button>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-xs">
@@ -1103,289 +1298,56 @@ export default function WalletPage() {
               </div>
             </div>
 
-            <div className="border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden">
+            <div className="border border-slate-100 dark:border-white/[0.06] rounded-2xl overflow-hidden">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 dark:bg-white/[0.03] text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-white/10">
+                <thead className="bg-slate-50 dark:bg-white/[0.03] text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px]">
                   <tr>
-                    <th className="py-2.5 px-3">Description</th>
-                    <th className="py-2.5 px-3">SAC</th>
-                    <th className="py-2.5 px-3 text-right">Taxable Amt</th>
+                    <th className="py-2.5 px-4">Description</th>
+                    <th className="py-2.5 px-4">SAC Code</th>
+                    <th className="py-2.5 px-4 text-right">Taxable Base</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
                   <tr>
-                    <td className="py-3 px-3 font-medium text-slate-900 dark:text-slate-100">
-                      WhatsApp Messaging Service Prepaid Recharge
+                    <td className="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">
+                      Digital Beings Platform Order &amp; Message Credits Top-Up
                     </td>
-                    <td className="py-3 px-3 font-mono text-slate-600 dark:text-slate-400">998313</td>
-                    <td className="py-3 px-3 font-mono font-bold text-right text-slate-900 dark:text-slate-100">
+                    <td className="py-3 px-4 font-mono text-slate-500">998313</td>
+                    <td className="py-3 px-4 font-mono font-bold text-right text-slate-900 dark:text-slate-100">
                       ₹{Number(selectedInvoice.baseAmount).toFixed(2)}
                     </td>
                   </tr>
                 </tbody>
               </table>
+            </div>
 
-              <div className="bg-slate-50 dark:bg-[#070b14] p-3 space-y-1.5 border-t border-slate-200 dark:border-white/10 text-xs">
-                {selectedInvoice.cgstAmount > 0 && (
-                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                    <span>CGST (9%)</span>
-                    <span className="font-mono">₹{Number(selectedInvoice.cgstAmount).toFixed(2)}</span>
-                  </div>
-                )}
-                {selectedInvoice.sgstAmount > 0 && (
-                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                    <span>SGST (9%)</span>
-                    <span className="font-mono">₹{Number(selectedInvoice.sgstAmount).toFixed(2)}</span>
-                  </div>
-                )}
-                {selectedInvoice.igstAmount > 0 && (
-                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                    <span>IGST (18%)</span>
-                    <span className="font-mono">₹{Number(selectedInvoice.igstAmount).toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between font-black text-slate-900 dark:text-slate-100 pt-2 border-t border-slate-200 dark:border-white/10 text-sm">
-                  <span>Total Amount Paid</span>
-                  <span className="font-mono text-emerald-600 dark:text-emerald-400">₹{Number(selectedInvoice.totalAmount).toFixed(2)}</span>
-                </div>
+            <div className="space-y-1.5 text-xs border-t border-slate-100 dark:border-white/[0.06] pt-3">
+              <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                <span>Taxable Amount</span>
+                <span className="font-mono text-slate-800 dark:text-slate-200">₹{Number(selectedInvoice.baseAmount).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                <span>GST Tax Rate</span>
+                <span className="font-mono text-slate-800 dark:text-slate-200">{selectedInvoice.gstRatePercent}%</span>
+              </div>
+              <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                <span>Total Tax (CGST+SGST / IGST)</span>
+                <span className="font-mono text-slate-800 dark:text-slate-200">₹{Number(selectedInvoice.totalTaxAmount).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm font-black text-slate-900 dark:text-slate-100 pt-2 border-t border-slate-100 dark:border-white/[0.06]">
+                <span>Total Amount Paid</span>
+                <span className="font-mono text-emerald-600 dark:text-emerald-400 text-base">₹{Number(selectedInvoice.totalAmount).toFixed(2)}</span>
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="pt-2 flex justify-end">
               <button
-                onClick={() => window.print()}
-                className="px-4 py-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+                onClick={() => setSelectedInvoice(null)}
+                className="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold transition cursor-pointer"
               >
-                <span>🖨️</span> Print Invoice
+                Close
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* PLAN UPGRADE & SUBSCRIPTION MODAL */}
-      {showSubscriptionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/75 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 dark:border-white/10 my-8">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-150 dark:border-white/[0.08]">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
-                  Select Plan
-                </span>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 mt-1">
-                  Choose Your Digital Beings Subscription
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Predictable flat dashboard pricing. Direct Meta wholesale rates for message fuel.
-                </p>
-              </div>
-              <button
-                onClick={() => setShowSubscriptionModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.12] flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold transition"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Plan Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {/* Plan 1: Starter Trial */}
-              <div
-                onClick={() => handlePurchaseSubscription("TRIAL")}
-                className="border-2 rounded-2xl p-5 space-y-4 hover:border-emerald-500 dark:hover:border-emerald-500/80 transition cursor-pointer flex flex-col justify-between bg-white dark:bg-[#070b14] border-slate-200 dark:border-white/10"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Starter Trial</span>
-                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-slate-100 dark:bg-white/[0.08] text-slate-700 dark:text-slate-300">30 Days</span>
-                  </div>
-                  <div className="flex items-baseline gap-1.5 flex-wrap">
-                    <span className="text-3xl font-black text-slate-900 dark:text-slate-100">₹500</span>
-                    <sub className="text-xs font-black text-slate-500 dark:text-slate-400 bottom-0 uppercase tracking-tight">+ GST</sub>
-                    <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">(₹590 all-incl.)</span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">
-                    1 User (Owner profile only). Ideal for onboarding, verifying numbers, and testing OTP APIs.
-                  </p>
-                  <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-white/[0.08]">
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span> 1 Seat Included (Owner only)</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span> Pay-as-you-go message fuel</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span> Full OTP API &amp; Webhooks</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span> Utility &amp; Order Messages</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span> Basic Campaign Broadcasts</li>
-                    <li className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">· Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
-                  </ul>
-                </div>
-                <button
-                  disabled={subscribing}
-                  className="w-full py-2.5 rounded-xl border-2 border-slate-900 dark:border-white/40 text-slate-900 dark:text-white hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-950 font-bold text-xs transition"
-                >
-                  {subscribing ? "Opening Checkout..." : "Start Trial (₹500 + GST) ➔"}
-                </button>
-              </div>
-
-              {/* Plan 2: Basic Business */}
-              <div
-                onClick={() => handlePurchaseSubscription("BASIC")}
-                className="border-2 rounded-2xl p-5 space-y-4 hover:border-emerald-500 dark:hover:border-emerald-500/80 transition cursor-pointer flex flex-col justify-between bg-white dark:bg-[#070b14] border-slate-200 dark:border-white/10"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Basic Plan</span>
-                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20">Popular</span>
-                  </div>
-                  <div className="flex items-baseline gap-1.5 flex-wrap">
-                    <span className="text-3xl font-black text-slate-900 dark:text-slate-100">₹1,000</span>
-                    <sub className="text-xs font-black text-slate-500 dark:text-slate-400 bottom-0 uppercase tracking-tight">+ GST</sub>
-                    <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">/ mo (₹1,180 all-incl.)</span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">
-                    For growing teams needing WhatsApp OTP, order confirmations, and customer support inbox.
-                  </p>
-                  <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-white/[0.08]">
-                    <li className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200"><span className="text-emerald-600 dark:text-emerald-400">✓</span> 4 Seats (1 Owner + 3 Support)</li>
-                    <li className="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-300"><span className="text-emerald-600 dark:text-emerald-400 font-black">✓</span> ₹50 Starter Wallet Balance Included (~250 OTPs)</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span> WhatsApp OTP &amp; Utility APIs</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span> Template Approval Dashboard</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span> Live Chat Team Inbox &amp; Routing</li>
-                    <li className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">· Meta OBA Green Tick Filing Assistance (₹999 + GST add-on)</li>
-                  </ul>
-                </div>
-                <button
-                  disabled={subscribing}
-                  className="w-full py-2.5 rounded-xl bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white font-bold text-xs transition"
-                >
-                  {subscribing ? "Opening Checkout..." : "Select Basic (₹1,000 + GST) ➔"}
-                </button>
-              </div>
-
-              {/* Plan 3: Professional Scale */}
-              <div
-                onClick={() => handlePurchaseSubscription("PROFESSIONAL")}
-                className="border-2 rounded-2xl p-5 space-y-4 hover:border-emerald-400 transition cursor-pointer flex flex-col justify-between bg-[#154336] text-white border-emerald-400 shadow-lg relative"
-              >
-                <div className="absolute -top-3 right-4 bg-emerald-400 text-slate-950 font-black text-[9px] uppercase tracking-wider px-2.5 py-0.5 rounded-full">
-                  RECOMMENDED
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-emerald-300 uppercase">Professional</span>
-                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-900 text-emerald-200 border border-emerald-700">All-Inclusive</span>
-                  </div>
-                  <div className="flex items-baseline gap-1.5 flex-wrap">
-                    <span className="text-3xl font-black text-white">₹2,500</span>
-                    <sub className="text-xs font-black text-emerald-300 bottom-0 uppercase tracking-tight">+ GST</sub>
-                    <span className="text-xs text-emerald-200 font-semibold">/ mo (₹2,950 all-incl.)</span>
-                  </div>
-                  <p className="text-xs text-emerald-100">
-                    For scaling brands using e-commerce automations, AI auto-replies, and complex logic funnels.
-                  </p>
-                  <ul className="space-y-1.5 text-xs text-emerald-50 pt-2 border-t border-emerald-800/80">
-                    <li className="flex items-center gap-1.5 font-bold text-white"><span className="text-emerald-400">✓</span> 6 Seats (1 Owner + 5 Support)</li>
-                    <li className="flex items-center gap-1.5 font-bold text-emerald-300"><span className="text-emerald-400 font-black">✓</span> ₹100 Starter Wallet Balance Included (~500 OTPs)</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Extra seats at ₹500 + GST/mo each</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> E-Commerce API (Shopify, Woo, Custom)</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> AI Assistant &amp; Smart Auto-Replies</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Complex Logic Campaigns (Read-Not-Replied)</li>
-                    <li className="flex items-center gap-1.5 font-bold text-emerald-300"><span className="text-emerald-400">✓</span> Meta Official Green Tick (OBA) Filing Support Included (Subject to Meta approval)</li>
-                    <li className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Priority Meta API Throughput</li>
-                  </ul>
-                </div>
-                <button
-                  disabled={subscribing}
-                  className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition"
-                >
-                  {subscribing ? "Opening Checkout..." : "Upgrade to Pro (₹2,500 + GST) ➔"}
-                </button>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-150 dark:border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
-              <span>Looking for high-throughput enterprise routing or 50+ seats?</span>
-              <a
-                href="mailto:support@digitalbeings.in?subject=Enterprise%20WhatsApp%20Inquiry"
-                className="font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
-              >
-                Contact Enterprise Sales ➔
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ADD EXTRA TEAM SEATS MODAL */}
-      {showSeatModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/75 backdrop-blur-xs">
-          <div className="bg-white dark:bg-[#0B101D] rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-6 shadow-2xl border border-slate-200 dark:border-white/10">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-150 dark:border-white/[0.08]">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
-                  Team Add-on
-                </span>
-                <h3 className="text-lg font-black text-slate-900 dark:text-slate-100 mt-1">
-                  Add Additional Team Seats
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowSeatModal(false)}
-                className="w-7 h-7 rounded-full bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.12] flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold transition text-xs"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Add support profiles, sales agents, or team managers to collaborate in the WhatsApp Team Inbox.
-              </p>
-
-              <div className="bg-slate-50 dark:bg-[#070b14] rounded-2xl p-4 border border-slate-200/90 dark:border-white/[0.08] space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Number of Additional Seats:</span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setExtraSeatCount(Math.max(1, extraSeatCount - 1))}
-                      className="w-8 h-8 rounded-lg bg-white dark:bg-white/[0.08] border border-slate-300 dark:border-white/10 font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.14] transition cursor-pointer"
-                    >
-                      -
-                    </button>
-                    <span className="w-8 text-center font-black text-base text-slate-900 dark:text-slate-100">
-                      {extraSeatCount}
-                    </span>
-                    <button
-                      onClick={() => setExtraSeatCount(extraSeatCount + 1)}
-                      className="w-8 h-8 rounded-lg bg-white dark:bg-white/[0.08] border border-slate-300 dark:border-white/10 font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.14] transition cursor-pointer"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-slate-200 dark:border-white/[0.08] text-xs space-y-1.5">
-                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                    <span>Base Seat Fee ({extraSeatCount} × ₹500 + GST/mo)</span>
-                    <span className="font-mono font-bold text-slate-900 dark:text-slate-100">₹{(extraSeatCount * 500).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                    <span>GST (18%)</span>
-                    <span className="font-mono text-slate-600 dark:text-slate-400">₹{(extraSeatCount * 500 * 0.18).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between font-black text-slate-900 dark:text-slate-100 pt-1.5 border-t border-slate-200 dark:border-white/[0.08] text-sm">
-                    <span>Total Monthly Amount</span>
-                    <span className="font-mono text-emerald-600 dark:text-emerald-400">₹{(extraSeatCount * 590).toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => handlePurchaseExtraSeats(extraSeatCount)}
-              disabled={subscribing}
-              className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition cursor-pointer"
-            >
-              {subscribing ? "Opening Checkout..." : `Purchase ${extraSeatCount} Seat(s) via Razorpay (₹${(extraSeatCount * 590).toFixed(2)})`}
-            </button>
           </div>
         </div>
       )}
