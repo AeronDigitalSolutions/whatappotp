@@ -1983,7 +1983,22 @@ fastify.get("/v1/meta/templates/:projectId", async (request: any, reply) => {
       return reply.status(400).send({ error: "Meta API Error: " + data.error.message, wabaId });
     }
 
-    return reply.send({ success: true, templates: data.data || [], wabaId });
+    // Filter out templates deleted/removed from workspace
+    let deletedNames = new Set<string>();
+    try {
+      const delRows: any = await prisma.$queryRawUnsafe(
+        `SELECT templateName FROM DeletedTemplate WHERE (projectId = ? OR projectId = 'all') AND (wabaId = ? OR wabaId = '')`,
+        targetPid,
+        wabaId
+      );
+      if (Array.isArray(delRows)) {
+        delRows.forEach((r: any) => deletedNames.add(r.templateName));
+      }
+    } catch (e) {}
+
+    const activeTemplates = (data.data || []).filter((t: any) => !deletedNames.has(t.name));
+
+    return reply.send({ success: true, templates: activeTemplates, wabaId });
   } catch (error: any) {
     fastify.log.error(error);
     return reply.status(500).send({ error: "Failed to fetch templates from Meta" });
@@ -2053,6 +2068,15 @@ fastify.post("/v1/meta/templates/:projectId", async (request: any, reply) => {
       });
     }
 
+    // Unmark template from DeletedTemplate so it displays
+    try {
+      await prisma.$executeRawUnsafe(
+        `DELETE FROM DeletedTemplate WHERE (projectId = ? OR projectId = 'all') AND templateName = ?`,
+        targetPid,
+        name.toLowerCase().replace(/[^a-z0-9_]/g, "_")
+      );
+    } catch (e) {}
+
     return reply.send({ success: true, template: data, wabaId });
   } catch (error: any) {
     fastify.log.error(error);
@@ -2063,15 +2087,6 @@ fastify.post("/v1/meta/templates/:projectId", async (request: any, reply) => {
 fastify.delete("/v1/meta/templates/:projectId/:templateName", async (request: any, reply) => {
   const { projectId, templateName } = request.params;
   const { hsm_id, wabaId: queryWabaId } = (request.query || {}) as any;
-
-  // Protect system/default templates from deletion attempts
-  const isProtected = templateName.toLowerCase() === "hello_world" || templateName.toLowerCase().startsWith("sample_");
-  if (isProtected) {
-    return reply.status(400).send({
-      success: false,
-      error: `"${templateName}" is a default template created by Meta WhatsApp. Meta locks default templates and does not permit them to be deleted.`
-    });
-  }
 
   try {
     let targetPid = projectId;
@@ -2087,42 +2102,70 @@ fastify.delete("/v1/meta/templates/:projectId/:templateName", async (request: an
     const wabaId = queryWabaId || project.metaWabaId || "2107898293422238";
     const token = project.metaAccessToken;
 
-    // Build URL with name and optional hsm_id
-    let url = `https://graph.facebook.com/v19.0/${wabaId}/message_templates?name=${encodeURIComponent(templateName)}`;
-    if (hsm_id) {
-      url += `&hsm_id=${encodeURIComponent(hsm_id)}`;
-    }
+    // 1. Attempt deleting on Meta Cloud API first if not protected
+    let metaDeleted = false;
+    const isProtected = templateName.toLowerCase() === "hello_world" || templateName.toLowerCase().startsWith("sample_");
 
-    const res = await fetch(url, {
-      method: "DELETE",
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      let friendlyError = data.error?.message || "Failed to delete template";
-      // Translate Meta error #100 permission error
-      if (data.error?.code === 100 && friendlyError.toLowerCase().includes("permission")) {
-        friendlyError = `Meta Permission Required: Your Meta System User or Token requires "Full Control (Manage WhatsApp Account)" asset access on WABA (${wabaId}) in Meta Business Settings > Accounts > WhatsApp Accounts to permanently delete templates.`;
+    if (!isProtected) {
+      try {
+        let url = `https://graph.facebook.com/v19.0/${wabaId}/message_templates?name=${encodeURIComponent(templateName)}`;
+        if (hsm_id) {
+          url += `&hsm_id=${encodeURIComponent(hsm_id)}`;
+        }
+        const res = await fetch(url, {
+          method: "DELETE",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          metaDeleted = true;
+        }
+      } catch (metaErr) {
+        fastify.log.warn({ metaErr }, "Meta delete call threw exception, proceeding with workspace deletion");
       }
-      return reply.status(400).send({ error: friendlyError, raw: data.error, wabaId });
     }
 
-    // Clean up local TemplateVariable metadata if present
+    // 2. Guarantee template is removed from workspace and dashboard
+    const delId = `del_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    try {
+      await prisma.$executeRawUnsafe(
+        `INSERT INTO DeletedTemplate (id, projectId, wabaId, templateName) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE deletedAt = NOW()`,
+        delId,
+        targetPid,
+        wabaId,
+        templateName
+      );
+    } catch (insertErr) {
+      try {
+        await prisma.$executeRawUnsafe(
+          `INSERT IGNORE INTO DeletedTemplate (id, projectId, wabaId, templateName) VALUES (?, ?, ?, ?)`,
+          delId,
+          targetPid,
+          wabaId,
+          templateName
+        );
+      } catch (e) {}
+    }
+
+    // 3. Clean up local TemplateVariable metadata if present
     try {
       await prisma.$executeRawUnsafe(
         `DELETE FROM TemplateVariable WHERE projectId = ? AND templateName = ?`,
         targetPid,
         templateName
       );
-    } catch (cleanErr) {
-      // Non-fatal if table or row does not exist
-    }
+    } catch (cleanErr) {}
 
-    return reply.send({ success: true, message: `Template "${templateName}" deleted successfully from WABA (${wabaId}).` });
+    return reply.send({
+      success: true,
+      metaDeleted,
+      message: metaDeleted
+        ? `Template "${templateName}" permanently deleted from Meta Cloud API and workspace.`
+        : `Template "${templateName}" deleted successfully from workspace.`
+    });
   } catch (error: any) {
     fastify.log.error(error);
-    return reply.status(500).send({ error: "Failed to delete template from Meta" });
+    return reply.status(500).send({ error: "Failed to delete template" });
   }
 });
 
@@ -4294,6 +4337,17 @@ async function initCampaignTables() {
         createdAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
         updatedAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
         INDEX idx_tpl_var (projectId, templateName)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS DeletedTemplate (
+        id VARCHAR(191) NOT NULL PRIMARY KEY,
+        projectId VARCHAR(191) NOT NULL,
+        wabaId VARCHAR(191) NOT NULL,
+        templateName VARCHAR(191) NOT NULL,
+        deletedAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        INDEX idx_del_tpl (projectId, wabaId, templateName)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
 

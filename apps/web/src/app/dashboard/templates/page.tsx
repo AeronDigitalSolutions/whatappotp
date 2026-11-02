@@ -535,14 +535,6 @@ export default function TemplatesPage() {
       );
       return;
     }
-    const isProtected = name.toLowerCase() === "hello_world" || name.toLowerCase().startsWith("sample_");
-    if (isProtected) {
-      showError(
-        `"${name}" is a default template created by Meta WhatsApp. Meta locks default templates and does not permit them to be deleted.`,
-        "Protected System Template"
-      );
-      return;
-    }
 
     const currentPortfolioName = activeBusiness?.name || "Connected Portfolio";
     const targetWaba = selectedWabaId || wabaId || "2107898293422238";
@@ -553,18 +545,18 @@ export default function TemplatesPage() {
       confirmVariant: "danger",
       loaderVariant: "bubble",
       badge: "Permanent Action",
-      message: `Are you sure you want to delete template "${name}" from Meta WhatsApp account (${currentPortfolioName})?`,
+      message: `Are you sure you want to delete template "${name}" from your workspace and Meta (${currentPortfolioName})?`,
       details: [
         { label: "Business Portfolio", value: currentPortfolioName },
         { label: "Template Name", value: name },
         { label: "Template ID", value: id || "N/A" },
         { label: "Target WABA ID", value: targetWaba }
       ],
-      note: "Once deleted from Meta, any active marketing campaigns or OTP dispatch using this template name will immediately fail.",
+      note: "Once deleted, this template will be removed from your dashboard and cannot be used in broadcasts.",
       confirmText: "Yes, Delete Template",
       cancelText: "Cancel",
       loadingTitle: `Deleting Template "${name}"...`,
-      loadingMessage: `Communicating with Meta WhatsApp Cloud API to permanently delete "${name}". Please wait...`,
+      loadingMessage: `Removing template "${name}". Please wait...`,
       onConfirm: async () => {
         try {
           const pid = getProjectId();
@@ -577,7 +569,9 @@ export default function TemplatesPage() {
             try {
               localStorage.removeItem(`tpl_vars_${name}`);
             } catch (e) {}
-            showSuccess(`Template "${name}" has been deleted successfully from Meta (${currentPortfolioName}).`, "Template Deleted");
+            // Instantly remove from local list for instant response
+            setTemplates(prev => prev.filter(t => t.name !== name));
+            showSuccess(data.message || `Template "${name}" has been deleted successfully.`, "Template Deleted");
             loadTemplates(targetWaba);
           } else {
             showError(data.error || "Failed to delete template", "Deletion Error");
