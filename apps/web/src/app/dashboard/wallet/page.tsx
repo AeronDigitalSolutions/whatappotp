@@ -105,6 +105,7 @@ export default function WalletPage() {
   const [planActive, setPlanActive] = useState<boolean>(false);
   const [selectedPlanId, setSelectedPlanId] = useState<"TRIAL" | "BASIC" | "PROFESSIONAL">("BASIC");
 
+  const [showCartModal, setShowCartModal] = useState<boolean>(false);
   const [processingPayment, setProcessingPayment] = useState<boolean>(false);
 
   // Data lists
@@ -148,6 +149,7 @@ export default function WalletPage() {
   const taxAmount = Math.round((totalBaseAmount * gstRate) / 100 * 100) / 100;
   const totalPayable = Math.round((totalBaseAmount + taxAmount) * 100) / 100;
   const hasItemsSelected = totalBaseAmount > 0;
+  const selectedCount = (rechargeActive && currentRechargeBase > 0 ? 1 : 0) + (seatsActive && currentSeatsBase > 0 ? 1 : 0) + (planActive && currentPlanBase > 0 ? 1 : 0);
 
   const loadWalletData = async () => {
     if (!orgId) return;
@@ -341,102 +343,10 @@ export default function WalletPage() {
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
-      {/* FIXED FLOATING TOP-RIGHT CHECKOUT CAPSULE */}
-      <div className="fixed top-24 right-4 sm:right-8 z-40 w-[calc(100%-2rem)] sm:w-88 transition-all duration-300 drop-shadow-2xl">
-        <div className="bg-slate-900/95 dark:bg-[#0B101D]/95 text-white backdrop-blur-2xl border-2 border-slate-700/80 dark:border-white/20 rounded-3xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.4)] space-y-4">
-          {/* Capsule Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800 dark:border-white/10">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-xs font-black uppercase tracking-wider text-slate-200">
-                Payment Summary
-              </span>
-            </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">
-              SAC: 998313
-            </span>
-          </div>
-
-          {/* Itemized Lines */}
-          <div className="space-y-2 text-xs">
-            {hasItemsSelected ? (
-              <>
-                {rechargeActive && currentRechargeBase > 0 && (
-                  <div className="flex items-center justify-between text-slate-300">
-                    <span className="flex items-center gap-1.5 truncate">
-                      <span>💬</span> Message Fuel Credits
-                    </span>
-                    <span className="font-mono font-bold text-emerald-400">₹{currentRechargeBase.toFixed(2)}</span>
-                  </div>
-                )}
-                {seatsActive && currentSeatsBase > 0 && (
-                  <div className="flex items-center justify-between text-slate-300">
-                    <span className="flex items-center gap-1.5 truncate">
-                      <span>👥</span> +{extraSeatCount} Extra Team Seat{extraSeatCount > 1 ? "s" : ""}
-                    </span>
-                    <span className="font-mono font-bold text-emerald-400">₹{currentSeatsBase.toFixed(2)}</span>
-                  </div>
-                )}
-                {planActive && currentPlanBase > 0 && (
-                  <div className="flex items-center justify-between text-slate-300">
-                    <span className="flex items-center gap-1.5 truncate">
-                      <span>🚀</span> {selectedPlanId} Plan
-                    </span>
-                    <span className="font-mono font-bold text-emerald-400">₹{currentPlanBase.toFixed(2)}</span>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="py-2 text-center text-slate-400 italic text-[11px]">
-                No items selected. Choose an option on the left.
-              </div>
-            )}
-          </div>
-
-          {/* Subtotal & Taxes */}
-          <div className="pt-3 border-t border-slate-800 dark:border-white/10 space-y-1.5 text-xs">
-            <div className="flex justify-between text-slate-400">
-              <span>Base Subtotal (Excl. GST)</span>
-              <span className="font-mono font-semibold text-slate-200">₹{totalBaseAmount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-slate-400">
-              <span>GST (18.0% {isOutOfState ? "IGST" : "CGST+SGST"})</span>
-              <span className="font-mono font-semibold text-slate-200">₹{taxAmount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between items-baseline pt-2 border-t border-slate-800 dark:border-white/10">
-              <span className="text-sm font-extrabold text-white">Total Payable</span>
-              <div className="text-right">
-                <div className="text-2xl font-black text-emerald-400 font-mono">
-                  ₹{totalPayable.toFixed(2)}
-                </div>
-                <span className="text-[10px] text-slate-400">All taxes included</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Primary CTA Button */}
-          <button
-            onClick={handleCombinedCheckout}
-            disabled={processingPayment || !hasItemsSelected || totalBaseAmount <= 0}
-            className="w-full bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:via-emerald-500 hover:to-teal-500 text-slate-950 font-black py-3 px-4 rounded-2xl transition-all shadow-[0_4px_20px_rgba(16,185,129,0.35)] hover:shadow-[0_6px_25px_rgba(16,185,129,0.5)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm cursor-pointer"
-          >
-            {processingPayment ? (
-              <span>Connecting Gateway...</span>
-            ) : hasItemsSelected ? (
-              <span>⚡ Proceed to Payment (₹{totalPayable.toFixed(2)}) ➔</span>
-            ) : (
-              <span>Select an option to proceed</span>
-            )}
-          </button>
-          <div className="text-center text-[10px] text-slate-400 font-medium">
-            🔒 Secure 256-bit encrypted checkout via Razorpay
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto space-y-6 pb-28 pr-0 xl:pr-96">
-        {/* Workspace Baseline Status Strip */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/90 dark:border-white/[0.08]">
+      <div className="max-w-6xl mx-auto space-y-6 pb-20">
+        {/* Top Control Bar: Total Amount + Pay Now on Top Right */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200/90 dark:border-white/[0.08]">
+          {/* Left: Spendable Balance & Baseline info */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/90 dark:border-emerald-500/20 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0 font-bold shadow-2xs">
               <WalletIcon className="w-5 h-5" />
@@ -461,20 +371,61 @@ export default function WalletPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Right: Total Amount & Pay Button */}
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+            {hasItemsSelected && (
+              <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 px-3 py-1.5 rounded-xl">
+                <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Total:</span>
+                <span className="text-sm sm:text-base font-black text-emerald-700 dark:text-emerald-400 font-mono">
+                  ₹{totalPayable.toFixed(2)}
+                </span>
+                <span className="text-[10px] text-slate-500 font-medium hidden md:inline">(incl. GST)</span>
+              </div>
+            )}
+
+            {/* View Cart Breakdown Modal Button */}
+            <button
+              onClick={() => setShowCartModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition shadow-2xs cursor-pointer"
+              title="View Cart & Breakdown"
+            >
+              <span>🛒 Cart</span>
+              {selectedCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center">
+                  {selectedCount}
+                </span>
+              )}
+            </button>
+
+            {/* Primary Pay Button */}
+            <button
+              onClick={handleCombinedCheckout}
+              disabled={processingPayment || !hasItemsSelected || totalBaseAmount <= 0}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black rounded-xl text-xs transition shadow-sm hover:shadow disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
+            >
+              {processingPayment ? (
+                <span>Opening Gateway...</span>
+              ) : hasItemsSelected ? (
+                <span>⚡ Pay Now (₹{totalPayable.toFixed(2)}) ➔</span>
+              ) : (
+                <span>Select an Option Below</span>
+              )}
+            </button>
+
+            {/* Secondary Actions */}
             <button
               onClick={() => setShowProfileModal(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition shadow-2xs cursor-pointer"
+              className="p-2 bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl text-slate-600 dark:text-slate-300 transition cursor-pointer"
+              title="GST Profile"
             >
-              <ShieldCheckIcon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-              <span>GST Profile</span>
+              <ShieldCheckIcon className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={loadWalletData}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition shadow-2xs cursor-pointer"
+              className="p-2 bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl text-slate-600 dark:text-slate-300 transition cursor-pointer"
+              title="Refresh Wallet"
             >
-              <RefreshIcon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-              <span>Refresh</span>
+              <RefreshIcon className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -534,13 +485,13 @@ export default function WalletPage() {
             <div className="bg-white dark:bg-[#0B101D]/80 border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-7 shadow-xs">
               <div className="mb-5">
                 <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
-                  Select What You Want To Do
+                  Step 1: Choose Your Actions
                 </span>
                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight mt-1">
                   What would you like to do today?
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Click any tile to configure. You can select one action or combine multiple items into a single checkout.
+                  Select one option or combine multiple purchases into a single checkout.
                 </p>
               </div>
 
@@ -1266,6 +1217,157 @@ export default function WalletPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Shopping Cart & Itemized Breakdown */}
+      {showCartModal && (
+        <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 dark:border-white/10 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-150 dark:border-white/[0.08]">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
+                  Shopping Cart
+                </span>
+                <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 mt-1">
+                  Cart &amp; Billing Breakdown
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowCartModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.12] flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Cart Items */}
+            <div className="space-y-2.5 max-h-[50vh] overflow-y-auto pr-1">
+              {hasItemsSelected ? (
+                <>
+                  {rechargeActive && currentRechargeBase > 0 && (
+                    <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-white/[0.03] rounded-2xl border border-slate-150 dark:border-white/[0.06]">
+                      <div className="pr-3">
+                        <div className="font-extrabold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                          <span>💬</span> Message Wallet Credits
+                        </div>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          Prepaid balance for WhatsApp OTP (~{Math.floor(currentRechargeBase / 0.20).toLocaleString()} OTPs)
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="font-mono font-black text-slate-900 dark:text-slate-100 text-sm">
+                          ₹{currentRechargeBase.toFixed(2)}
+                        </span>
+                        <button
+                          onClick={() => setRechargeActive(false)}
+                          className="text-slate-400 hover:text-red-500 text-xs font-bold cursor-pointer"
+                          title="Remove item"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {seatsActive && currentSeatsBase > 0 && (
+                    <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-white/[0.03] rounded-2xl border border-slate-150 dark:border-white/[0.06]">
+                      <div className="pr-3">
+                        <div className="font-extrabold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                          <span>👥</span> Additional Team Seats ({extraSeatCount} seat{extraSeatCount > 1 ? "s" : ""})
+                        </div>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          ₹500 / seat / month
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="font-mono font-black text-slate-900 dark:text-slate-100 text-sm">
+                          ₹{currentSeatsBase.toFixed(2)}
+                        </span>
+                        <button
+                          onClick={() => setSeatsActive(false)}
+                          className="text-slate-400 hover:text-red-500 text-xs font-bold cursor-pointer"
+                          title="Remove item"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {planActive && currentPlanBase > 0 && (
+                    <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-white/[0.03] rounded-2xl border border-slate-150 dark:border-white/[0.06]">
+                      <div className="pr-3">
+                        <div className="font-extrabold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                          <span>🚀</span> {selectedPlanId} Subscription Plan
+                        </div>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          Monthly platform subscription tier
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="font-mono font-black text-slate-900 dark:text-slate-100 text-sm">
+                          ₹{currentPlanBase.toFixed(2)}
+                        </span>
+                        <button
+                          onClick={() => setPlanActive(false)}
+                          className="text-slate-400 hover:text-red-500 text-xs font-bold cursor-pointer"
+                          title="Remove item"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="py-8 text-center text-slate-400 text-sm">
+                  Your cart is currently empty. Please select an option from the page.
+                </div>
+              )}
+            </div>
+
+            {/* Tax Breakdown */}
+            {hasItemsSelected && (
+              <div className="pt-3 border-t border-slate-150 dark:border-white/[0.06] space-y-2 text-xs">
+                <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                  <span>Base Subtotal (Excl. Tax)</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-slate-100">₹{totalBaseAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                  <span>GST (18.0% {isOutOfState ? "IGST" : "CGST+SGST"}) [SAC: 998313]</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-slate-100">₹{taxAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-baseline pt-2 border-t border-slate-200 dark:border-white/10 text-sm font-black text-slate-900 dark:text-slate-100">
+                  <span>Total Payable Amount</span>
+                  <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                    ₹{totalPayable.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Checkout Button */}
+            <div className="pt-2">
+              <button
+                onClick={() => {
+                  setShowCartModal(false);
+                  handleCombinedCheckout();
+                }}
+                disabled={processingPayment || !hasItemsSelected || totalBaseAmount <= 0}
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm transition shadow-md disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2"
+              >
+                {processingPayment ? (
+                  <span>Connecting to Razorpay...</span>
+                ) : (
+                  <span>⚡ Proceed to Payment (₹{totalPayable.toFixed(2)}) ➔</span>
+                )}
+              </button>
+              <p className="text-center text-[10px] text-slate-400 mt-2">
+                🔒 Secure 256-bit encrypted checkout via Razorpay • UPI, NetBanking, Cards
+              </p>
+            </div>
           </div>
         </div>
       )}
