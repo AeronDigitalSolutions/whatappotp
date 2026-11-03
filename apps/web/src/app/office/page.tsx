@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getApiUrl } from "@/lib/api";
 import ThemeToggle from "@/components/ThemeToggle";
+import PricingAdminModule from "@/components/PricingAdminModule";
 
 export type OfficeModule =
   | "leads"
@@ -15,7 +16,8 @@ export type OfficeModule =
   | "revenue"
   | "activity"
   | "team"
-  | "users";
+  | "users"
+  | "pricing";
 
 export interface TeamMember {
   id: string;
@@ -559,7 +561,7 @@ export default function OfficeDashboardPage() {
       setTeamForm((prev) => ({
         ...prev,
         role,
-        allowedModules: ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team"],
+        allowedModules: ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team", "users", "pricing"],
         canViewAllLeads: true,
         canManageSettings: true,
         canViewRevenue: true
@@ -568,7 +570,7 @@ export default function OfficeDashboardPage() {
       setTeamForm((prev) => ({
         ...prev,
         role,
-        allowedModules: ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team"],
+        allowedModules: ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team", "users", "pricing"],
         canViewAllLeads: true,
         canManageSettings: true,
         canViewRevenue: true
@@ -1037,7 +1039,7 @@ export default function OfficeDashboardPage() {
   );
 
   const allowedModulesList: OfficeModule[] = isManager
-    ? ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team", "users"]
+    ? ["leads", "chat", "payments", "onboarding", "portfolio", "revenue", "activity", "team", "users", "pricing"]
     : (Array.isArray(user?.allowedModules) && user.allowedModules.length > 0
       ? (user.allowedModules as OfficeModule[])
       : ["leads", "chat", "payments"]);
@@ -1152,6 +1154,18 @@ export default function OfficeDashboardPage() {
       ),
       badge: platformUsers.length > 0 ? String(platformUsers.length) : undefined,
       badgeColor: "bg-blue-600 text-white"
+    },
+    {
+      id: "pricing",
+      name: "Pricing & Safety Admin",
+      category: "ops",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+      ),
+      badge: "Margins",
+      badgeColor: "bg-purple-600 text-white"
     }
   ];
 
@@ -3415,6 +3429,13 @@ export default function OfficeDashboardPage() {
             </div>
           )}
 
+          {/* Module: Pricing & Safety Admin */}
+          {activeModule === "pricing" && (
+            <div className="space-y-6">
+              <PricingAdminModule />
+            </div>
+          )}
+
           {/* Access Restricted Screen if current activeModule is not in allowed list */}
           {!allowedModulesList.includes(activeModule) && (
             <div className="bg-white dark:bg-[#0B101D] rounded-3xl p-10 border border-slate-200/90 dark:border-white/10 shadow-xs flex flex-col items-center justify-center text-center space-y-4 max-w-xl mx-auto my-12">
@@ -4080,7 +4101,8 @@ export default function OfficeDashboardPage() {
                     { id: "revenue" as OfficeModule, label: "Revenue Analytics" },
                     { id: "activity" as OfficeModule, label: "Activity & Logs" },
                     { id: "team" as OfficeModule, label: "Team & Permissions" },
-                    { id: "users" as OfficeModule, label: "Users & Clients" }
+                    { id: "users" as OfficeModule, label: "Users & Clients" },
+                    { id: "pricing" as OfficeModule, label: "Pricing & Margins" }
                   ].map((mod) => {
                     const checked = teamForm.allowedModules.includes(mod.id);
                     return (

@@ -39,7 +39,6 @@ const MODULE_TITLES: Record<string, string> = {
   "/dashboard/numbers": "Numbers & Routing",
   "/dashboard/green-tick": "WhatsApp Verification",
   "/dashboard/wallet": "Wallet & Billing",
-  "/dashboard/pricing-admin": "Pricing & Safety Admin",
   "/dashboard/logs": "Logs & Audits",
   "/dashboard/api-keys": "API Keys",
   "/dashboard/settings": "Settings",
@@ -57,7 +56,6 @@ const MODULE_SUBTITLES: Record<string, string> = {
   "/dashboard/numbers": "Manage Meta WhatsApp Business Accounts, phone numbers, and webhooks.",
   "/dashboard/green-tick": "Official Meta green tick verification application and compliance.",
   "/dashboard/wallet": "Prepaid credits, usage analytics, auto-recharge and invoices.",
-  "/dashboard/pricing-admin": "Meta conversation rates, platform margins, and safety controls.",
   "/dashboard/logs": "Detailed audit trails and message delivery logs.",
   "/dashboard/api-keys": "API credentials, webhook secrets, and developer keys.",
   "/dashboard/settings": "Workspace configuration, profile, and team settings.",
@@ -96,7 +94,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       "/dashboard/numbers": "Numbers & Routing | Digital Beings",
       "/dashboard/green-tick": "WhatsApp Business Verification | Digital Beings",
       "/dashboard/wallet": "Wallet & Billing | Digital Beings",
-      "/dashboard/pricing-admin": "Pricing & Safety Admin | Digital Beings",
       "/dashboard/logs": "OTP Logs & Audits | Digital Beings",
       "/dashboard/api-keys": "API Keys | Digital Beings",
       "/dashboard/settings": "Settings | Digital Beings",
@@ -198,7 +195,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const showGovernanceSection =
     hasAccess("team") ||
     hasAccess("settings") ||
-    hasAccess("pricing_admin") ||
     hasAccess("super_admin");
 
   const renderNavLinks = (onItemClick?: () => void) => (
@@ -345,14 +341,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               <div className="flex items-center gap-3 min-w-0">
                 <SettingsIcon className={iconClass("/dashboard/settings")} />
                 <span className="truncate">Settings</span>
-              </div>
-            </Link>
-          )}
-          {hasAccess("pricing_admin") && (
-            <Link href="/dashboard/pricing-admin" onClick={onItemClick} className={navLinkClass("/dashboard/pricing-admin")}>
-              <div className="flex items-center gap-3 min-w-0">
-                <PricingAdminIcon className={iconClass("/dashboard/pricing-admin")} />
-                <span className="truncate">Pricing &amp; Safety Admin</span>
               </div>
             </Link>
           )}

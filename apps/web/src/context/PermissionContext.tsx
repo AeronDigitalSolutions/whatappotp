@@ -31,7 +31,6 @@ export const ALL_MODULES = [
   { key: "green-tick", label: "WhatsApp Verification", path: "/dashboard/green-tick", icon: "✅" },
   { key: "logs", label: "OTP & Audit Logs", path: "/dashboard/logs", icon: "📋" },
   { key: "wallet", label: "Wallet & Billing", path: "/dashboard/wallet", icon: "💳" },
-  { key: "pricing_admin", label: "Pricing & Safety Admin", path: "/dashboard/pricing-admin", icon: "🛡️" },
   { key: "api_keys", label: "Developer API Keys", path: "/dashboard/api-keys", icon: "🔑" },
   { key: "settings", label: "Workspace Settings", path: "/dashboard/settings", icon: "⚙️" },
   { key: "team", label: "Team & Role Manager", path: "/dashboard/team", icon: "👥" },
@@ -48,7 +47,7 @@ export const ROLE_PRESETS: Record<RoleKey, RoleDefinition> = {
     description: "Total cross-tenant authority across all businesses, users, and platform financials.",
     permissions: [
       "inbox", "automations", "ecommerce", "campaigns", "templates",
-      "numbers", "green-tick", "logs", "wallet", "pricing_admin",
+      "numbers", "green-tick", "logs", "wallet",
       "api_keys", "settings", "team", "super_admin"
     ]
   },
@@ -61,7 +60,7 @@ export const ROLE_PRESETS: Record<RoleKey, RoleDefinition> = {
     description: "Full control over company numbers, wallet recharges, team roles, and all modules.",
     permissions: [
       "inbox", "automations", "ecommerce", "campaigns", "templates",
-      "numbers", "green-tick", "logs", "wallet", "pricing_admin",
+      "numbers", "green-tick", "logs", "wallet",
       "api_keys", "settings", "team"
     ]
   },
@@ -99,7 +98,7 @@ export const ROLE_PRESETS: Record<RoleKey, RoleDefinition> = {
     icon: "💳",
     colorClass: "bg-rose-100 text-rose-900 border-rose-300",
     description: "Dedicated access to wallet recharges, GST invoices, and message cost breakdowns.",
-    permissions: ["wallet", "pricing_admin", "logs"]
+    permissions: ["wallet", "logs"]
   },
   CUSTOM: {
     key: "CUSTOM",
@@ -189,7 +188,6 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
       "/dashboard/green-tick": "green-tick",
       "/dashboard/logs": "logs",
       "/dashboard/wallet": "wallet",
-      "/dashboard/pricing-admin": "pricing_admin",
       "/dashboard/api-keys": "api_keys",
       "/dashboard/settings": "settings",
       "/dashboard/team": "team",
