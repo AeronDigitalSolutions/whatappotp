@@ -332,14 +332,14 @@ export default function NumbersPage() {
                       {/* Phone Info */}
                       <td className="px-6 py-4">
                         <div className="font-bold text-slate-900 dark:text-slate-100 font-mono text-sm">{item.displayPhone}</div>
-                        <div className="text-xs text-slate-500">{item.verifiedName || "WhatsApp Business"}</div>
-                        <div className="text-[10px] text-slate-400 font-mono mt-0.5">ID: {item.phoneId}</div>
+                        <div className="text-xs text-slate-600 dark:text-slate-300 font-medium">{item.verifiedName || "WhatsApp Business"}</div>
+                        <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">ID: {item.phoneId}</div>
                       </td>
 
                       {/* Portfolio / WABA */}
                       <td className="px-6 py-4">
-                        <div className="font-medium text-slate-800 text-xs">{item.wabaName || "Default WABA"}</div>
-                        <div className="text-[10px] text-slate-400 font-mono">WABA: {item.wabaId}</div>
+                        <div className="font-bold text-slate-900 dark:text-slate-100 text-xs">{item.wabaName || "Default WABA"}</div>
+                        <div className="text-[10px] text-slate-400 dark:text-slate-400 font-mono">WABA: {item.wabaId}</div>
                       </td>
 
                       {/* Assigned Services: CHECKBOXES */}
@@ -404,16 +404,16 @@ export default function NumbersPage() {
                                 🌟 All 3 Services Active (Shared Number)
                               </span>
                             ) : totalActiveServices > 0 ? (
-                              <span className="text-slate-600">
+                              <span className="text-slate-600 dark:text-slate-300">
                                 Active for {totalActiveServices} of 3 services
                               </span>
                             ) : (
-                              <span className="text-amber-600 font-semibold">
+                              <span className="text-amber-600 dark:text-amber-400 font-semibold">
                                 ⚠️ No services enabled (Number is inactive)
                               </span>
                             )}
                             {updatingPhoneId === item.phoneId && (
-                              <span className="text-[10px] text-emerald-600 animate-pulse">Saving...</span>
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 animate-pulse">Saving...</span>
                             )}
                           </div>
                         </div>
@@ -428,7 +428,7 @@ export default function NumbersPage() {
                         ) : (
                           <button
                             onClick={() => handleSetPrimary(item.phoneId)}
-                            className="text-xs text-slate-500 hover:text-slate-800 font-semibold hover:underline"
+                            className="text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-semibold hover:underline"
                           >
                             Set Primary
                           </button>

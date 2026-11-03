@@ -520,7 +520,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               </Link>
             </div>
 
-            {/* User Avatar Circle */}
+            {/* User Avatar Circle & Owner Name */}
             <div className="flex items-center gap-2 pl-2 border-l border-slate-300/80 dark:border-white/[0.1] whitespace-nowrap shrink-0">
               <div
                 className="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-[0_0_14px_rgba(16,185,129,0.3)] select-none border border-white/20 shrink-0"
@@ -528,9 +528,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               >
                 {userName.slice(0, 2).toUpperCase() || "WP"}
               </div>
+              <span className="text-xs font-bold text-slate-900 dark:text-slate-100 hidden sm:inline truncate max-w-[130px]">
+                {userName}
+              </span>
               <button
                 onClick={handleLogout}
-                className="text-slate-700 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 text-xs font-bold transition hidden sm:inline cursor-pointer whitespace-nowrap shrink-0"
+                className="text-slate-700 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 text-xs font-bold transition hidden sm:inline cursor-pointer whitespace-nowrap shrink-0 ml-0.5"
                 title="Logout"
               >
                 Logout

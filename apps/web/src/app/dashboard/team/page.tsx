@@ -371,7 +371,7 @@ export default function TeamPage() {
       )}
 
       {/* Top Control Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200/90">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200/90 dark:border-white/[0.08]">
         <div className="flex items-center gap-3.5">
           <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/90 dark:border-indigo-500/20 flex items-center justify-center text-indigo-700 dark:text-indigo-400 shrink-0 font-bold shadow-2xs">
             <TeamIcon className="w-5 h-5" />
@@ -481,10 +481,10 @@ export default function TeamPage() {
                   <th className="py-3.5 px-5 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/[0.08]">
                 {members.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-slate-500 font-medium">
+                    <td colSpan={5} className="p-8 text-center text-slate-500 dark:text-slate-400 font-medium">
                       No members added yet. Click &quot;Invite Member&quot; above to add colleagues.
                     </td>
                   </tr>
@@ -495,19 +495,19 @@ export default function TeamPage() {
                       <tr key={m.membershipId} className="hover:bg-slate-50/70 dark:hover:bg-white/[0.02] transition">
                         <td className="py-4 px-5">
                           <div className="flex items-center gap-3">
-                            <span className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center font-extrabold text-indigo-700 text-xs shrink-0 shadow-2xs">
+                            <span className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/20 border border-indigo-200/80 dark:border-indigo-500/30 flex items-center justify-center font-extrabold text-indigo-700 dark:text-indigo-300 text-xs shrink-0 shadow-2xs">
                               {(m.name || m.email || "U").charAt(0).toUpperCase()}
                             </span>
                             <div>
-                              <div className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
-                                <span>{m.name || "Colleague"}</span>
+                              <div className="font-extrabold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
+                                <span className="text-slate-900 dark:text-slate-100 font-bold">{m.name || "Colleague"}</span>
                                 {isOwner && (
                                   <span className="text-[10px] uppercase font-black text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-500/30">
                                     Owner
                                   </span>
                                 )}
                               </div>
-                              <div className="text-xs text-slate-500 font-mono mt-0.5">{m.email}</div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">{m.email}</div>
                             </div>
                           </div>
                         </td>
@@ -524,7 +524,7 @@ export default function TeamPage() {
                             <span>{m.customRoleName || (isOwner ? "Company Owner" : "Member")}</span>
                           </div>
                           {m.roleDescription && (
-                            <div className="text-xs text-slate-500 mt-1 line-clamp-1 max-w-xs font-medium">
+                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1 max-w-xs font-medium">
                               {m.roleDescription}
                             </div>
                           )}
@@ -533,7 +533,7 @@ export default function TeamPage() {
                         <td className="py-4 px-5">
                           {isOwner ? (
                             <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-500/30">
-                              <SparklesIcon className="w-3.5 h-3.5 text-emerald-600" />
+                              <SparklesIcon className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                               <span>All Modules Unrestricted</span>
                             </span>
                           ) : m.rolePermissions && m.rolePermissions.length > 0 ? (
@@ -552,11 +552,11 @@ export default function TeamPage() {
                               })}
                             </div>
                           ) : (
-                            <span className="text-xs text-slate-500 italic">Default View Access</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400 italic">Default View Access</span>
                           )}
                         </td>
 
-                        <td className="py-4 px-5 text-slate-600 text-xs font-medium">
+                        <td className="py-4 px-5 text-slate-600 dark:text-slate-300 text-xs font-medium">
                           {new Date(m.joinedAt).toLocaleDateString("en-IN", {
                             day: "numeric",
                             month: "short",

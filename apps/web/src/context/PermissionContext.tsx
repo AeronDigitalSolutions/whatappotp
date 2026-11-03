@@ -43,7 +43,7 @@ export const ROLE_PRESETS: Record<RoleKey, RoleDefinition> = {
     label: "Super Admin (Platform Owner)",
     badge: "Super Admin",
     icon: "👑",
-    colorClass: "bg-purple-100 text-purple-900 border-purple-300",
+    colorClass: "bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30",
     description: "Total cross-tenant authority across all businesses, users, and platform financials.",
     permissions: [
       "inbox", "automations", "ecommerce", "campaigns", "templates",
@@ -56,7 +56,7 @@ export const ROLE_PRESETS: Record<RoleKey, RoleDefinition> = {
     label: "Business Owner (Company Full Access)",
     badge: "Owner",
     icon: "🏢",
-    colorClass: "bg-emerald-100 text-emerald-900 border-emerald-300",
+    colorClass: "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30",
     description: "Full control over company numbers, wallet recharges, team roles, and all modules.",
     permissions: [
       "inbox", "automations", "ecommerce", "campaigns", "templates",
@@ -69,7 +69,7 @@ export const ROLE_PRESETS: Record<RoleKey, RoleDefinition> = {
     label: "Customer Support Specialist",
     badge: "Support",
     icon: "💬",
-    colorClass: "bg-teal-100 text-teal-900 border-teal-300",
+    colorClass: "bg-teal-100 text-teal-900 border-teal-300 dark:bg-teal-500/20 dark:text-teal-300 dark:border-teal-500/30",
     description: "Focuses on 2-way live chat customer support and pre-approved WhatsApp templates.",
     permissions: ["inbox", "templates", "logs"]
   },
@@ -78,7 +78,7 @@ export const ROLE_PRESETS: Record<RoleKey, RoleDefinition> = {
     label: "Growth & Marketing Manager",
     badge: "Marketing",
     icon: "📣",
-    colorClass: "bg-blue-100 text-blue-900 border-blue-300",
+    colorClass: "bg-blue-100 text-blue-900 border-blue-300 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30",
     description: "Builds broadcast campaigns, tests templates, and monitors delivery engagement.",
     permissions: ["campaigns", "templates", "numbers", "logs"]
   },
@@ -87,7 +87,7 @@ export const ROLE_PRESETS: Record<RoleKey, RoleDefinition> = {
     label: "E-Commerce Operations Lead",
     badge: "E-Commerce",
     icon: "🛍️",
-    colorClass: "bg-amber-100 text-amber-900 border-amber-300",
+    colorClass: "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30",
     description: "Manages Shopify/WooCommerce recipes, abandoned cart recovery, and COD confirmation.",
     permissions: ["ecommerce", "automations", "inbox", "logs"]
   },
@@ -96,7 +96,7 @@ export const ROLE_PRESETS: Record<RoleKey, RoleDefinition> = {
     label: "Finance & Accounts Specialist",
     badge: "Finance",
     icon: "💳",
-    colorClass: "bg-rose-100 text-rose-900 border-rose-300",
+    colorClass: "bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30",
     description: "Dedicated access to wallet recharges, GST invoices, and message cost breakdowns.",
     permissions: ["wallet", "logs"]
   },
@@ -105,7 +105,7 @@ export const ROLE_PRESETS: Record<RoleKey, RoleDefinition> = {
     label: "Custom Granular Role Simulator",
     badge: "Custom",
     icon: "⚙️",
-    colorClass: "bg-indigo-100 text-indigo-900 border-indigo-300",
+    colorClass: "bg-indigo-100 text-indigo-900 border-indigo-300 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30",
     description: "Interactive permission tester where you toggle any exact module access live.",
     permissions: ["inbox", "automations"]
   }
