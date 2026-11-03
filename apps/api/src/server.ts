@@ -5544,6 +5544,327 @@ fastify.post("/v1/inbox/conversation/:conversationId/read", async (request: any,
   }
 });
 
+fastify.post("/v1/inbox/conversation/start/:projectId", async (request: any, reply) => {
+  const { projectId } = request.params;
+  const {
+    customerPhone: rawCustomerPhone,
+    customerName,
+    senderPhoneId: explicitPhoneId,
+    messageType = "text",
+    body: rawBody,
+    templateName,
+    templateLanguage = "en_US",
+    templateVariables = []
+  } = request.body || {};
+
+  if (!rawCustomerPhone) {
+    return reply.status(400).send({ error: "Customer phone number is required" });
+  }
+
+  // Normalize phone number (strip whitespace, dashes, plus sign)
+  let cleanPhone = String(rawCustomerPhone).replace(/[^\d+]/g, "");
+  if (cleanPhone.startsWith("+")) {
+    cleanPhone = cleanPhone.slice(1);
+  }
+  // If 10-digit Indian mobile number, prefix with 91
+  if (cleanPhone.length === 10) {
+    cleanPhone = "91" + cleanPhone;
+  }
+
+  try {
+    let targetPid = projectId;
+    let project = await prisma.project.findUnique({ where: { id: targetPid } });
+    if (!project && targetPid === "default") {
+      project = await prisma.project.findFirst({ where: { metaAccessToken: { not: null } } }) || await prisma.project.findFirst();
+      if (project) targetPid = project.id;
+    }
+
+    // Determine sender phone ID
+    let phoneId = explicitPhoneId;
+    if (!phoneId) {
+      const defPhone = await prisma.phoneNumber.findFirst({
+        where: { projectId: targetPid, isDefault: true }
+      }) || await prisma.phoneNumber.findFirst({
+        where: { projectId: targetPid }
+      });
+      if (defPhone) phoneId = defPhone.phoneId;
+    }
+    if (!phoneId) {
+      phoneId = project?.metaPhoneId || "1406142089245094";
+    }
+
+    // Check if conversation already exists
+    const existing: any = await prisma.$queryRawUnsafe(`
+      SELECT * FROM ChatConversation
+      WHERE projectId = ? AND customerPhone = ?
+      LIMIT 1
+    `, targetPid, cleanPhone).catch(() => []);
+
+    let convId = crypto.randomUUID();
+    let isExisting = false;
+    let initialLastMessage = "Conversation started";
+
+    if (Array.isArray(existing) && existing.length > 0) {
+      convId = existing[0].id;
+      isExisting = true;
+      initialLastMessage = existing[0].lastMessage || "Conversation opened";
+    }
+
+    let metaMessageId = "out_" + Date.now();
+    let outboundBody = rawBody ? String(rawBody).trim() : "";
+    let dispatchSuccess = true;
+    let metaErrorMessage = "";
+
+    // If template message requested
+    if (messageType === "template" && templateName) {
+      outboundBody = `[Template: ${templateName}]`;
+      if (project?.metaAccessToken && phoneId) {
+        try {
+          const components: any[] = [];
+          if (Array.isArray(templateVariables) && templateVariables.length > 0) {
+            components.push({
+              type: "body",
+              parameters: templateVariables.map((v: any) => ({
+                type: "text",
+                text: String(v)
+              }))
+            });
+          }
+
+          const metaPayload: any = {
+            messaging_product: "whatsapp",
+            recipient_type: "individual",
+            to: cleanPhone,
+            type: "template",
+            template: {
+              name: templateName,
+              language: { code: templateLanguage || "en_US" }
+            }
+          };
+          if (components.length > 0) {
+            metaPayload.template.components = components;
+          }
+
+          const metaRes = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${project.metaAccessToken}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(metaPayload)
+          });
+          const metaData = await metaRes.json();
+          if (metaData.messages && metaData.messages[0]?.id) {
+            metaMessageId = metaData.messages[0].id;
+          } else if (metaData.error) {
+            dispatchSuccess = false;
+            metaErrorMessage = metaData.error.message || "Meta Template dispatch error";
+            fastify.log.warn(`Meta template outbound error: ${JSON.stringify(metaData.error)}`);
+          }
+        } catch (e: any) {
+          fastify.log.warn("Meta template dispatch exception: " + e.message);
+          metaErrorMessage = e.message;
+        }
+      }
+    } else if (messageType === "text" && outboundBody) {
+      // Direct text dispatch
+      if (project?.metaAccessToken && phoneId) {
+        try {
+          const metaRes = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${project.metaAccessToken}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              messaging_product: "whatsapp",
+              recipient_type: "individual",
+              to: cleanPhone,
+              type: "text",
+              text: { body: outboundBody }
+            })
+          });
+          const metaData = await metaRes.json();
+          if (metaData.messages && metaData.messages[0]?.id) {
+            metaMessageId = metaData.messages[0].id;
+          } else if (metaData.error) {
+            dispatchSuccess = false;
+            metaErrorMessage = metaData.error.message || "Meta Text dispatch error";
+            fastify.log.warn(`Meta outbound text dispatch error: ${JSON.stringify(metaData.error)}`);
+            if (metaData.error.code === 131047 || metaData.error.error_subcode === 2494010) {
+              metaErrorMessage = "WhatsApp 24-hour customer service window is closed for this number. To initiate a new conversation with a cold number, please send an Approved Template.";
+            }
+          }
+        } catch (e: any) {
+          fastify.log.warn("Meta outbound dispatch warning: " + e.message);
+          metaErrorMessage = e.message;
+        }
+      }
+    }
+
+    const finalLastMessage = outboundBody || initialLastMessage;
+
+    // Create or update ChatConversation
+    if (isExisting) {
+      await prisma.$executeRawUnsafe(`
+        UPDATE ChatConversation SET
+          phoneId = ?,
+          customerName = COALESCE(?, customerName),
+          lastMessage = ?,
+          lastMessageDirection = 'OUTBOUND',
+          lastMessageAt = NOW(),
+          status = 'OPEN',
+          updatedAt = NOW()
+        WHERE id = ?
+      `, phoneId, customerName || null, finalLastMessage, convId);
+    } else {
+      await prisma.$executeRawUnsafe(`
+        INSERT INTO ChatConversation (
+          id, projectId, phoneId, customerPhone, customerName,
+          lastMessage, lastMessageDirection, lastMessageAt,
+          serviceWindowExpiresAt, status, unreadCount, tags
+        ) VALUES (?, ?, ?, ?, ?, ?, 'OUTBOUND', NOW(), DATE_ADD(NOW(), INTERVAL 24 HOUR), 'OPEN', 0, '[]')
+      `, convId, targetPid, phoneId, cleanPhone, customerName || null, finalLastMessage);
+    }
+
+    // Insert ChatMessage if there is an outbound message
+    let insertedMessage: any = null;
+    if (outboundBody) {
+      const msgId = crypto.randomUUID();
+      await prisma.$executeRawUnsafe(`
+        INSERT INTO ChatMessage (
+          id, conversationId, projectId, senderPhone, recipientPhone,
+          direction, type, body, metaMessageId, status, createdAt
+        ) VALUES (?, ?, ?, ?, ?, 'OUTBOUND', ?, ?, ?, ?, NOW())
+      `, msgId, convId, targetPid, phoneId, cleanPhone, messageType === "template" ? "template" : "text", outboundBody, metaMessageId, dispatchSuccess ? "sent" : "failed");
+
+      insertedMessage = {
+        id: msgId,
+        conversationId: convId,
+        direction: "OUTBOUND",
+        type: messageType === "template" ? "template" : "text",
+        body: outboundBody,
+        senderPhone: phoneId,
+        status: dispatchSuccess ? "sent" : "failed",
+        createdAt: new Date().toISOString()
+      };
+    }
+
+    // Fetch refreshed conversation record
+    const updatedRows: any = await prisma.$queryRawUnsafe(`
+      SELECT * FROM ChatConversation WHERE id = ? LIMIT 1
+    `, convId).catch(() => []);
+
+    const updatedConv = Array.isArray(updatedRows) && updatedRows[0] ? updatedRows[0] : {
+      id: convId,
+      projectId: targetPid,
+      phoneId,
+      customerPhone: cleanPhone,
+      customerName: customerName || null,
+      lastMessage: finalLastMessage,
+      lastMessageDirection: "OUTBOUND",
+      lastMessageAt: new Date().toISOString(),
+      status: "OPEN",
+      unreadCount: 0,
+      tags: []
+    };
+    if (typeof updatedConv.tags === "string") {
+      try { updatedConv.tags = JSON.parse(updatedConv.tags); } catch (e) { updatedConv.tags = []; }
+    }
+
+    return reply.send({
+      success: true,
+      conversationId: convId,
+      conversation: updatedConv,
+      message: insertedMessage,
+      metaDispatched: dispatchSuccess,
+      warning: !dispatchSuccess ? metaErrorMessage : undefined
+    });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to start conversation: " + error.message });
+  }
+});
+
+fastify.get("/v1/inbox/contacts/search/:projectId", async (request: any, reply) => {
+  const { projectId } = request.params;
+  const { query = "" } = (request.query || {}) as any;
+  const q = String(query).trim();
+
+  if (!q) {
+    return reply.send({ success: true, contacts: [] });
+  }
+
+  try {
+    let targetPid = projectId;
+    const cleanDigits = q.replace(/\D/g, "");
+    const searchPattern = `%${q}%`;
+    const digitPattern = cleanDigits ? `%${cleanDigits}%` : searchPattern;
+
+    // 1. Search existing ChatConversations
+    const convRows: any = await prisma.$queryRawUnsafe(`
+      SELECT customerPhone as phone, customerName as name, id as conversationId, 'Chat' as source, lastMessageAt as lastSeen
+      FROM ChatConversation
+      WHERE projectId = ? AND (customerPhone LIKE ? OR customerName LIKE ?)
+      ORDER BY lastMessageAt DESC
+      LIMIT 10
+    `, targetPid, digitPattern, searchPattern).catch(() => []);
+
+    // 2. Search Campaign Recipients
+    const campRows: any = await prisma.$queryRawUnsafe(`
+      SELECT cr.phone as phone, cr.name as name, NULL as conversationId, 'Campaign' as source, cr.createdAt as lastSeen
+      FROM CampaignRecipient cr
+      JOIN Campaign c ON cr.campaignId = c.id
+      WHERE c.projectId = ? AND (cr.phone LIKE ? OR cr.name LIKE ?)
+      ORDER BY cr.createdAt DESC
+      LIMIT 10
+    `, targetPid, digitPattern, searchPattern).catch(() => []);
+
+    // 3. Search OTP Requests
+    const otpRows: any = await prisma.$queryRawUnsafe(`
+      SELECT phone as phone, reference as name, NULL as conversationId, 'OTP' as source, createdAt as lastSeen
+      FROM OtpRequest
+      WHERE projectId = ? AND phone LIKE ?
+      ORDER BY createdAt DESC
+      LIMIT 10
+    `, targetPid, digitPattern).catch(() => []);
+
+    // Merge and deduplicate by clean phone
+    const contactMap = new Map<string, any>();
+    const allRows = [
+      ...(Array.isArray(convRows) ? convRows : []),
+      ...(Array.isArray(campRows) ? campRows : []),
+      ...(Array.isArray(otpRows) ? otpRows : [])
+    ];
+
+    for (const row of allRows) {
+      if (!row.phone) continue;
+      const normalizedPhone = String(row.phone).replace(/\D/g, "");
+      if (!contactMap.has(normalizedPhone)) {
+        contactMap.set(normalizedPhone, {
+          phone: row.phone,
+          name: row.name || null,
+          conversationId: row.conversationId || null,
+          source: row.source,
+          lastSeen: row.lastSeen
+        });
+      } else {
+        const existing = contactMap.get(normalizedPhone);
+        if (!existing.name && row.name) existing.name = row.name;
+        if (!existing.conversationId && row.conversationId) existing.conversationId = row.conversationId;
+      }
+    }
+
+    return reply.send({
+      success: true,
+      contacts: Array.from(contactMap.values()).slice(0, 15)
+    });
+  } catch (error: any) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Failed to search contacts" });
+  }
+});
+
 // --- MODULE 9: CHATBOT & CONVERSATIONAL AUTOMATIONS ---
 
 fastify.get("/v1/automations/:projectId", async (request: any, reply) => {

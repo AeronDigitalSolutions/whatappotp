@@ -1,9 +1,18 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { getApiUrl } from "@/lib/api";
 import { useSubscription } from "@/context/SubscriptionContext";
+
+interface ContactSearchResult {
+  phone: string;
+  name?: string;
+  source: string;
+  conversationId?: string;
+  lastSeen?: string;
+}
 
 interface PhoneNumberItem {
   id: string;
@@ -92,6 +101,28 @@ export default function LiveInboxPage() {
     nextMonth: new Date(Date.now() + 30 * 24 * 3600 * 1000).toLocaleString("en-US", { month: "long" }),
     resetsInDays: 30
   });
+
+  // Start New Conversation & Contact Search States
+  const [mounted, setMounted] = useState<boolean>(false);
+  const [showNewChatModal, setShowNewChatModal] = useState<boolean>(false);
+  const [newChatPhone, setNewChatPhone] = useState<string>("");
+  const [newChatName, setNewChatName] = useState<string>("");
+  const [newChatSenderPhoneId, setNewChatSenderPhoneId] = useState<string>("");
+  const [newChatMode, setNewChatMode] = useState<"template" | "text">("template");
+  const [newChatMessage, setNewChatMessage] = useState<string>("");
+  const [newChatTemplateName, setNewChatTemplateName] = useState<string>("");
+  const [newChatTemplateLanguage, setNewChatTemplateLanguage] = useState<string>("en_US");
+  const [newChatTemplateVariables, setNewChatTemplateVariables] = useState<Record<string, string>>({});
+  const [availableTemplates, setAvailableTemplates] = useState<any[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState<boolean>(false);
+  const [submittingNewChat, setSubmittingNewChat] = useState<boolean>(false);
+  const [newChatError, setNewChatError] = useState<string>("");
+  const [contactResults, setContactResults] = useState<ContactSearchResult[]>([]);
+  const [searchingContacts, setSearchingContacts] = useState<boolean>(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -295,6 +326,175 @@ export default function LiveInboxPage() {
     }
   }, [activeConv]);
 
+  // Selected Template Object & Dynamic Variable Keys
+  const selectedTemplateObj = useMemo(() => {
+    return availableTemplates.find(t => t.name === newChatTemplateName);
+  }, [availableTemplates, newChatTemplateName]);
+
+  const templateBodyText = useMemo(() => {
+    if (!selectedTemplateObj?.components) return "";
+    const bodyComp = selectedTemplateObj.components.find((c: any) => c.type === "BODY");
+    return bodyComp?.text || "";
+  }, [selectedTemplateObj]);
+
+  const templateVariableKeys = useMemo(() => {
+    if (!templateBodyText) return [];
+    const matches: string[] = templateBodyText.match(/\{\{(\d+)\}\}/g) || [];
+    const uniqueKeys = Array.from(new Set(matches.map((m: string) => m.replace(/[{}]/g, "")))).sort((a: string, b: string) => Number(a) - Number(b));
+    return uniqueKeys;
+  }, [templateBodyText]);
+
+  // Fetch approved templates from Meta
+  const loadTemplates = async () => {
+    if (!projectId) return;
+    setLoadingTemplates(true);
+    try {
+      const res = await fetch(`${getApiUrl()}/v1/meta/templates/${projectId}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.templates)) {
+        const approved = data.templates.filter((t: any) => t.status === "APPROVED" || !t.status);
+        setAvailableTemplates(approved);
+        if (approved.length > 0) {
+          setNewChatTemplateName(prev => prev || approved[0].name);
+          setNewChatTemplateLanguage(prev => prev || approved[0].language || "en_US");
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load templates:", err);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  // Open New Chat Modal with optional prefilled number and name
+  const openNewChatModal = (prefillPhone = "", prefillName = "") => {
+    setNewChatPhone(prefillPhone);
+    setNewChatName(prefillName);
+    setNewChatError("");
+    if (!newChatSenderPhoneId && phoneNumbers.length > 0) {
+      const def = phoneNumbers.find(p => p.isDefault) || phoneNumbers[0];
+      if (def) setNewChatSenderPhoneId(def.phoneId);
+    }
+    setShowNewChatModal(true);
+    loadTemplates();
+  };
+
+  // Live Contact Search from OTP & Campaigns
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setContactResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      if (!projectId) return;
+      setSearchingContacts(true);
+      try {
+        const res = await fetch(`${getApiUrl()}/v1/inbox/contacts/search/${projectId}?query=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.contacts)) {
+          const activePhones = new Set(conversations.map(c => c.customerPhone.replace(/\D/g, "")));
+          const nonActive = data.contacts.filter((c: ContactSearchResult) => {
+            const norm = c.phone.replace(/\D/g, "");
+            return !activePhones.has(norm);
+          });
+          setContactResults(nonActive);
+        }
+      } catch (e) {
+        console.error("Contact search error:", e);
+      } finally {
+        setSearchingContacts(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, projectId, conversations]);
+
+  // Handle Start New Chat Submission
+  const handleStartNewChat = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (isDemo) {
+      triggerPaywall(
+        "To Continue, Please Take a Subscription",
+        "To initiate live WhatsApp conversations with customer contacts, please take our 30-Day Starter Trial (₹500 + GST) or monthly plan."
+      );
+      return;
+    }
+
+    if (!newChatPhone.trim()) {
+      setNewChatError("Please enter a recipient phone number.");
+      return;
+    }
+
+    setSubmittingNewChat(true);
+    setNewChatError("");
+
+    try {
+      let templateVars: string[] = [];
+      if (newChatMode === "template") {
+        templateVars = templateVariableKeys.map(k => newChatTemplateVariables[k] || "");
+      }
+
+      const payload: any = {
+        customerPhone: newChatPhone.trim(),
+        customerName: newChatName.trim() || undefined,
+        senderPhoneId: newChatSenderPhoneId || effectiveSenderPhoneId,
+        messageType: newChatMode,
+        body: newChatMode === "text" ? (newChatMessage.trim() || undefined) : undefined,
+        templateName: newChatMode === "template" ? newChatTemplateName : undefined,
+        templateLanguage: newChatMode === "template" ? (selectedTemplateObj?.language || newChatTemplateLanguage || "en_US") : undefined,
+        templateVariables: newChatMode === "template" ? templateVars : undefined
+      };
+
+      const res = await fetch(`${getApiUrl()}/v1/inbox/conversation/start/${projectId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setNewChatError(data.error || "Failed to start conversation.");
+        return;
+      }
+
+      if (data.warning && newChatMode === "text") {
+        setNewChatError(data.warning);
+        return;
+      }
+
+      // Success! Update local conversations
+      if (data.conversation) {
+        setConversations(prev => {
+          const idx = prev.findIndex(c => c.id === data.conversation.id);
+          if (idx >= 0) {
+            const updated = [...prev];
+            updated[idx] = data.conversation;
+            return updated;
+          }
+          return [data.conversation, ...prev];
+        });
+        setSelectedConvId(data.conversation.id);
+      }
+
+      setShowNewChatModal(false);
+      setNewChatPhone("");
+      setNewChatName("");
+      setNewChatMessage("");
+      setNewChatTemplateVariables({});
+      setSearchQuery("");
+
+      if (data.conversationId) {
+        fetchMessages(data.conversationId);
+      }
+      fetchConversations(false);
+    } catch (err: any) {
+      setNewChatError(err.message || "Failed to start conversation.");
+    } finally {
+      setSubmittingNewChat(false);
+    }
+  };
+
   // Send outbound message
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -456,6 +656,15 @@ export default function LiveInboxPage() {
           )}
 
           <button
+            onClick={() => openNewChatModal()}
+            className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-2xs hover:shadow cursor-pointer shrink-0"
+            title="Start a new WhatsApp conversation with any phone number"
+          >
+            <span className="text-sm font-black leading-none">＋</span>
+            <span>Start Conversation</span>
+          </button>
+
+          <button
             onClick={() => {
               fetchConversations(true);
               loadPhoneNumbers();
@@ -502,15 +711,33 @@ export default function LiveInboxPage() {
               </div>
             </div>
 
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search chats or phone numbers..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white dark:focus:bg-[#070b14] transition"
-              />
-              <span className="absolute left-2.5 top-2 text-slate-400 text-xs">🔍</span>
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  placeholder="Search chats or phone numbers..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-7 py-1.5 text-xs bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white dark:focus:bg-[#070b14] transition"
+                />
+                <span className="absolute left-2.5 top-2 text-slate-400 text-xs">🔍</span>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2 top-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={() => openNewChatModal()}
+                className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition shrink-0 cursor-pointer shadow-2xs"
+                title="Start new conversation with any number"
+              >
+                <span>＋</span>
+                <span>New</span>
+              </button>
             </div>
 
             {/* Filter Pills */}
@@ -545,6 +772,71 @@ export default function LiveInboxPage() {
 
           {/* Conversations Scroll Area */}
           <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-white/[0.04]">
+            {/* 1-Click Action: Start new chat with this searched number or name */}
+            {searchQuery.trim().length > 0 && (
+              <div
+                onClick={() => openNewChatModal(searchQuery.trim())}
+                className="p-3 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 border-b border-emerald-500/20 cursor-pointer transition flex items-center justify-between gap-2"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                    💬
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-emerald-950 dark:text-emerald-200 truncate">
+                      Start chat with &ldquo;{searchQuery}&rdquo;
+                    </p>
+                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400">
+                      Click to enter message or template ➔
+                    </p>
+                  </div>
+                </div>
+                <span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold shrink-0">＋</span>
+              </div>
+            )}
+
+            {/* Found Contacts from OTP & Campaigns */}
+            {contactResults.length > 0 && (
+              <div className="bg-slate-50 dark:bg-white/[0.02] border-b border-slate-200/80 dark:border-white/[0.06] p-2 space-y-1">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2 py-0.5 flex items-center justify-between">
+                  <span>Contacts from OTP & Campaigns</span>
+                  <span className="text-[9px] bg-slate-200 dark:bg-white/10 px-1.5 py-0.2 rounded font-mono">
+                    {contactResults.length}
+                  </span>
+                </div>
+                {contactResults.map((contact, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => {
+                      if (contact.conversationId) {
+                        setSelectedConvId(contact.conversationId);
+                      } else {
+                        openNewChatModal(contact.phone, contact.name);
+                      }
+                    }}
+                    className="p-2 hover:bg-white dark:hover:bg-white/[0.06] rounded-lg cursor-pointer transition flex items-center justify-between gap-2 border border-transparent hover:border-slate-200 dark:hover:border-white/10"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-white/[0.08] text-slate-700 dark:text-slate-300 text-[11px] font-bold flex items-center justify-center shrink-0">
+                        {contact.source === "OTP" ? "🔐" : "📢"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                          {contact.name || contact.phone}
+                        </p>
+                        <p className="text-[10px] text-slate-400 truncate">
+                          +{contact.phone.replace(/^\+/, "")} • {contact.source}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/60 dark:border-emerald-500/20 rounded">
+                      {contact.conversationId ? "Open Chat" : "Start Chat"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {loadingList ? (
               <div className="p-8 text-center text-slate-400 text-xs">
                 <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
@@ -552,24 +844,33 @@ export default function LiveInboxPage() {
               </div>
             ) : filteredConversations.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-xs">
-                <p className="text-2xl mb-2">📭</p>
-                <p className="font-semibold text-slate-700 dark:text-slate-300">
-                  {selectedPhoneId !== "ALL"
+                <p className="text-3xl mb-2">💬</p>
+                <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">
+                  {searchQuery
+                    ? `No chats found matching "${searchQuery}"`
+                    : selectedPhoneId !== "ALL"
                     ? `No chats found for ${phoneNumbers.find(p => p.phoneId === selectedPhoneId)?.displayPhone || "selected line"}`
                     : "No conversations found"}
                 </p>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
-                  {selectedPhoneId !== "ALL"
-                    ? "Inbound messages to this specific WhatsApp line will appear here."
-                    : "Inbound WhatsApp messages will appear here automatically."}
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 max-w-xs mx-auto">
+                  You can start a conversation with any WhatsApp number directly using Direct Message or an Approved Meta Template.
                 </p>
+                <button
+                  onClick={() => openNewChatModal(searchQuery)}
+                  className="mt-4 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold rounded-xl shadow-md transition inline-flex items-center gap-2 cursor-pointer"
+                >
+                  <span className="text-sm">＋</span>
+                  <span>Start New Conversation {searchQuery ? `with "${searchQuery}"` : ""}</span>
+                </button>
                 {selectedPhoneId !== "ALL" && (
-                  <button
-                    onClick={() => setSelectedPhoneId("ALL")}
-                    className="mt-3 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 px-3 py-1.5 rounded-lg transition"
-                  >
-                    Show All Numbers →
-                  </button>
+                  <div className="mt-2">
+                    <button
+                      onClick={() => setSelectedPhoneId("ALL")}
+                      className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
+                    >
+                      Show All Numbers →
+                    </button>
+                  </div>
                 )}
               </div>
             ) : (
@@ -1031,6 +1332,296 @@ export default function LiveInboxPage() {
           </div>
         )}
       </div>
+
+      {/* Start New Conversation Modal */}
+      {mounted && showNewChatModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className="bg-white dark:bg-[#0B101D] border border-slate-200 dark:border-white/10 rounded-2xl w-full max-w-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-white/[0.08] flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.02]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg font-bold">
+                  💬
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100">
+                    Start New WhatsApp Conversation
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Reach out to any WhatsApp phone number using your connected line
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowNewChatModal(false)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 text-sm font-bold transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleStartNewChat} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 text-xs">
+              {newChatError && (
+                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-800 dark:text-rose-200 text-xs flex items-start gap-2">
+                  <span className="text-sm shrink-0">⚠️</span>
+                  <div className="flex-1">
+                    <p className="font-semibold">{newChatError}</p>
+                    {newChatError.includes("24-hour") && newChatMode === "text" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewChatMode("template");
+                          setNewChatError("");
+                        }}
+                        className="mt-2 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 underline block hover:text-emerald-800"
+                      >
+                        Switch to Pre-Approved Meta Template →
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Row 1: Recipient Phone Number & Contact Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Recipient Phone Number <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 9876543210 or +91..."
+                    value={newChatPhone}
+                    onChange={e => setNewChatPhone(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-slate-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    required
+                    autoFocus
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    10-digit Indian numbers auto-prefix with +91.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Customer Name <span className="text-slate-400 font-normal">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Rahul Sharma"
+                    value={newChatName}
+                    onChange={e => setNewChatName(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-slate-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Sender WhatsApp Line */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Sender WhatsApp Business Line
+                </label>
+                <select
+                  value={newChatSenderPhoneId}
+                  onChange={e => setNewChatSenderPhoneId(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-slate-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                >
+                  {phoneNumbers.map(p => (
+                    <option key={p.phoneId} value={p.phoneId}>
+                      {p.displayPhone} {p.verifiedName ? `• ${p.verifiedName}` : ""} {p.isDefault ? "(Default)" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Outreach Type Selector */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Outreach Mode
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setNewChatMode("template")}
+                    className={`p-2.5 rounded-xl border text-left transition ${
+                      newChatMode === "template"
+                        ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-500/10 text-emerald-950 dark:text-emerald-200 shadow-2xs"
+                        : "border-slate-200 dark:border-white/10 bg-slate-50/40 dark:bg-white/[0.02] text-slate-600 dark:text-slate-400 hover:bg-slate-50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 font-bold text-xs">
+                      <span>📄</span>
+                      <span>Meta Template</span>
+                      <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold ml-auto">
+                        Recommended
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
+                      Pre-approved by Meta. Required for cold numbers outside 24h care window.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setNewChatMode("text")}
+                    className={`p-2.5 rounded-xl border text-left transition ${
+                      newChatMode === "text"
+                        ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-500/10 text-emerald-950 dark:text-emerald-200 shadow-2xs"
+                        : "border-slate-200 dark:border-white/10 bg-slate-50/40 dark:bg-white/[0.02] text-slate-600 dark:text-slate-400 hover:bg-slate-50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 font-bold text-xs">
+                      <span>💬</span>
+                      <span>Direct Message</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
+                      Free-form text message. Works for active sessions or developer sandbox.
+                    </p>
+                  </button>
+                </div>
+              </div>
+
+              {/* Mode 1: Template Message */}
+              {newChatMode === "template" && (
+                <div className="space-y-3 p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/90 dark:border-white/[0.06]">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Select Approved Template
+                    </label>
+                    {loadingTemplates ? (
+                      <div className="py-2 text-slate-400 text-xs">Loading approved templates from Meta...</div>
+                    ) : availableTemplates.length === 0 ? (
+                      <div className="text-xs text-amber-700 dark:text-amber-400 py-1">
+                        No approved templates found.{" "}
+                        <Link href="/dashboard/templates" className="font-bold underline">
+                          Create a template in Template Studio →
+                        </Link>
+                      </div>
+                    ) : (
+                      <select
+                        value={newChatTemplateName}
+                        onChange={e => {
+                          const tName = e.target.value;
+                          setNewChatTemplateName(tName);
+                          const t = availableTemplates.find(x => x.name === tName);
+                          if (t?.language) setNewChatTemplateLanguage(t.language);
+                        }}
+                        className="w-full px-3 py-2 bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-slate-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                      >
+                        {availableTemplates.map((t: any) => (
+                          <option key={t.id || t.name} value={t.name}>
+                            {t.name} ({t.category || "UTILITY"}) • {t.language || "en_US"}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+
+                  {templateBodyText && (
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
+                        Template Message Preview:
+                      </label>
+                      <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 text-slate-700 dark:text-slate-300 font-mono text-[11px] whitespace-pre-wrap leading-relaxed">
+                        {templateBodyText}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Dynamic Variables */}
+                  {templateVariableKeys.length > 0 && (
+                    <div className="space-y-2 pt-1 border-t border-slate-200/60 dark:border-white/[0.06]">
+                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                        Template Parameters ({templateVariableKeys.length})
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {templateVariableKeys.map(k => (
+                          <div key={k}>
+                            <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-0.5">
+                              Variable &#123;&#123;{k}&#125;&#125; Value
+                            </label>
+                            <input
+                              type="text"
+                              placeholder={k === "1" && newChatName ? newChatName : `Value for {{${k}}}`}
+                              value={newChatTemplateVariables[k] || ""}
+                              onChange={e => setNewChatTemplateVariables(prev => ({ ...prev, [k]: e.target.value }))}
+                              className="w-full px-2.5 py-1.5 bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Mode 2: Direct Text Message */}
+              {newChatMode === "text" && (
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Initial Direct Message <span className="text-slate-400 font-normal">(Optional)</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Type your message to initiate the conversation... (Leave empty to just open the thread)"
+                    value={newChatMessage}
+                    onChange={e => setNewChatMessage(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                  />
+
+                  {/* Quick suggestions */}
+                  <div className="flex flex-wrap gap-1">
+                    {QUICK_RESPONSES.slice(0, 3).map((r, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setNewChatMessage(r)}
+                        className="text-[10px] px-2 py-1 bg-slate-100 dark:bg-white/[0.05] hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-slate-600 dark:text-slate-300 rounded-md border border-slate-200/80 dark:border-white/5 truncate max-w-full"
+                      >
+                        {r.slice(0, 40)}...
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Modal Footer */}
+              <div className="pt-3 border-t border-slate-100 dark:border-white/[0.08] flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowNewChatModal(false)}
+                  className="px-4 py-2 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl transition"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={submittingNewChat || !newChatPhone.trim()}
+                  className="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold rounded-xl shadow-md disabled:opacity-50 transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  {submittingNewChat ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Starting Chat...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🚀</span>
+                      <span>Start Conversation & Send</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
